@@ -76,10 +76,10 @@ export function SignupForm() {
 
       if (result.error) {
         toast.error(result.error)
-      } else {
-        toast.success('Conta criada com sucesso! 🎉 Seja bem-vindo.')
+      } else if (result.success && result.redirectTo) {
+        toast.success('Conta criada com sucesso! 🎉')
         form.reset()
-        // TODO: Redirecionar
+        window.location.href = result.redirectTo
       }
     })
   }

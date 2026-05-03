@@ -1,3 +1,4 @@
+import 'server-only'
 import { cache } from 'react'
 import { requireUser } from '@/lib/auth/require-auth'
 
@@ -10,10 +11,10 @@ export const getClientDashboardData = cache(async () => {
   
   return {
     profile: {
-      name: 'João Silva',
-      avatar: null,
+      name: user.full_name || 'Cliente',
+      avatar: user.avatar_url,
       preferredBarber: 'Rafael',
-      loyaltyStamps: 7, // 7/10
+      loyaltyStamps: 7, // Mantendo o mock para stamps por enquanto
       nextAppointment: {
         date: '2026-05-05',
         time: '14:00',

@@ -49,7 +49,18 @@ export default async function DashboardLayout({
         </div>
         
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => (
+          {navItems
+            .filter((item) => {
+              if (profile.role === 'admin') return true
+              if (profile.role === 'barber') {
+                return ['Dashboard', 'Agendamentos', 'Fila', 'Fidelidade', 'Equipe'].includes(item.label)
+              }
+              if (profile.role === 'client') {
+                return ['Dashboard', 'Agendamentos', 'Fidelidade'].includes(item.label)
+              }
+              return false
+            })
+            .map((item) => (
             <Link
               key={item.href}
               href={item.href}

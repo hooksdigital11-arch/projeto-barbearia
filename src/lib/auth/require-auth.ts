@@ -9,9 +9,8 @@ export const getUser = cache(async (): Promise<Profile | null> => {
   const { data: { user } } = await supabase.auth.getUser()
   
   // --- MOCK PARA DESENVOLVIMENTO ---
-  // Se quiser testar roles diferentes, mude o 'role' abaixo:
-  // Opções: 'admin', 'barber', 'client'
-  if (process.env.NODE_ENV === 'development') {
+  // Só usa o mock se NÃO houver um usuário real logado no Supabase
+  if (process.env.NODE_ENV === 'development' && !user) {
     return {
       id: 'mock-id',
       full_name: 'Vitor Campos (Dev)',
@@ -47,5 +46,19 @@ export async function requireUser(): Promise<Profile> {
 export async function requireAdmin() {
   const user = await requireUser()
   if (user.role !== 'admin') redirect('/')
+  return user
+}
+
+export async function requireBarber() {
+  const user = await requireUser()
+  if (user.role !== 'barber' && user.role !== 'admin') redirect('/')
+  return user
+}
+
+export async function requireClient() {
+  const user = await requireUser()
+  // Clientes só acessam o que é deles, mas admin/barbeiro podem ver se necessário? 
+  // Geralmente cliente é restrito.
+  if (user.role !== 'client') redirect('/')
   return user
 }

@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Ghost } from '@phosphor-icons/react'
+import { Ghost } from '@phosphor-icons/react/dist/ssr'
 import { cn } from '@/lib/utils/cn'
 
 interface EmptyStateProps {

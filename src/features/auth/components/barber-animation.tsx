@@ -152,8 +152,13 @@ function BarberCharacter({ isSpying }: { isSpying: boolean }) {
           <Scissors
             size={36}
             weight="duotone"
-            className="text-cyan-400 animate-spin"
-            style={{ animationDuration: '6s' }}
+            className="text-cyan-400"
+            style={{ 
+              animationName: 'spin',
+              animationDuration: '6s',
+              animationTimingFunction: 'linear',
+              animationIterationCount: 'infinite'
+            }}
           />
         </div>
       </div>
@@ -178,8 +183,10 @@ function BarberCharacter({ isSpying }: { isSpying: boolean }) {
  */
 export function BarberAnimation() {
   const [isSpying, setIsSpying] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
+    setIsMounted(true)
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       if (target.closest('.auth-card-container')) {
@@ -190,7 +197,10 @@ export function BarberAnimation() {
     }
 
     window.addEventListener('mouseover', handleMouseOver)
-    return () => window.removeEventListener('mouseover', handleMouseOver)
+    return () => {
+      setIsMounted(false)
+      window.removeEventListener('mouseover', handleMouseOver)
+    }
   }, [])
 
   return (
@@ -214,21 +224,26 @@ export function BarberAnimation() {
       </div>
 
       {/* Partículas de Estilo (Cabelos minimalistas) */}
-      <div className="absolute bottom-10 w-full h-40 overflow-hidden opacity-10">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-0.5 h-3 bg-cyan-300 rounded-full"
-            style={{
-              left: `${(i * 10) + Math.random() * 5}%`,
-              bottom: '-20px',
-              animation: `float-hair ${5 + Math.random() * 5}s linear infinite`,
-              animationDelay: `${i * 0.3}s`,
-              transform: `rotate(${Math.random() * 360}deg)`
-            }}
-          />
-        ))}
-      </div>
+      {isMounted && (
+        <div className="absolute bottom-10 w-full h-40 overflow-hidden opacity-10">
+          {[...Array(12)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-0.5 h-3 bg-cyan-300 rounded-full"
+              style={{
+                left: `${(i * 10) + Math.random() * 5}%`,
+                bottom: '-20px',
+                animationName: 'float-hair',
+                animationDuration: `${5 + Math.random() * 5}s`,
+                animationTimingFunction: 'linear',
+                animationIterationCount: 'infinite',
+                animationDelay: `${i * 0.3}s`,
+                transform: `rotate(${Math.random() * 360}deg)`
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       <style jsx>{`
         @keyframes float-hair {

@@ -29,7 +29,27 @@ export async function updateSession(request: NextRequest) {
   )
 
   // refreshing the auth token
-  await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Se estiver na root e logado, redireciona para o dashboard correto
+  if (user && request.nextUrl.pathname === '/') {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role) {
+      const role = profile.role
+      const url = new URL(role === 'admin' ? '/admin' : role === 'barber' ? '/barber' : '/client', request.url)
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // Se NÃO estiver logado e tentar acessar root em produção, vai para login
+  if (!user && request.nextUrl.pathname === '/' && process.env.NODE_ENV !== 'development') {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
 
   return supabaseResponse
 }

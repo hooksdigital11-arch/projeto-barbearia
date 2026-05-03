@@ -6,13 +6,12 @@ import {
   Plus,
   Clock,
   ArrowRight,
-  MagnifyingGlass,
   CheckCircle,
   Scissors
 } from '@phosphor-icons/react/dist/ssr'
 import { getClientDashboardData } from '../queries'
+import 'server-only'
 import { cn } from '@/lib/utils/cn'
-import { SearchInput } from '@/components/shared/search-input'
 import { EmptyState } from '@/components/shared/empty-state'
 
 export async function ClientDashboard() {
