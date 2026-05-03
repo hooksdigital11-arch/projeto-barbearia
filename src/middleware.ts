@@ -1,12 +1,7 @@
-import { type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  // Redireciona /dashboard para / para evitar 404
-  if (request.nextUrl.pathname === '/dashboard') {
-    return NextResponse.redirect(new URL('/', request.url))
-  }
-
   return await updateSession(request)
 }
 

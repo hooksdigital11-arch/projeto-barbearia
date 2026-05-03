@@ -3,13 +3,14 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { loginSchema, signupSchema, recoverySchema } from './schemas'
 import type { AuthResponse } from './types'
 
 /**
  * Server Action: Login
  */
-export async function login(formData: FormData): Promise<AuthResponse> {
+export async function login(formData: FormData): Promise<AuthResponse | void> {
   const data = Object.fromEntries(formData)
   const parsed = loginSchema.safeParse({
     ...data,
@@ -34,24 +35,28 @@ export async function login(formData: FormData): Promise<AuthResponse> {
     return { error: 'Credenciais inválidas' }
   }
 
-  // Buscar role para redirecionamento correto
-  const { data: profile } = await supabase
+  // Buscar role para redirecionamento correto usando ADMIN para ignorar RLS problemático
+  const { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
     .select('role')
     .eq('id', authData.user.id)
     .single()
 
-  const role = profile?.role || 'client'
+  if (profileError) {
+    console.error('[LOGIN] Erro ao buscar profile:', profileError.message, '| User ID:', authData.user.id)
+  }
+
+  const role = (profile as { role: string } | null)?.role || 'client'
   const redirectTo = role === 'admin' ? '/admin' : role === 'barber' ? '/barber' : '/client'
 
   revalidatePath('/', 'layout')
-  return { success: true, redirectTo }
+  redirect(redirectTo)
 }
 
 /**
  * Server Action: Signup
  */
-export async function signup(formData: FormData): Promise<AuthResponse> {
+export async function signup(formData: FormData): Promise<AuthResponse | void> {
   const parsed = signupSchema.safeParse({
     fullName: formData.get('fullName'),
     email: formData.get('email'),
@@ -103,18 +108,22 @@ export async function signup(formData: FormData): Promise<AuthResponse> {
     }
   }
 
-  // Buscar role (deve ser 'client' por padrão para novos cadastros via formulário público)
-  const { data: profile } = await supabase
+  // Buscar role para redirecionamento correto usando ADMIN para ignorar RLS problemático
+  const { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
     .select('role')
     .eq('id', authData.user.id)
     .single()
 
-  const role = profile?.role || 'client'
+  if (profileError) {
+    console.error('[SIGNUP] Erro ao buscar profile:', profileError.message, '| User ID:', authData.user.id)
+  }
+
+  const role = (profile as { role: string } | null)?.role || 'client'
   const redirectTo = role === 'admin' ? '/admin' : role === 'barber' ? '/barber' : '/client'
  
   revalidatePath('/', 'layout')
-  return { success: true, redirectTo }
+  redirect(redirectTo)
 }
 
 /**

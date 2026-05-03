@@ -74,13 +74,10 @@ export function SignupForm() {
 
       const result = await signup(formData)
 
-      if (result.error) {
+      if (result?.error) {
         toast.error(result.error)
-      } else if (result.success && result.redirectTo) {
-        toast.success('Conta criada com sucesso! 🎉')
-        form.reset()
-        window.location.href = result.redirectTo
       }
+      // Se não retornou error, o redirect já aconteceu no server action
     })
   }
 

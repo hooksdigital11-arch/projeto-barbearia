@@ -2,41 +2,52 @@ import 'server-only'
 import { cache } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import type { Profile } from '@/types/database'
 
+/**
+ * Busca o profile completo do usuário logado.
+ * Retorna null se não houver sessão ativa.
+ * Se a sessão existe mas o profile não, cria um profile básico.
+ */
 export const getUser = cache(async (): Promise<Profile | null> => {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
-  // --- MOCK PARA DESENVOLVIMENTO ---
-  // Só usa o mock se NÃO houver um usuário real logado no Supabase
-  if (process.env.NODE_ENV === 'development' && !user) {
-    return {
-      id: 'mock-id',
-      full_name: 'Vitor Campos (Dev)',
-      email: 'dev@barbersaas.com',
-      role: 'admin', // Mude aqui para testar as outras dashboards!
-      organization_id: 'mock-org',
-      avatar_url: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      phone: '11999999999'
-    } as Profile
-  }
-  // ---------------------------------
 
   if (!user) return null
 
-  // Buscar profile completo
-  const { data: profile } = await supabase
+  // Buscar profile completo usando o cliente ADMIN para evitar erros de RLS (recursão infinita)
+  const { data: profile } = await supabaseAdmin
     .from('profiles')
     .select('*')
     .eq('id', user.id)
     .single()
 
+  // Se o profile não existe mas o auth user sim,
+  // retornar um profile básico derivado do auth user.
+  // Isso evita que o usuário fique preso num redirect loop.
+  if (!profile) {
+    return {
+      id: user.id,
+      full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
+      email: user.email || '',
+      role: 'client',
+      organization_id: '',
+      avatar_url: null,
+      created_at: user.created_at,
+      updated_at: new Date().toISOString(),
+      phone: user.user_metadata?.phone || '',
+    } as Profile
+  }
+
   return profile
 })
 
+/**
+ * Exige que o usuário esteja logado. Redireciona para /login se não estiver.
+ * NOTA: O middleware já protege as rotas, então esta função serve como
+ * fallback de segurança e para tipar o retorno como non-null.
+ */
 export async function requireUser(): Promise<Profile> {
   const user = await getUser()
   if (!user) redirect('/login')
@@ -57,8 +68,6 @@ export async function requireBarber() {
 
 export async function requireClient() {
   const user = await requireUser()
-  // Clientes só acessam o que é deles, mas admin/barbeiro podem ver se necessário? 
-  // Geralmente cliente é restrito.
   if (user.role !== 'client') redirect('/')
   return user
 }

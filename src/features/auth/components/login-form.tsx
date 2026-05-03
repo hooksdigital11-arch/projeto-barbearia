@@ -82,15 +82,12 @@ export function LoginForm() {
 
       const result = await login(formData)
 
-      if (result.error) {
+      if (result?.error) {
 
         toast.error(result.error)
 
-      } else if (result.success && result.redirectTo) {
-        toast.success('Login realizado com sucesso! ✨')
-        form.reset()
-        window.location.href = result.redirectTo
       }
+      // Se não retornou error, o redirect já aconteceu no server action
 
     })
 

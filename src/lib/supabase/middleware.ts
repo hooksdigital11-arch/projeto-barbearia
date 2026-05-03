@@ -1,6 +1,16 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { env } from '@/env/server'
+import { supabaseAdmin } from './admin'
+
+/**
+ * Rotas que NÃO precisam de autenticação.
+ */
+const publicRoutes = ['/login', '/signup', '/recovery', '/auth/callback']
+
+function isPublicRoute(pathname: string): boolean {
+  return publicRoutes.some((route) => pathname.startsWith(route))
+}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -28,27 +38,51 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // refreshing the auth token
+  // Refreshing the auth token
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Se estiver na root e logado, redireciona para o dashboard correto
-  if (user && request.nextUrl.pathname === '/') {
-    const { data: profile } = await supabase
+  // ========================================
+  // PROTEÇÃO DE ROTAS (toda lógica de auth)
+  // ========================================
+
+  const pathname = request.nextUrl.pathname
+
+  // 1. Usuário NÃO logado tentando acessar rota protegida → vai pro login
+  if (!user && !isPublicRoute(pathname)) {
+    const loginUrl = new URL('/login', request.url)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // 2. Usuário LOGADO tentando acessar rota pública (login/signup) → redireciona pro dashboard
+  if (user && isPublicRoute(pathname) && pathname !== '/auth/callback') {
+    const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
 
-    if (profile?.role) {
-      const role = profile.role
-      const url = new URL(role === 'admin' ? '/admin' : role === 'barber' ? '/barber' : '/client', request.url)
-      return NextResponse.redirect(url)
-    }
+    const role = (profile as { role: string } | null)?.role || 'client'
+    const dashboardUrl = new URL(
+      role === 'admin' ? '/admin' : role === 'barber' ? '/barber' : '/client',
+      request.url
+    )
+    return NextResponse.redirect(dashboardUrl)
   }
 
-  // Se NÃO estiver logado e tentar acessar root em produção, vai para login
-  if (!user && request.nextUrl.pathname === '/' && process.env.NODE_ENV !== 'development') {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // 3. Usuário logado na root → redireciona pro dashboard correto
+  if (user && pathname === '/') {
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    const role = (profile as { role: string } | null)?.role || 'client'
+    const dashboardUrl = new URL(
+      role === 'admin' ? '/admin' : role === 'barber' ? '/barber' : '/client',
+      request.url
+    )
+    return NextResponse.redirect(dashboardUrl)
   }
 
   return supabaseResponse

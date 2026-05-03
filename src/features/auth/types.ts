@@ -3,5 +3,4 @@ export type AuthResponse = {
   success?: boolean
   issues?: Record<string, string[]>
   message?: string
-  redirectTo?: string
 }

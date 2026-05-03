@@ -29,6 +29,7 @@ const navItems = [
 ]
 
 import { requireUser } from "@/lib/auth/require-auth"
+import { LogoutButton } from "@/components/shared/logout-button"
 
 export default async function DashboardLayout({
   children,
@@ -75,7 +76,7 @@ export default async function DashboardLayout({
           ))}
         </nav>
 
-        <div className="p-4 mt-auto">
+        <div className="p-4 mt-auto space-y-3">
           <div className="glass rounded-2xl p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-accent-blue flex items-center justify-center font-bold text-black">
               {profile.full_name?.[0] || 'U'}
@@ -84,6 +85,9 @@ export default async function DashboardLayout({
               <p className="text-sm font-bold truncate text-white">{profile.full_name}</p>
               <p className="text-xs text-text-secondary truncate capitalize">{profile.role}</p>
             </div>
+          </div>
+          <div className="border-t border-white/5 pt-2">
+            <LogoutButton />
           </div>
         </div>
       </aside>
