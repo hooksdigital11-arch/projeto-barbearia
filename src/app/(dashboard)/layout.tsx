@@ -25,6 +25,7 @@ const navItems = [
   { label: "Estoque", href: "/estoque", icon: Package },
   { label: "Mensageria", href: "/mensageria", icon: ChatTeardropText },
   { label: "Relatórios", href: "/relatorios", icon: ChartPieSlice },
+  { label: "Usuários", href: "/admin/users", icon: Users },
   { label: "Configurações", href: "/configuracoes", icon: Gear },
 ]
 
