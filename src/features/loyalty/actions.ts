@@ -127,7 +127,7 @@ export async function redeemReward(clientId: string) {
     .eq('id', user.organization_id)
     .single()
 
-  const config = (org?.loyalty_config as LoyaltyConfig) || DEFAULT_LOYALTY_CONFIG
+  const config = (org?.loyalty_config as unknown as LoyaltyConfig) || DEFAULT_LOYALTY_CONFIG
   const goal = config.mode === 'stamps'
     ? config.stamps_required
     : config.points_required
@@ -175,7 +175,7 @@ export async function addStampAfterAppointment(
     .eq('id', organizationId)
     .single()
 
-  const config = (org?.loyalty_config as LoyaltyConfig) || DEFAULT_LOYALTY_CONFIG
+  const config = (org?.loyalty_config as unknown as LoyaltyConfig) || DEFAULT_LOYALTY_CONFIG
   const amount =
     config.mode === 'points'
       ? Math.floor(priceCents / 100) * (config.points_per_real || 1)

@@ -69,10 +69,10 @@ export default async function DashboardLayout({
             .filter((item) => {
               if (profile.role === 'admin') return true
               if (profile.role === 'barber') {
-                return ['Dashboard', 'Agendamentos', 'Fila', 'Fidelidade', 'Equipe', 'Estoque'].includes(item.label)
+                return ['Dashboard', 'Agendamentos', 'Clientes', 'Fila', 'Fidelidade', 'Equipe', 'Estoque'].includes(item.label)
               }
               if (profile.role === 'client') {
-                return ['Dashboard', 'Agendamentos', 'Fidelidade'].includes(item.label)
+                return ['Dashboard', 'Agendamentos', 'Fila', 'Fidelidade'].includes(item.label)
               }
               return false
             })
@@ -87,6 +87,10 @@ export default async function DashboardLayout({
                 href = profile.role === 'admin' ? '/admin/inventory' : '/barber/inventory'
               } else if (item.label === 'Equipe') {
                 href = profile.role === 'admin' ? '/admin/team' : '/barber/team'
+              } else if (item.label === 'Clientes') {
+                href = profile.role === 'admin' ? '/admin/clients' : '/barber/clients'
+              } else if (item.label === 'Fila') {
+                href = profile.role === 'admin' ? '/admin/waiting-list' : profile.role === 'barber' ? '/barber/waiting-list' : '/client/waiting-list'
               } else if (item.label === 'Fidelidade') {
                 href = profile.role === 'admin' ? '/admin/loyalty' : profile.role === 'barber' ? '/barber/loyalty' : '/client/loyalty'
               }

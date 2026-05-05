@@ -35,13 +35,13 @@ export function InventoryList({ items }: InventoryListProps) {
         <div className="p-6 rounded-[2rem] bg-amber-500/5 border border-amber-500/10 space-y-2">
           <p className="text-xs font-bold text-amber-400/60 uppercase tracking-widest">Estoque Baixo</p>
           <p className="text-3xl font-bold text-amber-400 font-syne">
-            {items.filter(i => i.quantity <= i.min_quantity).length}
+            {items.filter(i => (i.quantity ?? 0) <= (i.min_quantity ?? 0)).length}
           </p>
         </div>
         <div className="p-6 rounded-[2rem] bg-accent-cyan/5 border border-accent-cyan/10 space-y-2">
           <p className="text-xs font-bold text-accent-cyan/60 uppercase tracking-widest">Valor em Estoque</p>
           <p className="text-3xl font-bold text-accent-cyan font-syne">
-            {formatPrice(items.reduce((acc, curr) => acc + (curr.price_cents * curr.quantity), 0))}
+            {formatPrice(items.reduce((acc, curr) => acc + ((curr.price_cents ?? 0) * (curr.quantity ?? 0)), 0))}
           </p>
         </div>
       </div>
@@ -67,7 +67,7 @@ export function InventoryList({ items }: InventoryListProps) {
                     </div>
                     <div>
                       <p className="font-bold text-white text-sm">{item.name}</p>
-                      {item.quantity <= item.min_quantity && (
+                      {(item.quantity ?? 0) <= (item.min_quantity ?? 0) && (
                         <span className="flex items-center gap-1 text-[10px] text-amber-400 font-bold uppercase mt-0.5">
                           <Warning size={12} weight="fill" />
                           Estoque Baixo
@@ -84,13 +84,13 @@ export function InventoryList({ items }: InventoryListProps) {
                 <td className="px-6 py-5 text-center">
                   <p className={cn(
                     "font-bold text-sm",
-                    item.quantity <= item.min_quantity ? "text-amber-400" : "text-white"
+                    (item.quantity ?? 0) <= (item.min_quantity ?? 0) ? "text-amber-400" : "text-white"
                   )}>
-                    {item.quantity} <span className="text-[10px] text-muted-foreground font-normal uppercase ml-1">{item.unit}</span>
+                    {item.quantity ?? 0} <span className="text-[10px] text-muted-foreground font-normal uppercase ml-1">UN</span>
                   </p>
                 </td>
                 <td className="px-6 py-5">
-                  <span className="font-mono text-sm text-accent-cyan">{formatPrice(item.price_cents)}</span>
+                  <span className="font-mono text-sm text-accent-cyan">{formatPrice(item.price_cents ?? 0)}</span>
                 </td>
                 <td className="px-6 py-5 text-right">
                   <button className="p-2 text-muted-foreground hover:text-white transition-colors rounded-lg hover:bg-white/5">

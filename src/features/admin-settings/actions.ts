@@ -30,7 +30,7 @@ export async function updatePassword(currentPassword: string, newPassword: strin
     
     // Verifica a senha atual tentando fazer login
     const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: admin.email,
+      email: admin.email || '',
       password: currentPassword,
     })
 

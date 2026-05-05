@@ -10,7 +10,7 @@ function hashColor(name: string): string {
     'Thiago': '#f59e0b',
     'Marcos': '#10b981',
   }
-  const firstName = (name || '').split(' ')[0]
+  const firstName = (name || '').split(' ')[0] || ''
   if (knownColors[firstName]) return knownColors[firstName]
 
   let hash = 0
@@ -18,7 +18,7 @@ function hashColor(name: string): string {
     hash = (name || '').charCodeAt(i) + ((hash << 5) - hash)
   }
   const colors = ['#8b5cf6', '#ec4899', '#f97316', '#06b6d4', '#84cc16', '#a78bfa']
-  return colors[Math.abs(hash) % colors.length]
+  return colors[Math.abs(hash) % colors.length] || '#8b5cf6'
 }
 
 function formatCurrency(cents: number): string {

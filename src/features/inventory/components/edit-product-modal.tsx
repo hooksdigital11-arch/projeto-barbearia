@@ -37,6 +37,7 @@ export function EditProductModal({ isOpen, onClose, product }: { isOpen: boolean
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (!product) return
     const formData = new FormData(e.currentTarget)
     formData.set('active', isActive.toString())
     
@@ -80,11 +81,11 @@ export function EditProductModal({ isOpen, onClose, product }: { isOpen: boolean
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Qtd Atual</label>
-                <Input name="quantity" type="number" defaultValue={product.quantity} min={0} className="bg-white/5 border-white/10 rounded-xl h-12" />
+                <Input name="quantity" type="number" defaultValue={product.quantity ?? 0} min={0} className="bg-white/5 border-white/10 rounded-xl h-12" />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Qtd Mínima</label>
-                <Input name="min_quantity" type="number" defaultValue={product.min_quantity} min={0} className="bg-white/5 border-white/10 rounded-xl h-12" />
+                <Input name="min_quantity" type="number" defaultValue={product.min_quantity ?? 0} min={0} className="bg-white/5 border-white/10 rounded-xl h-12" />
               </div>
             </div>
 

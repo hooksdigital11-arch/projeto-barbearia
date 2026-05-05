@@ -32,7 +32,7 @@ export const getTeam = cache(async (): Promise<TeamMember[]> => {
 export const getTeamWithStats = cache(async (): Promise<TeamMemberWithStats[]> => {
   const user = await requireUser()
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toISOString().split('T')[0] || ''
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
 
   // Buscar barbeiros
@@ -85,7 +85,7 @@ export const getTeamWithStats = cache(async (): Promise<TeamMemberWithStats[]> =
 export const getTeamStats = cache(async (): Promise<TeamStats> => {
   const user = await requireUser()
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toISOString().split('T')[0] || ''
 
   const { data: barbers } = await supabaseAdmin
     .from('profiles')
@@ -131,7 +131,7 @@ export const getBarberPerformance = cache(async (
   let startDate: string
 
   if (period === 'today') {
-    startDate = now.toISOString().split('T')[0] + 'T00:00:00'
+    startDate = (now.toISOString().split('T')[0] || '') + 'T00:00:00'
   } else if (period === 'week') {
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
     startDate = weekAgo.toISOString()
@@ -172,7 +172,7 @@ export const getBarberPerformance = cache(async (
 export const getBarberTodaySchedule = cache(async (barberId: string): Promise<ScheduleItem[]> => {
   const user = await requireUser()
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toISOString().split('T')[0] || ''
 
   const { data, error } = await supabaseAdmin
     .from('appointments')

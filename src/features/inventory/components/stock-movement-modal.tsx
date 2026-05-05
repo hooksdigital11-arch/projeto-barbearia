@@ -16,10 +16,11 @@ export function StockMovementModal({ isOpen, onClose, product }: { isOpen: boole
 
   if (!isOpen || !product) return null
 
-  const newQuantity = direction === 'in' ? product.quantity + quantity : product.quantity - quantity
+  const newQuantity = direction === 'in' ? (product.quantity ?? 0) + quantity : (product.quantity ?? 0) - quantity
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (!product) return
     if (quantity <= 0) {
       toast.error('A quantidade deve ser maior que zero.')
       return
@@ -107,7 +108,7 @@ export function StockMovementModal({ isOpen, onClose, product }: { isOpen: boole
             <div className="grid grid-cols-2 gap-6 p-4 rounded-2xl bg-white/5 border border-white/5">
               <div className="text-center">
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Atual</p>
-                <p className="text-xl font-bold text-white">{product.quantity}</p>
+                <p className="text-xl font-bold text-white">{product.quantity ?? 0}</p>
               </div>
               <div className="text-center border-l border-white/5">
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Após</p>

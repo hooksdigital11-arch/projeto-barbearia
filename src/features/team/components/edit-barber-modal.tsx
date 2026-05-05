@@ -34,6 +34,7 @@ export function EditBarberModal({ isOpen, onClose, member, canChangeStatus }: Ed
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (!member) return
     const formData = new FormData(e.currentTarget)
 
     startTransition(async () => {

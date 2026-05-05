@@ -140,7 +140,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                   </div>
                 </td>
                 <td className="px-6 py-5 text-sm text-muted-foreground">
-                  {service.duration} min
+                  {service.duration_minutes} min
                 </td>
                 <td className="px-6 py-5">
                   <span className="font-mono text-sm text-accent-cyan">{formatPrice(service.price_cents)}</span>
@@ -240,7 +240,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                     min="15" 
                     step="15" 
                     required 
-                    defaultValue={editingService?.duration || 30} 
+                    defaultValue={editingService?.duration_minutes || 30} 
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
                   />
                 </div>
