@@ -57,7 +57,23 @@ export async function createUser(input: CreateUserInput) {
     }
 
     revalidatePath('/admin/users')
-    return { success: true, data: authUser.user }
+    
+    // Retornar os dados completos para atualização em tempo real na UI
+    return { 
+      success: true, 
+      data: {
+        id: authUser.user.id,
+        full_name: fullName,
+        email,
+        phone,
+        role,
+        specialty,
+        organization_id: admin.organization_id,
+        status: 'active',
+        created_at: new Date().toISOString()
+      }
+    }
+
   } catch (err) {
     return { error: 'Ocorreu um erro inesperado ao criar o usuário.' }
   }
@@ -75,9 +91,26 @@ export async function updateUser(id: string, input: UpdateUserInput) {
       return { error: 'Dados inválidos', issues: parsed.error.flatten().fieldErrors }
     }
 
+    const { fullName, email, phone, specialty, status } = parsed.data
+
+    // 1. Atualizar no Auth se o email mudou
+    if (email) {
+      const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(id, {
+        email: email
+      })
+      if (authError) return { error: `Erro ao atualizar email no Auth: ${authError.message}` }
+    }
+
+    // 2. Atualizar no Profile (Database)
     const { error } = await supabaseAdmin
       .from('profiles')
-      .update(parsed.data as any)
+      .update({
+        full_name: fullName,
+        email,
+        phone,
+        specialty,
+        status
+      } as any)
       .eq('id', id)
       .eq('organization_id', admin.organization_id)
 
@@ -86,9 +119,11 @@ export async function updateUser(id: string, input: UpdateUserInput) {
     revalidatePath('/admin/users')
     return { success: true }
   } catch (err) {
+    console.error('Update user error:', err)
     return { error: 'Ocorreu um erro inesperado ao atualizar o usuário.' }
   }
 }
+
 
 /**
  * Alterna o status do usuário entre ativo e inativo.
@@ -120,18 +155,41 @@ export async function deleteUser(id: string) {
   try {
     const admin = await requireAdmin()
     
-    // Por segurança e integridade, usamos soft delete mudando status
-    const { error } = await supabaseAdmin
+    // Prevenção: não permitir que o admin se delete (opcional, mas recomendado)
+    if (id === admin.id) {
+      return { error: 'Você não pode excluir seu próprio usuário.' }
+    }
+
+    // 1. Deletar da tabela profiles (garante isolamento por organization_id)
+    const { error: profileError } = await supabaseAdmin
       .from('profiles')
-      .update({ status: 'inactive' } as any)
+      .delete()
       .eq('id', id)
       .eq('organization_id', admin.organization_id)
 
-    if (error) return { error: error.message }
+    if (profileError) {
+      // Erro 23503 é Foreign Key Violation
+      if (profileError.code === '23503') {
+        return { 
+          error: 'Este usuário possui registros vinculados (agendamentos, histórico, etc) e não pode ser removido permanentemente. Recomendamos apenas desativá-lo.' 
+        }
+      }
+      return { error: profileError.message }
+    }
+
+    // 2. Remover do Supabase Auth
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id)
+    
+    if (authError) {
+      console.error('Erro ao deletar usuário do Auth:', authError)
+      // Continuamos pois o perfil já foi removido, o que resolve a visibilidade na UI
+    }
 
     revalidatePath('/admin/users')
     return { success: true }
   } catch (err) {
-    return { error: 'Erro ao remover usuário.' }
+    console.error('Delete user error:', err)
+    return { error: 'Erro inesperado ao remover usuário.' }
   }
 }
+

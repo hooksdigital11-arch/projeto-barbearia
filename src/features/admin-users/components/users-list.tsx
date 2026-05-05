@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils/cn'
 import { toast } from 'sonner'
 import { toggleUserStatus, deleteUser } from '../actions'
 import { CreateUserModal } from './create-user-modal'
+import { EditUserModal } from './edit-user-modal'
 
 interface UsersListProps {
   initialUsers: AdminUser[]
@@ -28,6 +29,8 @@ export function UsersList({ initialUsers }: UsersListProps) {
   const [roleFilter, setRoleFilter] = useState<AdminUsersFilter['role']>('all')
   const [isPending, startTransition] = useTransition()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [userToEdit, setUserToEdit] = useState<AdminUser | null>(null)
 
   const filteredUsers = users.filter(user => {
     const name = user.full_name || ''
@@ -62,6 +65,11 @@ export function UsersList({ initialUsers }: UsersListProps) {
         toast.error(result.error)
       }
     })
+  }
+
+  const handleEdit = (user: AdminUser) => {
+    setUserToEdit(user)
+    setIsEditModalOpen(true)
   }
 
   return (
@@ -150,7 +158,10 @@ export function UsersList({ initialUsers }: UsersListProps) {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-muted-foreground hover:text-white transition-colors rounded-lg hover:bg-white/5">
+                      <button 
+                        onClick={() => handleEdit(user)}
+                        className="p-2 text-muted-foreground hover:text-white transition-colors rounded-lg hover:bg-white/5"
+                      >
                         <PencilSimple size={18} />
                       </button>
                       <button 
@@ -190,6 +201,17 @@ export function UsersList({ initialUsers }: UsersListProps) {
         onSuccess={(newUser) => {
           setUsers(prev => [newUser as any, ...prev])
           setIsModalOpen(false)
+        }}
+      />
+      <EditUserModal 
+        user={userToEdit}
+        isOpen={isEditModalOpen} 
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setUserToEdit(null)
+        }} 
+        onSuccess={(updatedUser) => {
+          setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u))
         }}
       />
     </div>
