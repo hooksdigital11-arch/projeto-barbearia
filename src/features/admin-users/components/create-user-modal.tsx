@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { X, CircleNotch, FloppyDisk, User, Envelope, Phone, Briefcase, Lock } from '@phosphor-icons/react'
 import { createUserSchema, type CreateUserInput } from '../schemas'
@@ -42,7 +42,11 @@ export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalP
     },
   })
 
-  const selectedRole = form.watch('role')
+  const selectedRole = useWatch({
+    control: form.control,
+    name: 'role',
+    defaultValue: 'barber'
+  })
 
   function onSubmit(data: CreateUserInput) {
     startTransition(async () => {

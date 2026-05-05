@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { BarberAnimation } from '@/features/auth/components/barber-animation'
-import { Toaster } from 'sonner'
+
 
 /**
  * AuthLayout
@@ -37,7 +37,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      <Toaster position="top-right" theme="dark" richColors closeButton />
+
     </div>
   )
 }

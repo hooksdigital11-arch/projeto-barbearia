@@ -198,7 +198,6 @@ export function BarberAnimation() {
 
     window.addEventListener('mouseover', handleMouseOver)
     return () => {
-      setIsMounted(false)
       window.removeEventListener('mouseover', handleMouseOver)
     }
   }, [])

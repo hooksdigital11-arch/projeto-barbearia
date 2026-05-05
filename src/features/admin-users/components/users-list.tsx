@@ -195,25 +195,30 @@ export function UsersList({ initialUsers }: UsersListProps) {
         )}
       </div>
 
-      <CreateUserModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSuccess={(newUser) => {
-          setUsers(prev => [newUser as any, ...prev])
-          setIsModalOpen(false)
-        }}
-      />
-      <EditUserModal 
-        user={userToEdit}
-        isOpen={isEditModalOpen} 
-        onClose={() => {
-          setIsEditModalOpen(false)
-          setUserToEdit(null)
-        }} 
-        onSuccess={(updatedUser) => {
-          setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u))
-        }}
-      />
+      {isModalOpen && (
+        <CreateUserModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          onSuccess={(newUser) => {
+            setUsers(prev => [newUser as any, ...prev])
+            setIsModalOpen(false)
+          }}
+        />
+      )}
+
+      {isEditModalOpen && userToEdit && (
+        <EditUserModal 
+          user={userToEdit}
+          isOpen={isEditModalOpen} 
+          onClose={() => {
+            setIsEditModalOpen(false)
+            setUserToEdit(null)
+          }} 
+          onSuccess={(updatedUser) => {
+            setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u))
+          }}
+        />
+      )}
     </div>
   )
 }

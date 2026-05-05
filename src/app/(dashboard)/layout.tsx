@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils/cn"
 import Link from "next/link"
+import Image from "next/image"
 import { 
   SquaresFour, 
   Calendar, 
@@ -30,6 +31,7 @@ const navItems = [
 ]
 
 import { requireUser } from "@/lib/auth/require-auth"
+import { getOrganization } from "@/features/organization/queries"
 import { LogoutButton } from "@/components/shared/logout-button"
 
 export default async function DashboardLayout({
@@ -38,16 +40,25 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const profile = await requireUser()
+  const organization = await getOrganization(profile.organization_id)
+  const orgName = organization?.name || "BarberSaaS"
+  const orgLogo = organization?.logo_url
 
   return (
     <div className="flex min-h-screen bg-bg-primary">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 border-r border-white/5 bg-bg-secondary/50 backdrop-blur-xl">
         <div className="p-6">
-          <div className="flex items-center gap-3 px-2">
-            <div className="w-8 h-8 rounded-lg accent-gradient" />
-            <span className="font-syne font-bold text-xl tracking-tight">BarberSaaS</span>
-          </div>
+          <Link href="/" className="flex items-center gap-3 px-2 hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white/5 border border-white/10">
+              {orgLogo ? (
+                <Image src={orgLogo} alt={orgName} width={32} height={32} className="object-cover" />
+              ) : (
+                <div className="w-full h-full accent-gradient" />
+              )}
+            </div>
+            <span className="font-syne font-bold text-xl tracking-tight text-white truncate">{orgName}</span>
+          </Link>
         </div>
         
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
@@ -98,8 +109,14 @@ export default async function DashboardLayout({
         {/* Mobile Header (placeholder) */}
         <header className="md:hidden h-16 border-b border-white/5 flex items-center justify-between px-6 bg-bg-secondary/50 backdrop-blur-xl sticky top-0 z-50">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md accent-gradient" />
-            <span className="font-syne font-bold">BarberSaaS</span>
+            <div className="w-6 h-6 rounded-md overflow-hidden flex items-center justify-center bg-white/5 border border-white/10">
+              {orgLogo ? (
+                <Image src={orgLogo} alt={orgName} width={24} height={24} className="object-cover" />
+              ) : (
+                <div className="w-full h-full accent-gradient" />
+              )}
+            </div>
+            <span className="font-syne font-bold truncate max-w-[150px] text-white">{orgName}</span>
           </div>
           <button className="p-2 text-text-secondary">
              <SquaresFour size={24} weight="duotone" />
