@@ -69,7 +69,7 @@ export default async function DashboardLayout({
             .filter((item) => {
               if (profile.role === 'admin') return true
               if (profile.role === 'barber') {
-                return ['Dashboard', 'Agendamentos', 'Fila', 'Fidelidade', 'Equipe'].includes(item.label)
+                return ['Dashboard', 'Agendamentos', 'Fila', 'Fidelidade', 'Equipe', 'Estoque'].includes(item.label)
               }
               if (profile.role === 'client') {
                 return ['Dashboard', 'Agendamentos', 'Fidelidade'].includes(item.label)
@@ -85,6 +85,8 @@ export default async function DashboardLayout({
                 href = profile.role === 'admin' ? '/admin' : profile.role === 'barber' ? '/barber' : '/client'
               } else if (item.label === 'Estoque') {
                 href = profile.role === 'admin' ? '/admin/inventory' : '/barber/inventory'
+              } else if (item.label === 'Equipe') {
+                href = profile.role === 'admin' ? '/admin/team' : '/barber/team'
               }
 
               return (
