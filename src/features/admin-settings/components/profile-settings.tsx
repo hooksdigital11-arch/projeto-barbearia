@@ -1,11 +1,11 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { User, Envelope, Phone, Article, Lock, FloppyDisk, CircleNotch, SignOut } from '@phosphor-icons/react'
+import { User, Envelope, Phone, Article, Lock, FloppyDisk, CircleNotch, SignOut, PencilSimple, X, Eye, EyeSlash } from '@phosphor-icons/react'
 import { adminProfileSchema, type AdminProfileInput } from '../schemas'
-import { updateAdminProfile } from '../actions'
+import { updateAdminProfile, updatePassword } from '../actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -22,6 +22,15 @@ import { logout } from '@/features/auth/actions'
 export function ProfileSettings({ initialData }: { initialData: any }) {
   const [isPending, startTransition] = useTransition()
   
+  // Estados para o modal de alteração de senha
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+  const [isChangingPassword, startPasswordTransition] = useTransition()
+  
+  // Visibilidade de senhas
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  
+  // Form principal
   const form = useForm<AdminProfileInput>({
     resolver: zodResolver(adminProfileSchema),
     defaultValues: {
@@ -39,6 +48,34 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
         toast.success('Perfil atualizado!')
       } else {
         toast.error(result.error)
+      }
+    })
+  }
+
+  function handlePasswordSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const currentPassword = formData.get('currentPassword') as string
+    const newPassword = formData.get('newPassword') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+
+    if (newPassword !== confirmPassword) {
+      toast.error('As novas senhas não coincidem.')
+      return
+    }
+
+    if (newPassword.length < 6) {
+      toast.error('A nova senha deve ter pelo menos 6 caracteres.')
+      return
+    }
+
+    startPasswordTransition(async () => {
+      const result = await updatePassword(currentPassword, newPassword)
+      if (result.success) {
+        toast.success('Senha alterada com sucesso!')
+        setIsPasswordModalOpen(false)
+      } else {
+        toast.error(result.error || 'Erro ao alterar a senha.')
       }
     })
   }
@@ -161,7 +198,13 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
               </div>
               <div>
                 <p className="text-sm font-bold text-white">Segurança da Conta</p>
-                <button type="button" className="text-xs text-accent-cyan hover:underline">Alterar senha de acesso</button>
+                <button 
+                  type="button" 
+                  onClick={() => setIsPasswordModalOpen(true)}
+                  className="text-xs text-accent-cyan hover:underline text-left"
+                >
+                  Alterar senha de acesso
+                </button>
               </div>
             </div>
 
@@ -172,8 +215,103 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
           </div>
         </form>
       </Form>
+
+      {/* Modal de Alteração de Senha */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-[#141414] border border-white/10 rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-accent-cyan/10 flex items-center justify-center text-accent-cyan">
+                  <Lock size={20} weight="duotone" />
+                </div>
+                <h3 className="text-xl font-bold font-syne text-white">Alterar Senha</h3>
+              </div>
+              <button 
+                onClick={() => setIsPasswordModalOpen(false)}
+                className="p-2 text-muted-foreground hover:text-white transition-colors rounded-lg hover:bg-white/5"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">Senha Atual</label>
+                <div className="relative">
+                  <input 
+                    name="currentPassword" 
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    required 
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
+                    placeholder="Digite sua senha atual"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
+                  >
+                    {showCurrentPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <label className="text-sm font-medium text-white">Nova Senha</label>
+                <div className="relative">
+                  <input 
+                    name="newPassword" 
+                    type={showNewPassword ? 'text' : 'password'}
+                    required 
+                    minLength={6}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
+                    placeholder="Nova senha (mínimo 6 caracteres)"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
+                  >
+                    {showNewPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">Confirmar Nova Senha</label>
+                <input 
+                  name="confirmPassword" 
+                  type={showNewPassword ? 'text' : 'password'}
+                  required 
+                  minLength={6}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
+                  placeholder="Confirme a nova senha"
+                />
+              </div>
+
+              <div className="pt-6 flex gap-3">
+                <Button 
+                  type="button" 
+                  onClick={() => setIsPasswordModalOpen(false)} 
+                  variant="ghost" 
+                  className="flex-1 rounded-xl text-white hover:bg-white/5"
+                  disabled={isChangingPassword}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="flex-1 bg-accent-cyan hover:bg-cyan-400 text-black font-bold rounded-xl"
+                  disabled={isChangingPassword}
+                >
+                  {isChangingPassword ? <CircleNotch size={20} className="animate-spin" /> : 'Atualizar Senha'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-import { PencilSimple } from '@phosphor-icons/react'

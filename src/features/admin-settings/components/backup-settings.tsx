@@ -1,6 +1,6 @@
 'use client'
 
-import { CloudArrowDown, FileJson, FileCsv, Database, Clock, ArrowRight } from '@phosphor-icons/react'
+import { CloudArrowDown, FileCode, FileText, Database, Clock, ArrowRight } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
@@ -34,10 +34,10 @@ export function BackupSettings() {
           
           <div className="grid gap-3">
             {[
-              { label: 'Todos os Dados', type: 'JSON', icon: FileJson },
-              { label: 'Lista de Clientes', type: 'CSV', icon: FileCsv },
-              { label: 'Histórico de Agendamentos', type: 'CSV', icon: FileCsv },
-              { label: 'Relatório Financeiro', type: 'JSON', icon: FileJson },
+              { label: 'Todos os Dados', type: 'JSON', icon: FileCode },
+              { label: 'Lista de Clientes', type: 'CSV', icon: FileText },
+              { label: 'Histórico de Agendamentos', type: 'CSV', icon: FileText },
+              { label: 'Relatório Financeiro', type: 'JSON', icon: FileCode },
             ].map((item) => (
               <button
                 key={item.label}

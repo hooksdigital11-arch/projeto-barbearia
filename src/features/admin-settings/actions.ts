@@ -18,6 +18,41 @@ import type {
   AdminProfileInput
 } from './schemas'
 
+import { createClient } from '@/lib/supabase/server'
+
+/**
+ * 1. Atualiza Configurações Gerais
+ */
+export async function updatePassword(currentPassword: string, newPassword: string) {
+  try {
+    const admin = await requireAdmin()
+    const supabase = await createClient()
+    
+    // Verifica a senha atual tentando fazer login
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: admin.email,
+      password: currentPassword,
+    })
+
+    if (signInError) {
+      return { error: 'A senha atual está incorreta.' }
+    }
+
+    // Se passou, atualiza para a nova senha
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    })
+
+    if (updateError) {
+      return { error: updateError.message }
+    }
+
+    return { success: true }
+  } catch (err) {
+    return { error: 'Erro inesperado ao alterar a senha.' }
+  }
+}
+
 /**
  * 1. Atualiza Configurações Gerais
  */
