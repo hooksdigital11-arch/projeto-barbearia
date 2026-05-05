@@ -93,7 +93,11 @@ export async function createService(input: ServiceInput) {
     const { error } = await supabaseAdmin
       .from('services')
       .insert({
-        ...parsed.data,
+        name: parsed.data.name,
+        description: parsed.data.description,
+        duration: parsed.data.duration,
+        category: parsed.data.category,
+        is_active: parsed.data.isActive,
         price_cents: Math.round(parsed.data.price * 100),
         organization_id: admin.organization_id
       } as any)
@@ -117,7 +121,11 @@ export async function updateService(id: string, input: ServiceInput) {
     const { error } = await supabaseAdmin
       .from('services')
       .update({
-        ...parsed.data,
+        name: parsed.data.name,
+        description: parsed.data.description,
+        duration: parsed.data.duration,
+        category: parsed.data.category,
+        is_active: parsed.data.isActive,
         price_cents: Math.round(parsed.data.price * 100)
       } as any)
       .eq('id', id)
@@ -133,13 +141,31 @@ export async function updateService(id: string, input: ServiceInput) {
   }
 }
 
+export async function toggleServiceStatus(id: string, isActive: boolean) {
+  try {
+    const admin = await requireAdmin()
+    const { error } = await supabaseAdmin
+      .from('services')
+      .update({ is_active: isActive } as any)
+      .eq('id', id)
+      .eq('organization_id', admin.organization_id)
+
+    if (error) return { error: error.message }
+    
+    revalidateTag('services-settings')
+    revalidatePath('/admin/settings/services')
+    return { success: true }
+  } catch (err) {
+    return { error: 'Erro ao alterar status.' }
+  }
+}
+
 export async function deleteService(id: string) {
   try {
     const admin = await requireAdmin()
-    // Soft delete preferencialmente
     const { error } = await supabaseAdmin
       .from('services')
-      .update({ is_active: false } as any)
+      .delete()
       .eq('id', id)
       .eq('organization_id', admin.organization_id)
 

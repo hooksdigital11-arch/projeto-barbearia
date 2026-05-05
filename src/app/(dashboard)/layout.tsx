@@ -49,7 +49,10 @@ export default async function DashboardLayout({
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 border-r border-white/5 bg-bg-secondary/50 backdrop-blur-xl">
         <div className="p-6">
-          <Link href="/" className="flex items-center gap-3 px-2 hover:opacity-80 transition-opacity">
+          <Link 
+            href={profile.role === 'admin' ? '/admin' : profile.role === 'barber' ? '/barber' : '/client'} 
+            className="flex items-center gap-3 px-2 hover:opacity-80 transition-opacity"
+          >
             <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white/5 border border-white/10">
               {orgLogo ? (
                 <Image src={orgLogo} alt={orgName} width={32} height={32} className="object-cover" />
@@ -73,19 +76,29 @@ export default async function DashboardLayout({
               }
               return false
             })
-            .map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all group",
-                "text-text-secondary hover:text-text-primary hover:bg-white/5"
-              )}
-            >
-              <item.icon size={20} weight="duotone" className="transition-colors group-hover:text-accent-cyan" />
-              {item.label}
-            </Link>
-          ))}
+            .map((item) => {
+              let href = item.href
+              
+              if (item.label === 'Configurações' && profile.role === 'admin') {
+                href = '/admin/settings/general'
+              } else if (item.label === 'Dashboard') {
+                href = profile.role === 'admin' ? '/admin' : profile.role === 'barber' ? '/barber' : '/client'
+              }
+
+              return (
+                <Link
+                  key={item.href}
+                  href={href}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all group",
+                    "text-text-secondary hover:text-text-primary hover:bg-white/5"
+                  )}
+                >
+                  <item.icon size={20} weight="duotone" className="transition-colors group-hover:text-accent-cyan" />
+                  {item.label}
+                </Link>
+              )
+            })}
         </nav>
 
         <div className="p-4 mt-auto space-y-3">

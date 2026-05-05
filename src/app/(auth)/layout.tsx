@@ -10,7 +10,7 @@ import { BarberAnimation } from '@/features/auth/components/barber-animation'
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-black via-[#0a0a0a] to-background flex items-center justify-center p-4 lg:p-8 overflow-hidden font-sans">
-      
+
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-500/5 blur-[120px] rounded-full" />
@@ -19,7 +19,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
       <div className="w-full max-w-6xl relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
-          
+
           {/* Lado Esquerdo: Animação Temática (Apenas Desktop) */}
           <div className="hidden lg:flex items-center justify-center min-h-[600px] border-r border-white/5 pr-12">
             <BarberAnimation />
@@ -33,7 +33,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               </div>
             </div>
           </div>
-          
+
         </div>
       </div>
 

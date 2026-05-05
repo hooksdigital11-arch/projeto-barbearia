@@ -9,10 +9,9 @@ export default async function ConfiguracoesPage() {
   const profile = await requireUser()
 
   if (profile.role === 'admin') {
-    redirect('/admin/settings')
+    redirect('/admin/settings/general')
   }
 
-  // Barbeiros e Clientes por enquanto não possuem uma página de configurações dedicada
-  // Se tivessem, redirecionaríamos para /barber/settings ou /client/settings
+  // Clientes por enquanto não possuem uma página de configurações dedicada
   redirect('/')
 }
