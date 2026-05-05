@@ -1,14 +1,16 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Warning, Trash, Power, ShieldWarning, CircleNotch } from '@phosphor-icons/react'
+import { Warning, Trash, Power, ShieldWarning, CircleNotch, CheckCircle } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { deactivateOrganization } from '../actions'
+import { deactivateOrganization, activateOrganization } from '../actions'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils/cn'
 
-export function DangerZone() {
+export function DangerZone({ initialStatus = 'active' }: { initialStatus?: string }) {
   const [isPending, startTransition] = useTransition()
+  const [status, setStatus] = useState(initialStatus)
   const [confirmText, setConfirmText] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
@@ -18,12 +20,27 @@ export function DangerZone() {
     startTransition(async () => {
       const result = await deactivateOrganization()
       if (result.success) {
+        setStatus('inactive')
         toast.success('Barbearia desativada com sucesso.')
       } else {
         toast.error(result.error)
       }
     })
   }
+
+  const handleActivate = () => {
+    startTransition(async () => {
+      const result = await activateOrganization()
+      if (result.success) {
+        setStatus('active')
+        toast.success('Barbearia reativada com sucesso!')
+      } else {
+        toast.error(result.error)
+      }
+    })
+  }
+
+  const isInactive = status === 'inactive'
 
   return (
     <div className="space-y-12">
@@ -37,24 +54,43 @@ export function DangerZone() {
 
       <div className="grid gap-6">
         {/* Deactivate Section */}
-        <div className="p-8 rounded-[2rem] border border-red-500/20 bg-red-500/5 space-y-6">
+        <div className={cn(
+          "p-8 rounded-[2rem] border transition-all duration-500",
+          isInactive 
+            ? "border-emerald-500/20 bg-emerald-500/5 shadow-[0_0_20px_rgba(16,185,129,0.05)]" 
+            : "border-red-500/20 bg-red-500/5"
+        )}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Power size={20} className="text-red-400" />
-                Desativar Barbearia
+              <h3 className={cn(
+                "text-lg font-bold flex items-center gap-2",
+                isInactive ? "text-emerald-400" : "text-white"
+              )}>
+                {isInactive ? (
+                  <CheckCircle size={20} className="text-emerald-400" weight="fill" />
+                ) : (
+                  <Power size={20} className="text-red-400" />
+                )}
+                {isInactive ? 'Barbearia Desativada' : 'Desativar Barbearia'}
               </h3>
               <p className="text-sm text-muted-foreground max-w-md">
-                Suspende temporariamente todas as atividades. Usuários não poderão logar e o agendamento será bloqueado. Você pode reativar a qualquer momento.
+                {isInactive 
+                  ? 'A unidade está suspensa. Os clientes não conseguem agendar e os funcionários não têm acesso ao sistema.' 
+                  : 'Suspende temporariamente todas as atividades. Usuários não poderão logar e o agendamento será bloqueado.'}
               </p>
             </div>
             <Button 
               variant="outline" 
-              onClick={handleDeactivate}
+              onClick={isInactive ? handleActivate : handleDeactivate}
               disabled={isPending}
-              className="border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white rounded-xl px-8"
+              className={cn(
+                "rounded-xl px-8 transition-all duration-300 font-bold",
+                isInactive 
+                  ? "border-emerald-500/50 text-emerald-400 hover:bg-emerald-500 hover:text-white"
+                  : "border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white"
+              )}
             >
-              {isPending ? <CircleNotch className="animate-spin" /> : 'Desativar Unidade'}
+              {isPending ? <CircleNotch className="animate-spin" /> : (isInactive ? 'Reativar Unidade' : 'Desativar Unidade')}
             </Button>
           </div>
         </div>

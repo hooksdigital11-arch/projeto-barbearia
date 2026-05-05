@@ -279,6 +279,25 @@ export async function deactivateOrganization() {
 }
 
 /**
+ * Reativa a Organização
+ */
+export async function activateOrganization() {
+  try {
+    const admin = await requireAdmin()
+    const { error } = await supabaseAdmin
+      .from('organizations')
+      .update({ status: 'active' } as any)
+      .eq('id', admin.organization_id)
+
+    if (error) return { error: error.message }
+    revalidatePath('/admin/settings')
+    return { success: true }
+  } catch (err) {
+    return { error: 'Erro ao reativar.' }
+  }
+}
+
+/**
  * 9. Upload de Logo (Storage)
  */
 export async function uploadLogo(formData: FormData) {

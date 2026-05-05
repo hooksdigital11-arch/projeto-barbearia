@@ -83,6 +83,8 @@ export default async function DashboardLayout({
                 href = '/admin/settings/general'
               } else if (item.label === 'Dashboard') {
                 href = profile.role === 'admin' ? '/admin' : profile.role === 'barber' ? '/barber' : '/client'
+              } else if (item.label === 'Estoque') {
+                href = profile.role === 'admin' ? '/admin/inventory' : '/barber/inventory'
               }
 
               return (
