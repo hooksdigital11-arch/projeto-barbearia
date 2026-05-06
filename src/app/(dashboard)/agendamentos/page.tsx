@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/auth/require-auth'
+import { RoleRedirect } from '@/components/shared/role-redirect'
 
 /**
  * /agendamentos → role-based redirect
@@ -7,7 +7,13 @@ import { requireUser } from '@/lib/auth/require-auth'
 export default async function AgendamentosRedirect() {
   const user = await requireUser()
 
-  if (user.role === 'admin') redirect('/admin/appointments')
-  if (user.role === 'barber') redirect('/barber/appointments')
-  redirect('/client')
+  return (
+    <RoleRedirect 
+      role={user.role} 
+      adminPath="/admin/appointments" 
+      barberPath="/barber/appointments" 
+      clientPath="/client" 
+    />
+  )
 }
+

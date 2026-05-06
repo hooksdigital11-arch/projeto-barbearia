@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/auth/require-auth'
+import { RoleRedirect } from '@/components/shared/role-redirect'
 
 /**
  * Dashboard root page.
@@ -9,15 +9,13 @@ import { requireUser } from '@/lib/auth/require-auth'
 export default async function DashboardPage() {
   const profile = await requireUser()
 
-  // Redirect based on role
-  if (profile.role === 'admin') {
-    redirect('/admin')
-  }
-
-  if (profile.role === 'barber') {
-    redirect('/barber')
-  }
-
-  // Default to client dashboard
-  redirect('/client')
+  return (
+    <RoleRedirect 
+      role={profile.role} 
+      adminPath="/admin" 
+      barberPath="/barber" 
+      clientPath="/client" 
+    />
+  )
 }
+

@@ -1,5 +1,5 @@
 import { requireUser } from '@/lib/auth/require-auth'
-import { redirect } from 'next/navigation'
+import { RoleRedirect } from '@/components/shared/role-redirect'
 
 /**
  * Rota de redirecionamento para Configurações.
@@ -8,10 +8,13 @@ import { redirect } from 'next/navigation'
 export default async function ConfiguracoesPage() {
   const profile = await requireUser()
 
-  if (profile.role === 'admin') {
-    redirect('/admin/settings/general')
-  }
-
-  // Clientes por enquanto não possuem uma página de configurações dedicada
-  redirect('/')
+  return (
+    <RoleRedirect 
+      role={profile.role} 
+      adminPath="/admin/settings/general" 
+      barberPath="/" 
+      clientPath="/" 
+    />
+  )
 }
+

@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 /**
  * Error Boundary for the app.
  * Catches errors in page/layout components within the app directory.
@@ -11,6 +13,19 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    // Se for um erro de redirecionamento do Next.js, ignoramos o log
+    if (error.message === 'NEXT_REDIRECT') return
+    
+    console.error('[ErrorBoundary]:', error)
+  }, [error])
+
+  // Se for um erro de redirecionamento, não mostramos a UI de erro
+  // O Next.js deve processar o redirecionamento automaticamente
+  if (error.message === 'NEXT_REDIRECT') {
+    return null
+  }
+
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-4">
       <div className="text-center space-y-6 max-w-md">
@@ -22,7 +37,7 @@ export default function Error({
             Algo deu errado
           </h2>
           <p className="text-sm text-gray-400">
-            Ocorreu um erro inesperado. Tente novamente.
+            {error.message === 'NEXT_REDIRECT' ? 'Redirecionando...' : 'Ocorreu um erro inesperado. Tente novamente.'}
           </p>
         </div>
         <button
@@ -35,3 +50,4 @@ export default function Error({
     </div>
   )
 }
+

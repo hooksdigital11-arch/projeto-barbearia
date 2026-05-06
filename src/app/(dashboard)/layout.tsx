@@ -68,7 +68,9 @@ export default async function DashboardLayout({
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
           {navItems
             .filter((item) => {
-              if (profile.role === 'admin') return true
+              if (profile.role === 'admin') {
+                return item.label !== 'Perfil'
+              }
               if (profile.role === 'barber') {
                 return ['Dashboard', 'Agendamentos', 'Clientes', 'Comanda', 'Fila', 'Fidelidade', 'Equipe', 'Estoque', 'Mensageria'].includes(item.label)
               }
