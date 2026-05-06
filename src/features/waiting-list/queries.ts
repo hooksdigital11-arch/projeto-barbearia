@@ -17,7 +17,7 @@ export const getWaitingList = cache(async (): Promise<WaitingListEntry[]> => {
       *,
       client:clients(id, full_name, phone),
       barber:profiles!waiting_list_barber_id_fkey(id, full_name),
-      service:services(id, name, duration_minutes)
+      service:services(id, name)
     `)
     .eq('organization_id', user.organization_id)
     .in('status', ['waiting', 'notified', 'confirmed'])
@@ -41,7 +41,7 @@ export const getClientQueuePosition = cache(async (clientId: string): Promise<Wa
     .from('waiting_list')
     .select(`
       *,
-      service:services(id, name, duration_minutes),
+      service:services(id, name),
       barber:profiles!waiting_list_barber_id_fkey(id, full_name)
     `)
     .eq('organization_id', user.organization_id)
@@ -93,7 +93,7 @@ export const getAvailableServices = cache(async (): Promise<ServiceOption[]> => 
 
   const { data } = await supabaseAdmin
     .from('services')
-    .select('id, name, duration_minutes')
+    .select('id, name')
     .eq('organization_id', user.organization_id)
     .order('name', { ascending: true })
 

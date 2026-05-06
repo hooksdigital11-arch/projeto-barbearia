@@ -28,6 +28,7 @@ const navItems = [
   { label: "Relatórios", href: "/relatorios", icon: ChartPieSlice },
   { label: "Usuários", href: "/admin/users", icon: Users },
   { label: "Configurações", href: "/configuracoes", icon: Gear },
+  { label: "Perfil", href: "/client/profile", icon: UserCircle },
 ]
 
 import { requireUser } from "@/lib/auth/require-auth"
@@ -69,10 +70,10 @@ export default async function DashboardLayout({
             .filter((item) => {
               if (profile.role === 'admin') return true
               if (profile.role === 'barber') {
-                return ['Dashboard', 'Agendamentos', 'Clientes', 'Fila', 'Fidelidade', 'Equipe', 'Estoque'].includes(item.label)
+                return ['Dashboard', 'Agendamentos', 'Clientes', 'Comanda', 'Fila', 'Fidelidade', 'Equipe', 'Estoque', 'Mensageria'].includes(item.label)
               }
               if (profile.role === 'client') {
-                return ['Dashboard', 'Agendamentos', 'Fila', 'Fidelidade'].includes(item.label)
+                return ['Dashboard', 'Agendamentos', 'Fila', 'Fidelidade', 'Perfil'].includes(item.label)
               }
               return false
             })
@@ -83,6 +84,8 @@ export default async function DashboardLayout({
                 href = '/admin/settings/general'
               } else if (item.label === 'Dashboard') {
                 href = profile.role === 'admin' ? '/admin' : profile.role === 'barber' ? '/barber' : '/client'
+              } else if (item.label === 'Agendamentos') {
+                href = profile.role === 'admin' ? '/admin/appointments' : profile.role === 'barber' ? '/barber/appointments' : '/client/appointments'
               } else if (item.label === 'Estoque') {
                 href = profile.role === 'admin' ? '/admin/inventory' : '/barber/inventory'
               } else if (item.label === 'Equipe') {
@@ -93,6 +96,12 @@ export default async function DashboardLayout({
                 href = profile.role === 'admin' ? '/admin/waiting-list' : profile.role === 'barber' ? '/barber/waiting-list' : '/client/waiting-list'
               } else if (item.label === 'Fidelidade') {
                 href = profile.role === 'admin' ? '/admin/loyalty' : profile.role === 'barber' ? '/barber/loyalty' : '/client/loyalty'
+              } else if (item.label === 'Mensageria') {
+                href = profile.role === 'admin' ? '/admin/messaging' : '/barber/messaging'
+              } else if (item.label === 'Relatórios') {
+                href = '/admin/reports'
+              } else if (item.label === 'Usuários') {
+                href = '/admin/users'
               }
 
               return (
