@@ -9,7 +9,7 @@ export default async function BarberPage() {
   const data = await getBarberDashboardData()
   
   return (
-    <Suspense fallback={<div className="p-8 text-white">Carregando Dashboard Operacional...</div>}>
+    <Suspense fallback={<div className="p-8 text-white">Carregando Home...</div>}>
       <BarberDashboard initialData={data} organizationId={profile.organization_id} />
     </Suspense>
   )

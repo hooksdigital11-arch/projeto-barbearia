@@ -17,7 +17,7 @@ import {
 } from "@phosphor-icons/react/dist/ssr"
 
 const navItems = [
-  { label: "Dashboard", href: "/", icon: SquaresFour },
+  { label: "Home", href: "/", icon: SquaresFour },
   { label: "Agendamentos", href: "/agendamentos", icon: Calendar },
   { label: "Serviços", href: "/servicos", icon: Scissors },
   { label: "Clientes", href: "/clientes", icon: Users },
@@ -83,14 +83,14 @@ export default async function DashboardLayout({
             {navItems
               .filter((item) => {
                 if (profile.role === 'admin') return item.label !== 'Perfil'
-                if (profile.role === 'barber') return ['Dashboard', 'Agendamentos', 'Serviços', 'Clientes', 'Comanda', 'Fila', 'Fidelidade', 'Equipe', 'Estoque', 'Mensageria'].includes(item.label)
-                if (profile.role === 'client') return ['Dashboard', 'Agendamentos', 'Serviços', 'Fila', 'Fidelidade', 'Perfil'].includes(item.label)
+                if (profile.role === 'barber') return ['Home', 'Agendamentos', 'Serviços', 'Clientes', 'Comanda', 'Fila', 'Fidelidade', 'Equipe', 'Estoque', 'Mensageria'].includes(item.label)
+                if (profile.role === 'client') return ['Home', 'Agendamentos', 'Serviços', 'Fila', 'Fidelidade', 'Perfil'].includes(item.label)
                 return false
               })
               .map((item) => {
                 let href = item.href
                 if (item.label === 'Configurações' && profile.role === 'admin') href = '/admin/settings/general'
-                else if (item.label === 'Dashboard') href = profile.role === 'admin' ? '/admin' : profile.role === 'barber' ? '/barber' : '/client'
+                else if (item.label === 'Home') href = profile.role === 'admin' ? '/admin' : profile.role === 'barber' ? '/barber' : '/client'
                 else if (item.label === 'Agendamentos') href = profile.role === 'admin' ? '/admin/appointments' : profile.role === 'barber' ? '/barber/appointments' : '/client/appointments'
                 else if (item.label === 'Serviços') href = profile.role === 'admin' ? '/admin/services' : profile.role === 'barber' ? '/barber/services' : '/client/services'
                 else if (item.label === 'Estoque') href = profile.role === 'admin' ? '/admin/inventory' : '/barber/inventory'
