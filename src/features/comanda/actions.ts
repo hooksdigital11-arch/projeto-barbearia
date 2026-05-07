@@ -115,44 +115,25 @@ export async function closeComanda(formData: FormData) {
 
   if (payError) return { error: 'Erro ao processar pagamento' }
 
-  // 3. Descontar produtos do estoque
-  const productItems = items.filter(i => i.item_type === 'product')
-  for (const item of productItems) {
-    if (item.inventory_id) {
-      await supabase.rpc('decrement_inventory' as never, {
-        p_id: item.inventory_id,
-        p_quantity: item.quantity,
-      } as never)
-    }
-  }
-
-  // 4. Atualizar appointment pra completed
+  // 3. Atualizar agendamento para completed (Isso dispara a Trigger de Fidelidade e Estoque)
   if (parsed.data.appointment_id) {
-    const apptUpdate = { status: 'completed' as const }
     await (supabase
       .from('appointments') as any)
-      .update(apptUpdate)
+      .update({ status: 'completed' })
       .eq('id', parsed.data.appointment_id)
       .eq('organization_id', user.organization_id)
   }
 
-  // 5. Adicionar carimbo de fidelidade automaticamente
-  const totalCents = items.reduce((sum: number, i: ComandaItem) => sum + i.total_cents, 0)
-    - (parsed.data.discount_cents || 0)
-
-  // Wait for it, maybe we don't await so we don't block
-  await addStampAfterAppointment(
-    user.organization_id,
-    parsed.data.client_id,
-    parsed.data.appointment_id || '',
-    totalCents
-  )
-
-  // 6. Gerar número do recibo
+  // 4. Gerar número do recibo
   const receiptNumber = `#${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`
 
   revalidatePath('/barber/comanda')
   revalidatePath('/admin/comanda')
+  revalidatePath('/admin')
+  revalidatePath('/admin/reports')
+
+  const totalCents = items.reduce((sum: number, i: ComandaItem) => sum + i.total_cents, 0)
+    - (parsed.data.discount_cents || 0)
 
   return {
     success: true,

@@ -1,4 +1,7 @@
-import { Suspense } from 'react'
+'use client'
+
+import { Suspense, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { 
   CurrencyDollar, 
@@ -8,11 +11,11 @@ import {
   ChartLineUp,
   Users
 } from '@phosphor-icons/react/dist/ssr'
-import { getAdminKPIs, getBarbersPerformance } from '../queries'
 import { KPICard } from '@/components/shared/kpi-card'
 import { Skeleton, CardSkeleton, TableSkeleton } from '@/components/shared/loading-skeleton'
 import { cn } from '@/lib/utils/cn'
 import { WhatsappLogo, Calendar, ChartBar } from '@phosphor-icons/react/dist/ssr'
+import { createClient } from '@/lib/supabase/client'
 
 const RevenueChart = dynamic(() => import('./revenue-chart'), {
   loading: () => <Skeleton className="h-[350px] w-full rounded-3xl" />
@@ -20,11 +23,27 @@ const RevenueChart = dynamic(() => import('./revenue-chart'), {
 
 import { AdminControls } from './admin-controls'
 
-export async function AdminDashboard() {
-  const [kpis, barbers] = await Promise.all([
-    getAdminKPIs(),
-    getBarbersPerformance()
-  ])
+interface AdminDashboardProps {
+  initialKpis: any
+  initialBarbers: any
+  organizationId: string
+}
+
+import { useDashboardRealtime } from '@/features/analytics/useDashboardRealtime'
+
+export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: AdminDashboardProps) {
+  const router = useRouter()
+  const [kpis, setKpis] = useState(initialKpis)
+  const [barbers, setBarbers] = useState(initialBarbers)
+
+  // Ativa Sincronização em Tempo Real (Event-Driven)
+  useDashboardRealtime(organizationId)
+
+  // Sincroniza props quando o servidor envia novos dados via router.refresh()
+  useEffect(() => {
+    setKpis(initialKpis)
+    setBarbers(initialBarbers)
+  }, [initialKpis, initialBarbers])
 
   return (
     <div className="space-y-12 max-w-[1600px] mx-auto animate-in fade-in duration-700">
@@ -87,7 +106,7 @@ export async function AdminDashboard() {
             </div>
           </div>
           <Suspense fallback={<Skeleton className="h-[350px] w-full rounded-3xl" />}>
-            <RevenueChart />
+            <RevenueChart data={kpis.weekly_chart} />
           </Suspense>
         </div>
       </div>
@@ -95,6 +114,7 @@ export async function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Performance dos Barbeiros */}
         <div className="lg:col-span-2 space-y-6">
+          {/* ... (conteúdo barbers mantido) */}
           <div className="glass-card p-10">
             <div className="flex items-center justify-between mb-10">
               <div className="space-y-1">
@@ -111,7 +131,7 @@ export async function AdminDashboard() {
             
             <Suspense fallback={<TableSkeleton rows={3} />}>
               <div className="space-y-4">
-                {barbers.map((barber) => (
+                {barbers.map((barber: any) => (
                   <div 
                     key={barber.id}
                     className="flex items-center justify-between p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.05] transition-all duration-500 group"
@@ -155,7 +175,7 @@ export async function AdminDashboard() {
                           <div 
                             className="h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_currentColor]" 
                             style={{ 
-                              width: `${(barber.revenue / 1200) * 100}%`,
+                              width: `${Math.min((barber.revenue / 2000) * 100, 100)}%`,
                               backgroundColor: barber.color,
                               color: barber.color
                             }}
@@ -182,29 +202,33 @@ export async function AdminDashboard() {
             </div>
             
             <div className="space-y-5">
-              <div className="p-5 rounded-2xl bg-accent-cyan/[0.03] border border-accent-cyan/10 relative overflow-hidden group hover:bg-accent-cyan/[0.06] transition-all duration-300">
-                <div className="absolute top-0 left-0 w-1 h-full bg-accent-cyan shadow-[0_0_10px_rgba(0,229,255,0.5)]" />
-                <p className="text-sm font-black text-accent-cyan uppercase tracking-widest">Novo Cliente</p>
-                <p className="text-sm text-white font-medium mt-1">João Silva <span className="text-text-secondary font-normal">acabou de entrar na plataforma.</span></p>
-                <p className="text-[10px] text-text-secondary mt-3 font-bold opacity-50">Agora mesmo</p>
-              </div>
+              {kpis.recent_activities?.map((activity: any, idx: number) => (
+                <div key={idx} className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all duration-300 relative overflow-hidden group">
+                  <div className={cn(
+                    "absolute top-0 left-0 w-1 h-full",
+                    activity.status === 'completed' ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" : "bg-accent-cyan shadow-[0_0_10px_rgba(0,229,255,0.5)]"
+                  )} />
+                  <p className="text-sm font-black uppercase tracking-widest text-text-secondary group-hover:text-white transition-colors">
+                    {activity.status === 'completed' ? 'Finalizado' : 'Novo Agendamento'}
+                  </p>
+                  <p className="text-sm text-white font-medium mt-1">
+                    {activity.client_name} <span className="text-text-secondary font-normal">
+                      {activity.status === 'completed' ? `pagou R$ ${activity.value}` : 'agendou um horário'}
+                    </span>
+                  </p>
+                  <p className="text-[10px] text-text-secondary mt-3 font-bold opacity-50">{activity.time}</p>
+                </div>
+              ))}
 
-              <div className="p-5 rounded-2xl bg-red-500/[0.03] border border-red-500/10 relative overflow-hidden group hover:bg-red-500/[0.06] transition-all duration-300">
-                <div className="absolute top-0 left-0 w-1 h-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
-                <p className="text-sm font-black text-red-400 uppercase tracking-widest">Cancelamento</p>
-                <p className="text-sm text-white font-medium mt-1">Maria Santos <span className="text-text-secondary font-normal">cancelou o horário das 14:00.</span></p>
-                <p className="text-[10px] text-text-secondary mt-3 font-bold opacity-50">15 min atrás</p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 opacity-50 hover:opacity-100 transition-all duration-300">
-                <p className="text-sm font-black text-white uppercase tracking-widest">Turno Finalizado</p>
-                <p className="text-sm text-text-secondary mt-1">Marcos encerrou seu expediente hoje.</p>
-                <p className="text-[10px] text-text-secondary mt-3 font-bold opacity-50">2 horas atrás</p>
-              </div>
+              {(!kpis.recent_activities || kpis.recent_activities.length === 0) && (
+                <div className="text-center py-10 opacity-30">
+                  <p className="text-xs uppercase tracking-widest">Sem atividades recentes</p>
+                </div>
+              )}
             </div>
             
             <button className="w-full mt-10 py-4 text-xs font-black uppercase tracking-[0.2em] text-text-secondary hover:text-white transition-all border-t border-white/5 group active:scale-95">
-              Limpar histórico
+              Ver histórico completo
             </button>
           </div>
         </div>

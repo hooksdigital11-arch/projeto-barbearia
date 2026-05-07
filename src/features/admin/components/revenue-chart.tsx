@@ -12,17 +12,11 @@ import {
   Area
 } from 'recharts'
 
-const data = [
-  { name: 'Seg', revenue: 400, lastWeek: 320 },
-  { name: 'Ter', revenue: 600, lastWeek: 450 },
-  { name: 'Qua', revenue: 550, lastWeek: 600 },
-  { name: 'Qui', revenue: 900, lastWeek: 700 },
-  { name: 'Sex', revenue: 1200, lastWeek: 950 },
-  { name: 'Sáb', revenue: 1500, lastWeek: 1200 },
-  { name: 'Dom', revenue: 300, lastWeek: 200 },
-]
+interface RevenueChartProps {
+  data?: any[]
+}
 
-export default function RevenueChart() {
+export default function RevenueChart({ data = [] }: RevenueChartProps) {
   return (
     <div className="h-[350px] w-full p-6 rounded-3xl border border-white/5 bg-card/10 backdrop-blur-xl">
       <div className="flex items-center justify-between mb-8">
@@ -71,15 +65,18 @@ export default function RevenueChart() {
             strokeWidth={3}
             fillOpacity={1} 
             fill="url(#colorRevenue)" 
+            animationDuration={1500}
           />
-          <Area 
-            type="monotone" 
-            dataKey="lastWeek" 
-            stroke="#ffffff40" 
-            strokeWidth={2}
-            strokeDasharray="5 5"
-            fill="transparent" 
-          />
+          {data[0]?.lastWeek !== undefined && (
+            <Area 
+              type="monotone" 
+              dataKey="lastWeek" 
+              stroke="#ffffff40" 
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              fill="transparent" 
+            />
+          )}
         </AreaChart>
       </ResponsiveContainer>
     </div>

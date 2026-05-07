@@ -8,25 +8,26 @@ import {
 import { ReportsPage } from '@/features/reports/components/reports-page'
 import { requireAdmin } from '@/lib/auth/require-auth'
 
-export default async function AdminReportsPage() {
-  await requireAdmin()
+export default async function AdminReportsPage({ 
+  searchParams 
+}: { 
+  searchParams: Promise<{ start?: string; end?: string }> 
+}) {
+  const profile = await requireAdmin()
+  const params = await searchParams
 
-  // Default to last 30 days
-  const end = new Date()
-  const start = new Date()
-  start.setMonth(end.getMonth() - 1)
-
-  const startDate = start.toISOString()
-  const endDate = end.toISOString()
+  // Default dates if none provided
+  const end = params.end || new Date().toISOString()
+  const start = params.start || new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString()
 
   return (
     <Suspense fallback={<ReportsLoading />}>
-      <ReportsContent startDate={startDate} endDate={endDate} />
+      <ReportsContent startDate={start} endDate={end} organizationId={profile.organization_id} />
     </Suspense>
   )
 }
 
-async function ReportsContent({ startDate, endDate }: { startDate: string, endDate: string }) {
+async function ReportsContent({ startDate, endDate, organizationId }: { startDate: string, endDate: string, organizationId: string }) {
   const [revenue, appointments, clients, team] = await Promise.all([
     getRevenueReport(startDate, endDate),
     getAppointmentsReport(startDate, endDate),
@@ -40,6 +41,7 @@ async function ReportsContent({ startDate, endDate }: { startDate: string, endDa
       initialAppointments={appointments}
       initialClients={clients}
       initialTeam={team}
+      organizationId={organizationId}
     />
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { PeriodSelector } from './period-selector'
 import { RevenueSection } from './revenue-section'
 import { AppointmentsSection } from './appointments-section'
@@ -8,6 +9,7 @@ import { ClientsSection } from './clients-section'
 import { TeamSection } from './team-section'
 import { ExportButton } from './export-button'
 import { PageTitle } from '@/components/shared/page-title'
+import { createClient } from '@/lib/supabase/client'
 import type { 
   RevenueReport, 
   AppointmentReport, 
@@ -21,14 +23,17 @@ interface ReportsPageProps {
   initialAppointments: AppointmentReport
   initialClients: ClientReport
   initialTeam: TeamReport
+  organizationId: string
 }
 
 export function ReportsPage({ 
   initialRevenue, 
   initialAppointments, 
   initialClients, 
-  initialTeam 
+  initialTeam,
+  organizationId
 }: ReportsPageProps) {
+  const router = useRouter()
   const [dates, setDates] = useState({ 
     start: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString(),
     end: new Date().toISOString()
@@ -39,10 +44,57 @@ export function ReportsPage({
   const [team, setTeam] = useState(initialTeam)
   const [isPending, startTransition] = useTransition()
 
+  // Sincroniza o estado local com as novas props do server pós-refresh
+  useEffect(() => {
+    setRevenue(initialRevenue)
+    setAppointments(initialAppointments)
+    setClients(initialClients)
+    setTeam(initialTeam)
+  }, [initialRevenue, initialAppointments, initialClients, initialTeam])
+
+  // Realtime setup
+  useEffect(() => {
+    const supabase = createClient()
+    
+    const channel = supabase.channel('reports-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'services', filter: `organization_id=eq.${organizationId}` },
+        () => router.refresh()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'appointments', filter: `organization_id=eq.${organizationId}` },
+        () => router.refresh()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'comanda_items', filter: `organization_id=eq.${organizationId}` },
+        () => router.refresh()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'clients', filter: `organization_id=eq.${organizationId}` },
+        () => router.refresh()
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [organizationId, router])
+
   const handlePeriodChange = (start: string, end: string, period: ReportPeriod) => {
     setDates({ start, end })
-    // In a real app, we would call Server Actions here to fetch new data
-    // For this implementation, we rely on the initial data or simulated updates
+    
+    // Atualiza a URL com os novos parâmetros de busca
+    // Isso forçará o Next.js a re-executar as queries no servidor
+    const params = new URLSearchParams()
+    params.set('start', start)
+    params.set('end', end)
+    params.set('period', period)
+    
+    router.push(`?${params.toString()}`, { scroll: false })
   }
 
   return (

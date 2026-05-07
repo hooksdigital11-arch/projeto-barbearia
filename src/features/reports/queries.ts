@@ -26,59 +26,57 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
   
   const start = new Date(startDate)
   const end = new Date(endDate)
-  const { start: pStart, end: pEnd } = getPreviousPeriod(start, end)
-
-  // Current period data
-  const { data: currentApps } = await supabase
-    .from('appointments')
-    .select('id, price_cents, start_time')
-    .eq('organization_id', user.organization_id)
-    .eq('status', 'completed')
-    .gte('start_time', start.toISOString())
-    .lte('start_time', end.toISOString())
-
-  // Previous period data for KPIs
-  const { data: prevApps } = await supabase
-    .from('appointments')
-    .select('id, price_cents, start_time')
-    .eq('organization_id', user.organization_id)
-    .eq('status', 'completed')
-    .gte('start_time', pStart.toISOString())
-    .lte('start_time', pEnd.toISOString())
-
-  const items = (currentApps as any[]) || []
-  const pItems = (prevApps as any[]) || []
-
-  const totalRevenue = items.reduce((acc, item) => acc + (item.price_cents || 0), 0)
-  const prevRevenue = pItems.reduce((acc, item) => acc + (item.price_cents || 0), 0)
   
-  const uniqueComandas = items.length || 1
-  const pUniqueComandas = pItems.length || 1
+  // 1. Busca agregada via Views
+  const { data: revenueData } = await supabase
+    .from('view_monthly_revenue' as any)
+    .select('*')
+    .eq('organization_id', user.organization_id)
+    .gte('month', start.toISOString())
+    .lte('month', end.toISOString())
 
-  // Payment Methods - Appointments doesn't store this by default in the MVP
-  // If we wanted to track this perfectly, we would need to join with comanda_items
-  const paymentMethods = [
-    { method: 'Dinheiro', value: totalRevenue / 100, percentage: 100 },
-    { method: 'PIX', value: 0, percentage: 0 },
-    { method: 'Crédito', value: 0, percentage: 0 },
-    { method: 'Débito', value: 0, percentage: 0 }
-  ]
+  // 2. Busca performance de barbeiros para a seção financeira
+  const { data: teamData } = await supabase
+    .from('view_team_productivity' as any)
+    .select('*')
+    .eq('organization_id', user.organization_id)
+    .gte('month', start.toISOString())
+    .lte('month', end.toISOString())
+
+  const items = (revenueData as any[]) || []
+  const teamItems = (teamData as any[]) || []
+  
+  const totalRevenueCents = items.reduce((acc, item) => acc + (item.total_revenue_cents || 0), 0)
+  const totalAppointments = items.reduce((acc, item) => acc + (item.total_appointments || 0), 0)
 
   return {
     kpis: {
-      totalRevenue: totalRevenue / 100,
-      totalRevenueChange: prevRevenue > 0 ? ((totalRevenue - prevRevenue) / prevRevenue) * 100 : 0,
-      averageTicket: (totalRevenue / uniqueComandas) / 100,
-      averageTicketChange: 0, // Placeholder
-      totalComandas: uniqueComandas,
+      totalRevenue: totalRevenueCents / 100,
+      totalRevenueChange: 0,
+      averageTicket: totalAppointments > 0 ? (totalRevenueCents / totalAppointments) / 100 : 0,
+      averageTicketChange: 0,
+      totalComandas: totalAppointments,
       totalComandasChange: 0,
       totalDiscounts: 0,
       totalDiscountsChange: 0,
     },
-    chartData: [], // Would need complex grouping by date
-    paymentMethods,
+    chartData: items.map(item => ({
+      date: new Date(item.month).toLocaleDateString('pt-BR', { month: 'short' }),
+      revenue: item.total_revenue_cents / 100
+    })),
+    paymentMethods: [
+      { method: 'Dinheiro', value: totalRevenueCents / 100, percentage: 100 }
+    ],
     topServices: [],
-    barberPerformance: []
+    barberPerformance: teamItems.map(b => ({
+      barberId: b.barber_id as string,
+      name: b.barber_name as string,
+      avatarUrl: null,
+      appointments: b.total_services as number,
+      revenue: (b.total_revenue_cents || 0) / 100,
+      averageTicket: (b.average_ticket_cents || 0) / 100,
+      percentage: totalRevenueCents > 0 ? ((b.total_revenue_cents || 0) / totalRevenueCents) * 100 : 0
+    }))
   }
 })
 
@@ -86,33 +84,38 @@ export const getAppointmentsReport = cache(async (startDate: string, endDate: st
   const user = await requireAdmin()
   const supabase = await createClient()
 
+  // 2. Busca via View de Dashboard Diário (já agregada por dia)
   const { data } = await supabase
-    .from('appointments')
+    .from('view_dashboard_daily' as any)
     .select('*')
     .eq('organization_id', user.organization_id)
-    .gte('start_time', startDate)
-    .lte('start_time', endDate)
+    .gte('target_date', startDate.split('T')[0])
+    .lte('target_date', endDate.split('T')[0])
 
-  const appointments = (data as any[]) || []
+  const days = (data as any[]) || []
   
+  const total = days.reduce((acc, d) => acc + d.total_appointments, 0)
+  const completed = days.reduce((acc, d) => acc + d.completed, 0)
+  const cancelled = days.reduce((acc, d) => acc + d.canceled, 0)
+  const noShow = days.reduce((acc, d) => acc + d.no_show, 0)
+
   return {
     kpis: {
-      total: appointments.length,
+      total,
       totalChange: 0,
-      completed: appointments.filter(a => a.status === 'completed').length,
+      completed,
       completedChange: 0,
-      cancelled: appointments.filter(a => a.status === 'cancelled').length,
+      cancelled,
       cancelledChange: 0,
-      noShow: appointments.filter(a => a.status === 'no_show').length,
+      noShow,
       noShowChange: 0,
-      completionRate: appointments.length > 0 ? (appointments.filter(a => a.status === 'completed').length / appointments.length) * 100 : 0,
+      completionRate: total > 0 ? (completed / total) * 100 : 0,
       completionRateChange: 0
     },
     statusDistribution: [
-      { status: 'Concluído', count: appointments.filter(a => a.status === 'completed').length, color: '#10b981' },
-      { status: 'Cancelado', count: appointments.filter(a => a.status === 'cancelled').length, color: '#ef4444' },
-      { status: 'No-show', count: appointments.filter(a => a.status === 'no_show').length, color: '#f59e0b' },
-      { status: 'Agendado', count: appointments.filter(a => a.status === 'scheduled').length, color: '#3b82f6' },
+      { status: 'Concluído', count: completed, color: '#10b981' },
+      { status: 'Cancelado', count: cancelled, color: '#ef4444' },
+      { status: 'No-show', count: noShow, color: '#f59e0b' }
     ],
     dayOfWeekDistribution: [],
     peakHours: [],
@@ -124,10 +127,12 @@ export const getClientsReport = cache(async (startDate: string, endDate: string)
   const user = await requireAdmin()
   const supabase = await createClient()
 
+  // 3. Busca via View de Ranking de Clientes
   const { data: clients } = await supabase
-    .from('clients')
+    .from('view_client_ranking' as any)
     .select('*')
     .eq('organization_id', user.organization_id)
+    .limit(10)
 
   return {
     kpis: {
@@ -143,7 +148,15 @@ export const getClientsReport = cache(async (startDate: string, endDate: string)
     newClientsChart: [],
     frequencyDistribution: [],
     birthdays: [],
-    topClients: []
+    topClients: (clients as any[] || []).map(c => ({
+      id: c.client_id as string,
+      name: c.full_name as string,
+      avatarUrl: null,
+      visits: c.total_visits as number,
+      totalSpent: (c.total_spent_cents || 0) / 100,
+      lastVisit: c.last_visit_at as string,
+      loyaltyPoints: 0
+    }))
   }
 })
 
@@ -151,21 +164,21 @@ export const getTeamReport = cache(async (startDate: string, endDate: string): P
   const user = await requireAdmin()
   const supabase = await createClient()
 
-  const { data: barbers } = await supabase
-    .from('profiles')
+  // 4. Busca via View de Produtividade
+  const { data: performance } = await supabase
+    .from('view_team_productivity' as any)
     .select('*')
     .eq('organization_id', user.organization_id)
-    .eq('role', 'barber')
 
   return {
-    barbers: ((barbers as any[]) || []).map(b => ({
-      id: b.id,
-      name: b.full_name,
-      avatarUrl: b.avatar_url,
-      appointments: 0,
-      revenue: 0,
-      rating: 4.8,
-      completionRate: 95,
+    barbers: ((performance as any[]) || []).map(b => ({
+      id: b.barber_id,
+      name: b.barber_name,
+      avatarUrl: null,
+      appointments: b.total_services,
+      revenue: b.total_revenue_cents / 100,
+      rating: 5.0,
+      completionRate: 100,
       cancellations: 0
     })),
     revenueComparison: [],
@@ -173,6 +186,7 @@ export const getTeamReport = cache(async (startDate: string, endDate: string): P
     serviceDistribution: []
   }
 })
+
 
 export const getLoyaltyReport = cache(async (startDate: string, endDate: string): Promise<LoyaltyReport> => {
   const user = await requireAdmin()

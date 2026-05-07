@@ -14,11 +14,14 @@ import 'server-only'
 import { cn } from '@/lib/utils/cn'
 import { EmptyState } from '@/components/shared/empty-state'
 
+import { RealtimeRefresher } from '@/components/shared/realtime-refresher'
+
 export async function ClientDashboard() {
   const data = await getClientDashboardData()
 
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto animate-in fade-in duration-500 pb-20">
+      <RealtimeRefresher organizationId="" />
       {/* Header Boas-vindas */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1">

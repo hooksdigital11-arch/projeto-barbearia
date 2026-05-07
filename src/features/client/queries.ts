@@ -1,42 +1,46 @@
 import 'server-only'
 import { cache } from 'react'
 import { requireUser } from '@/lib/auth/require-auth'
+import { createClient } from '@/lib/supabase/server'
 
 /**
- * Client Data Access Layer (Mock)
+ * Client Data Access Layer (Real)
  */
-
 export const getClientDashboardData = cache(async () => {
   const user = await requireUser()
+  const supabase = await createClient()
   
-  return {
+  const { data, error } = await (supabase as any)
+    .rpc('get_client_dashboard_data', {
+      p_user_id: user.id
+    })
+
+  if (error || !data) {
+    console.error('[GET_CLIENT_DASHBOARD_DATA] Error:', error)
+    return {
+      profile: {
+        name: user.full_name || 'Cliente',
+        avatar: user.avatar_url,
+        preferredBarber: '---',
+        loyaltyStamps: 0,
+        nextAppointment: null
+      },
+      upcomingAppointments: [] as any[],
+      history: [] as any[],
+      availableCoupons: [] as any[]
+    }
+  }
+
+  return data as {
     profile: {
-      name: user.full_name || 'Cliente',
-      avatar: user.avatar_url,
-      preferredBarber: 'Rafael',
-      loyaltyStamps: 7, // Mantendo o mock para stamps por enquanto
-      nextAppointment: {
-        date: '2026-05-05',
-        time: '14:00',
-        barber: 'Rafael',
-        service: 'Corte',
-        status: 'confirmed'
-      }
-    },
-    upcomingAppointments: [
-      { id: 'u1', date: '05/05', time: '14:00', barber: 'Rafael', service: 'Corte', status: 'confirmed' },
-      { id: 'u2', date: '12/05', time: '10:00', barber: 'Rafael', service: 'Barba', status: 'pending' }
-    ],
-    history: [
-      { id: 'h1', date: '28/04', service: 'Corte', barber: 'Rafael', price: 50, duration: '30min', rating: 5 },
-      { id: 'h2', date: '21/04', service: 'Barba', barber: 'Thiago', price: 40, duration: '45min', rating: 5 },
-      { id: 'h3', date: '14/04', service: 'Corte + Barba', barber: 'Rafael', price: 80, duration: '1h', rating: 5 },
-      { id: 'h4', date: '07/04', service: 'Corte', barber: 'Marcos', price: 50, duration: '30min', rating: 4 },
-      { id: 'h5', date: '31/03', service: 'Barba', barber: 'Rafael', price: 40, duration: '45min', rating: 5 }
-    ],
-    availableCoupons: [
-      { id: 'cp1', title: '10% OFF Próximo Corte', expiry: '30/05', code: 'NEXT10', discount: '10%' },
-      { id: 'cp2', title: 'Pomada Grátis (2+ serviços)', expiry: '15/05', code: 'POMADAFREE', discount: 'BRINDE' }
-    ]
+      name: string
+      avatar: string | null
+      preferredBarber: string
+      loyaltyStamps: number
+      nextAppointment: string | null
+    }
+    upcomingAppointments: any[]
+    history: any[]
+    availableCoupons: any[]
   }
 })

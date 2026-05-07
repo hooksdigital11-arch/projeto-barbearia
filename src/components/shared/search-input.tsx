@@ -8,10 +8,11 @@ interface SearchInputProps {
   onSearch: (value: string) => void
   placeholder?: string
   className?: string
+  initialValue?: string
 }
 
-export function SearchInput({ onSearch, placeholder, className }: SearchInputProps) {
-  const [value, setValue] = useState('')
+export function SearchInput({ onSearch, placeholder, className, initialValue = '' }: SearchInputProps) {
+  const [value, setValue] = useState(initialValue)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -31,7 +32,7 @@ export function SearchInput({ onSearch, placeholder, className }: SearchInputPro
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder || "Buscar..."}
-        className="w-full pl-12 pr-10 py-3 bg-white/5 border border-white/10 rounded-2xl text-sm text-white placeholder:text-text-secondary focus:outline-none focus:border-accent-cyan/50 focus:bg-white/10 transition-all"
+        className="w-full pl-12 pr-10 py-3.5 bg-white/[0.06] border border-white/[0.12] rounded-2xl text-sm font-medium text-white placeholder:text-white/30 focus:outline-none focus:border-accent-cyan/60 focus:bg-white/[0.09] focus:shadow-[0_0_0_3px_rgba(0,229,255,0.08)] transition-all duration-200"
       />
       {value && (
         <button 

@@ -1,12 +1,37 @@
 'use client'
 
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { DownloadSimple } from '@phosphor-icons/react'
 import { SearchInput } from '@/components/shared/search-input'
 import { cn } from '@/lib/utils/cn'
 
 export function AdminControls() {
-  const [activePeriod, setActivePeriod] = useState('Mês')
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const activePeriod = searchParams.get('period') || 'month'
+
+  const handlePeriodChange = (period: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('period', period)
+    router.push(`?${params.toString()}`, { scroll: false })
+  }
+
+  const handleSearch = (query: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (query) {
+      params.set('q', query)
+    } else {
+      params.delete('q')
+    }
+    router.push(`?${params.toString()}`, { scroll: false })
+  }
+
+  const periods = [
+    { label: 'Hoje', value: 'today' },
+    { label: 'Semana', value: 'week' },
+    { label: 'Mês', value: 'month' },
+    { label: 'Custom', value: 'custom' },
+  ]
 
   return (
     <div className="space-y-8">
@@ -28,7 +53,8 @@ export function AdminControls() {
           <div className="relative group/search">
             <SearchInput 
               placeholder="Buscar barbeiro ou cliente..." 
-              onSearch={(v) => console.log('Searching admin:', v)}
+              onSearch={handleSearch}
+              initialValue={searchParams.get('q') || ''}
               className="w-full sm:w-80 glass-input"
             />
           </div>
@@ -46,18 +72,18 @@ export function AdminControls() {
       {/* Filtros de Período */}
       <div className="glass p-1.5 rounded-[1.5rem] w-fit border border-white/5 shadow-2xl">
         <div className="flex items-center gap-1">
-          {['Hoje', 'Semana', 'Mês', 'Custom'].map((period) => (
+          {periods.map((period) => (
             <button 
-              key={period}
-              onClick={() => setActivePeriod(period)}
+              key={period.value}
+              onClick={() => handlePeriodChange(period.value)}
               className={cn(
                 "px-6 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95",
-                activePeriod === period 
+                activePeriod === period.value
                   ? "bg-white text-black shadow-[0_8px_15px_rgba(255,255,255,0.15)] scale-100" 
                   : "text-text-secondary hover:text-white hover:bg-white/5"
               )}
             >
-              {period}
+              {period.label}
             </button>
           ))}
         </div>

@@ -1,3 +1,7 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   Clock, 
   CheckCircle, 
@@ -10,13 +14,23 @@ import {
   Coffee,
   SignOut
 } from '@phosphor-icons/react/dist/ssr'
-import { getBarberDashboardData } from '../queries'
 import { ServiceTimer } from './service-timer'
 import { QuickNotes } from './quick-notes'
 import { cn } from '@/lib/utils/cn'
+import { createClient } from '@/lib/supabase/client'
 
-export async function BarberDashboard() {
-  const data = await getBarberDashboardData()
+import { useDashboardRealtime } from '@/features/analytics/useDashboardRealtime'
+
+export function BarberDashboard({ initialData, organizationId }: { initialData: any, organizationId: string }) {
+  const router = useRouter()
+  const [data, setData] = useState(initialData)
+
+  // Sincronização Realtime Global
+  useDashboardRealtime(organizationId)
+
+  useEffect(() => {
+    setData(initialData)
+  }, [initialData])
 
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto animate-in fade-in duration-500">
@@ -66,65 +80,77 @@ export async function BarberDashboard() {
         {/* Coluna Central: Agenda e Cliente Atual */}
         <div className="lg:col-span-2 space-y-8">
           {/* Cliente Atual (Destaque) */}
-          <div className="p-8 rounded-3xl border border-accent-cyan/20 bg-accent-cyan/5 backdrop-blur-xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-              <User size={160} weight="duotone" className="text-accent-cyan" />
+          {data.currentClient ? (
+            <div className="p-8 rounded-3xl border border-accent-cyan/20 bg-accent-cyan/5 backdrop-blur-xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                <User size={160} weight="duotone" className="text-accent-cyan" />
+              </div>
+              
+              <div className="relative z-10 space-y-6">
+                <div className="flex items-center justify-between">
+                  <span className="px-3 py-1 bg-accent-cyan/20 text-accent-cyan text-[10px] font-bold rounded-full uppercase tracking-tighter">
+                    Atendimento Ativo
+                  </span>
+                  <ServiceTimer initialMinutes={Math.floor(data.currentClient.elapsedMinutes || 0)} targetMinutes={45} />
+                </div>
+
+                <div className="flex items-center gap-6">
+                  <div className="w-20 h-20 rounded-2xl bg-accent-cyan/20 flex items-center justify-center text-3xl font-bold text-accent-cyan">
+                    {data.currentClient.name[0]}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-3xl font-bold text-white font-syne tracking-tight">{data.currentClient.name}</h3>
+                    <p className="text-text-secondary font-medium">{data.currentClient.todayService}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl hover:bg-emerald-500 hover:text-white transition-all">
+                        <Phone size={20} weight="duotone" />
+                    </button>
+                    <button className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all" title="No-show">
+                        <UserMinus size={20} weight="duotone" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-8 border-y border-white/5 py-8">
+                  <div>
+                    <p className="text-xs text-text-secondary uppercase font-bold tracking-widest">Frequência</p>
+                    <p className="text-xl font-bold text-white mt-1">{data.currentClient.visits} visitas</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-text-secondary uppercase font-bold tracking-widest">Avaliação</p>
+                    <p className="text-xl font-bold text-white mt-1">{data.currentClient.rating} ⭐</p>
+                  </div>
+                  <div className="col-span-2 md:col-span-1">
+                    <p className="text-xs text-text-secondary uppercase font-bold tracking-widest">Total Gasto</p>
+                    <p className="text-xl font-bold text-accent-cyan mt-1">R$ {data.currentClient.totalSpent}</p>
+                  </div>
+                </div>
+
+                {/* Notas Rápidas */}
+                <QuickNotes initialNote={data.currentClient.lastNote} />
+
+                <div className="flex flex-wrap gap-4 pt-4">
+                  <button className="flex-1 min-w-[150px] py-4 bg-accent-cyan text-black font-extrabold rounded-2xl hover:brightness-110 transition-all shadow-lg shadow-accent-cyan/20">
+                    Finalizar e Próximo
+                  </button>
+                  <button className="px-6 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 transition-all">
+                    Comanda Digital
+                  </button>
+                </div>
+              </div>
             </div>
-            
-            <div className="relative z-10 space-y-6">
-              <div className="flex items-center justify-between">
-                <span className="px-3 py-1 bg-accent-cyan/20 text-accent-cyan text-[10px] font-bold rounded-full uppercase tracking-tighter">
-                  Atendimento Ativo
-                </span>
-                <ServiceTimer initialMinutes={31} targetMinutes={45} />
+          ) : (
+            <div className="p-12 rounded-3xl border border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center text-center space-y-4">
+              <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center text-text-secondary">
+                <User size={40} weight="duotone" />
               </div>
-
-              <div className="flex items-center gap-6">
-                <div className="w-20 h-20 rounded-2xl bg-accent-cyan/20 flex items-center justify-center text-3xl font-bold text-accent-cyan">
-                  {data.currentClient.name[0]}
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-3xl font-bold text-white font-syne tracking-tight">{data.currentClient.name}</h3>
-                  <p className="text-text-secondary font-medium">{data.currentClient.todayService}</p>
-                </div>
-                <div className="flex gap-2">
-                   <button className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl hover:bg-emerald-500 hover:text-white transition-all">
-                      <Phone size={20} weight="duotone" />
-                   </button>
-                   <button className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all" title="No-show">
-                      <UserMinus size={20} weight="duotone" />
-                   </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-8 border-y border-white/5 py-8">
-                <div>
-                  <p className="text-xs text-text-secondary uppercase font-bold tracking-widest">Frequência</p>
-                  <p className="text-xl font-bold text-white mt-1">{data.currentClient.visits} visitas</p>
-                </div>
-                <div>
-                  <p className="text-xs text-text-secondary uppercase font-bold tracking-widest">Avaliação</p>
-                  <p className="text-xl font-bold text-white mt-1">{data.currentClient.rating} ⭐</p>
-                </div>
-                <div className="col-span-2 md:col-span-1">
-                  <p className="text-xs text-text-secondary uppercase font-bold tracking-widest">Total Gasto</p>
-                  <p className="text-xl font-bold text-accent-cyan mt-1">R$ {data.currentClient.totalSpent}</p>
-                </div>
-              </div>
-
-              {/* Notas Rápidas */}
-              <QuickNotes initialNote={data.currentClient.lastNote} />
-
-              <div className="flex flex-wrap gap-4 pt-4">
-                <button className="flex-1 min-w-[150px] py-4 bg-accent-cyan text-black font-extrabold rounded-2xl hover:brightness-110 transition-all shadow-lg shadow-accent-cyan/20">
-                  Finalizar e Próximo
-                </button>
-                <button className="px-6 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 transition-all">
-                  Comanda Digital
-                </button>
+              <div className="space-y-1">
+                <h3 className="text-xl font-bold text-white">Nenhum atendimento ativo</h3>
+                <p className="text-sm text-text-secondary">Chame o próximo cliente da fila ou agenda para começar.</p>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Timeline do Dia */}
           <div className="p-6 rounded-3xl border border-white/5 bg-card/10 backdrop-blur-xl">
@@ -133,7 +159,7 @@ export async function BarberDashboard() {
                <button className="text-xs font-bold text-text-secondary hover:text-white">Ver calendário completo</button>
             </div>
             <div className="space-y-4">
-              {data.appointments.map((apt) => (
+              {data.appointments.map((apt: any) => (
                 <div 
                   key={apt.id}
                   className={cn(
@@ -184,7 +210,7 @@ export async function BarberDashboard() {
             </div>
 
             <div className="space-y-4">
-              {data.waitingList.map((client, index) => (
+              {data.waitingList.map((client: any, index: number) => (
                 <div key={client.id} className="p-5 rounded-2xl bg-white/5 border border-white/5 group hover:border-accent-cyan/30 transition-all relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-1 h-full bg-white/5 group-hover:bg-accent-cyan/50 transition-colors" />
                   
