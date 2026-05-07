@@ -18,6 +18,7 @@ import {
 import { KPICard } from '@/components/shared/kpi-card'
 import type { RevenueReport } from '../types'
 import { CurrencyCircleDollar, Ticket, Receipt, Tag } from '@phosphor-icons/react/dist/ssr'
+import { ClientOnly } from '@/components/shared/client-only'
 
 interface RevenueSectionProps {
   data: RevenueReport
@@ -71,47 +72,49 @@ export function RevenueSection({ data }: RevenueSectionProps) {
         <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
           <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Receita por Dia</h3>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                <XAxis 
-                  dataKey="date" 
-                  stroke="#a0a0a0" 
-                  fontSize={10} 
-                  tickLine={false} 
-                  axisLine={false} 
-                />
-                <YAxis 
-                  stroke="#a0a0a0" 
-                  fontSize={10} 
-                  tickLine={false} 
-                  axisLine={false} 
-                  tickFormatter={(val) => `R$ ${val}`}
-                />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                  itemStyle={{ color: '#00e5ff', fontSize: '12px' }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="#00e5ff" 
-                  strokeWidth={3} 
-                  dot={false}
-                  activeDot={{ r: 6, stroke: '#00e5ff', strokeWidth: 2, fill: '#0a0a0a' }}
-                />
-                {chartData[0]?.previousRevenue !== undefined && (
+            <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="#a0a0a0" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false} 
+                  />
+                  <YAxis 
+                    stroke="#a0a0a0" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tickFormatter={(val) => `R$ ${val}`}
+                  />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                    itemStyle={{ color: '#00e5ff', fontSize: '12px' }}
+                  />
                   <Line 
                     type="monotone" 
-                    dataKey="previousRevenue" 
-                    stroke="#a0a0a0" 
-                    strokeDasharray="5 5" 
-                    strokeWidth={2} 
-                    dot={false} 
+                    dataKey="revenue" 
+                    stroke="#00e5ff" 
+                    strokeWidth={3} 
+                    dot={false}
+                    activeDot={{ r: 6, stroke: '#00e5ff', strokeWidth: 2, fill: '#0a0a0a' }}
                   />
-                )}
-              </LineChart>
-            </ResponsiveContainer>
+                  {chartData[0]?.previousRevenue !== undefined && (
+                    <Line 
+                      type="monotone" 
+                      dataKey="previousRevenue" 
+                      stroke="#a0a0a0" 
+                      strokeDasharray="5 5" 
+                      strokeWidth={2} 
+                      dot={false} 
+                    />
+                  )}
+                </LineChart>
+              </ResponsiveContainer>
+            </ClientOnly>
           </div>
         </div>
 
@@ -119,32 +122,34 @@ export function RevenueSection({ data }: RevenueSectionProps) {
         <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
           <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Formas de Pagamento</h3>
           <div className="h-[300px] flex items-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={paymentMethods}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                  nameKey="method"
-                >
-                  {paymentMethods.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={PAYMENT_COLORS[index % PAYMENT_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend 
-                  verticalAlign="bottom" 
-                  align="center"
-                  formatter={(value, entry: any) => (
-                    <span className="text-xs text-text-secondary">{value} ({entry.payload.percentage.toFixed(1)}%)</span>
-                  )}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-full animate-pulse mx-auto aspect-square max-w-[200px]" />}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={paymentMethods}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                    nameKey="method"
+                  >
+                    {paymentMethods.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={PAYMENT_COLORS[index % PAYMENT_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    align="center"
+                    formatter={(value, entry: any) => (
+                      <span className="text-xs text-text-secondary">{value} ({entry.payload.percentage.toFixed(1)}%)</span>
+                    )}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </ClientOnly>
           </div>
         </div>
       </div>
@@ -154,17 +159,19 @@ export function RevenueSection({ data }: RevenueSectionProps) {
         <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
           <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Top 5 Serviços</h3>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topServices} layout="vertical" margin={{ left: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
-                <XAxis type="number" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis dataKey="name" type="category" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} width={80} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                />
-                <Bar dataKey="quantity" fill="#00e5ff" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topServices} layout="vertical" margin={{ left: 40 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
+                  <XAxis type="number" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
+                  <YAxis dataKey="name" type="category" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} width={80} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                  />
+                  <Bar dataKey="quantity" fill="#00e5ff" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </ClientOnly>
           </div>
         </div>
 

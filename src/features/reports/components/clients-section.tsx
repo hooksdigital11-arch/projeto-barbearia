@@ -9,11 +9,18 @@ import {
   Tooltip, 
   ResponsiveContainer,
   BarChart,
-  Bar
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
 } from 'recharts'
 import { KPICard } from '@/components/shared/kpi-card'
 import type { ClientReport } from '../types'
-import { Users, UserPlus, ArrowsClockwise, Heart } from '@phosphor-icons/react/dist/ssr'
+import { Users, UserPlus, ArrowsClockwise, HeartStraight } from '@phosphor-icons/react/dist/ssr'
+import { ClientOnly } from '@/components/shared/client-only'
+
+const FREQ_COLORS = ['#10b981', '#06b6d4', '#6366f1', '#a855f7']
 
 interface ClientsSectionProps {
   data: ClientReport
@@ -51,7 +58,7 @@ export function ClientsSection({ data }: ClientsSectionProps) {
         <KPICard
           title="Taxa de Retenção"
           value={`${kpis.retentionRate.toFixed(1)}%`}
-          icon={<Heart size={24} weight="duotone" />}
+          icon={<HeartStraight size={24} weight="duotone" />}
           trend={kpis.retentionRateChange}
         />
       </div>
@@ -61,41 +68,65 @@ export function ClientsSection({ data }: ClientsSectionProps) {
         <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
           <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Novos Clientes</h3>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={newClientsChart}>
-                <defs>
-                  <linearGradient id="colorNew" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#00e5ff" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#00e5ff" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                <XAxis dataKey="date" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                />
-                <Area type="monotone" dataKey="count" stroke="#00e5ff" fillOpacity={1} fill="url(#colorNew)" strokeWidth={3} />
-              </AreaChart>
-            </ResponsiveContainer>
+            <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={newClientsChart} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorClients" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                  <XAxis dataKey="date" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="count" 
+                    stroke="#10b981" 
+                    fillOpacity={1} 
+                    fill="url(#colorClients)" 
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ClientOnly>
           </div>
         </div>
 
         {/* Frequência */}
         <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
-          <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Fidelização</h3>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={frequencyDistribution}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                <XAxis dataKey="range" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                />
-                <Bar dataKey="count" fill="#00e5ff" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Frequência de Visitas</h3>
+          <div className="h-[300px] flex items-center">
+            <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-full animate-pulse mx-auto aspect-square max-w-[200px]" />}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={frequencyDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                    nameKey="category"
+                  >
+                    {frequencyDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={FREQ_COLORS[index % FREQ_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    align="center"
+                    formatter={(value) => <span className="text-xs text-text-secondary">{value}</span>}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </ClientOnly>
           </div>
         </div>
       </div>
@@ -135,7 +166,7 @@ export function ClientsSection({ data }: ClientsSectionProps) {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent-cyan/10 text-accent-cyan text-xs font-bold">
-                      <Heart size={12} weight="duotone" />
+                      <HeartStraight size={12} weight="duotone" />
                       {client.loyaltyPoints} carimbos
                     </div>
                   </td>

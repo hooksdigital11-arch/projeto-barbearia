@@ -102,138 +102,160 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold font-syne text-white">Serviços Oferecidos</h2>
-          <p className="text-muted-foreground">Gerencie o cardápio de serviços da sua barbearia</p>
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-8 bg-accent-cyan rounded-full shadow-[0_0_15px_rgba(0,229,255,0.5)]" />
+            <h2 className="text-3xl font-bold font-syne text-white tracking-tight">Serviços Oferecidos</h2>
+          </div>
+          <p className="text-text-secondary text-lg">Gerencie o cardápio de serviços com experiência premium</p>
         </div>
-        <Button onClick={handleNew} className="bg-accent-cyan hover:bg-cyan-400 text-black font-bold gap-2 rounded-2xl px-6">
-          <Plus size={18} weight="bold" />
+        <Button onClick={handleNew} variant="cyan" size="lg" className="gap-3 shadow-cyan-500/20 group">
+          <Plus size={20} weight="bold" className="group-hover:rotate-90 transition-transform duration-300" />
           Novo Serviço
         </Button>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-[2rem] overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-white/5 border-b border-white/5">
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Serviço</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Duração</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Preço</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {services.map((service) => (
-              <tr key={service.id} className="hover:bg-white/[0.02] transition-colors group">
-                <td className="px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-accent-cyan/10 flex items-center justify-center text-accent-cyan">
-                      <Scissors size={20} weight="duotone" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-white text-sm">{service.name}</p>
-                      <p className="text-xs text-muted-foreground">{service.description || 'Sem descrição'}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-5 text-sm text-muted-foreground">
-                  {service.duration_minutes} min
-                </td>
-                <td className="px-6 py-5">
-                  <span className="font-mono text-sm text-accent-cyan">{formatPrice(service.price_cents)}</span>
-                </td>
-                <td className="px-6 py-5">
-                  <div className="flex items-center gap-2">
-                    <div className={cn(
-                      "w-2 h-2 rounded-full transition-colors duration-300",
-                      service.is_active ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-red-500/50"
-                    )} />
-                    <span className="text-xs text-muted-foreground">
-                      {service.is_active ? 'Ativo' : 'Pausado'}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-5 text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <button 
-                      onClick={() => handleToggleActive(service)}
-                      className={cn(
-                        "p-2 transition-colors rounded-lg hover:bg-white/5",
-                        service.is_active ? "text-emerald-400 hover:text-emerald-300" : "text-muted-foreground hover:text-accent-cyan"
-                      )} 
-                      title={service.is_active ? "Pausar Serviço" : "Ativar Serviço"}
-                    >
-                      {service.is_active ? <Pause size={18} weight="fill" /> : <Play size={18} weight="fill" />}
-                    </button>
-                    <button onClick={() => handleDuplicate(service)} className="p-2 text-muted-foreground hover:text-white transition-colors rounded-lg hover:bg-white/5" title="Duplicar">
-                      <Copy size={18} />
-                    </button>
-                    <button onClick={() => handleEdit(service)} className="p-2 text-muted-foreground hover:text-white transition-colors rounded-lg hover:bg-white/5" title="Editar">
-                      <PencilSimple size={18} />
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(service.id)}
-                      className="p-2 text-muted-foreground hover:text-red-400 transition-colors rounded-lg hover:bg-white/5"
-                      title="Excluir"
-                    >
-                      <Trash size={18} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {services.length === 0 && (
-          <div className="p-20 text-center text-muted-foreground">
-            Nenhum serviço cadastrado.
+      <div className="relative group">
+        <div className="absolute -inset-1 bg-gradient-to-r from-accent-cyan/20 to-accent-blue/20 rounded-[2.5rem] blur-xl opacity-0 group-hover:opacity-100 transition duration-1000"></div>
+        <div className="relative glass-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-white/5 bg-white/[0.01]">
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-text-secondary">Serviço</th>
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-text-secondary">Duração</th>
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-text-secondary">Preço</th>
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-text-secondary">Status</th>
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-text-secondary text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {services.map((service) => (
+                  <tr key={service.id} className="hover:bg-white/[0.03] transition-all duration-300 group/row">
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-accent-cyan shadow-inner group-hover/row:scale-110 transition-transform duration-500">
+                          <Scissors size={24} weight="duotone" />
+                        </div>
+                        <div className="flex flex-col">
+                          <p className="font-bold text-white text-base group-hover/row:text-accent-cyan transition-colors">{service.name}</p>
+                          <p className="text-xs text-text-secondary line-clamp-1 opacity-70">{service.description || 'Sem descrição'}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="text-sm font-medium text-text-secondary bg-white/5 px-3 py-1 rounded-full border border-white/5">
+                        {service.duration_minutes} min
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="font-mono text-base font-bold text-white tracking-tight">
+                        {formatPrice(service.price_cents)}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-2.5">
+                        <div className={cn(
+                          "w-2 h-2 rounded-full transition-all duration-500",
+                          service.is_active ? "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]" : "bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.5)]"
+                        )} />
+                        <span className={cn(
+                          "text-xs font-bold uppercase tracking-wider",
+                          service.is_active ? "text-emerald-400" : "text-red-400 opacity-70"
+                        )}>
+                          {service.is_active ? 'Ativo' : 'Pausado'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => handleToggleActive(service)}
+                          className={cn(
+                            "p-2.5 transition-all rounded-xl border border-transparent active:scale-90",
+                            service.is_active ? "text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/20" : "text-text-secondary hover:bg-accent-cyan/10 hover:text-accent-cyan hover:border-accent-cyan/20"
+                          )} 
+                          title={service.is_active ? "Pausar Serviço" : "Ativar Serviço"}
+                        >
+                          {service.is_active ? <Pause size={20} weight="fill" /> : <Play size={20} weight="fill" />}
+                        </button>
+                        <button onClick={() => handleDuplicate(service)} className="p-2.5 text-text-secondary hover:text-white transition-all rounded-xl hover:bg-white/5 hover:border-white/10 active:scale-90" title="Duplicar">
+                          <Copy size={20} />
+                        </button>
+                        <button onClick={() => handleEdit(service)} className="p-2.5 text-text-secondary hover:text-white transition-all rounded-xl hover:bg-white/5 hover:border-white/10 active:scale-90" title="Editar">
+                          <PencilSimple size={20} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(service.id)}
+                          className="p-2.5 text-text-secondary hover:text-red-400 transition-all rounded-xl hover:bg-red-500/10 hover:border-red-500/20 active:scale-90"
+                          title="Excluir"
+                        >
+                          <Trash size={20} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+          {services.length === 0 && (
+            <div className="p-32 text-center flex flex-col items-center gap-4">
+              <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center text-text-secondary opacity-20">
+                <Scissors size={40} weight="thin" />
+              </div>
+              <p className="text-text-secondary text-lg font-medium">Nenhum serviço cadastrado.</p>
+              <Button onClick={handleNew} variant="outline" size="sm">Começar agora</Button>
+            </div>
+          )}
+        </div>
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-[#141414] border border-white/10 rounded-3xl p-6 w-full max-w-lg shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold font-syne text-white">
-                {editingService?.id ? 'Editar Serviço' : 'Novo Serviço'}
-              </h3>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+          <div className="glass-card p-10 w-full max-w-xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] border-white/20 animate-in zoom-in-95 duration-500 ease-out">
+            <div className="flex items-center justify-between mb-8">
+              <div className="space-y-1">
+                <h3 className="text-2xl font-bold font-syne text-white tracking-tight">
+                  {editingService?.id ? 'Editar Serviço' : 'Novo Serviço'}
+                </h3>
+                <p className="text-text-secondary text-sm">Preencha os detalhes do serviço abaixo</p>
+              </div>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 text-muted-foreground hover:text-white transition-colors rounded-lg hover:bg-white/5"
+                className="p-3 text-text-secondary hover:text-white transition-all rounded-2xl hover:bg-white/5 active:scale-90"
               >
-                <X size={20} />
+                <X size={24} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white">Nome do Serviço</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-accent-cyan ml-1">Nome do Serviço</label>
                 <input 
                   name="name" 
                   required 
                   defaultValue={editingService?.name || ''} 
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
+                  className="glass-input w-full text-lg font-medium"
                   placeholder="Ex: Corte Degrade"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white">Descrição</label>
-                <input 
+                <label className="text-xs font-bold uppercase tracking-widest text-text-secondary ml-1">Descrição</label>
+                <textarea 
                   name="description" 
                   defaultValue={editingService?.description || ''} 
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
-                  placeholder="Ex: Corte moderno com fade na navalha"
+                  className="glass-input w-full min-h-[100px] resize-none"
+                  placeholder="Descreva os diferenciais deste serviço..."
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-white">Duração (min)</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-text-secondary ml-1">Duração (min)</label>
                   <input 
                     name="duration" 
                     type="number" 
@@ -241,11 +263,11 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                     step="15" 
                     required 
                     defaultValue={editingService?.duration_minutes || 30} 
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
+                    className="glass-input w-full text-center font-mono text-xl"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-white">Preço (R$)</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-text-secondary ml-1">Preço (R$)</label>
                   <input 
                     name="price" 
                     type="number" 
@@ -253,18 +275,18 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                     step="0.01" 
                     required 
                     defaultValue={editingService?.price_cents ? editingService.price_cents / 100 : ''} 
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
+                    className="glass-input w-full text-center font-mono text-xl text-accent-cyan"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white">Categoria</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-text-secondary ml-1">Categoria</label>
                 <select 
                   name="category" 
                   required 
                   defaultValue={editingService?.category || 'corte'} 
-                  className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 appearance-none"
+                  className="glass-input w-full appearance-none cursor-pointer"
                 >
                   <option value="corte">Corte</option>
                   <option value="barba">Barba</option>
@@ -273,22 +295,25 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                 </select>
               </div>
 
-              <div className="pt-4 flex gap-3">
+              <div className="pt-6 flex gap-4">
                 <Button 
                   type="button" 
                   onClick={() => setIsModalOpen(false)} 
                   variant="ghost" 
-                  className="flex-1 rounded-xl text-white hover:bg-white/5"
+                  size="lg"
+                  className="flex-1"
                   disabled={isPending}
                 >
                   Cancelar
                 </Button>
                 <Button 
                   type="submit" 
-                  className="flex-1 bg-accent-cyan hover:bg-cyan-400 text-black font-bold rounded-xl"
+                  variant="cyan"
+                  size="lg"
+                  className="flex-[1.5]"
                   disabled={isPending}
                 >
-                  {isPending ? <CircleNotch size={20} className="animate-spin" /> : 'Salvar Serviço'}
+                  {isPending ? <CircleNotch size={24} className="animate-spin" /> : 'Salvar Serviço'}
                 </Button>
               </div>
             </form>

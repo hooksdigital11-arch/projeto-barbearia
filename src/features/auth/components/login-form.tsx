@@ -96,212 +96,148 @@ export function LoginForm() {
   return (
     <Form {...form}>
       <form
-
         onSubmit={form.handleSubmit(onSubmit)}
-
-        className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
+        className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
 
         {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold font-syne text-white tracking-tight">
-
-            Entrar na Barbearia
+        <div className="space-y-3">
+          <h1 className="text-5xl font-black font-syne text-white tracking-tighter leading-none">
+            Bem-vindo <span className="text-accent-cyan">de volta</span>
           </h1>
-          <p className="text-sm text-muted-foreground">
-
-            Gerencie sua agenda e clientes com facilidade
+          <p className="text-text-secondary text-lg font-medium leading-relaxed">
+            Acesse sua conta para gerenciar sua barbearia com excelência.
           </p>
         </div>
 
-        {/* Email Field */}
-        <FormField
+        <div className="space-y-6">
+          {/* Email Field */}
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-accent-cyan ml-1">Email Profissional</FormLabel>
+                <FormControl>
+                  <div className="relative group">
+                    <Input
+                      {...field}
+                      type="email"
+                      placeholder="exemplo@barberpro.com"
+                      disabled={isPending}
+                      className="glass-input pl-14 h-14 text-base"
+                    />
+                    <div className="absolute left-0 top-0 h-full w-14 flex items-center justify-center text-text-secondary group-focus-within:text-accent-cyan transition-colors">
+                      <EnvelopeSimple size={24} weight="bold" />
+                    </div>
+                  </div>
+                </FormControl>
+                <FormMessage className="text-red-400 font-bold text-xs" />
+              </FormItem>
+            )}
+          />
 
-          control={form.control}
-
-          name="email"
-
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-white text-sm font-medium">Email</FormLabel>
-              <FormControl>
-                <div className="relative group">
-                  <Input
-
-                    {...field}
-
-                    type="email"
-
-                    placeholder="seu@email.com"
-
-                    disabled={isPending}
-
-                    className="pl-11 bg-card/50 border-cyan-500/20 text-white placeholder:text-muted-foreground/40 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 group-hover:border-cyan-500/40"
-
-                  />
-                  <EnvelopeSimple
-
-                    size={22}
-
-                    weight="duotone"
-
-                    className="absolute left-3 top-2.5 text-muted-foreground group-focus-within:text-cyan-500 transition-colors duration-300"
-
-                  />
-                </div>
-              </FormControl>
-              <FormMessage className="text-red-400" />
-            </FormItem>
-
-          )}
-
-        />
-
-        {/* Password Field */}
-        <FormField
-
-          control={form.control}
-
-          name="password"
-
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-white text-sm font-medium">Senha</FormLabel>
-              <FormControl>
-                <div className="relative group">
-                  <Input
-
-                    {...field}
-
-                    type={showPassword ? 'text' : 'password'}
-
-                    placeholder="••••••••"
-
-                    disabled={isPending}
-
-                    className="pl-11 pr-12 bg-card/50 border-cyan-500/20 text-white placeholder:text-muted-foreground/40 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 group-hover:border-cyan-500/40"
-
-                  />
-                  <LockSimple
-
-                    size={22}
-
-                    weight="duotone"
-
-                    className="absolute left-3 top-2.5 text-muted-foreground group-focus-within:text-cyan-500 transition-colors duration-300"
-
-                  />
-                  <button
-
-                    type="button"
-
-                    onClick={() => setShowPassword(!showPassword)}
-
-                    className="absolute right-3 top-2.5 text-muted-foreground hover:text-cyan-400 transition-colors p-0.5"
-
-                    disabled={isPending}
-                  >
-
-                    {showPassword ? (
-                      <EyeSlash size={22} weight="duotone" />
-
-                    ) : (
-                      <Eye size={22} weight="duotone" />
-
-                    )}
-                  </button>
-                </div>
-              </FormControl>
-              <FormMessage className="text-red-400" />
-            </FormItem>
-
-          )}
-
-        />
+          {/* Password Field */}
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary ml-1">Senha de Acesso</FormLabel>
+                <FormControl>
+                  <div className="relative group">
+                    <Input
+                      {...field}
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      disabled={isPending}
+                      className="glass-input pl-14 pr-14 h-14 text-base"
+                    />
+                    <div className="absolute left-0 top-0 h-full w-14 flex items-center justify-center text-text-secondary group-focus-within:text-accent-cyan transition-colors">
+                      <LockSimple size={24} weight="bold" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-0 top-0 h-full w-14 flex items-center justify-center text-text-secondary hover:text-white transition-colors p-0.5"
+                      disabled={isPending}
+                    >
+                      {showPassword ? (
+                        <EyeSlash size={24} weight="bold" />
+                      ) : (
+                        <Eye size={24} weight="bold" />
+                      )}
+                    </button>
+                  </div>
+                </FormControl>
+                <FormMessage className="text-red-400 font-bold text-xs" />
+              </FormItem>
+            )}
+          />
+        </div>
 
         {/* Links Secundários */}
         <div className="flex items-center justify-between">
           <FormField
-
             control={form.control}
-
             name="rememberMe"
-
             render={({ field }) => (
-              <FormItem className="flex items-center space-x-2 space-y-0">
+              <FormItem className="flex items-center space-x-3 space-y-0">
                 <FormControl>
                   <Checkbox
-
                     checked={field.value}
-
                     onCheckedChange={field.onChange}
-
                     disabled={isPending}
-
-                    className="border-cyan-500/50 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
-
+                    className="w-5 h-5 border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan rounded-lg"
                   />
                 </FormControl>
-                <FormLabel className="text-xs text-muted-foreground cursor-pointer hover:text-white transition-colors">
-
-                  Lembrar-me
+                <FormLabel className="text-sm font-bold text-text-secondary cursor-pointer hover:text-white transition-colors uppercase tracking-widest text-[10px]">
+                  Lembrar acesso
                 </FormLabel>
               </FormItem>
-
             )}
-
           />
           <Link
-
             href="/recovery"
-
-            className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
+            className="text-[10px] font-black uppercase tracking-widest text-accent-cyan hover:text-cyan-300 transition-colors"
           >
-
             Esqueceu a senha?
           </Link>
         </div>
 
         {/* Submit Button */}
-        <Button
-
-          type="submit"
-
-          disabled={isPending}
-
-          className="w-full h-12 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-black font-bold text-base transition-all duration-300 active:scale-[0.98] disabled:opacity-50 shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:shadow-[0_0_25px_rgba(0,229,255,0.5)]"
-        >
-
-          {isPending ? (
-            <div className="flex items-center justify-center space-x-2">
-              <CircleNotch size={20} className="animate-spin" />
-              <span>Entrando...</span>
-            </div>
-
-          ) : (
-
-            'Entrar na Barbearia'
-
-          )}
-        </Button>
+        <div className="pt-4">
+          <Button
+            type="submit"
+            disabled={isPending}
+            variant="cyan"
+            size="lg"
+            className="w-full text-base tracking-[0.1em]"
+          >
+            {isPending ? (
+              <div className="flex items-center justify-center space-x-3">
+                <CircleNotch size={24} className="animate-spin" />
+                <span className="uppercase font-black">Validando...</span>
+              </div>
+            ) : (
+              <span className="uppercase font-black">Acessar Painel</span>
+            )}
+          </Button>
+        </div>
 
         {/* Cadastro Link */}
-        <p className="text-center text-sm text-muted-foreground">
-
-          Não tem conta?{' '}
-          <Link
-
-            href="/signup"
-
-            className="text-cyan-400 hover:text-cyan-300 font-bold underline-offset-4 hover:underline transition-all"
-          >
-
-            Crie agora
-          </Link>
-        </p>
+        <div className="text-center">
+          <p className="text-sm text-text-secondary font-medium">
+            Ainda não faz parte da elite?{' '}
+            <Link
+              href="/signup"
+              className="text-accent-cyan hover:text-cyan-300 font-black transition-all"
+            >
+              Crie sua conta agora
+            </Link>
+          </p>
+        </div>
       </form>
     </Form>
-
   )
-
 }

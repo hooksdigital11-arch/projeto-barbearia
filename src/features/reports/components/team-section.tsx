@@ -15,7 +15,10 @@ import {
 } from 'recharts'
 import type { TeamReport } from '../types'
 import { Star, Medal, Crown } from '@phosphor-icons/react/dist/ssr'
+import { ClientOnly } from '@/components/shared/client-only'
 import { cn } from '@/lib/utils/cn'
+
+const TEAM_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899']
 
 interface TeamSectionProps {
   data: TeamReport
@@ -82,49 +85,49 @@ export function TeamSection({ data }: TeamSectionProps) {
         <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
           <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Comparativo de Receita</h3>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={revenueComparison}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                <XAxis dataKey="name" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                />
-                <Bar dataKey="revenue" radius={[4, 4, 0, 0]}>
-                  {revenueComparison.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={revenueComparison} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                  <XAxis dataKey="name" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `R$${v}`} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                    cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                  />
+                  <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </ClientOnly>
           </div>
         </div>
 
         {/* Weekly Evolution */}
         <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
-          <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Evolução Semanal</h3>
+          <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Evolução de Atendimentos</h3>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={weeklyEvolution}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                <XAxis dataKey="date" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                <Tooltip 
-                   contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                />
-                <Legend verticalAlign="top" align="right" iconType="circle" />
-                {barbers.map((barber, index) => (
-                  <Line 
-                    key={barber.id}
-                    type="monotone" 
-                    dataKey={barber.name} 
-                    stroke={index === 0 ? '#3b82f6' : index === 1 ? '#f59e0b' : '#10b981'}
-                    strokeWidth={2}
-                    dot={false}
+            <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={weeklyEvolution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                  <XAxis dataKey="week" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
                   />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
+                  {barbers.map((b, i) => (
+                    <Line 
+                      key={b.id}
+                      type="monotone" 
+                      dataKey={b.name} 
+                      stroke={TEAM_COLORS[i % TEAM_COLORS.length]} 
+                      strokeWidth={2} 
+                      dot={false}
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </ClientOnly>
           </div>
         </div>
       </div>

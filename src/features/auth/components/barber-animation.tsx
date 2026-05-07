@@ -1,163 +1,182 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Scissors } from '@phosphor-icons/react'
+import { Scissors } from '@phosphor-icons/react/dist/ssr'
 
 /**
  * BarberCharacter Component
- * Renders a modern, professional, and minimalist 2D SVG Barber.
- * Features realistic proportions and subtle animations.
+ * Renders a modern, professional Flat Design 2.0 Barber avatar.
  */
 function BarberCharacter({ isSpying }: { isSpying: boolean }) {
   return (
     <div 
-      className="relative flex flex-col items-center transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1)"
+      className="relative flex flex-col items-center pointer-events-none"
       style={{
         transform: isSpying 
-          ? 'translateX(25px) rotateZ(-14deg) scale(1.02)' 
-          : 'translateX(0) rotateZ(0deg) scale(1)',
+          ? 'translateX(15px) rotateZ(-12deg)' 
+          : 'translateX(0) rotateZ(0deg)',
+        transition: 'transform 450ms cubic-bezier(0.4, 0, 0.2, 1)',
+        filter: 'drop-shadow(0 20px 40px rgba(0,229,255,0.15))'
       }}
     >
       <svg
-        width="240"
+        width="280"
         height="320"
-        viewBox="0 0 240 320"
+        viewBox="0 0 280 320"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="drop-shadow-[0_20px_40px_rgba(0,229,255,0.15)]"
+        className="overflow-visible"
       >
         <defs>
-          <linearGradient id="skinGradient" x1="120" y1="40" x2="120" y2="140" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#F3D5B5" />
-            <stop offset="100%" stopColor="#E8C4A0" />
+          <linearGradient id="skinGrad" x1="140" y1="40" x2="140" y2="150" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#f3d5b5" />
+            <stop offset="100%" stopColor="#e8c4a0" />
           </linearGradient>
-          <filter id="subtleGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          <linearGradient id="apronGrad" x1="140" y1="160" x2="140" y2="320" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#00e5ff" />
+            <stop offset="100%" stopColor="#00b8cc" />
+          </linearGradient>
+          <linearGradient id="shirtGrad" x1="140" y1="150" x2="140" y2="320" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="100%" stopColor="#e5e7eb" />
+          </linearGradient>
+          <filter id="subtleShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#000000" floodOpacity="0.1" />
           </filter>
         </defs>
 
-        {/* Corpo / Camisa Polo de Barbeiro */}
-        <path
-          d="M60 300C60 220 70 160 120 160C170 160 180 220 180 300"
-          fill="#ffffff"
-          className="transition-all duration-500"
-        />
-        <path
-          d="M60 300L180 300L170 200C170 180 150 160 120 160C90 160 70 180 70 200L60 300Z"
-          fill="#ffffff"
-        />
-        {/* Detalhe Ciano no Uniforme (Avental/Listra) */}
-        <rect x="95" y="180" width="50" height="120" rx="4" fill="#00e5ff" opacity="0.9" />
-        <path d="M100 160L120 185L140 160" stroke="#f0f0f0" strokeWidth="2" />
-
-        {/* Braços */}
-        <g className="arms transition-all duration-700">
-          {/* Braço Esquerdo */}
-          <path
-            d={isSpying ? "M60 210C40 180 35 150 45 120" : "M65 210C50 230 50 260 60 290"}
-            stroke="#E8C4A0"
-            strokeWidth="14"
-            strokeLinecap="round"
+        {/* --- CORPO / UNIFORME --- */}
+        <g className="body">
+          {/* Camisa Branca */}
+          <path 
+            d="M90 170 Q140 145 190 170 Q240 185 230 320 L50 320 Q40 185 90 170 Z" 
+            fill="url(#shirtGrad)" 
+            filter="url(#subtleShadow)"
           />
-          {/* Braço Direito */}
-          <path
-            d={isSpying ? "M180 210C200 230 210 260 200 290" : "M175 210C190 230 190 260 180 290"}
-            stroke="#E8C4A0"
-            strokeWidth="14"
-            strokeLinecap="round"
+          {/* Gola V sutil */}
+          <path d="M125 160 L140 190 L155 160 Z" fill="#f3d5b5" />
+          
+          {/* Braço Direito (Escondido atrás na animação) */}
+          <path 
+            d={isSpying ? "M210 180 Q250 160 230 110" : "M210 180 Q240 220 220 300"} 
+            stroke="url(#shirtGrad)" 
+            strokeWidth="28" 
+            strokeLinecap="round" 
+            fill="none"
+            style={{ transition: 'd 450ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+          />
+          {/* Mão Direita aparecendo quando espia */}
+          <circle 
+            cx={isSpying ? "228" : "220"} 
+            cy={isSpying ? "105" : "305"} 
+            r="12" 
+            fill="#e8c4a0" 
+            style={{ transition: 'all 450ms cubic-bezier(0.4, 0, 0.2, 1)', opacity: isSpying ? 1 : 0 }}
+          />
+
+          {/* Avental Ciano */}
+          <path 
+            d="M105 170 L175 170 Q185 240 195 320 L85 320 Q95 240 105 170 Z" 
+            fill="url(#apronGrad)" 
+            filter="url(#subtleShadow)"
+          />
+          {/* Alça do Avental */}
+          <path d="M105 170 L120 150 M175 170 L160 150" stroke="#00b8cc" strokeWidth="4" />
+          
+          {/* Bolso do Avental */}
+          <rect x="125" y="220" width="30" height="35" rx="4" fill="#000000" fillOpacity="0.05" />
+          
+          {/* Braço Esquerdo (Relaxado) */}
+          <path 
+            d="M70 180 Q40 220 60 300" 
+            stroke="url(#shirtGrad)" 
+            strokeWidth="28" 
+            strokeLinecap="round" 
+            fill="none"
           />
         </g>
 
-        {/* Cabeça */}
-        <ellipse cx="120" cy="100" rx="50" ry="60" fill="url(#skinGradient)" />
-        
-        {/* Sombra da Mandíbula (Barba por fazer sutil) */}
-        <path
-          d="M75 120C75 145 95 155 120 155C145 155 165 145 165 120"
-          fill="#000000"
-          opacity="0.05"
-        />
+        {/* --- CABEÇA --- */}
+        <g className="head">
+          {/* Pescoço */}
+          <rect x="125" y="140" width="30" height="30" rx="10" fill="#d1ae8a" />
+          
+          {/* Rosto / Base */}
+          <ellipse cx="140" cy="100" rx="42" ry="52" fill="url(#skinGrad)" filter="url(#subtleShadow)" />
 
-        {/* Cabelo (Corte Fade Moderno) */}
-        <path
-          d="M70 100C70 60 90 30 120 30C150 30 170 60 170 100L175 105C175 105 180 80 170 60C160 30 120 20 80 50C70 60 65 90 70 100Z"
-          fill="#1a1a1a"
-        />
-        <path
-          d="M80 55C80 40 120 25 155 50C165 60 170 80 170 95"
-          stroke="#2d2d2d"
-          strokeWidth="4"
-          strokeLinecap="round"
-          opacity="0.5"
-        />
-
-        {/* Rosto */}
-        <g className="face-features transition-all duration-500">
-          {/* Sobrancelhas */}
+          {/* Sombra de Barba Fade (Estilo) */}
           <path 
-            d={isSpying ? "M90 75C95 72 105 72 110 75" : "M90 80C95 78 105 78 110 80"} 
-            stroke="#1a1a1a" 
-            strokeWidth="2" 
-            strokeLinecap="round"
-          />
-          <path 
-            d={isSpying ? "M130 75C135 72 145 72 150 75" : "M130 80C135 78 145 78 150 80"} 
-            stroke="#1a1a1a" 
-            strokeWidth="2" 
-            strokeLinecap="round"
+            d="M102 115 Q140 160 178 115 Q178 135 140 152 Q102 135 102 115 Z" 
+            fill="#0a0a0a" 
+            opacity="0.08" 
           />
 
-          {/* Olhos */}
-          <g className="eyes">
-            <circle 
-              cx={isSpying ? "105" : "100"} 
-              cy="95" 
-              r={isSpying ? "6" : "4.5"} 
-              fill="#1a1a1a" 
-              className="transition-all duration-500" 
+          {/* Cabelo Undercut Moderno */}
+          <path 
+            d="M98 90 Q98 40 140 35 Q180 35 182 90 Q170 45 140 45 Q110 45 98 90 Z" 
+            fill="#1a1a1a" 
+          />
+          {/* Topete Volume */}
+          <path 
+            d="M105 50 Q130 20 160 35 Q175 40 175 55 Q150 25 115 55 Z" 
+            fill="#2d2d2d" 
+          />
+
+          {/* Rosto Elementos */}
+          <g className="face" style={{ transform: isSpying ? 'translateX(4px)' : 'translateX(0)', transition: 'transform 450ms' }}>
+            
+            {/* Sobrancelhas bem definidas */}
+            <path 
+              d={isSpying ? "M115 70 Q122 65 130 72" : "M115 75 Q122 72 130 75"} 
+              stroke="#1a1a1a" strokeWidth="3.5" strokeLinecap="round" fill="none"
+              style={{ transition: 'd 450ms' }}
             />
-            <circle 
-              cx={isSpying ? "145" : "140"} 
-              cy="95" 
-              r={isSpying ? "7.5" : "4.5"} 
-              fill="#1a1a1a" 
-              className="transition-all duration-500" 
+            <path 
+              d={isSpying ? "M150 72 Q158 65 165 70" : "M150 75 Q158 72 165 75"} 
+              stroke="#1a1a1a" strokeWidth="3.5" strokeLinecap="round" fill="none"
+              style={{ transition: 'd 450ms' }}
+            />
+
+            {/* Olhos Container */}
+            <g className="eyes" style={{ transformOrigin: '140px 85px', transform: isSpying ? 'scale(1.2)' : 'scale(1)', transition: 'transform 450ms' }}>
+              {/* Esquerdo */}
+              <circle cx="122" cy="85" r="4" fill="#000000" />
+              {/* Direito */}
+              <circle cx="158" cy="85" r="4" fill="#000000" />
+              {/* Pupilas/Brilho olhando pro form */}
+              <circle cx={isSpying ? "124" : "123"} cy="84" r="1.5" fill="#ffffff" style={{ transition: 'cx 450ms' }} />
+              <circle cx={isSpying ? "160" : "159"} cy="84" r="1.5" fill="#ffffff" style={{ transition: 'cx 450ms' }} />
+            </g>
+
+            {/* Nariz minimalista */}
+            <path d="M138 95 L140 105 L143 103" stroke="#d1ae8a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+
+            {/* Boca (Sorriso sutil/elegante) */}
+            <path 
+              d={isSpying ? "M128 120 Q140 128 152 120" : "M132 122 Q140 126 148 122"} 
+              stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" fill="none"
+              style={{ transition: 'd 450ms' }}
             />
           </g>
-
-          {/* Nariz */}
-          <path d="M120 105L118 115L122 115Z" fill="#000000" opacity="0.1" />
-
-          {/* Boca */}
-          <path
-            d={isSpying ? "M110 135C110 135 120 145 135 135" : "M115 138C115 138 120 142 125 138"}
-            stroke="#1a1a1a"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            className="transition-all duration-500"
-          />
         </g>
       </svg>
 
-      {/* Tesoura Girando Lentamente */}
+      {/* Tesoura Girando Elegantemente */}
       <div 
-        className="absolute bottom-10 transition-all duration-700"
+        className="absolute transition-all duration-500"
         style={{
-          transform: isSpying ? 'translateY(-30px) scale(0.9)' : 'translateY(0) scale(1)',
-          opacity: isSpying ? 0.4 : 0.8
+          bottom: '80px',
+          right: isSpying ? '0px' : '45px',
+          transform: isSpying ? 'scale(1.15) rotate(15deg)' : 'scale(1) rotate(0deg)',
+          opacity: 0.9
         }}
       >
-        <div className="p-3 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
+        <div className="p-3 rounded-full bg-bg-secondary/40 backdrop-blur-md border border-white/5 shadow-xl text-accent-cyan">
           <Scissors
-            size={36}
+            size={32}
             weight="duotone"
-            className="text-cyan-400"
             style={{ 
-              animationName: 'spin',
-              animationDuration: '6s',
-              animationTimingFunction: 'linear',
-              animationIterationCount: 'infinite'
+              animation: 'spinSlow 8s linear infinite'
             }}
           />
         </div>
@@ -167,10 +186,13 @@ function BarberCharacter({ isSpying }: { isSpying: boolean }) {
         .eyes {
           animation: blink 4s infinite;
         }
-
         @keyframes blink {
-          0%, 96%, 100% { transform: scaleY(1); }
-          98% { transform: scaleY(0.1); }
+          0%, 43%, 47%, 100% { transform: scaleY(1); }
+          45% { transform: scaleY(0.1); }
+        }
+        @keyframes spinSlow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
       `}</style>
     </div>
@@ -179,7 +201,7 @@ function BarberCharacter({ isSpying }: { isSpying: boolean }) {
 
 /**
  * BarberAnimation Component
- * Refined version with a modern, minimalist 2.5D character.
+ * Wrapper that listens to mouse events and renders the 2.5D Barber Character.
  */
 export function BarberAnimation() {
   const [isSpying, setIsSpying] = useState(false)
@@ -187,71 +209,48 @@ export function BarberAnimation() {
 
   useEffect(() => {
     setIsMounted(true)
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (target.closest('.auth-card-container')) {
-        setIsSpying(true)
-      } else {
-        setIsSpying(false)
+    
+    const formContainer = document.querySelector('.form-container')
+    
+    if (formContainer) {
+      const handleMouseEnter = () => setIsSpying(true)
+      const handleMouseLeave = () => setIsSpying(false)
+      
+      formContainer.addEventListener('mouseenter', handleMouseEnter)
+      formContainer.addEventListener('mouseleave', handleMouseLeave)
+      
+      return () => {
+        formContainer.removeEventListener('mouseenter', handleMouseEnter)
+        formContainer.removeEventListener('mouseleave', handleMouseLeave)
       }
     }
-
-    window.addEventListener('mouseover', handleMouseOver)
-    return () => {
-      window.removeEventListener('mouseover', handleMouseOver)
-    }
-  }, [])
+  }, [isMounted])
 
   return (
-    <div className="flex flex-col items-center justify-center h-full space-y-12 px-8 select-none pointer-events-none">
-      {/* Background Ambient Glow */}
+    <div className="flex flex-col items-center justify-center h-full space-y-10 px-8 select-none pointer-events-none relative w-full">
+      {/* Background Ambient Glow sutil */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[400px] h-[400px] bg-cyan-500/5 blur-[120px] rounded-full animate-pulse" />
+        <div className="w-[350px] h-[350px] bg-accent-cyan/5 blur-[100px] rounded-full" />
       </div>
       
-      {/* O Novo Personagem Barbeiro Moderno */}
+      {/* Avatar do Barbeiro 2.5D */}
       <BarberCharacter isSpying={isSpying} />
 
-      {/* Texto Minimalista */}
-      <div className="text-center space-y-4 transition-all duration-700 relative z-10" style={{ opacity: isSpying ? 0.3 : 1 }}>
-        <h2 className="text-5xl font-extrabold text-white font-syne tracking-tight leading-tight">
-          {isSpying ? "Curioso?" : "Pronto para o corte?"}
+      {/* Texto Engajador Minimalista */}
+      <div 
+        className="text-center space-y-3 transition-all duration-500 relative z-10" 
+        style={{ 
+          transform: isSpying ? 'translateY(15px)' : 'translateY(0)',
+          opacity: isSpying ? 0.9 : 1
+        }}
+      >
+        <h2 className="text-4xl font-extrabold text-white font-syne tracking-tight leading-tight">
+          {isSpying ? "Tô de olho! 👀" : "Pronto pro corte?"}
         </h2>
-        <p className="text-muted-foreground text-xl font-medium max-w-sm mx-auto">
-          {isSpying ? "Estou de olho nos seus dados... 👀" : "Acesse sua conta e gerencie sua barbearia com tecnologia."}
+        <p className="text-text-secondary text-base font-medium max-w-[280px] mx-auto">
+          {isSpying ? "Cuidado com a senha aí..." : "Acesse sua conta e gerencie sua barbearia com estilo."}
         </p>
       </div>
-
-      {/* Partículas de Estilo (Cabelos minimalistas) */}
-      {isMounted && (
-        <div className="absolute bottom-10 w-full h-40 overflow-hidden opacity-10">
-          {[...Array(12)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-0.5 h-3 bg-cyan-300 rounded-full"
-              style={{
-                left: `${(i * 10) + Math.random() * 5}%`,
-                bottom: '-20px',
-                animationName: 'float-hair',
-                animationDuration: `${5 + Math.random() * 5}s`,
-                animationTimingFunction: 'linear',
-                animationIterationCount: 'infinite',
-                animationDelay: `${i * 0.3}s`,
-                transform: `rotate(${Math.random() * 360}deg)`
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      <style jsx>{`
-        @keyframes float-hair {
-          0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-          20% { opacity: 1; }
-          80% { opacity: 1; }
-          100% { transform: translateY(-200px) rotate(720deg); opacity: 0; }
-        }
-      `}</style>
     </div>
   )
 }
