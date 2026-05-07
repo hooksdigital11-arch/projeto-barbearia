@@ -135,20 +135,29 @@ export function TeamSection({ data }: TeamSectionProps) {
       <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
         <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Distribuição de Serviços</h3>
         <div className="h-[400px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={serviceDistribution}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-              <XAxis dataKey="barberName" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-              />
-              <Legend />
-              <Bar dataKey="Corte" stackId="a" fill="#00e5ff" />
-              <Bar dataKey="Barba" stackId="a" fill="#3b82f6" />
-              <Bar dataKey="Combo" stackId="a" fill="#10b981" />
-            </BarChart>
-          </ResponsiveContainer>
+          <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={serviceDistribution}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                <XAxis dataKey="barberName" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                />
+                <Legend />
+                {(() => {
+                  const serviceNames = new Set<string>()
+                  serviceDistribution.forEach(d => {
+                    Object.keys(d).filter(k => k !== 'barberName').forEach(k => serviceNames.add(k))
+                  })
+                  const svcColors = ['#00e5ff', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899']
+                  return Array.from(serviceNames).map((name, i) => (
+                    <Bar key={name} dataKey={name} stackId="a" fill={svcColors[i % svcColors.length]} />
+                  ))
+                })()}
+              </BarChart>
+            </ResponsiveContainer>
+          </ClientOnly>
         </div>
       </div>
     </section>

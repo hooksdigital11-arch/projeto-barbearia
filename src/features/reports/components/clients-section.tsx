@@ -111,8 +111,8 @@ export function ClientsSection({ data }: ClientsSectionProps) {
                     innerRadius={60}
                     outerRadius={80}
                     paddingAngle={5}
-                    dataKey="value"
-                    nameKey="category"
+                    dataKey="count"
+                    nameKey="range"
                   >
                     {frequencyDistribution.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={FREQ_COLORS[index % FREQ_COLORS.length]} />
