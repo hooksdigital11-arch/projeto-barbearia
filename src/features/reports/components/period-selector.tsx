@@ -35,11 +35,12 @@ export function PeriodSelector({ onPeriodChange }: PeriodSelectorProps) {
     localStorage.setItem('reports-period', period)
     
     const end = new Date()
+    end.setHours(23, 59, 59, 999)
+    
     let start = new Date()
+    start.setHours(0, 0, 0, 0)
 
-    if (period === 'today') {
-      start.setHours(0, 0, 0, 0)
-    } else if (period === 'week') {
+    if (period === 'week') {
       start.setDate(end.getDate() - 7)
     } else if (period === 'month') {
       start.setMonth(end.getMonth() - 1)

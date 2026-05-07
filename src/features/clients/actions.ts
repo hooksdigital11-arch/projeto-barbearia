@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireUser } from '@/lib/auth/require-auth'
 import { createClientSchema, updateClientSchema, updateNotesSchema } from './schemas'
 
-const REVALIDATE_PATHS = ['/admin/clients', '/barber/clients']
+const REVALIDATE_PATHS = ['/admin/clients', '/barber/clients', '/admin/reports']
 
 function revalidateAll(clientId?: string) {
   REVALIDATE_PATHS.forEach(path => revalidatePath(path))

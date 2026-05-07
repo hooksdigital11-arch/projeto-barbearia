@@ -3,7 +3,8 @@ import {
   getRevenueReport, 
   getAppointmentsReport, 
   getClientsReport, 
-  getTeamReport 
+  getTeamReport,
+  getLoyaltyReport
 } from '@/features/reports/queries'
 import { ReportsPage } from '@/features/reports/components/reports-page'
 import { requireAdmin } from '@/lib/auth/require-auth'
@@ -17,8 +18,16 @@ export default async function AdminReportsPage({
   const params = await searchParams
 
   // Default dates if none provided
-  const end = params.end || new Date().toISOString()
-  const start = params.start || new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString()
+  const now = new Date()
+  const defaultEnd = new Date(now)
+  defaultEnd.setHours(23, 59, 59, 999)
+  
+  const defaultStart = new Date(now)
+  defaultStart.setHours(0, 0, 0, 0)
+  defaultStart.setMonth(defaultStart.getMonth() - 1)
+
+  const end = params.end || defaultEnd.toISOString()
+  const start = params.start || defaultStart.toISOString()
 
   return (
     <Suspense fallback={<ReportsLoading />}>
@@ -28,11 +37,12 @@ export default async function AdminReportsPage({
 }
 
 async function ReportsContent({ startDate, endDate, organizationId }: { startDate: string, endDate: string, organizationId: string }) {
-  const [revenue, appointments, clients, team] = await Promise.all([
+  const [revenue, appointments, clients, team, loyalty] = await Promise.all([
     getRevenueReport(startDate, endDate),
     getAppointmentsReport(startDate, endDate),
     getClientsReport(startDate, endDate),
     getTeamReport(startDate, endDate),
+    getLoyaltyReport(startDate, endDate),
   ])
 
   return (
@@ -41,6 +51,7 @@ async function ReportsContent({ startDate, endDate, organizationId }: { startDat
       initialAppointments={appointments}
       initialClients={clients}
       initialTeam={team}
+      initialLoyalty={loyalty}
       organizationId={organizationId}
     />
   )

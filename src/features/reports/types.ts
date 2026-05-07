@@ -42,6 +42,7 @@ export interface RevenueReport {
   chartData: RevenueData[]
   paymentMethods: PaymentMethodData[]
   topServices: ServiceSalesData[]
+  topProducts: ServiceSalesData[]
   barberPerformance: BarberRevenueData[]
 }
 

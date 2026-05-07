@@ -14,6 +14,7 @@ const REVALIDATE_PATHS = [
   '/admin/appointments',
   '/barber/appointments',
   '/agendamentos',
+  '/admin/reports'
 ]
 
 function revalidateAll() {
@@ -201,6 +202,12 @@ export async function updateAppointmentStatus(formData: FormData) {
     return { error: 'Dados inválidos' }
   }
 
+  const { data: apptBefore } = await supabaseAdmin
+    .from('appointments')
+    .select('status, price_cents, client_id')
+    .eq('id', parsed.data.id)
+    .single()
+
   let query = (supabaseAdmin
     .from('appointments') as any)
     .update({ status: parsed.data.status as string })
@@ -213,6 +220,28 @@ export async function updateAppointmentStatus(formData: FormData) {
   }
 
   const { error } = await query
+
+  if (!error && parsed.data.status === 'completed' && apptBefore?.status !== 'completed') {
+    // Atualiza os status do cliente manualmente (já que a trigger SQL pode não estar ativa)
+    const { data: client } = await supabaseAdmin
+      .from('clients')
+      .select('total_visits, total_spent_cents')
+      .eq('id', apptBefore.client_id)
+      .single()
+      
+    if (client) {
+      await supabaseAdmin
+        .from('clients')
+        .update({
+          total_visits: (client.total_visits || 0) + 1,
+          total_spent_cents: (client.total_spent_cents || 0) + (apptBefore.price_cents || 0),
+          last_visit_at: new Date().toISOString()
+        })
+        .eq('id', apptBefore.client_id)
+    }
+  }
+
+  const { error: queryError } = { error }
 
   if (error) {
     console.error('[UPDATE_STATUS]', error.message)

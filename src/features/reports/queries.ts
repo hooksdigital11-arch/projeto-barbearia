@@ -16,26 +16,41 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
   const user = await requireAdmin()
   const supabase = await createClient()
   
-  const start = startDate.split('T')[0]
-  const end = endDate.split('T')[0]
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  end.setHours(23, 59, 59, 999)
+  end.setHours(23, 59, 59, 999)
 
-  // 1. Busca agendamentos concluídos no período
-  const { data: appointments } = await supabase
-    .from('appointments')
-    .select('id, price_cents, start_time, barber_id, service_id')
-    .eq('organization_id', user.organization_id)
-    .eq('status', 'completed')
-    .gte('start_time', start)
-    .lte('start_time', end)
+  const duration = end.getTime() - start.getTime()
+  const prevStart = new Date(start.getTime() - duration).toISOString()
+  const prevEnd = start.toISOString()
 
-  // 2. Busca comanda_items pagos para payment methods
-  const { data: comandaItems } = await supabase
+  // 1. Busca agendamentos concluídos no período atual e anterior
+  const [{ data: currentApps }, { data: prevApps }] = await Promise.all([
+    supabase
+      .from('appointments')
+      .select('id, price_cents, start_time, barber_id, service_id, status')
+      .eq('organization_id', user.organization_id)
+      .eq('status', 'completed')
+      .gte('start_time', start.toISOString())
+      .lte('start_time', end.toISOString()),
+    supabase
+      .from('appointments')
+      .select('id, price_cents')
+      .eq('organization_id', user.organization_id)
+      .eq('status', 'completed')
+      .gte('start_time', prevStart)
+      .lt('start_time', prevEnd)
+  ])
+
+  // 2. Busca comanda_items pagos para payment methods e produtos
+  const { data: currentComandas } = await supabase
     .from('comanda_items')
-    .select('id, total_cents, payment_method, name, quantity, item_type')
+    .select('id, total_cents, payment_method, name, quantity, item_type, paid_at, created_at, appointment_id')
     .eq('organization_id', user.organization_id)
     .eq('paid', true)
-    .gte('created_at', start)
-    .lte('created_at', end)
+    .gte('created_at', start.toISOString())
+    .lte('created_at', end.toISOString())
 
   // 3. Busca barbeiros para nomes
   const { data: barbers } = await supabase
@@ -50,19 +65,42 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
     .select('id, name')
     .eq('organization_id', user.organization_id)
 
-  const items = (appointments as any[]) || []
-  const comandas = (comandaItems as any[]) || []
+  const items = (currentApps as any[]) || []
+  const prevItems = (prevApps as any[]) || []
+  const comandas = (currentComandas as any[]) || []
+
   const barberMap = new Map(((barbers as any[]) || []).map((b: any) => [b.id, b.full_name || 'Barbeiro']))
   const serviceMap = new Map(((services as any[]) || []).map((s: any) => [s.id, s.name]))
 
-  const totalRevenueCents = items.reduce((acc, item) => acc + (item.price_cents || 0), 0)
+  // Receita Total usando agendamentos concluídos + comandas que NÃO vieram de agendamentos
+  const comandaAppointmentIds = new Set(comandas.map(c => c.appointment_id).filter(Boolean))
+  const comandasAvulsas = comandas.filter(c => !c.appointment_id)
+  
+  const totalRevenueCents = items.reduce((acc, a) => acc + (a.price_cents || 0), 0) + 
+                            comandasAvulsas.reduce((acc, c) => acc + (c.total_cents || 0), 0)
+                            
+  const prevRevenueCents = prevItems.reduce((acc, a) => acc + (a.price_cents || 0), 0)
+
+  const calculateTrend = (curr: number, prev: number) => {
+    if (prev === 0) return curr > 0 ? 100 : 0
+    return Math.round(((curr - prev) / prev) * 100)
+  }
 
   // --- Chart: Receita por Dia ---
   const revenueByDate = new Map<string, number>()
+  
+  // Agrega agendamentos
   items.forEach(item => {
     const day = new Date(item.start_time).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
     revenueByDate.set(day, (revenueByDate.get(day) || 0) + (item.price_cents || 0))
   })
+  
+  // Agrega comandas avulsas
+  comandasAvulsas.forEach(item => {
+    const day = new Date(item.paid_at || item.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+    revenueByDate.set(day, (revenueByDate.get(day) || 0) + (item.total_cents || 0))
+  })
+  
   const chartData = Array.from(revenueByDate.entries())
     .map(([date, cents]) => ({ date, revenue: cents / 100 }))
     .sort((a, b) => {
@@ -81,10 +119,7 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
     const label = methodLabels[c.payment_method || ''] || 'Outro'
     paymentMap.set(label, (paymentMap.get(label) || 0) + (c.total_cents || 0))
   })
-  // If no comanda data, derive from appointments
-  if (paymentMap.size === 0 && totalRevenueCents > 0) {
-    paymentMap.set('Não especificado', totalRevenueCents)
-  }
+  
   const paymentTotal = Array.from(paymentMap.values()).reduce((a, b) => a + b, 0) || 1
   const paymentMethods = Array.from(paymentMap.entries()).map(([method, cents]) => ({
     method,
@@ -103,6 +138,21 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
     })
   })
   const topServices = Array.from(serviceCount.entries())
+    .map(([name, data]) => ({ name, quantity: data.quantity, totalRevenue: data.revenue }))
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 5)
+
+  // --- Chart: Top 5 Produtos ---
+  const productCount = new Map<string, { quantity: number; revenue: number }>()
+  comandas.filter(c => c.item_type === 'product').forEach(item => {
+    const name = item.name || 'Produto'
+    const current = productCount.get(name) || { quantity: 0, revenue: 0 }
+    productCount.set(name, { 
+      quantity: current.quantity + (item.quantity || 1), 
+      revenue: current.revenue + (item.total_cents || 0) / 100 
+    })
+  })
+  const topProducts = Array.from(productCount.entries())
     .map(([name, data]) => ({ name, quantity: data.quantity, totalRevenue: data.revenue }))
     .sort((a, b) => b.quantity - a.quantity)
     .slice(0, 5)
@@ -128,20 +178,27 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
     }))
     .sort((a, b) => b.revenue - a.revenue)
 
+  const totalItemsCount = items.length + comandasAvulsas.length
+  const prevTotalItemsCount = prevItems.length
+
+  const avgTicket = totalItemsCount > 0 ? (totalRevenueCents / totalItemsCount) / 100 : 0
+  const prevAvgTicket = prevTotalItemsCount > 0 ? (prevRevenueCents / prevTotalItemsCount) / 100 : 0
+
   return {
     kpis: {
       totalRevenue: totalRevenueCents / 100,
-      totalRevenueChange: 0,
-      averageTicket: items.length > 0 ? (totalRevenueCents / items.length) / 100 : 0,
-      averageTicketChange: 0,
-      totalComandas: items.length,
-      totalComandasChange: 0,
+      totalRevenueChange: calculateTrend(totalRevenueCents, prevRevenueCents),
+      averageTicket: avgTicket,
+      averageTicketChange: calculateTrend(avgTicket, prevAvgTicket),
+      totalComandas: totalItemsCount,
+      totalComandasChange: calculateTrend(totalItemsCount, prevTotalItemsCount),
       totalDiscounts: 0,
       totalDiscountsChange: 0,
     },
     chartData,
     paymentMethods,
     topServices,
+    topProducts,
     barberPerformance
   }
 })
@@ -150,16 +207,29 @@ export const getAppointmentsReport = cache(async (startDate: string, endDate: st
   const user = await requireAdmin()
   const supabase = await createClient()
 
-  const start = startDate.split('T')[0]
-  const end = endDate.split('T')[0]
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  end.setHours(23, 59, 59, 999)
 
-  // Busca TODOS os agendamentos no período (todos os status)
-  const { data: appointments } = await supabase
-    .from('appointments')
-    .select('id, status, start_time, barber_id')
-    .eq('organization_id', user.organization_id)
-    .gte('start_time', start)
-    .lte('start_time', end)
+  const duration = end.getTime() - start.getTime()
+  const prevStart = new Date(start.getTime() - duration).toISOString()
+  const prevEnd = start.toISOString()
+
+  // Busca TODOS os agendamentos no período atual e anterior
+  const [{ data: currentApps }, { data: prevApps }] = await Promise.all([
+    supabase
+      .from('appointments')
+      .select('id, status, start_time, barber_id')
+      .eq('organization_id', user.organization_id)
+      .gte('start_time', start.toISOString())
+      .lte('start_time', end.toISOString()),
+    supabase
+      .from('appointments')
+      .select('id, status')
+      .eq('organization_id', user.organization_id)
+      .gte('start_time', prevStart)
+      .lt('start_time', prevEnd)
+  ])
 
   // Busca barbeiros
   const { data: barbers } = await supabase
@@ -168,13 +238,26 @@ export const getAppointmentsReport = cache(async (startDate: string, endDate: st
     .eq('organization_id', user.organization_id)
     .eq('role', 'barber')
 
-  const items = (appointments as any[]) || []
+  const items = (currentApps as any[]) || []
+  const prevItems = (prevApps as any[]) || []
   const barberMap = new Map(((barbers as any[]) || []).map((b: any) => [b.id, b.full_name || 'Barbeiro']))
 
   const total = items.length
+  const prevTotal = prevItems.length
+  
   const completed = items.filter(a => a.status === 'completed').length
+  const prevCompleted = prevItems.filter(a => a.status === 'completed').length
+
   const cancelled = items.filter(a => a.status === 'cancelled').length
+  const prevCancelled = prevItems.filter(a => a.status === 'cancelled').length
+
   const noShow = items.filter(a => a.status === 'no_show').length
+  const prevNoShow = prevItems.filter(a => a.status === 'no_show').length
+
+  const calculateTrend = (curr: number, prev: number) => {
+    if (prev === 0) return curr > 0 ? 100 : 0
+    return Math.round(((curr - prev) / prev) * 100)
+  }
 
   // --- Chart: Status Distribution ---
   const statusDistribution = [
@@ -214,18 +297,21 @@ export const getAppointmentsReport = cache(async (startDate: string, endDate: st
     .map(([barberName, count]) => ({ barberName, count }))
     .sort((a, b) => b.count - a.count)
 
+  const completionRate = total > 0 ? (completed / total) * 100 : 0
+  const prevCompletionRate = prevTotal > 0 ? (prevCompleted / prevTotal) * 100 : 0
+
   return {
     kpis: {
       total,
-      totalChange: 0,
+      totalChange: calculateTrend(total, prevTotal),
       completed,
-      completedChange: 0,
+      completedChange: calculateTrend(completed, prevCompleted),
       cancelled,
-      cancelledChange: 0,
+      cancelledChange: calculateTrend(cancelled, prevCancelled),
       noShow,
-      noShowChange: 0,
-      completionRate: total > 0 ? (completed / total) * 100 : 0,
-      completionRateChange: 0
+      noShowChange: calculateTrend(noShow, prevNoShow),
+      completionRate,
+      completionRateChange: calculateTrend(completionRate, prevCompletionRate)
     },
     statusDistribution,
     dayOfWeekDistribution,
@@ -238,8 +324,13 @@ export const getClientsReport = cache(async (startDate: string, endDate: string)
   const user = await requireAdmin()
   const supabase = await createClient()
 
-  const start = startDate.split('T')[0]
-  const end = endDate.split('T')[0]
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  end.setHours(23, 59, 59, 999)
+
+  const duration = end.getTime() - start.getTime()
+  const prevStart = new Date(start.getTime() - duration).toISOString()
+  const prevEnd = start.toISOString()
 
   // 1. Todos os clientes da org
   const { data: allClients } = await supabase
@@ -253,8 +344,9 @@ export const getClientsReport = cache(async (startDate: string, endDate: string)
 
   // Novos clientes no período
   const newClients = clients.filter(c => {
-    const created = c.created_at?.split('T')[0]
-    return created && created >= start! && created <= end!
+    if (!c.created_at) return false
+    const d = new Date(c.created_at).getTime()
+    return d >= start.getTime() && d <= end.getTime()
   })
 
   // Recorrentes (mais de 1 visita)
@@ -318,17 +410,32 @@ export const getClientsReport = cache(async (startDate: string, endDate: string)
     loyaltyPoints: 0
   }))
 
+  // Novos clientes no período anterior
+  const { data: prevNewClientsData } = await supabase
+    .from('clients')
+    .select('id')
+    .eq('organization_id', user.organization_id)
+    .gte('created_at', prevStart)
+    .lt('created_at', prevEnd)
+
+  const prevNewClientsCount = (prevNewClientsData as any[])?.length || 0
+
+  const calculateTrend = (curr: number, prev: number) => {
+    if (prev === 0) return curr > 0 ? 100 : 0
+    return Math.round(((curr - prev) / prev) * 100)
+  }
+
+  const retentionRate = activeClients.length > 0 ? (recurring.length / activeClients.length) * 100 : 0
+
   return {
     kpis: {
       totalActive: activeClients.length,
-      totalActiveChange: 0,
+      totalActiveChange: 0, // Total acumulado não tem trend de período
       newClients: newClients.length,
-      newClientsChange: 0,
+      newClientsChange: calculateTrend(newClients.length, prevNewClientsCount),
       recurringClients: recurring.length,
       recurringClientsChange: 0,
-      retentionRate: activeClients.length > 0 
-        ? (recurring.length / activeClients.length) * 100 
-        : 0,
+      retentionRate,
       retentionRateChange: 0
     },
     newClientsChart,
@@ -342,8 +449,9 @@ export const getTeamReport = cache(async (startDate: string, endDate: string): P
   const user = await requireAdmin()
   const supabase = await createClient()
 
-  const start = startDate.split('T')[0]
-  const end = endDate.split('T')[0]
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  end.setHours(23, 59, 59, 999)
 
   // 1. Busca barbeiros
   const { data: barberProfiles } = await supabase
@@ -357,8 +465,8 @@ export const getTeamReport = cache(async (startDate: string, endDate: string): P
     .from('appointments')
     .select('id, barber_id, service_id, status, price_cents, start_time, rating')
     .eq('organization_id', user.organization_id)
-    .gte('start_time', start)
-    .lte('start_time', end)
+    .gte('start_time', start.toISOString())
+    .lte('start_time', end.toISOString())
 
   // 3. Busca serviços
   const { data: services } = await supabase
@@ -376,7 +484,10 @@ export const getTeamReport = cache(async (startDate: string, endDate: string): P
     const myApps = allApps.filter((a: any) => a.barber_id === b.id)
     const completed = myApps.filter((a: any) => a.status === 'completed')
     const cancelled = myApps.filter((a: any) => a.status === 'cancelled')
-    const revenue = completed.reduce((acc: number, a: any) => acc + (a.price_cents || 0), 0)
+    
+    // Receita vem dos agendamentos concluidos
+    const revenue = completed.reduce((acc: number, c: any) => acc + (c.price_cents || 0), 0)
+    
     const ratings = completed.filter((a: any) => a.rating != null).map((a: any) => a.rating as number)
     const avgRating = ratings.length > 0 ? ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length : 5.0
 
@@ -440,43 +551,102 @@ export const getTeamReport = cache(async (startDate: string, endDate: string): P
   }
 })
 
-
 export const getLoyaltyReport = cache(async (startDate: string, endDate: string): Promise<LoyaltyReport> => {
   const user = await requireAdmin()
   const supabase = await createClient()
 
-  const { data: stamps } = await supabase
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  end.setHours(23, 59, 59, 999)
+
+  const duration = end.getTime() - start.getTime()
+  const prevStart = new Date(start.getTime() - duration).toISOString()
+  const prevEnd = start.toISOString()
+
+  // 1. Busca carimbos e resgates no período atual e anterior
+  const [{ data: currentStamps }, { data: prevStamps }] = await Promise.all([
+    supabase
+      .from('loyalty_stamps')
+      .select('id, client_id, type, amount, created_at')
+      .eq('organization_id', user.organization_id)
+      .gte('created_at', start.toISOString())
+      .lte('created_at', end.toISOString()),
+    supabase
+      .from('loyalty_stamps')
+      .select('id, type, amount')
+      .eq('organization_id', user.organization_id)
+      .gte('created_at', prevStart)
+      .lt('created_at', prevEnd)
+  ])
+
+  // 2. Busca todos os carimbos para calcular saldo atual dos clientes
+  const { data: allStampsData } = await supabase
     .from('loyalty_stamps')
-    .select('id, client_id, type, amount, created_at')
+    .select('client_id, type, amount')
     .eq('organization_id', user.organization_id)
 
-  const allStamps = (stamps as any[]) || []
-  const stampEntries = allStamps.filter((s: any) => s.type === 'stamp')
-  const redeemEntries = allStamps.filter((s: any) => s.type === 'redeem')
+  const allStamps = (allStampsData as any[]) || []
+  const currentStampsList = (currentStamps as any[]) || []
+  const prevStampsList = (prevStamps as any[]) || []
   
-  // Unique clients with stamps
-  const clientStamps = new Map<string, number>()
-  stampEntries.forEach((s: any) => {
-    clientStamps.set(s.client_id, (clientStamps.get(s.client_id) || 0) + s.amount)
-  })
-  redeemEntries.forEach((s: any) => {
-    clientStamps.set(s.client_id, (clientStamps.get(s.client_id) || 0) - s.amount)
+  const stampEntries = currentStampsList.filter((s: any) => s.type === 'stamp')
+  const redeemEntries = currentStampsList.filter((s: any) => s.type === 'redeem')
+  
+  const prevStampEntries = prevStampsList.filter((s: any) => s.type === 'stamp')
+  const prevRedeemEntries = prevStampsList.filter((s: any) => s.type === 'redeem')
+
+  // Saldo atual por cliente
+  const clientBalances = new Map<string, number>()
+  allStamps.forEach((s: any) => {
+    const current = clientBalances.get(s.client_id) || 0
+    clientBalances.set(s.client_id, s.type === 'stamp' ? current + s.amount : current - s.amount)
   })
 
-  const readyToRedeem = Array.from(clientStamps.values()).filter(v => v >= 10).length
+  const activeMembers = new Set(currentStampsList.map(s => s.client_id)).size
+  const prevActiveMembers = new Set(prevStampsList.map(s => s.client_id)).size
+  
+  const stampsDistributed = stampEntries.reduce((a, s) => a + s.amount, 0)
+  const prevStampsDistributed = prevStampEntries.reduce((a, s) => a + s.amount, 0)
+
+  const readyToRedeem = Array.from(clientBalances.values()).filter(v => v >= 10).length
+
+  const calculateTrend = (curr: number, prev: number) => {
+    if (prev === 0) return curr > 0 ? 100 : 0
+    return Math.round(((curr - prev) / prev) * 100)
+  }
+
+  // --- Chart: Resgates por Mês ---
+  const redemptionsByMonthMap = new Map<string, number>()
+  currentStampsList.filter(s => s.type === 'redeem').forEach(s => {
+    const month = new Date(s.created_at).toLocaleDateString('pt-BR', { month: 'short' })
+    redemptionsByMonthMap.set(month, (redemptionsByMonthMap.get(month) || 0) + 1)
+  })
+  const redemptionsByMonth = Array.from(redemptionsByMonthMap.entries()).map(([month, count]) => ({ month, count }))
+
+  // --- Chart: Distribuição de Carimbos ---
+  const ranges = [
+    { label: '1-3 selos', min: 1, max: 3 },
+    { label: '4-6 selos', min: 4, max: 6 },
+    { label: '7-9 selos', min: 7, max: 9 },
+    { label: 'Pronto p/ Resgate', min: 10, max: Infinity },
+  ]
+  const stampsDistribution = ranges.map(r => ({
+    range: r.label,
+    count: Array.from(clientBalances.values()).filter(v => v >= r.min && v <= r.max).length
+  })).filter(f => f.count > 0)
 
   return {
     kpis: {
-      activeMembers: clientStamps.size,
-      activeMembersChange: 0,
+      activeMembers,
+      activeMembersChange: calculateTrend(activeMembers, prevActiveMembers),
       redemptions: redeemEntries.length,
-      redemptionsChange: 0,
-      stampsDistributed: stampEntries.reduce((a: number, s: any) => a + s.amount, 0),
-      stampsDistributedChange: 0,
+      redemptionsChange: calculateTrend(redeemEntries.length, prevRedeemEntries.length),
+      stampsDistributed,
+      stampsDistributedChange: calculateTrend(stampsDistributed, prevStampsDistributed),
       readyToRedeem,
       readyToRedeemChange: 0
     },
-    redemptionsByMonth: [],
-    stampsDistribution: []
+    redemptionsByMonth,
+    stampsDistribution
   }
 })

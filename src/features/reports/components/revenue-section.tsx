@@ -27,7 +27,7 @@ interface RevenueSectionProps {
 const PAYMENT_COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b']
 
 export function RevenueSection({ data }: RevenueSectionProps) {
-  const { kpis, chartData, paymentMethods, topServices, barberPerformance } = data
+  const { kpis, chartData, paymentMethods, topServices, topProducts, barberPerformance } = data
 
   return (
     <section className="space-y-6">
@@ -169,6 +169,28 @@ export function RevenueSection({ data }: RevenueSectionProps) {
                     contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
                   />
                   <Bar dataKey="quantity" fill="#00e5ff" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </ClientOnly>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Produtos */}
+        <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
+          <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Top 5 Produtos</h3>
+          <div className="h-[300px]">
+            <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topProducts} layout="vertical" margin={{ left: 40 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
+                  <XAxis type="number" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
+                  <YAxis dataKey="name" type="category" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} width={80} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                  />
+                  <Bar dataKey="quantity" fill="#f59e0b" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </ClientOnly>

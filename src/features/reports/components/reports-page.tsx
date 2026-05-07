@@ -7,6 +7,7 @@ import { RevenueSection } from './revenue-section'
 import { AppointmentsSection } from './appointments-section'
 import { ClientsSection } from './clients-section'
 import { TeamSection } from './team-section'
+import { LoyaltySection } from './loyalty-section'
 import { ExportButton } from './export-button'
 import { PageTitle } from '@/components/shared/page-title'
 import { createClient } from '@/lib/supabase/client'
@@ -14,7 +15,8 @@ import type {
   RevenueReport, 
   AppointmentReport, 
   ClientReport, 
-  TeamReport, 
+  TeamReport,
+  LoyaltyReport,
   ReportPeriod 
 } from '../types'
 
@@ -23,6 +25,7 @@ interface ReportsPageProps {
   initialAppointments: AppointmentReport
   initialClients: ClientReport
   initialTeam: TeamReport
+  initialLoyalty: LoyaltyReport
   organizationId: string
 }
 
@@ -31,6 +34,7 @@ export function ReportsPage({
   initialAppointments, 
   initialClients, 
   initialTeam,
+  initialLoyalty,
   organizationId
 }: ReportsPageProps) {
   const router = useRouter()
@@ -42,6 +46,7 @@ export function ReportsPage({
   const [appointments, setAppointments] = useState(initialAppointments)
   const [clients, setClients] = useState(initialClients)
   const [team, setTeam] = useState(initialTeam)
+  const [loyalty, setLoyalty] = useState(initialLoyalty)
   const [isPending, startTransition] = useTransition()
 
   // Sincroniza o estado local com as novas props do server pós-refresh
@@ -50,7 +55,8 @@ export function ReportsPage({
     setAppointments(initialAppointments)
     setClients(initialClients)
     setTeam(initialTeam)
-  }, [initialRevenue, initialAppointments, initialClients, initialTeam])
+    setLoyalty(initialLoyalty)
+  }, [initialRevenue, initialAppointments, initialClients, initialTeam, initialLoyalty])
 
   // Realtime setup
   useEffect(() => {
@@ -75,6 +81,11 @@ export function ReportsPage({
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'clients', filter: `organization_id=eq.${organizationId}` },
+        () => router.refresh()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'loyalty_stamps', filter: `organization_id=eq.${organizationId}` },
         () => router.refresh()
       )
       .subscribe()
@@ -119,6 +130,7 @@ export function ReportsPage({
           <AppointmentsSection data={appointments} />
           <ClientsSection data={clients} />
           <TeamSection data={team} />
+          <LoyaltySection data={loyalty} />
         </div>
       )}
     </div>

@@ -117,11 +117,37 @@ export async function closeComanda(formData: FormData) {
 
   // 3. Atualizar agendamento para completed (Isso dispara a Trigger de Fidelidade e Estoque)
   if (parsed.data.appointment_id) {
+    const { data: apptBefore } = await supabase
+      .from('appointments')
+      .select('status')
+      .eq('id', parsed.data.appointment_id)
+      .single()
+
     await (supabase
       .from('appointments') as any)
       .update({ status: 'completed' })
       .eq('id', parsed.data.appointment_id)
       .eq('organization_id', user.organization_id)
+
+    if (apptBefore?.status !== 'completed') {
+      const totalCents = items.reduce((sum: number, i: ComandaItem) => sum + i.total_cents, 0) - (parsed.data.discount_cents || 0)
+      const { data: client } = await supabase
+        .from('clients')
+        .select('total_visits, total_spent_cents')
+        .eq('id', parsed.data.client_id)
+        .single()
+
+      if (client) {
+        await supabase
+          .from('clients')
+          .update({
+            total_visits: (client.total_visits || 0) + 1,
+            total_spent_cents: (client.total_spent_cents || 0) + totalCents,
+            last_visit_at: new Date().toISOString()
+          })
+          .eq('id', parsed.data.client_id)
+      }
+    }
   }
 
   // 4. Gerar número do recibo
