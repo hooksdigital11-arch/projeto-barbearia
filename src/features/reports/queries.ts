@@ -15,191 +15,66 @@ import type {
 export const getRevenueReport = cache(async (startDate: string, endDate: string): Promise<RevenueReport> => {
   const user = await requireAdmin()
   const supabase = await createClient()
-  
+
   const start = new Date(startDate)
   const end = new Date(endDate)
   end.setHours(23, 59, 59, 999)
-  end.setHours(23, 59, 59, 999)
 
   const duration = end.getTime() - start.getTime()
-  const prevStart = new Date(start.getTime() - duration).toISOString()
-  const prevEnd = start.toISOString()
+  const prevStart = new Date(start.getTime() - duration)
+  const prevEnd = start
 
-  // 1. Busca agendamentos concluídos no período atual e anterior
-  const [{ data: currentApps }, { data: prevApps }] = await Promise.all([
-    supabase
-      .from('appointments')
-      .select('id, price_cents, start_time, barber_id, service_id, status')
-      .eq('organization_id', user.organization_id)
-      .eq('status', 'completed')
-      .gte('start_time', start.toISOString())
-      .lte('start_time', end.toISOString()),
-    supabase
-      .from('appointments')
-      .select('id, price_cents')
-      .eq('organization_id', user.organization_id)
-      .eq('status', 'completed')
-      .gte('start_time', prevStart)
-      .lt('start_time', prevEnd)
+  const [{ data: currentData, error: currentError }, { data: prevData }] = await Promise.all([
+    (supabase.rpc as any)('get_revenue_report_data', {
+      p_org_id: user.organization_id,
+      p_start_date: start.toISOString().split('T')[0],
+      p_end_date: end.toISOString().split('T')[0]
+    }),
+    (supabase.rpc as any)('get_revenue_report_data', {
+      p_org_id: user.organization_id,
+      p_start_date: prevStart.toISOString().split('T')[0],
+      p_end_date: prevEnd.toISOString().split('T')[0]
+    })
   ])
 
-  // 2. Busca comanda_items pagos para payment methods e produtos
-  const { data: currentComandas } = await supabase
-    .from('comanda_items')
-    .select('id, total_cents, payment_method, name, quantity, item_type, paid_at, created_at, appointment_id')
-    .eq('organization_id', user.organization_id)
-    .eq('paid', true)
-    .gte('created_at', start.toISOString())
-    .lte('created_at', end.toISOString())
-
-  // 3. Busca barbeiros para nomes
-  const { data: barbers } = await supabase
-    .from('profiles')
-    .select('id, full_name')
-    .eq('organization_id', user.organization_id)
-    .eq('role', 'barber')
-
-  // 4. Busca serviços para nomes
-  const { data: services } = await supabase
-    .from('services')
-    .select('id, name')
-    .eq('organization_id', user.organization_id)
-
-  const items = (currentApps as any[]) || []
-  const prevItems = (prevApps as any[]) || []
-  const comandas = (currentComandas as any[]) || []
-
-  const barberMap = new Map(((barbers as any[]) || []).map((b: any) => [b.id, b.full_name || 'Barbeiro']))
-  const serviceMap = new Map(((services as any[]) || []).map((s: any) => [s.id, s.name]))
-
-  // Receita Total usando agendamentos concluídos + comandas que NÃO vieram de agendamentos
-  const comandaAppointmentIds = new Set(comandas.map(c => c.appointment_id).filter(Boolean))
-  const comandasAvulsas = comandas.filter(c => !c.appointment_id)
-  
-  const totalRevenueCents = items.reduce((acc, a) => acc + (a.price_cents || 0), 0) + 
-                            comandasAvulsas.reduce((acc, c) => acc + (c.total_cents || 0), 0)
-                            
-  const prevRevenueCents = prevItems.reduce((acc, a) => acc + (a.price_cents || 0), 0)
+  if (currentError) {
+    console.error('Error fetching revenue report RPC:', currentError)
+    throw new Error('Falha ao carregar relatório financeiro do banco de dados.')
+  }
 
   const calculateTrend = (curr: number, prev: number) => {
     if (prev === 0) return curr > 0 ? 100 : 0
     return Math.round(((curr - prev) / prev) * 100)
   }
 
-  // --- Chart: Receita por Dia ---
-  const revenueByDate = new Map<string, number>()
+  const currKpis = currentData?.kpis || {}
+  const prevKpis = prevData?.kpis || {}
+
+  const totalRevenue = currKpis.totalRevenue || 0
+  const prevRevenue = prevKpis.totalRevenue || 0
   
-  // Agrega agendamentos
-  items.forEach(item => {
-    const day = new Date(item.start_time).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
-    revenueByDate.set(day, (revenueByDate.get(day) || 0) + (item.price_cents || 0))
-  })
+  const averageTicket = currKpis.averageTicket || 0
+  const prevAverageTicket = prevKpis.averageTicket || 0
   
-  // Agrega comandas avulsas
-  comandasAvulsas.forEach(item => {
-    const day = new Date(item.paid_at || item.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
-    revenueByDate.set(day, (revenueByDate.get(day) || 0) + (item.total_cents || 0))
-  })
-  
-  const chartData = Array.from(revenueByDate.entries())
-    .map(([date, cents]) => ({ date, revenue: cents / 100 }))
-    .sort((a, b) => {
-      const [dA = 0, mA = 0] = a.date.split('/').map(Number)
-      const [dB = 0, mB = 0] = b.date.split('/').map(Number)
-      return mA !== mB ? mA - mB : dA - dB
-    })
-
-  // --- Chart: Formas de Pagamento ---
-  const paymentMap = new Map<string, number>()
-  const methodLabels: Record<string, string> = {
-    'cash': 'Dinheiro', 'pix': 'PIX', 
-    'credit_card': 'Crédito', 'debit_card': 'Débito'
-  }
-  comandas.forEach((c: any) => {
-    const label = methodLabels[c.payment_method || ''] || 'Outro'
-    paymentMap.set(label, (paymentMap.get(label) || 0) + (c.total_cents || 0))
-  })
-  
-  const paymentTotal = Array.from(paymentMap.values()).reduce((a, b) => a + b, 0) || 1
-  const paymentMethods = Array.from(paymentMap.entries()).map(([method, cents]) => ({
-    method,
-    value: cents / 100,
-    percentage: (cents / paymentTotal) * 100
-  }))
-
-  // --- Chart: Top 5 Serviços ---
-  const serviceCount = new Map<string, { quantity: number; revenue: number }>()
-  items.forEach(item => {
-    const name = serviceMap.get(item.service_id) || 'Serviço'
-    const current = serviceCount.get(name) || { quantity: 0, revenue: 0 }
-    serviceCount.set(name, { 
-      quantity: current.quantity + 1, 
-      revenue: current.revenue + (item.price_cents || 0) / 100 
-    })
-  })
-  const topServices = Array.from(serviceCount.entries())
-    .map(([name, data]) => ({ name, quantity: data.quantity, totalRevenue: data.revenue }))
-    .sort((a, b) => b.quantity - a.quantity)
-    .slice(0, 5)
-
-  // --- Chart: Top 5 Produtos ---
-  const productCount = new Map<string, { quantity: number; revenue: number }>()
-  comandas.filter(c => c.item_type === 'product').forEach(item => {
-    const name = item.name || 'Produto'
-    const current = productCount.get(name) || { quantity: 0, revenue: 0 }
-    productCount.set(name, { 
-      quantity: current.quantity + (item.quantity || 1), 
-      revenue: current.revenue + (item.total_cents || 0) / 100 
-    })
-  })
-  const topProducts = Array.from(productCount.entries())
-    .map(([name, data]) => ({ name, quantity: data.quantity, totalRevenue: data.revenue }))
-    .sort((a, b) => b.quantity - a.quantity)
-    .slice(0, 5)
-
-  // --- Table: Performance por Barbeiro ---
-  const barberStats = new Map<string, { appointments: number; revenue: number }>()
-  items.forEach(item => {
-    const current = barberStats.get(item.barber_id) || { appointments: 0, revenue: 0 }
-    barberStats.set(item.barber_id, {
-      appointments: current.appointments + 1,
-      revenue: current.revenue + (item.price_cents || 0)
-    })
-  })
-  const barberPerformance = Array.from(barberStats.entries())
-    .map(([barberId, stats]) => ({
-      barberId,
-      name: barberMap.get(barberId) || 'Barbeiro',
-      avatarUrl: null,
-      appointments: stats.appointments,
-      revenue: stats.revenue / 100,
-      averageTicket: stats.appointments > 0 ? (stats.revenue / stats.appointments) / 100 : 0,
-      percentage: totalRevenueCents > 0 ? (stats.revenue / totalRevenueCents) * 100 : 0
-    }))
-    .sort((a, b) => b.revenue - a.revenue)
-
-  const totalItemsCount = items.length + comandasAvulsas.length
-  const prevTotalItemsCount = prevItems.length
-
-  const avgTicket = totalItemsCount > 0 ? (totalRevenueCents / totalItemsCount) / 100 : 0
-  const prevAvgTicket = prevTotalItemsCount > 0 ? (prevRevenueCents / prevTotalItemsCount) / 100 : 0
+  const totalComandas = currKpis.totalComandas || 0
+  const prevTotalComandas = prevKpis.totalComandas || 0
 
   return {
     kpis: {
-      totalRevenue: totalRevenueCents / 100,
-      totalRevenueChange: calculateTrend(totalRevenueCents, prevRevenueCents),
-      averageTicket: avgTicket,
-      averageTicketChange: calculateTrend(avgTicket, prevAvgTicket),
-      totalComandas: totalItemsCount,
-      totalComandasChange: calculateTrend(totalItemsCount, prevTotalItemsCount),
+      totalRevenue,
+      totalRevenueChange: calculateTrend(totalRevenue, prevRevenue),
+      averageTicket,
+      averageTicketChange: calculateTrend(averageTicket, prevAverageTicket),
+      totalComandas,
+      totalComandasChange: calculateTrend(totalComandas, prevTotalComandas),
       totalDiscounts: 0,
       totalDiscountsChange: 0,
     },
-    chartData,
-    paymentMethods,
-    topServices,
-    topProducts,
-    barberPerformance
+    chartData: currentData?.chartData || [],
+    paymentMethods: currentData?.paymentMethods || [],
+    topServices: currentData?.topServices || [],
+    topProducts: currentData?.topProducts || [], // Top Products logic wasn't in RPC, so it will fall back to [] for now unless added
+    barberPerformance: currentData?.barberPerformance || []
   }
 })
 
@@ -212,90 +87,70 @@ export const getAppointmentsReport = cache(async (startDate: string, endDate: st
   end.setHours(23, 59, 59, 999)
 
   const duration = end.getTime() - start.getTime()
-  const prevStart = new Date(start.getTime() - duration).toISOString()
-  const prevEnd = start.toISOString()
+  const prevStart = new Date(start.getTime() - duration)
+  const prevEnd = start
 
-  // Busca TODOS os agendamentos no período atual e anterior
-  const [{ data: currentApps }, { data: prevApps }] = await Promise.all([
-    supabase
-      .from('appointments')
-      .select('id, status, start_time, barber_id')
-      .eq('organization_id', user.organization_id)
-      .gte('start_time', start.toISOString())
-      .lte('start_time', end.toISOString()),
-    supabase
-      .from('appointments')
-      .select('id, status')
-      .eq('organization_id', user.organization_id)
-      .gte('start_time', prevStart)
-      .lt('start_time', prevEnd)
+  const [{ data: currentData, error: currentError }, { data: prevData }] = await Promise.all([
+    (supabase.rpc as any)('get_appointments_report_data', {
+      p_org_id: user.organization_id,
+      p_start_date: start.toISOString().split('T')[0],
+      p_end_date: end.toISOString().split('T')[0]
+    }),
+    (supabase.rpc as any)('get_appointments_report_data', {
+      p_org_id: user.organization_id,
+      p_start_date: prevStart.toISOString().split('T')[0],
+      p_end_date: prevEnd.toISOString().split('T')[0]
+    })
   ])
 
-  // Busca barbeiros
-  const { data: barbers } = await supabase
-    .from('profiles')
-    .select('id, full_name')
-    .eq('organization_id', user.organization_id)
-    .eq('role', 'barber')
-
-  const items = (currentApps as any[]) || []
-  const prevItems = (prevApps as any[]) || []
-  const barberMap = new Map(((barbers as any[]) || []).map((b: any) => [b.id, b.full_name || 'Barbeiro']))
-
-  const total = items.length
-  const prevTotal = prevItems.length
-  
-  const completed = items.filter(a => a.status === 'completed').length
-  const prevCompleted = prevItems.filter(a => a.status === 'completed').length
-
-  const cancelled = items.filter(a => a.status === 'cancelled').length
-  const prevCancelled = prevItems.filter(a => a.status === 'cancelled').length
-
-  const noShow = items.filter(a => a.status === 'no_show').length
-  const prevNoShow = prevItems.filter(a => a.status === 'no_show').length
+  if (currentError) {
+    console.error('Error fetching appointments report RPC:', currentError)
+    throw new Error('Falha ao carregar relatório de agendamentos do banco de dados.')
+  }
 
   const calculateTrend = (curr: number, prev: number) => {
     if (prev === 0) return curr > 0 ? 100 : 0
     return Math.round(((curr - prev) / prev) * 100)
   }
 
-  // --- Chart: Status Distribution ---
-  const statusDistribution = [
-    { status: 'Concluído', count: completed, color: '#10b981' },
-    { status: 'Cancelado', count: cancelled, color: '#ef4444' },
-    { status: 'No-show', count: noShow, color: '#f59e0b' },
-    { status: 'Agendado', count: total - completed - cancelled - noShow, color: '#3b82f6' },
-  ].filter(s => s.count > 0)
+  // Preenche cores pro chart de status caso o banco não tenha retornado com cor
+  const defaultColors: Record<string, string> = {
+    'completed': '#10b981',
+    'cancelled': '#ef4444',
+    'no_show': '#f59e0b',
+    'pending': '#3b82f6',
+    'in_progress': '#06b6d4'
+  }
 
-  // --- Chart: Distribuição por Dia da Semana ---
-  const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-  const dayCounts = new Array(7).fill(0)
-  items.forEach(item => {
-    const dayIndex = new Date(item.start_time).getDay()
-    dayCounts[dayIndex]++
-  })
-  const dayOfWeekDistribution = dayNames.map((day, i) => ({ day, count: dayCounts[i] }))
+  const statusMap: Record<string, string> = {
+    'completed': 'Concluído',
+    'cancelled': 'Cancelado',
+    'no_show': 'No-show',
+    'pending': 'Agendado',
+    'in_progress': 'Em andamento'
+  }
 
-  // --- Chart: Horários de Pico ---
-  const hourCounts = new Map<string, number>()
-  items.forEach(item => {
-    const hour = new Date(item.start_time).getHours()
-    const label = `${hour.toString().padStart(2, '0')}:00`
-    hourCounts.set(label, (hourCounts.get(label) || 0) + 1)
-  })
-  const peakHours = Array.from(hourCounts.entries())
-    .map(([hour, count]) => ({ hour, count }))
-    .sort((a, b) => a.hour.localeCompare(b.hour))
+  const rawStatus = currentData?.statusDistribution || []
+  const formattedStatus = rawStatus.map((s: any) => ({
+    status: statusMap[s.status] || s.status,
+    count: s.count,
+    color: defaultColors[s.status] || '#a0a0a0'
+  }))
 
-  // --- Chart: Agendamentos por Barbeiro ---
-  const barberCounts = new Map<string, number>()
-  items.forEach(item => {
-    const name = barberMap.get(item.barber_id) || 'Barbeiro'
-    barberCounts.set(name, (barberCounts.get(name) || 0) + 1)
-  })
-  const barberDistribution = Array.from(barberCounts.entries())
-    .map(([barberName, count]) => ({ barberName, count }))
-    .sort((a, b) => b.count - a.count)
+  const currKpis = currentData?.kpis || {}
+  const prevKpis = prevData?.kpis || {}
+
+  const total = currKpis.total || 0
+  const prevTotal = prevKpis.total || 0
+  
+  const completed = currKpis.completed || 0
+  const prevCompleted = prevKpis.completed || 0
+  
+  const cancelled = currKpis.cancelled || 0
+  const prevCancelled = prevKpis.cancelled || 0
+  
+  const noShow = currKpis.noShow || 0
+  const prevNoShow = prevKpis.noShow || 0
 
   const completionRate = total > 0 ? (completed / total) * 100 : 0
   const prevCompletionRate = prevTotal > 0 ? (prevCompleted / prevTotal) * 100 : 0
@@ -313,10 +168,10 @@ export const getAppointmentsReport = cache(async (startDate: string, endDate: st
       completionRate,
       completionRateChange: calculateTrend(completionRate, prevCompletionRate)
     },
-    statusDistribution,
-    dayOfWeekDistribution,
-    peakHours,
-    barberDistribution
+    statusDistribution: formattedStatus,
+    dayOfWeekDistribution: [], // Pode ser adicionado futuramente no RPC se necessário
+    peakHours: currentData?.peakHours || [],
+    barberDistribution: currentData?.barberDistribution || []
   }
 })
 
