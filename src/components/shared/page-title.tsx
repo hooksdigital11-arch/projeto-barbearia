@@ -8,15 +8,18 @@ interface PageTitleProps {
 
 export function PageTitle({ title, subtitle, className }: PageTitleProps) {
   return (
-    <div className={cn("space-y-1 mb-8", className)}>
-      <h1 className="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
-        {title}
-      </h1>
-      {subtitle && (
-        <p className="text-lg text-text-secondary">
-          {subtitle}
-        </p>
-      )}
+    <div className={cn("space-y-4 mb-20", className)}>
+      <div className="space-y-1">
+        {subtitle && (
+          <p className="label-muted opacity-40">
+            {subtitle}
+          </p>
+        )}
+        <h1 className="heading-hero text-4xl md:text-5xl lg:text-6xl">
+          {title}<span className="text-accent-cyan">.</span>
+        </h1>
+      </div>
+      <div className="h-[2px] w-12 bg-accent-cyan opacity-30" />
     </div>
   )
 }

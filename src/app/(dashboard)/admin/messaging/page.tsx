@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { requireAdmin } from '@/lib/auth/require-auth'
-import { getConversations, getMessagingStats, getClientsForMessaging } from '@/features/messaging/queries'
+import { getConversations, getMessagingStats, getClientsForMessaging, getMessageTemplates } from '@/features/messaging/queries'
 import { getOrganization } from '@/features/organization/queries'
 import { MessagingPage } from '@/features/messaging/components/messaging-page'
 
@@ -13,10 +13,11 @@ export default async function AdminMessagingRoute() {
   const user = await requireAdmin()
 
   try {
-    const [conversations, stats, clients, org] = await Promise.all([
+    const [conversations, stats, clients, templates, org] = await Promise.all([
       getConversations(),
       getMessagingStats(),
       getClientsForMessaging(),
+      getMessageTemplates(),
       getOrganization(user.organization_id),
     ])
 
@@ -26,6 +27,7 @@ export default async function AdminMessagingRoute() {
           conversations={conversations}
           stats={stats}
           clients={clients}
+          templates={templates}
           orgName={org?.name || 'Barbearia'}
           isAdmin
         />

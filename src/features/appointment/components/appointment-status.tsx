@@ -25,13 +25,24 @@ const STATUS_ACTION_LABEL: Partial<Record<AppointmentStatus, string>> = {
 
 export function StatusBadge({ status, appointmentId, interactive = false }: StatusBadgeProps) {
   const cfg = STATUS_CONFIG[status]
+  
+  // Custom semantic colors for premium look
+  const semanticColors: Record<string, { bg: string, text: string }> = {
+    scheduled: { bg: 'rgba(59, 130, 246, 0.08)', text: '#3b82f6' },
+    in_progress: { bg: 'rgba(245, 158, 11, 0.08)', text: '#f59e0b' },
+    completed: { bg: 'rgba(16, 185, 129, 0.08)', text: '#10b981' },
+    cancelled: { bg: 'rgba(239, 68, 68, 0.08)', text: '#ef4444' },
+    no_show: { bg: 'rgba(255, 255, 255, 0.08)', text: '#888888' },
+  }
+
+  const colors = semanticColors[status] || { bg: 'rgba(255, 255, 255, 0.08)', text: '#888888' }
+
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider',
-        cfg.bg
+        'inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.1em]'
       )}
-      style={{ color: cfg.color }}
+      style={{ backgroundColor: colors.bg, color: colors.text }}
     >
       {cfg.label}
     </span>
@@ -67,7 +78,7 @@ export function QuickStatusButton({
     <button
       onClick={handleAdvance}
       disabled={isPending}
-      className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-lg bg-accent-cyan/10 text-accent-cyan hover:bg-accent-cyan/20 transition-colors disabled:opacity-50"
+      className="btn-pill-primary px-4 py-1.5 text-[10px] uppercase tracking-widest disabled:opacity-50 h-auto"
     >
       {isPending ? '...' : label}
     </button>
@@ -90,7 +101,7 @@ export function CancelButton({ appointmentId }: { appointmentId: string }) {
     <button
       onClick={handleCancel}
       disabled={isPending}
-      className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+      className="btn-pill-secondary px-4 py-1.5 text-[10px] uppercase tracking-widest border-red-500/50 text-red-400 hover:bg-red-500/10 h-auto"
     >
       {isPending ? '...' : 'Cancelar'}
     </button>

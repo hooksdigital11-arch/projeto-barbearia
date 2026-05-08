@@ -37,7 +37,6 @@ import { requireUser } from "@/lib/auth/require-auth"
 import { getOrganization } from "@/features/organization/queries"
 import { LogoutButton } from "@/components/shared/logout-button"
 import { RealtimeListener } from "@/components/shared/realtime-listener"
-import { BackgroundMesh } from "@/components/shared/background-mesh"
 
 export default async function DashboardLayout({
   children,
@@ -50,31 +49,28 @@ export default async function DashboardLayout({
   const orgLogo = organization?.logo_url
 
   return (
-    <div className="flex min-h-screen bg-[#050505] relative overflow-hidden">
+    <div className="flex min-h-screen bg-black relative overflow-hidden">
       {/* Realtime Updates */}
       <RealtimeListener organizationId={profile.organization_id} />
 
-      {/* Decorative background effects */}
-      <BackgroundMesh />
-
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 z-50 p-4">
-        <div className="glass-card flex flex-col h-full overflow-hidden">
-          <div className="p-8">
+      <aside className="hidden md:flex w-72 flex-col fixed inset-y-0 z-50 bg-black border-r border-white/[0.05]">
+        <div className="flex flex-col h-full overflow-hidden">
+          <div className="p-12">
             <Link 
               href={profile.role === 'admin' ? '/admin' : profile.role === 'barber' ? '/barber' : '/client'} 
-              className="flex items-center gap-4 hover:opacity-80 transition-all active:scale-95"
+              className="flex flex-col gap-4 hover:opacity-80 transition-all active:scale-95"
             >
-              <div className="w-10 h-10 rounded-2xl overflow-hidden flex items-center justify-center bg-white/5 border border-white/10 shadow-lg">
+              <div className="w-12 h-12 rounded-[12px] overflow-hidden flex items-center justify-center bg-white/[0.03] border border-white/5">
                 {orgLogo ? (
-                  <Image src={orgLogo} alt={orgName} width={40} height={40} className="object-cover" />
+                  <Image src={orgLogo} alt={orgName} width={48} height={48} className="object-cover" />
                 ) : (
-                  <div className="w-full h-full accent-gradient" />
+                  <div className="w-full h-full bg-accent-cyan" />
                 )}
               </div>
               <div className="flex flex-col">
-                <span className="font-syne font-bold text-lg tracking-tight text-white truncate leading-tight">{orgName}</span>
-                <span className="text-[10px] text-accent-cyan font-bold tracking-[0.2em] uppercase opacity-70">Barber Pro</span>
+                <span className="font-syne font-bold text-xl tracking-tight text-white truncate leading-tight uppercase">{orgName}</span>
+                <span className="label-muted mt-1 opacity-50 text-[10px] tracking-[0.2em] uppercase">Precision Systems</span>
               </div>
             </Link>
           </div>
@@ -102,62 +98,67 @@ export default async function DashboardLayout({
                 else if (item.label === 'Relatórios') href = '/admin/reports'
                 else if (item.label === 'Usuários') href = '/admin/users'
 
+                const isActive = false
+
                 return (
                   <Link
                     key={item.href}
                     href={href}
                     className={cn(
-                      "flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all group relative overflow-hidden",
-                      "text-text-secondary hover:text-white hover:bg-white/5 active:scale-95"
+                      "flex items-center gap-4 px-12 py-4 text-sm font-bold transition-all group relative",
+                      "text-text-secondary hover:text-white hover:bg-white/[0.02]",
+                      isActive && "text-white bg-white/[0.03]"
                     )}
                   >
-                    <item.icon size={22} weight="duotone" className="transition-all group-hover:text-accent-cyan group-hover:scale-110" />
-                    {item.label}
-                    {/* Hover indicator */}
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-accent-cyan rounded-r-full transition-all group-hover:h-8" />
+                    <item.icon size={20} weight="bold" className={cn("transition-all", isActive ? "text-accent-cyan" : "group-hover:text-accent-cyan")} />
+                    <span className="uppercase tracking-widest text-[11px]">{item.label}</span>
+                    
+                    {/* Active State Indicator: 2px left border */}
+                    <div className={cn(
+                      "absolute left-0 top-0 bottom-0 w-[2px] bg-accent-cyan transition-opacity",
+                      isActive ? "opacity-100" : "opacity-0 group-hover:opacity-30"
+                    )} />
                   </Link>
                 )
               })}
           </nav>
 
-          <div className="p-6 mt-auto">
-            <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-4 flex items-center gap-4 transition-all hover:bg-white/5 group">
-              <div className="w-11 h-11 rounded-2xl bg-accent-cyan flex items-center justify-center font-bold text-black shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+          <div className="p-12 mt-auto border-t border-white/5 space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-white text-xs">
                 {profile.full_name?.[0] || 'U'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold truncate text-white leading-tight">{profile.full_name}</p>
-                <p className="text-[10px] text-text-secondary truncate uppercase tracking-widest font-bold opacity-60 mt-0.5">{profile.role}</p>
+                <p className="text-xs font-bold truncate text-white leading-tight uppercase tracking-tight">{profile.full_name}</p>
+                <p className="label-muted truncate opacity-40 mt-1">{profile.role}</p>
               </div>
             </div>
-            <div className="mt-4">
-              <LogoutButton />
-            </div>
+            <LogoutButton />
           </div>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 md:pl-64 flex flex-col relative z-10 min-h-screen overflow-x-hidden">
+      <div className="flex-1 md:ml-72 flex flex-col relative z-10 min-h-screen bg-black">
         {/* Mobile Header */}
-        <header className="md:hidden h-20 border-b border-white/5 flex items-center justify-between px-6 bg-black/40 backdrop-blur-xl sticky top-0 z-50">
+        <header className="md:hidden h-20 border-b border-white/5 flex items-center justify-between px-6 bg-black sticky top-0 z-50">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center bg-white/5 border border-white/10 shadow-lg">
+            <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white/5 border border-white/10">
               {orgLogo ? (
-                <Image src={orgLogo} alt={orgName} width={36} height={36} className="object-cover" />
+                <Image src={orgLogo} alt={orgName} width={32} height={32} className="object-cover" />
               ) : (
-                <div className="w-full h-full accent-gradient" />
+                <div className="w-full h-full bg-accent-cyan" />
               )}
             </div>
-            <span className="font-syne font-bold truncate max-w-[150px] text-white text-lg tracking-tight">{orgName}</span>
+            <span className="font-syne font-bold truncate max-w-[150px] text-white text-md uppercase tracking-tight">{orgName}</span>
           </div>
-          <button className="tap-target glass rounded-2xl text-accent-cyan shadow-lg shadow-cyan-500/10">
+          <button className="w-10 h-10 flex items-center justify-center text-accent-cyan">
              <SquaresFour size={24} weight="bold" />
           </button>
         </header>
         
-        <main className="flex-1 p-6 md:p-10 lg:p-12">
-          <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out overflow-x-hidden">
+        <main className="flex-1 p-8 md:p-16 lg:p-24 overflow-x-hidden">
+          <div className="max-w-6xl mx-auto">
             {children}
           </div>
         </main>

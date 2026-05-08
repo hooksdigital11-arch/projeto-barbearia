@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { KPICard } from '@/components/shared/kpi-card'
 import { ConversationPanel, ChatPanel } from './chat-interface'
 import { BroadcastModal } from './broadcast-modal'
 import { TemplateModal } from './template-modal'
-import type { Message, MessageConversation, MessagingStats, ClientForMessage } from '../types'
+import type { Message, MessageConversation, MessagingStats, ClientForMessage, MessageTemplate } from '../types'
 import { 
   ChatCircle, 
   Lightning, 
@@ -13,7 +14,8 @@ import {
   TrendUp, 
   Users, 
   Warning, 
-  Calendar 
+  Calendar,
+  Sparkle
 } from '@phosphor-icons/react/dist/ssr'
 import { cn } from '@/lib/utils/cn'
 
@@ -21,6 +23,7 @@ interface MessagingPageProps {
   conversations: MessageConversation[]
   stats: MessagingStats
   clients: ClientForMessage[]
+  templates: MessageTemplate[]
   orgName: string
   isAdmin: boolean
   initialMessages?: Message[]
@@ -30,9 +33,11 @@ export function MessagingPage({
   conversations,
   stats,
   clients,
+  templates,
   orgName,
   isAdmin,
 }: MessagingPageProps) {
+  const router = useRouter()
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
   const [selectedClientName, setSelectedClientName] = useState('')
   const [selectedClientPhone, setSelectedClientPhone] = useState<string | null>(null)
@@ -47,7 +52,6 @@ export function MessagingPage({
     setSelectedClientPhone(phone)
     setLoadingMessages(true)
 
-    // Fetch messages client-side via a fresh server request
     try {
       const res = await fetch(`/api/messaging/messages?clientId=${clientId}`)
       if (res.ok) {
@@ -55,32 +59,35 @@ export function MessagingPage({
         setCurrentMessages(Array.isArray(data) ? data : [])
       }
     } catch {
-      // Silently fail — messages will be empty
       setCurrentMessages([])
     } finally {
       setLoadingMessages(false)
     }
   }
 
+  const handleRefresh = () => {
+    router.refresh()
+  }
+
   return (
     <div className="space-y-16 animate-in fade-in duration-1000 h-full">
-      {/* Header com Design Assimétrico */}
+      {/* Header com Design Premium Assimétrico */}
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10">
         <div className="space-y-4">
           <div className="flex items-center gap-4">
-            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-syne text-white tracking-tighter leading-none uppercase break-words">
+            <div className="w-2 h-14 bg-accent-cyan rounded-full shadow-[0_0_40px_rgba(0,229,255,0.3)]" />
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black font-syne text-white tracking-tighter leading-none uppercase">
               Mensagens<span className="text-accent-cyan">.</span>
             </h1>
           </div>
-          <p className="text-text-secondary text-lg font-medium max-w-md ml-7 border-l border-white/10 pl-6">
-            Comunicação direta e automatizada. Conecte-se com seus clientes via WhatsApp com templates inteligentes e disparos em massa estratégicos.
+          <p className="text-muted-foreground text-lg font-medium max-w-md ml-6 border-l border-white/5 pl-8 leading-relaxed">
+            Gestão de relacionamento de alto nível. Templates inteligentes e disparos automatizados para máxima conversão.
           </p>
         </div>
         <div className="flex flex-wrap gap-4 lg:ml-0">
           <button
             onClick={() => setIsTemplateOpen(true)}
-            className="flex items-center gap-3 px-6 py-4 rounded-2xl border border-white/10 bg-white/5 text-white text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all duration-300"
+            className="flex items-center gap-3 px-8 py-5 rounded-full border border-white/10 bg-white/5 text-white text-xs font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all duration-300"
           >
             <FileText size={20} weight="bold" />
             Templates
@@ -88,47 +95,48 @@ export function MessagingPage({
           {isAdmin && (
             <button
               onClick={() => setIsBroadcastOpen(true)}
-              className="flex items-center gap-3 px-8 py-4 rounded-3xl bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group"
+              className="flex items-center gap-3 px-10 py-5 rounded-full bg-white text-black text-xs font-black uppercase tracking-[0.2em] hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_50px_rgba(0,0,0,0.5)] active:scale-95 group relative overflow-hidden"
             >
-              <Lightning size={20} weight="bold" className="group-hover:animate-pulse" />
-              Disparo em Massa
+              <div className="absolute inset-0 bg-accent-cyan/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+              <Lightning size={20} weight="bold" className="relative z-10" />
+              <span className="relative z-10">Disparo em Massa</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* KPI Cards com Design Pro Max */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      {/* KPI Cards Estilo Nubank/Apple */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { title: 'Enviadas Hoje', value: stats.today, icon: ChatCircle, color: '#8b5cf6', desc: 'Mensagens processadas' },
-          { title: 'Esta Semana', value: stats.week, icon: Calendar, color: '#3b82f6', desc: 'Volume últimos 7 dias' },
-          { title: 'Este Mês', value: stats.month, icon: TrendUp, color: '#10b981', desc: 'Engajamento mensal' },
-          { title: 'Falhas', value: stats.failed, icon: Warning, color: '#ef4444', desc: 'Erros de processamento' }
+          { title: 'Enviadas Hoje', value: stats.today, icon: Sparkle, color: '#00e5ff' },
+          { title: 'Esta Semana', value: stats.week, icon: Calendar, color: '#ffffff' },
+          { title: 'Este Mês', value: stats.month, icon: TrendUp, color: '#10b981' },
+          { title: 'Taxa de Erro', value: stats.failed, icon: Warning, color: '#ef4444' }
         ].map((kpi, idx) => (
-          <div key={idx} className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-500 relative overflow-hidden group">
-            <div className="relative z-10">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 bg-white/[0.03] border border-white/10 group-hover:scale-110 transition-transform">
-                <kpi.icon size={24} weight="duotone" style={{ color: kpi.color }} />
+          <div key={idx} className="p-10 rounded-[32px] bg-[#0d0d0d] border border-white/[0.04] hover:border-white/[0.08] transition-all duration-700 group">
+            <div className="space-y-6">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/[0.03] border border-white/5">
+                <kpi.icon size={22} weight="duotone" style={{ color: kpi.color }} />
               </div>
-              <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{kpi.title}</h4>
-              <p className="text-4xl font-bold text-white tabular-nums tracking-tighter">{kpi.value}</p>
-              <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest opacity-50">{kpi.desc}</p>
-            </div>
-            <div className="absolute -bottom-2 -right-2 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
-              <kpi.icon size={80} weight="duotone" />
+              <div>
+                <h4 className="text-[10px] font-dm-mono font-bold text-muted-foreground uppercase tracking-[0.3em] mb-2">{kpi.title}</h4>
+                <p className="text-5xl font-bold text-white font-syne tracking-tighter tabular-nums">
+                  {kpi.value}
+                </p>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Chat Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-[320px,1fr] gap-0 rounded-2xl border border-white/5 bg-[#141414] overflow-hidden"
-        style={{ height: 'calc(100vh - 380px)', minHeight: '480px' }}
+      {/* Chat Interface Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-[360px,1fr] gap-0 rounded-[24px] border border-white/5 bg-[#0a0a0a] overflow-hidden shadow-2xl"
+        style={{ height: 'calc(100vh - 420px)', minHeight: '520px' }}
       >
-        {/* Left: Conversations */}
-        <div className="border-r border-white/5 flex flex-col">
-          <div className="px-4 py-3 border-b border-white/5">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Conversas</p>
+        {/* Left Panel: Conversations */}
+        <div className="border-r border-white/5 flex flex-col bg-[#0d0d0d]">
+          <div className="px-8 py-6 border-b border-white/5">
+            <h3 className="text-[10px] font-dm-mono font-bold text-muted-foreground uppercase tracking-widest">Conversas Ativas</h3>
           </div>
           <ConversationPanel
             conversations={conversations}
@@ -138,12 +146,12 @@ export function MessagingPage({
           />
         </div>
 
-        {/* Right: Chat */}
-        <div className="flex flex-col">
+        {/* Right Panel: Active Chat */}
+        <div className="flex flex-col bg-[#050505]">
           {selectedClientId ? (
             loadingMessages ? (
               <div className="flex-1 flex items-center justify-center">
-                <div className="w-5 h-5 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin" />
               </div>
             ) : (
               <ChatPanel
@@ -155,31 +163,33 @@ export function MessagingPage({
               />
             )
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-8">
-              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-12">
+              <div className="w-24 h-24 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center mb-8">
+                <ChatCircle size={40} weight="thin" className="text-muted-foreground/20" />
               </div>
-              <p className="font-medium text-white">Selecione um cliente</p>
-              <p className="text-sm mt-1 text-center max-w-xs">
-                Escolha uma conversa à esquerda ou busque um cliente pelo nome.
+              <h3 className="text-xl font-syne font-bold text-white tracking-tight mb-2 uppercase">Central de Atendimento</h3>
+              <p className="text-sm text-muted-foreground max-w-sm leading-relaxed opacity-50">
+                Selecione uma conversa à esquerda para visualizar o histórico ou iniciar um novo atendimento premium via WhatsApp.
               </p>
             </div>
           )}
         </div>
       </div>
 
+      {/* Modals with Injected Templates */}
       <BroadcastModal
         isOpen={isBroadcastOpen}
         onClose={() => setIsBroadcastOpen(false)}
         orgName={orgName}
+        templates={templates}
       />
       <TemplateModal
         isOpen={isTemplateOpen}
         onClose={() => setIsTemplateOpen(false)}
         clients={clients}
+        templates={templates}
         orgName={orgName}
+        onRefresh={handleRefresh}
       />
     </div>
   )

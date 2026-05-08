@@ -4,23 +4,27 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
 import { recordBroadcast } from '../actions'
-import type { ClientForMessage } from '../types'
-import { TEMPLATES, BROADCAST_GROUPS, type BroadcastGroup, type TemplateKey } from '../types'
-import { X, Lightning, Users, Eye, PaperPlaneRight } from '@phosphor-icons/react/dist/ssr'
+import type { ClientForMessage, MessageTemplate } from '../types'
+import { BROADCAST_GROUPS, type BroadcastGroup } from '../types'
+import { X, Lightning, Users, Eye, PaperPlaneRight, CheckCircle } from '@phosphor-icons/react/dist/ssr'
 
 interface BroadcastModalProps {
   isOpen: boolean
   onClose: () => void
   orgName: string
+  templates: MessageTemplate[]
 }
 
 function applyTemplateVars(content: string, client: ClientForMessage, orgName: string): string {
   return content
-    .replace(/\[NOME\]/g, client.full_name)
-    .replace(/\[NOME_BARBEARIA\]/g, orgName)
-    .replace(/\[DATA\]/g, new Date().toLocaleDateString('pt-BR'))
-    .replace(/\[HORA\]/g, new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
-    .replace(/\[BARBEIRO\]/g, 'seu barbeiro')
+    .replace(/\{nome\}/g, client.full_name)
+    .replace(/\{nome_barbearia\}/g, orgName)
+    .replace(/\{data\}/g, new Date().toLocaleDateString('pt-BR'))
+    .replace(/\{horario\}/g, new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
+    .replace(/\{servico\}/g, 'serviço')
+    .replace(/\{barbeiro\}/g, 'seu barbeiro')
+    .replace(/\{valor\}/g, 'R$ 0,00')
+    .replace(/\{link_agendamento\}/g, 'barbearia.com')
 }
 
 function sendWhatsApp(phone: string, message: string) {
@@ -29,17 +33,17 @@ function sendWhatsApp(phone: string, message: string) {
   window.open(url, '_blank')
 }
 
-export function BroadcastModal({ isOpen, onClose, orgName }: BroadcastModalProps) {
+export function BroadcastModal({ isOpen, onClose, orgName, templates }: BroadcastModalProps) {
   const [selectedGroup, setSelectedGroup] = useState<BroadcastGroup | ''>('')
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey | ''>('')
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [step, setStep] = useState<'config' | 'preview' | 'sending'>('config')
   const [isPending, startTransition] = useTransition()
   const [sentCount, setSentCount] = useState(0)
 
-  const template = TEMPLATES.find(t => t.key === selectedTemplate)
+  const template = templates.find(t => t.id === selectedTemplateId)
 
   const handlePreview = () => {
-    if (!selectedGroup || !selectedTemplate) {
+    if (!selectedGroup || !selectedTemplateId) {
       toast.error('Selecione grupo e template')
       return
     }
@@ -47,12 +51,12 @@ export function BroadcastModal({ isOpen, onClose, orgName }: BroadcastModalProps
   }
 
   const handleSend = () => {
-    if (!selectedGroup || !selectedTemplate || !template) return
+    if (!selectedGroup || !selectedTemplateId || !template) return
 
     startTransition(async () => {
       const fd = new FormData()
       fd.append('group', selectedGroup)
-      fd.append('template_key', selectedTemplate)
+      fd.append('template_key', selectedTemplateId)
       fd.append('content', template.content)
 
       const res = await recordBroadcast(fd)
@@ -71,7 +75,7 @@ export function BroadcastModal({ isOpen, onClose, orgName }: BroadcastModalProps
           sendWhatsApp(client.phone, msg)
           count++
           // Small delay to avoid browser blocking
-          await new Promise(r => setTimeout(r, 400))
+          await new Promise(r => setTimeout(r, 600))
         }
       }
 
@@ -84,7 +88,7 @@ export function BroadcastModal({ isOpen, onClose, orgName }: BroadcastModalProps
   const handleClose = () => {
     setStep('config')
     setSelectedGroup('')
-    setSelectedTemplate('')
+    setSelectedTemplateId('')
     setSentCount(0)
     onClose()
   }
@@ -93,119 +97,137 @@ export function BroadcastModal({ isOpen, onClose, orgName }: BroadcastModalProps
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={handleClose} />
-      <div className="relative bg-[#141414] border border-white/10 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden">
+      <div className="absolute inset-0 bg-black/95" onClick={handleClose} />
+      <div className="relative bg-[#0a0a0a] border border-white/5 rounded-[24px] w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-accent-cyan/10 flex items-center justify-center">
-              <Lightning size={20} weight="duotone" className="text-accent-cyan" />
+        <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-accent-cyan/10 flex items-center justify-center">
+              <Lightning size={24} weight="duotone" className="text-accent-cyan" />
             </div>
             <div>
-              <h2 className="font-syne font-bold text-white uppercase tracking-tight">Disparo em Massa</h2>
-              <p className="text-xs text-muted-foreground">WhatsApp · Todos os números com telefone</p>
+              <h2 className="font-syne font-bold text-2xl text-white uppercase tracking-tight">Disparo em Massa</h2>
+              <p className="text-[10px] font-dm-mono text-muted-foreground uppercase tracking-widest mt-1">Conectividade Exclusiva via WhatsApp</p>
             </div>
           </div>
-          <button onClick={handleClose} className="text-muted-foreground hover:text-white transition-colors">
+          <button onClick={handleClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-muted-foreground hover:text-white transition-colors">
             <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-8 overflow-y-auto scrollbar-hide">
           {step === 'sending' ? (
-            <div className="flex flex-col items-center py-8 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-[#25D366]/10 flex items-center justify-center">
-                <svg className="w-8 h-8 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
+            <div className="flex flex-col items-center py-12 space-y-6 animate-in fade-in zoom-in-95 duration-500">
+              <div className="w-24 h-24 rounded-full bg-[#25D366]/10 flex items-center justify-center relative">
+                <div className="absolute inset-0 rounded-full border-2 border-[#25D366] animate-ping opacity-20" />
+                <CheckCircle size={48} weight="duotone" className="text-[#25D366]" />
               </div>
-              <p className="text-2xl font-bold font-syne text-white">{sentCount} mensagens</p>
-              <p className="text-muted-foreground text-sm text-center">
-                Os links do WhatsApp foram abertos em novas abas.<br />
-                O envio foi registrado no histórico.
-              </p>
+              <div className="text-center space-y-2">
+                <p className="text-3xl font-bold font-syne text-white tracking-tighter">{sentCount} Mensagens</p>
+                <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+                  Os disparos foram iniciados com sucesso. O histórico já foi atualizado para auditoria.
+                </p>
+              </div>
               <button
                 onClick={handleClose}
-                className="px-6 py-2 rounded-xl bg-white/5 text-white text-sm font-bold hover:bg-white/10 transition-colors"
+                className="px-10 py-4 rounded-full bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-white/90 transition-all shadow-xl active:scale-95"
               >
-                Fechar
+                Finalizar
               </button>
             </div>
           ) : step === 'preview' ? (
-            <div className="space-y-5">
-              <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Preview da Mensagem</p>
-                <p className="text-sm text-white leading-relaxed">{template?.content}</p>
-                <p className="text-xs text-muted-foreground italic">
-                  [NOME], [HORA], etc. serão substituídos por dados reais de cada cliente.
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="space-y-4">
+                <label className="font-dm-mono text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Preview da Estrutura</label>
+                <div className="p-6 rounded-2xl bg-[#111] border border-white/5 space-y-4">
+                  <p className="text-sm text-white leading-relaxed whitespace-pre-wrap">{template?.content}</p>
+                  <div className="pt-4 border-t border-white/5">
+                    <p className="text-[10px] font-dm-mono text-accent-cyan/50 uppercase italic leading-relaxed">
+                      As chaves {'{nome}'}, {'{horario}'}, etc. serão injetadas dinamicamente com os dados de cada cliente no momento do disparo.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                  <p className="text-[10px] font-dm-mono text-muted-foreground uppercase">Alvo</p>
+                  <p className="text-sm font-bold text-white">{BROADCAST_GROUPS.find(g => g.id === selectedGroup)?.label}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                  <p className="text-[10px] font-dm-mono text-muted-foreground uppercase">Template</p>
+                  <p className="text-sm font-bold text-white">{template?.name}</p>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 flex gap-4">
+                <div className="shrink-0 text-amber-500">
+                  <Lightning size={20} weight="fill" />
+                </div>
+                <p className="text-xs text-amber-200/60 leading-relaxed">
+                  O sistema abrirá o WhatsApp Web para cada cliente. Recomendamos manter a janela visível e evitar disparos superiores a 30 contatos para mitigar riscos de spam.
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Users size={16} weight="duotone" />
-                <span>Grupo: <strong className="text-white">{BROADCAST_GROUPS.find(g => g.id === selectedGroup)?.label ?? 'Não selecionado'}</strong></span>
-              </div>
-              <p className="text-xs text-amber-400/80 bg-amber-400/5 border border-amber-400/20 rounded-xl p-3">
-                ⚠️ O WhatsApp será aberto para <strong>cada cliente com telefone</strong> em sequência. Pode haver bloqueio após muitas abas. Recomendado: até 20 clientes por vez.
-              </p>
-              <div className="flex gap-3">
+
+              <div className="flex gap-4 pt-4">
                 <button
                   onClick={() => setStep('config')}
-                  className="flex-1 py-2.5 rounded-xl bg-white/5 text-white text-sm font-bold hover:bg-white/10 transition-colors"
+                  className="flex-1 py-4 rounded-full border border-white/10 text-white text-xs font-bold uppercase tracking-widest hover:bg-white/5 transition-colors"
                 >
                   Voltar
                 </button>
                 <button
                   onClick={handleSend}
                   disabled={isPending}
-                  className="flex-[2] flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#25D366] text-white text-sm font-bold hover:bg-[#25D366]/90 transition-colors disabled:opacity-50"
+                  className="flex-[2] flex items-center justify-center gap-3 py-4 rounded-full bg-[#25D366] text-black text-xs font-bold uppercase tracking-widest hover:bg-[#25D366]/90 transition-all shadow-[0_0_30px_rgba(37,211,102,0.2)] active:scale-95 disabled:opacity-30"
                 >
                   <PaperPlaneRight size={18} weight="bold" />
-                  {isPending ? 'Disparando...' : 'Disparar Mensagens'}
+                  {isPending ? 'Iniciando Disparos...' : 'Confirmar Disparo'}
                 </button>
               </div>
             </div>
           ) : (
-            <div className="space-y-5">
+            <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-500">
               {/* Group */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Grupo de Clientes</label>
-                <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-4">
+                <label className="font-dm-mono text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Segmentação de Público</label>
+                <div className="grid grid-cols-2 gap-3">
                   {BROADCAST_GROUPS.map(g => (
                     <button
                       key={g.id}
                       onClick={() => setSelectedGroup(g.id)}
                       className={cn(
-                        'p-3 rounded-xl border text-left transition-all text-sm',
+                        'p-5 rounded-2xl border text-left transition-all duration-300',
                         selectedGroup === g.id
-                          ? 'border-accent-cyan/50 bg-accent-cyan/5 text-white'
-                          : 'border-white/10 bg-white/5 text-muted-foreground hover:border-white/20'
+                          ? 'border-accent-cyan bg-accent-cyan/5 text-white'
+                          : 'border-white/5 bg-[#111] text-muted-foreground hover:border-white/10 hover:text-white'
                       )}
                     >
-                      {g.label}
+                      <p className="text-xs font-bold uppercase tracking-widest">{g.label}</p>
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Template */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Template de Mensagem</label>
-                <div className="space-y-2">
-                  {TEMPLATES.map(t => (
+              <div className="space-y-4">
+                <label className="font-dm-mono text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Template de Alta Performance</label>
+                <div className="space-y-3 max-h-[240px] overflow-y-auto pr-2 scrollbar-hide">
+                  {templates.map(t => (
                     <button
-                      key={t.key}
-                      onClick={() => setSelectedTemplate(t.key)}
+                      key={t.id}
+                      onClick={() => setSelectedTemplateId(t.id)}
                       className={cn(
-                        'w-full p-3 rounded-xl border text-left transition-all',
-                        selectedTemplate === t.key
-                          ? 'border-accent-cyan/50 bg-accent-cyan/5'
-                          : 'border-white/10 bg-white/5 hover:border-white/20'
+                        'w-full p-5 rounded-2xl border text-left transition-all duration-300',
+                        selectedTemplateId === t.id
+                          ? 'border-accent-cyan bg-accent-cyan/5'
+                          : 'border-white/5 bg-[#111] hover:border-white/10'
                       )}
                     >
-                      <p className="text-sm font-bold text-white">{t.label}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t.description}</p>
+                      <p className="text-sm font-bold text-white">{t.name}</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1 opacity-60">{t.description}</p>
                     </button>
                   ))}
                 </div>
@@ -213,11 +235,11 @@ export function BroadcastModal({ isOpen, onClose, orgName }: BroadcastModalProps
 
               <button
                 onClick={handlePreview}
-                disabled={!selectedGroup || !selectedTemplate}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-accent-cyan text-black font-bold uppercase tracking-wider text-sm hover:bg-accent-cyan/90 transition-colors disabled:opacity-40"
+                disabled={!selectedGroup || !selectedTemplateId}
+                className="w-full h-16 flex items-center justify-center gap-3 rounded-full bg-accent-cyan text-black font-black uppercase tracking-widest text-xs hover:bg-accent-cyan/90 transition-all shadow-[0_10px_30px_rgba(0,229,255,0.2)] active:scale-[0.98] disabled:opacity-20"
               >
-                <Eye size={18} weight="bold" />
-                Pré-visualizar
+                <Eye size={20} weight="bold" />
+                Validar Configuração
               </button>
             </div>
           )}
@@ -226,3 +248,4 @@ export function BroadcastModal({ isOpen, onClose, orgName }: BroadcastModalProps
     </div>
   )
 }
+

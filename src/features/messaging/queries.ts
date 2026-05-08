@@ -2,7 +2,7 @@ import 'server-only'
 import { cache } from 'react'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireUser } from '@/lib/auth/require-auth'
-import type { Message, MessageConversation, MessagingStats, ClientForMessage } from './types'
+import type { Message, MessageConversation, MessagingStats, ClientForMessage, MessageTemplate } from './types'
 
 const MESSAGE_SELECT = `
   id, organization_id, client_id, channel, direction,
@@ -164,4 +164,26 @@ export const getClientsForMessaging = cache(async (group?: string): Promise<Clie
   }
 
   return clients
+})
+
+/**
+ * Busca templates de mensagens da organização
+ */
+export const getMessageTemplates = cache(async (): Promise<MessageTemplate[]> => {
+  const user = await requireUser()
+
+  const { data, error } = await (supabaseAdmin as any)
+    .from('message_templates')
+    .select('*')
+    .eq('organization_id', user.organization_id)
+    .eq('is_active', true)
+    .order('is_system', { ascending: false }) // sistema primeiro
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    console.error('[GET_TEMPLATES]', error.message)
+    return []
+  }
+
+  return (data || []) as unknown as MessageTemplate[]
 })
