@@ -17,9 +17,29 @@ async function test() {
       .gte('start_time', start.toISOString())
       .lte('start_time', end.toISOString())
       
-  console.log("Found:", currentApps?.length)
-  console.log("Error:", error)
-  console.log("Data:", currentApps)
+  const { data: currentComandas } = await supabase
+    .from('comanda_items')
+    .select('id, total_cents, payment_method, name, quantity, item_type, paid_at, created_at, appointment_id')
+    .eq('organization_id', orgId)
+    .eq('paid', true)
+    .gte('created_at', start.toISOString())
+    .lte('created_at', end.toISOString())
+
+  const items = (currentApps as any[]) || []
+  const comandas = (currentComandas as any[]) || []
+  const comandasAvulsas = comandas.filter(c => !c.appointment_id)
+
+  const totalRevenueCents = items.reduce((acc, a) => acc + (a.price_cents || 0), 0) + 
+                            comandasAvulsas.reduce((acc, c) => acc + (c.total_cents || 0), 0)
+
+  const totalItemsCount = items.length + comandasAvulsas.length
+  const avgTicket = totalItemsCount > 0 ? (totalRevenueCents / totalItemsCount) / 100 : 0
+
+  console.log("Total Appointments (items):", items.length)
+  console.log("Total Comandas Avulsas:", comandasAvulsas.length)
+  console.log("Total Revenue (BRL):", totalRevenueCents / 100)
+  console.log("Average Ticket (BRL):", avgTicket)
+  console.log("Total Comandas (KPI):", totalItemsCount)
 }
 
 test()
