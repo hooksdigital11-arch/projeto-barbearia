@@ -11,7 +11,14 @@ interface ComandaItemRowProps {
   item: ComandaItem
 }
 
-export function ComandaItemRow({ item }: ComandaItemRowProps) {
+import { Scissors, Package, Trash } from '@phosphor-icons/react'
+
+interface ComandaItemRowProps {
+  item: ComandaItem
+  index?: number
+}
+
+export function ComandaItemRow({ item, index = 0 }: ComandaItemRowProps) {
   const [isPending, startTransition] = useTransition()
 
   const handleRemove = () => {
@@ -26,27 +33,42 @@ export function ComandaItemRow({ item }: ComandaItemRowProps) {
   }
 
   return (
-    <div className="flex items-center justify-between py-3 border-b border-white/5 last:border-0 group">
-      <div className="flex flex-col">
-        <span className="font-medium text-white flex items-center gap-2">
-          {item.item_type === 'service' ? '✂️' : '🧴'} {item.name}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {item.quantity}x de R$ {(item.unit_price_cents / 100).toFixed(2)}
-        </span>
-      </div>
+    <div 
+      style={{ animationDelay: `${index * 80}ms` }}
+      className="flex items-center justify-between py-5 border-b border-white/5 last:border-0 group animate-in fade-in slide-in-from-right-2 duration-500"
+    >
       <div className="flex items-center gap-4">
-        <span className="font-semibold text-white">
+        <div className={cn(
+          "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 shadow-lg",
+          item.item_type === 'service' ? "bg-accent-blue/10 text-accent-blue shadow-accent-blue/10" : "bg-accent-cyan/10 text-accent-cyan shadow-accent-cyan/10"
+        )}>
+          {item.item_type === 'service' ? (
+            <Scissors size={20} weight="duotone" />
+          ) : (
+            <Package size={20} weight="duotone" />
+          )}
+        </div>
+        <div className="flex flex-col">
+          <span className="font-bold text-white tracking-tight group-hover:text-accent-cyan transition-colors">
+            {item.name}
+          </span>
+          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+            {item.quantity}x de R$ {(item.unit_price_cents / 100).toFixed(2)}
+          </span>
+        </div>
+      </div>
+      <div className="flex items-center gap-6">
+        <span className="font-bold text-white font-mono tabular-nums">
           R$ {(item.total_cents / 100).toFixed(2)}
         </span>
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-muted-foreground hover:text-error hover:bg-error/10 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="h-10 w-10 rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all active:scale-90"
           onClick={handleRemove}
           disabled={isPending}
         >
-          <X className="h-4 w-4" />
+          <Trash size={18} weight="duotone" />
         </Button>
       </div>
     </div>

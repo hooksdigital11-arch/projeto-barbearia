@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { Package, Tag, Wrench, Warning } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 import type { InventoryStats, InventoryItem } from '../types'
@@ -18,78 +19,111 @@ export function InventoryStatsCards({ stats, items, period, salesData, isLoading
   }
 
   // Calcular faturamento real total do período
-  let totalRevenue = 0
-  items.forEach(item => {
-    if (item.type === 'revenda') {
-      const sale = salesData.get(item.id)
-      if (sale) {
-        totalRevenue += sale.faturamento
+  const totalRevenue = useMemo(() => {
+    let total = 0
+    items.forEach(item => {
+      if (item.type === 'revenda') {
+        const sale = salesData.get(item.id)
+        if (sale) {
+          total += sale.faturamento
+        }
       }
-    }
-  })
+    })
+    return total
+  }, [items, salesData])
+
+  const Skeleton = () => (
+    <div className="space-y-4">
+      <div className="w-12 h-12 rounded-2xl bg-white/5 animate-pulse" />
+      <div className="space-y-2">
+        <div className="w-24 h-2 bg-white/5 animate-pulse rounded" />
+        <div className="w-16 h-8 bg-white/5 animate-pulse rounded" />
+      </div>
+    </div>
+  )
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      <div className="p-6 rounded-[2rem] bg-accent-cyan/5 border border-accent-cyan/10 space-y-3">
-        <div className="w-10 h-10 rounded-xl bg-accent-cyan/10 flex items-center justify-center text-accent-cyan">
-          <Package size={24} weight="duotone" />
-        </div>
-        <div>
-          <p className="text-[10px] font-bold text-accent-cyan/60 uppercase tracking-widest">Total de Itens</p>
-          <p className="text-3xl font-bold text-white font-syne">{stats.total}</p>
-        </div>
+      {/* Total Items */}
+      <div className="p-6 rounded-[2.5rem] bg-accent-cyan/5 border border-white/5 backdrop-blur-xl space-y-4 hover:border-accent-cyan/20 transition-all duration-300 group">
+        {isLoading ? <Skeleton /> : (
+          <>
+            <div className="w-12 h-12 rounded-2xl bg-accent-cyan/10 flex items-center justify-center text-accent-cyan group-hover:scale-110 transition-transform duration-500">
+              <Package size={26} weight="duotone" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-accent-cyan/60 uppercase tracking-[0.2em]">Total de Itens</p>
+              <p className="text-4xl font-bold text-white font-syne mt-1">{stats.total}</p>
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="p-6 rounded-[2rem] bg-green-500/5 border border-green-500/10 space-y-3">
-        <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400">
-          <Tag size={24} weight="duotone" />
-        </div>
-        <div className="flex flex-col">
-          <p className="text-[10px] font-bold text-green-400/60 uppercase tracking-widest">Revenda</p>
-          <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-bold text-white font-syne">{stats.revenda}</p>
-          </div>
-          <div className="mt-1">
-            <p className="text-[10px] text-accent-cyan font-mono font-bold tracking-tight">
-              {formatPrice(totalRevenue)}
-            </p>
-            <p className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">faturamento {period}</p>
-          </div>
-        </div>
+      {/* Revenda */}
+      <div className="p-6 rounded-[2.5rem] bg-green-500/5 border border-white/5 backdrop-blur-xl space-y-4 hover:border-green-500/20 transition-all duration-300 group">
+        {isLoading ? <Skeleton /> : (
+          <>
+            <div className="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-400 group-hover:scale-110 transition-transform duration-500">
+              <Tag size={26} weight="duotone" />
+            </div>
+            <div className="flex flex-col">
+              <p className="text-[10px] font-black text-green-400/60 uppercase tracking-[0.2em]">Revenda</p>
+              <div className="flex items-baseline gap-2 mt-1">
+                <p className="text-4xl font-bold text-white font-syne">{stats.revenda}</p>
+              </div>
+              <div className="mt-3 p-3 rounded-2xl bg-black/20 border border-white/5">
+                <p className="text-xs text-accent-cyan font-mono font-bold">
+                  {formatPrice(totalRevenue)}
+                </p>
+                <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest mt-1">faturamento {period}</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="p-6 rounded-[2rem] bg-blue-500/5 border border-blue-500/10 space-y-3">
-        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
-          <Wrench size={24} weight="duotone" />
-        </div>
-        <div>
-          <p className="text-[10px] font-bold text-blue-400/60 uppercase tracking-widest">Uso Interno</p>
-          <p className="text-3xl font-bold text-white font-syne">{stats.usoInterno}</p>
-        </div>
+      {/* Uso Interno */}
+      <div className="p-6 rounded-[2.5rem] bg-blue-500/5 border border-white/5 backdrop-blur-xl space-y-4 hover:border-blue-500/20 transition-all duration-300 group">
+        {isLoading ? <Skeleton /> : (
+          <>
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform duration-500">
+              <Wrench size={26} weight="duotone" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-blue-400/60 uppercase tracking-[0.2em]">Uso Interno</p>
+              <p className="text-4xl font-bold text-white font-syne mt-1">{stats.usoInterno}</p>
+            </div>
+          </>
+        )}
       </div>
 
+      {/* Alerts */}
       <div className={cn(
-        "p-6 rounded-[2rem] border space-y-3 transition-all duration-500",
+        "p-6 rounded-[2.5rem] border backdrop-blur-xl space-y-4 transition-all duration-500 group",
         stats.lowStock > 0 
-          ? "bg-red-500/10 border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.05)]" 
+          ? "bg-red-500/10 border-red-500/30 shadow-[0_0_30px_rgba(239,68,68,0.1)]" 
           : "bg-white/5 border-white/5"
       )}>
-        <div className={cn(
-          "w-10 h-10 rounded-xl flex items-center justify-center",
-          stats.lowStock > 0 ? "bg-red-500/20 text-red-400" : "bg-white/10 text-muted-foreground"
-        )}>
-          <Warning size={24} weight={stats.lowStock > 0 ? "fill" : "duotone"} />
-        </div>
-        <div>
-          <p className={cn(
-            "text-[10px] font-bold uppercase tracking-widest",
-            stats.lowStock > 0 ? "text-red-400/60" : "text-muted-foreground/60"
-          )}>Alertas</p>
-          <p className={cn(
-            "text-3xl font-bold font-syne",
-            stats.lowStock > 0 ? "text-red-400" : "text-white"
-          )}>{stats.lowStock}</p>
-        </div>
+        {isLoading ? <Skeleton /> : (
+          <>
+            <div className={cn(
+              "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110",
+              stats.lowStock > 0 ? "bg-red-500/20 text-red-400" : "bg-white/10 text-muted-foreground"
+            )}>
+              <Warning size={26} weight={stats.lowStock > 0 ? "fill" : "duotone"} />
+            </div>
+            <div>
+              <p className={cn(
+                "text-[10px] font-black uppercase tracking-[0.2em]",
+                stats.lowStock > 0 ? "text-red-400/60" : "text-muted-foreground/60"
+              )}>Alertas Críticos</p>
+              <p className={cn(
+                "text-4xl font-bold font-syne mt-1",
+                stats.lowStock > 0 ? "text-red-400" : "text-white"
+              )}>{stats.lowStock}</p>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

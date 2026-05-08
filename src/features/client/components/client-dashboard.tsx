@@ -20,23 +20,26 @@ export async function ClientDashboard() {
   const data = await getClientDashboardData()
 
   return (
-    <div className="p-8 space-y-8 max-w-7xl mx-auto animate-in fade-in duration-500 pb-20">
+    <div className="p-8 space-y-16 animate-in fade-in duration-1000 pb-20">
       <RealtimeRefresher organizationId="" />
-      {/* Header Boas-vindas */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-1">
-          <h1 className="text-4xl font-extrabold font-syne text-white tracking-tight">
-            Olá, {data.profile.name}!
-          </h1>
-          <p className="text-text-secondary">
-            Seu barbeiro preferido, <span className="text-accent-cyan font-bold">{data.profile.preferredBarber}</span>, está disponível hoje.
+      {/* Header Boas-vindas Pro Max */}
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-syne text-white tracking-tighter leading-none uppercase">
+              Bem-vindo<span className="text-accent-cyan">.</span>
+            </h1>
+          </div>
+          <p className="text-text-secondary text-lg font-medium max-w-md ml-7 border-l border-white/10 pl-6">
+            Olá, <span className="text-white font-bold">{data.profile.name}</span>. Seu barbeiro preferido, <span className="text-accent-cyan font-bold">{data.profile.preferredBarber}</span>, está disponível hoje para transformar seu visual.
           </p>
         </div>
         
-        <button className="flex items-center gap-2 px-8 py-4 bg-accent-cyan text-black font-extrabold rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-accent-cyan/20 group">
-          <Plus size={20} weight="bold" />
-          Agendar Novo Corte
-          <ArrowRight size={18} weight="bold" className="group-hover:translate-x-1 transition-transform" />
+        <button className="flex items-center gap-4 px-10 py-7 bg-white text-black font-black text-xs uppercase tracking-[0.2em] rounded-[2rem] hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group lg:ml-0">
+          <Plus size={22} weight="bold" className="group-hover:rotate-90 transition-transform duration-500" />
+          Agendar Corte
+          <ArrowRight size={20} weight="bold" className="group-hover:translate-x-2 transition-transform duration-500" />
         </button>
       </div>
 

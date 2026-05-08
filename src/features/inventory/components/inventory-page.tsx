@@ -1,19 +1,22 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { useState, useMemo, useTransition, useEffect } from 'react'
+import { useState, useMemo, useTransition, useEffect, useCallback } from 'react'
 import { Plus, ArrowCounterClockwise } from '@phosphor-icons/react'
+import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/button'
 import { InventoryStatsCards } from './inventory-stats'
 import { LowStockAlert } from './low-stock-alert'
 import { InventoryFilters } from './inventory-filters'
-import { InventoryTable } from './inventory-table'
-import { CreateProductModal } from './create-product-modal'
-import { EditProductModal } from './edit-product-modal'
-import { StockMovementModal } from './stock-movement-modal'
 import { deleteProduct, reactivateProduct, getSalesByPeriodAction } from '../actions'
 import { toast } from 'sonner'
 import type { InventoryItem, InventoryStats } from '../types'
+
+const InventoryTable = dynamic(() => import('./inventory-table').then(m => m.InventoryTable), { ssr: false })
+const CreateProductModal = dynamic(() => import('./create-product-modal').then(m => m.CreateProductModal), { ssr: false })
+const EditProductModal = dynamic(() => import('./edit-product-modal').then(m => m.EditProductModal), { ssr: false })
+const StockMovementModal = dynamic(() => import('./stock-movement-modal').then(m => m.StockMovementModal), { ssr: false })
 
 interface Filters {
   category: string
@@ -33,12 +36,13 @@ interface InventoryPageProps {
 
 export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: InventoryPageProps) {
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const [activeTab, setActiveTab] = useState<'all' | 'revenda' | 'uso_interno' | 'inactive'>('all')
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
   const [period, setPeriod] = useState<'hoje' | 'semana' | 'mes' | 'ano'>('mes')
+  const [showCost, setShowCost] = useState(false)
   const [salesData, setSalesData] = useState<Map<string, { qtdVendida: number, faturamento: number }>>(new Map())
-  const [isLoadingSales, setIsLoadingSales] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   // Modais
@@ -46,48 +50,45 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
   const [editingProduct, setEditingProduct] = useState<InventoryItem | null>(null)
   const [movingProduct, setMovingProduct] = useState<InventoryItem | null>(null)
 
-  const [isPending, startTransition] = useTransition()
 
   const organizationId = activeItems[0]?.organization_id || inactiveItems[0]?.organization_id
 
   useEffect(() => {
     if (!organizationId) return
 
-    async function loadSales() {
-      setIsLoadingSales(true)
-      const now = new Date()
-      let start = new Date()
-      const end = new Date()
+    function loadSales() {
+      startTransition(async () => {
+        const now = new Date()
+        let start = new Date()
+        const end = new Date()
 
-      if (period === 'hoje') {
-        start.setHours(0, 0, 0, 0)
-        end.setHours(23, 59, 59, 999)
-      } else if (period === 'semana') {
-        // Segunda-feira desta semana
-        const day = start.getDay()
-        const diff = start.getDate() - day + (day === 0 ? -6 : 1)
-        start.setDate(diff)
-        start.setHours(0, 0, 0, 0)
-      } else if (period === 'mes') {
-        start.setDate(1)
-        start.setHours(0, 0, 0, 0)
-      } else if (period === 'ano') {
-        start.setMonth(0, 1)
-        start.setHours(0, 0, 0, 0)
-      }
+        if (period === 'hoje') {
+          start.setHours(0, 0, 0, 0)
+          end.setHours(23, 59, 59, 999)
+        } else if (period === 'semana') {
+          const day = start.getDay()
+          const diff = start.getDate() - day + (day === 0 ? -6 : 1)
+          start.setDate(diff)
+          start.setHours(0, 0, 0, 0)
+        } else if (period === 'mes') {
+          start.setDate(1)
+          start.setHours(0, 0, 0, 0)
+        } else if (period === 'ano') {
+          start.setMonth(0, 1)
+          start.setHours(0, 0, 0, 0)
+        }
 
-      try {
-        const dataArray = await getSalesByPeriodAction(start.toISOString(), end.toISOString())
-        const newSalesMap = new Map<string, { qtdVendida: number, faturamento: number }>()
-        dataArray.forEach(item => {
-          newSalesMap.set(item.id, { qtdVendida: item.qtdVendida, faturamento: item.faturamento })
-        })
-        setSalesData(newSalesMap)
-      } catch (err) {
-        console.error('Failed to load sales data:', err)
-      } finally {
-        setIsLoadingSales(false)
-      }
+        try {
+          const dataArray = await getSalesByPeriodAction(start.toISOString(), end.toISOString())
+          const newSalesMap = new Map<string, { qtdVendida: number, faturamento: number }>()
+          dataArray.forEach(item => {
+            newSalesMap.set(item.id, { qtdVendida: item.qtdVendida, faturamento: item.faturamento })
+          })
+          setSalesData(newSalesMap)
+        } catch (err) {
+          console.error('Failed to load sales data:', err)
+        }
+      })
     }
 
     loadSales()
@@ -137,44 +138,73 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
+    <div className="space-y-12 animate-in fade-in duration-1000">
       <LowStockAlert
         count={stats.lowStock}
         onFilter={() => {
-          setActiveTab('all')
-          setFilters({ ...DEFAULT_FILTERS, lowStockOnly: true })
+          startTransition(() => {
+            setActiveTab('all')
+            setFilters({ ...DEFAULT_FILTERS, lowStockOnly: true })
+          })
         }}
       />
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold font-syne text-white tracking-tight">Estoque</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Gerenciamento completo de suprimentos e revenda.</p>
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-syne text-white tracking-tighter leading-none">
+              Estoque<span className="text-accent-cyan">.</span>
+            </h1>
+          </div>
+          <p className="text-text-secondary text-lg font-medium max-w-md ml-7 border-l border-white/10 pl-6">
+            Controle total de produtos, insumos e movimentações. Gestão inteligente para evitar rupturas.
+          </p>
         </div>
-        {userRole === 'admin' && (
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="bg-accent-cyan hover:bg-cyan-400 text-black font-bold gap-2 rounded-2xl px-8 py-7 text-base shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <Plus size={20} weight="bold" />
-            Novo Produto
-          </Button>
-        )}
+
+        <div className="flex items-center gap-4 ml-7 lg:ml-0">
+          {userRole === 'admin' && (
+            <button
+              onClick={() => setShowCost(!showCost)}
+              className={cn(
+                "px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 border",
+                showCost 
+                  ? "bg-accent-cyan/10 text-accent-cyan border-accent-cyan/20 shadow-[0_0_20px_rgba(0,229,255,0.1)]" 
+                  : "bg-white/5 text-muted-foreground border-white/10 hover:text-white"
+              )}
+            >
+              {showCost ? 'Ocultar Custos' : 'Ver Custos'}
+            </button>
+          )}
+          
+          {userRole === 'admin' && (
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="flex items-center gap-3 px-8 py-4 bg-white text-black rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group"
+            >
+              <Plus size={20} weight="bold" className="group-hover:rotate-90 transition-transform duration-500" />
+              Novo Item
+            </button>
+          )}
+        </div>
       </div>
 
-      <InventoryStatsCards stats={stats} items={activeItems} period={period} salesData={salesData} isLoading={isLoadingSales} />
+      <div className="relative">
+        <div className="absolute -top-20 -left-20 w-64 h-64 bg-accent-cyan/5 rounded-full blur-[100px] pointer-events-none" />
+        <InventoryStatsCards stats={stats} items={activeItems} period={period} salesData={salesData} isLoading={isPending} />
+      </div>
 
       <div className="space-y-6">
         <InventoryFilters
           activeTab={activeTab}
-          setActiveTab={(t) => { setActiveTab(t); setFilters(DEFAULT_FILTERS) }}
+          setActiveTab={(t) => startTransition(() => { setActiveTab(t); setFilters(DEFAULT_FILTERS) })}
           search={search}
-          setSearch={setSearch}
+          setSearch={(s) => startTransition(() => setSearch(s))}
           filters={filters}
-          setFilters={setFilters}
+          setFilters={(f) => startTransition(() => setFilters(f))}
           inactiveCount={inactiveItems.length}
           period={period}
-          setPeriod={setPeriod}
+          setPeriod={(p) => startTransition(() => setPeriod(p))}
         />
 
         {activeTab === 'inactive' ? (
@@ -194,7 +224,7 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
             showCost={userRole === 'admin'}
             period={period}
             salesData={salesData}
-            isLoading={isLoadingSales}
+             isLoading={isPending}
           />
         )}
       </div>

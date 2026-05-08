@@ -37,6 +37,7 @@ import { requireUser } from "@/lib/auth/require-auth"
 import { getOrganization } from "@/features/organization/queries"
 import { LogoutButton } from "@/components/shared/logout-button"
 import { RealtimeListener } from "@/components/shared/realtime-listener"
+import { BackgroundMesh } from "@/components/shared/background-mesh"
 
 export default async function DashboardLayout({
   children,
@@ -54,11 +55,10 @@ export default async function DashboardLayout({
       <RealtimeListener organizationId={profile.organization_id} />
 
       {/* Decorative background effects */}
-      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-cyan/10 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-accent-blue/10 blur-[120px] rounded-full pointer-events-none" />
+      <BackgroundMesh />
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-72 flex-col fixed inset-y-0 z-50 p-4">
+      <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 z-50 p-4">
         <div className="glass-card flex flex-col h-full overflow-hidden">
           <div className="p-8">
             <Link 
@@ -138,7 +138,7 @@ export default async function DashboardLayout({
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 md:pl-[304px] flex flex-col relative z-10 min-h-screen">
+      <div className="flex-1 md:pl-64 flex flex-col relative z-10 min-h-screen overflow-x-hidden">
         {/* Mobile Header */}
         <header className="md:hidden h-20 border-b border-white/5 flex items-center justify-between px-6 bg-black/40 backdrop-blur-xl sticky top-0 z-50">
           <div className="flex items-center gap-3">
@@ -157,7 +157,7 @@ export default async function DashboardLayout({
         </header>
         
         <main className="flex-1 p-6 md:p-10 lg:p-12">
-          <div className="max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+          <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out overflow-x-hidden">
             {children}
           </div>
         </main>

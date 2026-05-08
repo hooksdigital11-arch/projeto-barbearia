@@ -13,18 +13,21 @@ export default async function AdminComandaPage({
   const user = await requireUser()
   const supabase = await createClient()
 
-  // Buscar barbeiros para o filtro
-  const { data: barbers } = await supabase
-    .from('profiles')
-    .select('id, full_name')
-    .eq('organization_id', user.organization_id)
-    .in('role', ['admin', 'barber'])
+  // Buscar dados em paralelo para evitar waterfalls
+  const [barbersResponse, stats, history] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, full_name')
+      .eq('organization_id', user.organization_id)
+      .in('role', ['admin', 'barber']),
+    getComandasStats(),
+    getComandasHistory({
+      period: (params.period as any) || 'today',
+      barberId: params.barberId === 'all' ? undefined : params.barberId,
+    })
+  ])
 
-  const stats = await getComandasStats()
-  const history = await getComandasHistory({
-    period: (params.period as any) || 'today',
-    barberId: params.barberId === 'all' ? undefined : params.barberId,
-  })
+  const barbers = barbersResponse.data || []
 
   return (
     <div className="flex-1 p-4 md:p-8 pt-6">

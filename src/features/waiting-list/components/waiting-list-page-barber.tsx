@@ -1,5 +1,6 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import {
   Queue,
@@ -11,10 +12,11 @@ import {
 import { KPICard } from '@/components/shared/kpi-card'
 import { PageTitle } from '@/components/shared/page-title'
 import { EmptyState } from '@/components/shared/empty-state'
-import { WaitingListCard } from './waiting-list-card'
-import { AddToQueueModal } from './add-to-queue-modal'
 import { WaitingListRealtime } from './waiting-list-realtime'
 import type { WaitingListEntry, QueueStats, ServiceOption, BarberOption, ClientOption } from '../types'
+
+const AddToQueueModal = dynamic(() => import('./add-to-queue-modal').then(m => m.AddToQueueModal), { ssr: false })
+const WaitingListCard = dynamic(() => import('./waiting-list-card').then(m => m.WaitingListCard), { ssr: false })
 
 interface WaitingListPageBarberProps {
   entries: WaitingListEntry[]

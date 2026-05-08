@@ -14,12 +14,20 @@ export default async function AdminUsersPage() {
   await requireAdmin()
 
   return (
-    <div className="p-4 md:p-8 space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <PageTitle 
-          title="Gestão de Usuários" 
-          subtitle="Cadastre e gerencie barbeiros e administradores da sua unidade" 
-        />
+    <div className="p-4 md:p-8 space-y-16 animate-in fade-in duration-1000">
+      {/* Header com Design Assimétrico */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
+            <h1 className="text-5xl md:text-7xl font-black font-syne text-white tracking-tighter leading-none uppercase">
+              Usuários<span className="text-accent-cyan">.</span>
+            </h1>
+          </div>
+          <p className="text-text-secondary text-lg font-medium max-w-xl ml-7 border-l border-white/10 pl-6">
+            Gestão de acessos e permissões. Controle sua equipe de barbeiros e administradores com total transparência e segurança.
+          </p>
+        </div>
       </div>
 
       <Suspense fallback={

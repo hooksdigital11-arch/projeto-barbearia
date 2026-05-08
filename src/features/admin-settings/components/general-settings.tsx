@@ -146,11 +146,11 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
                 ) : (
                   <Storefront size={40} weight="duotone" className="text-muted-foreground" />
                 )}
-                {isUploading && (
+                {isUploading ? (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
                     <CircleNotch size={24} className="animate-spin text-accent-cyan" />
                   </div>
-                )}
+                ) : null}
               </div>
               <button type="button" onClick={() => fileInputRef.current?.click()} className="absolute -bottom-2 -right-2 p-3 bg-accent-cyan text-black rounded-2xl shadow-xl hover:scale-105 transition-all">
                 <UploadSimple size={20} weight="bold" />
@@ -160,11 +160,11 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
             <div className="space-y-2 text-center md:text-left">
               <h3 className="text-lg font-bold text-white">Logo da Marca</h3>
               <p className="text-xs text-muted-foreground max-w-[280px]">Quadrada, máx. 5MB, 1080x1080px.</p>
-              {form.watch('logoUrl') && (
+              {form.watch('logoUrl') ? (
                 <button type="button" onClick={() => form.setValue('logoUrl', '')} className="text-[10px] text-red-400 uppercase font-bold tracking-widest hover:underline flex items-center gap-1 mt-2 justify-center md:justify-start">
                   <Trash size={12} /> Remover Logo
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
 

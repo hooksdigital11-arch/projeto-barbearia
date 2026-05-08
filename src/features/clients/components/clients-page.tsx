@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import dynamic from 'next/dynamic'
+import { useState, useCallback, useEffect, useDeferredValue } from 'react'
 import {
   Users,
   UserCheck,
@@ -11,15 +12,15 @@ import {
 } from '@phosphor-icons/react'
 import { KPICard } from '@/components/shared/kpi-card'
 import { PageTitle } from '@/components/shared/page-title'
-import { EmptyState } from '@/components/shared/empty-state'
 import { SearchInput } from '@/components/shared/search-input'
 import { ViewToggle } from './view-toggle'
-import { ClientCard } from './client-card'
-import { ClientsTable } from './clients-table'
-import { CreateClientModal } from './create-client-modal'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils/cn'
 import type { ClientRecord, ClientsStats, BarberOption, ClientStatus } from '../types'
+
+const CreateClientModal = dynamic(() => import('./create-client-modal').then(m => m.CreateClientModal), { ssr: false })
+const ClientsTable = dynamic(() => import('./clients-table').then(m => m.ClientsTable), { ssr: false })
+const ClientCard = dynamic(() => import('./client-card').then(m => m.ClientCard), { ssr: false })
 
 interface ClientsPageProps {
   clients: ClientRecord[]
@@ -59,10 +60,12 @@ export function ClientsPage({
     setSearch(value)
   }, [])
 
+  const deferredSearch = useDeferredValue(search)
+
   // Client-side filtering for instant feedback
   const filtered = clients.filter(c => {
-    if (search) {
-      const q = search.toLowerCase()
+    if (deferredSearch) {
+      const q = deferredSearch.toLowerCase()
       const matchesName = c.full_name?.toLowerCase().includes(q)
       const matchesPhone = c.phone?.toLowerCase().includes(q)
       const matchesEmail = c.email?.toLowerCase().includes(q)
@@ -73,59 +76,57 @@ export function ClientsPage({
   })
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-8 bg-accent-cyan rounded-full shadow-[0_0_15px_rgba(0,229,255,0.5)]" />
-            <h1 className="text-4xl font-black font-syne text-white tracking-tighter uppercase leading-none">
-              Base de <span className="text-accent-cyan">Clientes</span>
+    <div className="space-y-16 animate-in fade-in duration-1000">
+      {/* Header com Design Assimétrico */}
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-syne text-white tracking-tighter leading-none uppercase">
+              Clientes<span className="text-accent-cyan">.</span>
             </h1>
           </div>
-          <p className="text-text-secondary text-lg font-medium">
-            {stats.total} registros ativos na sua unidade.
+          <p className="text-text-secondary text-lg font-medium max-w-md ml-7 border-l border-white/10 pl-6">
+            Gestão completa da sua base de clientes. Acompanhe o comportamento, fidelidade e histórico de atendimentos com inteligência.
           </p>
         </div>
-        <div className="flex items-center gap-4">
+
+        <div className="flex items-center gap-4 ml-7 lg:ml-0">
           <ViewToggle view={view} onViewChange={handleViewChange} />
           <Button
             onClick={() => setIsModalOpen(true)}
             variant="cyan"
             size="lg"
-            className="gap-3 shadow-cyan-500/20 group"
+            className="gap-4 px-8 py-7 rounded-[2rem] font-black text-xs uppercase tracking-widest bg-white text-black hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group"
           >
-            <Plus size={20} weight="bold" className="group-hover:rotate-90 transition-transform duration-300" />
-            Novo Cliente
+            <Plus size={22} weight="bold" className="group-hover:rotate-90 transition-transform duration-500" />
+            Novo Registro
           </Button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KPICard
-          title="Total"
-          value={stats.total}
-          icon={<Users size={24} weight="bold" />}
-        />
-        <KPICard
-          title="Ativos"
-          value={stats.active}
-          subtitle="Últimos 60 dias"
-          icon={<UserCheck size={24} weight="bold" />}
-        />
-        <KPICard
-          title="Novos"
-          value={stats.newThisMonth}
-          subtitle="Este mês"
-          icon={<UserPlus size={24} weight="bold" />}
-        />
-        <KPICard
-          title="Aniversariantes"
-          value={stats.birthdaysThisWeek}
-          subtitle="Esta semana"
-          icon={<Cake size={24} weight="bold" />}
-        />
+      {/* KPI Cards com Design Pro Max */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {[
+          { label: 'Total', value: stats.total, icon: Users, color: '#8b5cf6', desc: 'Base total cadastrada' },
+          { label: 'Ativos', value: stats.active, icon: UserCheck, color: '#3b82f6', desc: 'Atendidos nos últimos 60 dias' },
+          { label: 'Novos', value: stats.newThisMonth, icon: UserPlus, color: '#10b981', desc: 'Cadastros realizados este mês' },
+          { label: 'Aniversários', value: stats.birthdaysThisWeek, icon: Cake, color: '#ec4899', desc: 'Aniversariantes da semana' }
+        ].map((kpi, idx) => (
+          <div key={idx} className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-500 relative overflow-hidden group">
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 bg-white/[0.03] border border-white/10 group-hover:scale-110 transition-transform">
+                <kpi.icon size={24} weight="duotone" style={{ color: kpi.color }} />
+              </div>
+              <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{kpi.label}</h4>
+              <p className="text-4xl font-bold text-white tabular-nums tracking-tighter">{kpi.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest opacity-50">{kpi.desc}</p>
+            </div>
+            <div className="absolute -bottom-2 -right-2 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
+              <kpi.icon size={80} weight="duotone" />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Search + Filters */}
@@ -157,7 +158,7 @@ export function ClientsPage({
       </div>
 
       {/* Filter Pills */}
-      {showFilters && (
+      {showFilters ? (
         <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
           {[
             { value: '', label: 'Todos' },
@@ -179,7 +180,7 @@ export function ClientsPage({
             </button>
           ))}
         </div>
-      )}
+      ) : null}
 
       {/* Content */}
       <div className="relative group">
@@ -222,14 +223,14 @@ export function ClientsPage({
       </div>
 
       {/* Results count */}
-      {filtered.length > 0 && (
+      {filtered.length > 0 ? (
         <div className="flex items-center justify-center py-4">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-text-secondary opacity-40">
             {filtered.length} {filtered.length === 1 ? 'cliente exibido' : 'clientes exibidos'}
             {search && ` para "${search}"`}
           </p>
         </div>
-      )}
+      ) : null}
 
       {/* Create Modal */}
       <CreateClientModal

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import dynamic from 'next/dynamic'
+import { useState, useTransition, useDeferredValue } from 'react'
 import type { AppointmentWithRelations, ServiceOption, BarberOption, ClientOption, AppointmentStats } from '../types'
 import { STATUS_CONFIG } from '../types'
-import { AppointmentModal } from './appointment-modal'
 import { StatusBadge, QuickStatusButton, CancelButton } from './appointment-status'
 import { KPICard } from '@/components/shared/kpi-card'
 import { Button } from '@/components/ui/button'
@@ -22,7 +22,8 @@ import {
   CaretRight
 } from '@phosphor-icons/react'
 import { useRouter, usePathname } from 'next/navigation'
-import { useTransition } from 'react'
+
+const AppointmentModal = dynamic(() => import('./appointment-modal').then(m => m.AppointmentModal), { ssr: false })
 
 // Hash de cor por barbeiro
 const BARBER_PALETTE = ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#00e5ff']
@@ -70,10 +71,12 @@ export function AdminAppointmentsPage({
     })
   }
 
+  const deferredSearch = useDeferredValue(searchTerm)
+
   const filtered = appointments.filter(a =>
-    a.client.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    a.barber.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    a.service.name.toLowerCase().includes(searchTerm.toLowerCase())
+    a.client.full_name.toLowerCase().includes(deferredSearch.toLowerCase()) ||
+    a.barber.full_name.toLowerCase().includes(deferredSearch.toLowerCase()) ||
+    a.service.name.toLowerCase().includes(deferredSearch.toLowerCase())
   )
 
   const PERIODS: { id: Period; label: string }[] = [
@@ -83,57 +86,54 @@ export function AdminAppointmentsPage({
   ]
 
   return (
-    <div className={cn('space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700', isTransitioning && 'opacity-60')}>
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-8 bg-accent-cyan rounded-full shadow-[0_0_15px_rgba(0,229,255,0.5)]" />
-            <h1 className="text-4xl font-black font-syne text-white tracking-tighter uppercase leading-none">
-              Agenda <span className="text-accent-cyan">Geral</span>
+    <div className={cn('space-y-16 animate-in fade-in duration-1000', isTransitioning && 'opacity-60')}>
+      {/* Header com Design Assimétrico */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
+            <h1 className="text-5xl md:text-7xl font-black font-syne text-white tracking-tighter leading-none uppercase">
+              Agenda<span className="text-accent-cyan">.</span>
             </h1>
           </div>
-          <p className="text-text-secondary text-lg font-medium leading-relaxed">
-            Gestão inteligente de horários e produtividade da unidade.
+          <p className="text-text-secondary text-lg font-medium max-w-xl ml-7 border-l border-white/10 pl-6">
+            Gestão inteligente de horários e produtividade da unidade. Controle cada slot de atendimento com precisão máxima.
           </p>
         </div>
+
         <Button
           variant="cyan"
           size="lg"
-          className="gap-3 shadow-cyan-500/20 group active:scale-95"
+          className="gap-4 px-8 py-7 rounded-[2rem] font-black text-xs uppercase tracking-widest bg-white text-black hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group ml-7 lg:ml-0"
           onClick={() => { setEditingAppointment(null); setIsModalOpen(true) }}
         >
-          <Plus size={20} weight="bold" className="group-hover:rotate-90 transition-transform duration-300" />
-          Novo Agendamento
+          <Plus size={22} weight="bold" className="group-hover:rotate-90 transition-transform duration-500" />
+          Novo Registro
         </Button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KPICard
-          title="Total Hoje"
-          value={stats.total.toString()}
-          icon={<Calendar size={24} weight="bold" />}
-          subtitle="Agendamentos do dia"
-        />
-        <KPICard
-          title="Confirmados"
-          value={stats.confirmed.toString()}
-          icon={<CheckCircle size={24} weight="bold" />}
-          subtitle="Aguardando atendimento"
-        />
-        <KPICard
-          title="Concluídos"
-          value={stats.completed.toString()}
-          icon={<TrendingUp size={24} weight="bold" />}
-          subtitle="Finalizados com sucesso"
-        />
-        <KPICard
-          title="Receita"
-          value={`R$ ${(stats.revenue / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-          icon={<TrendingUp size={24} weight="bold" />}
-          subtitle="Volume financeiro hoje"
-        />
+      {/* KPI Cards com Design Pro Max */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {[
+          { title: 'Total Hoje', value: stats.total, icon: Calendar, color: '#8b5cf6', desc: 'Agendamentos do dia' },
+          { title: 'Confirmados', value: stats.confirmed, icon: CheckCircle, color: '#3b82f6', desc: 'Aguardando atendimento' },
+          { title: 'Concluídos', value: stats.completed, icon: TrendingUp, color: '#10b981', desc: 'Finalizados com sucesso' },
+          { title: 'Receita', value: `R$ ${(stats.revenue / 100).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`, icon: TrendingUp, color: '#00e5ff', desc: 'Volume financeiro' }
+        ].map((item, idx) => (
+          <div key={idx} className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-500 relative overflow-hidden group">
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 bg-white/[0.03] border border-white/10 group-hover:scale-110 transition-transform">
+                <item.icon size={24} weight="duotone" style={{ color: item.color }} />
+              </div>
+              <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{item.title}</h4>
+              <p className="text-4xl font-bold text-white tabular-nums tracking-tighter">{item.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest opacity-50">{item.desc}</p>
+            </div>
+            <div className="absolute -bottom-2 -right-2 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
+              <item.icon size={80} weight="duotone" />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* List Card Container */}

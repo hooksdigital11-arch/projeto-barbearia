@@ -66,12 +66,12 @@ export function InventoryFilters({
               )}
             >
               {tab.label}
-              {tab.value === 'inactive' && inactiveCount > 0 && (
+              {tab.value === 'inactive' && inactiveCount > 0 ? (
                 <span className={cn(
                   "text-[9px] px-1.5 py-0.5 rounded-full font-bold",
                   activeTab === 'inactive' ? "bg-red-400/30 text-red-300" : "bg-red-500/20 text-red-400"
                 )}>{inactiveCount}</span>
-              )}
+              ) : null}
             </button>
           ))}
         </div>
@@ -115,20 +115,20 @@ export function InventoryFilters({
             )}
           >
             <Funnel size={20} weight={hasActiveFilters ? "fill" : "regular"} />
-            {hasActiveFilters && (
+            {hasActiveFilters ? (
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent-cyan rounded-full" />
-            )}
+            ) : null}
           </button>
         </div>
       </div>
 
       {/* Painel de Filtros */}
-      {showPanel && (
+      {showPanel ? (
         <div className="bg-[#141414] border border-white/10 rounded-2xl p-6 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-sm font-bold text-white uppercase tracking-widest">Filtros Avançados</h3>
             <div className="flex items-center gap-3">
-              {hasActiveFilters && (
+              {hasActiveFilters ? (
                 <button
                   onClick={resetFilters}
                   className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1 font-bold"
@@ -136,7 +136,7 @@ export function InventoryFilters({
                   <X size={12} weight="bold" />
                   Limpar filtros
                 </button>
-              )}
+              ) : null}
               <button onClick={() => setShowPanel(false)} className="text-muted-foreground hover:text-white transition-colors">
                 <X size={18} />
               </button>
@@ -217,7 +217,7 @@ export function InventoryFilters({
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

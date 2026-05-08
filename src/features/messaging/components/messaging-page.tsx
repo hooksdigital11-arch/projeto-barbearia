@@ -63,64 +63,62 @@ export function MessagingPage({
   }
 
   return (
-    <div className="space-y-6 h-full">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-bold text-accent-cyan uppercase tracking-[0.2em] mb-2">COMUNICAÇÃO</p>
-          <h1 className="text-3xl md:text-4xl font-bold font-syne text-white uppercase tracking-tight leading-none">
-            Mensageria
-          </h1>
-          <p className="text-muted-foreground mt-2 text-sm">
-            WhatsApp direto com seus clientes.
+    <div className="space-y-16 animate-in fade-in duration-1000 h-full">
+      {/* Header com Design Assimétrico */}
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-syne text-white tracking-tighter leading-none uppercase break-words">
+              Mensagens<span className="text-accent-cyan">.</span>
+            </h1>
+          </div>
+          <p className="text-text-secondary text-lg font-medium max-w-md ml-7 border-l border-white/10 pl-6">
+            Comunicação direta e automatizada. Conecte-se com seus clientes via WhatsApp com templates inteligentes e disparos em massa estratégicos.
           </p>
         </div>
-        <div className="flex gap-3 shrink-0">
+        <div className="flex flex-wrap gap-4 lg:ml-0">
           <button
             onClick={() => setIsTemplateOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white text-sm font-bold hover:bg-white/10 transition-colors"
+            className="flex items-center gap-3 px-6 py-4 rounded-2xl border border-white/10 bg-white/5 text-white text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all duration-300"
           >
-            <FileText className="w-4 h-4" />
+            <FileText size={20} weight="bold" />
             Templates
           </button>
           {isAdmin && (
             <button
               onClick={() => setIsBroadcastOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent-cyan text-black text-sm font-bold hover:bg-accent-cyan/90 transition-colors"
+              className="flex items-center gap-3 px-8 py-4 rounded-3xl bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group"
             >
-              <Lightning size={18} weight="bold" />
+              <Lightning size={20} weight="bold" className="group-hover:animate-pulse" />
               Disparo em Massa
             </button>
           )}
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard
-          title="Enviadas Hoje"
-          value={stats.today.toString()}
-          icon={<ChatCircle size={20} weight="duotone" />}
-          subtitle="via WhatsApp"
-        />
-        <KPICard
-          title="Esta Semana"
-          value={stats.week.toString()}
-          icon={<Calendar size={20} weight="duotone" />}
-          subtitle="últimos 7 dias"
-        />
-        <KPICard
-          title="Este Mês"
-          value={stats.month.toString()}
-          icon={<TrendUp size={20} weight="duotone" />}
-          subtitle="últimos 30 dias"
-        />
-        <KPICard
-          title="Falhas"
-          value={stats.failed.toString()}
-          icon={<Warning size={20} weight="duotone" />}
-          subtitle="não enviadas"
-        />
+      {/* KPI Cards com Design Pro Max */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {[
+          { title: 'Enviadas Hoje', value: stats.today, icon: ChatCircle, color: '#8b5cf6', desc: 'Mensagens processadas' },
+          { title: 'Esta Semana', value: stats.week, icon: Calendar, color: '#3b82f6', desc: 'Volume últimos 7 dias' },
+          { title: 'Este Mês', value: stats.month, icon: TrendUp, color: '#10b981', desc: 'Engajamento mensal' },
+          { title: 'Falhas', value: stats.failed, icon: Warning, color: '#ef4444', desc: 'Erros de processamento' }
+        ].map((kpi, idx) => (
+          <div key={idx} className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-500 relative overflow-hidden group">
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 bg-white/[0.03] border border-white/10 group-hover:scale-110 transition-transform">
+                <kpi.icon size={24} weight="duotone" style={{ color: kpi.color }} />
+              </div>
+              <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{kpi.title}</h4>
+              <p className="text-4xl font-bold text-white tabular-nums tracking-tighter">{kpi.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest opacity-50">{kpi.desc}</p>
+            </div>
+            <div className="absolute -bottom-2 -right-2 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
+              <kpi.icon size={80} weight="duotone" />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Chat Layout */}

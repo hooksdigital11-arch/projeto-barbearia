@@ -33,17 +33,33 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
   }, [initialData])
 
   return (
-    <div className="p-8 space-y-8 max-w-7xl mx-auto animate-in fade-in duration-500">
+    <div className="p-8 space-y-16 animate-in fade-in duration-1000">
+      {/* Header com Design Assimétrico Pro Max */}
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-syne text-white tracking-tighter leading-none uppercase">
+              Workspace<span className="text-accent-cyan">.</span>
+            </h1>
+          </div>
+          <p className="text-text-secondary text-lg font-medium max-w-md ml-7 border-l border-white/10 pl-6">
+            Centro de controle do barbeiro. Monitore sua agenda, atenda clientes e gerencie seu desempenho em tempo real.
+          </p>
+        </div>
+      </div>
+
       {/* Header / Status Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 rounded-3xl border border-white/5 bg-card/10 backdrop-blur-xl">
-        <div className="flex items-center gap-4">
-          <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl shadow-2xl relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-r from-accent-cyan/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+        <div className="flex items-center gap-6 relative z-10">
+          <div className="w-5 h-5 rounded-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.8)] animate-pulse" />
           <div>
-            <p className="text-sm font-medium text-text-secondary uppercase tracking-widest">Seu Status</p>
-            <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-bold text-white">{data.status}</h2>
-              <button className="p-1 hover:text-accent-cyan transition-colors">
-                <Clock size={16} weight="bold" />
+            <p className="text-[10px] font-black text-text-secondary uppercase tracking-[0.3em]">Status Operacional</p>
+            <div className="flex items-center gap-3">
+              <h2 className="text-3xl font-bold text-white tracking-tight">{data.status}</h2>
+              <button className="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-full text-accent-cyan transition-colors">
+                <Clock size={18} weight="bold" />
               </button>
             </div>
           </div>
@@ -176,19 +192,19 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {apt.status === 'completed' && <CheckCircle size={24} weight="duotone" className="text-emerald-500" />}
-                    {apt.status === 'in_progress' && (
+                    {apt.status === 'completed' ? <CheckCircle size={24} weight="duotone" className="text-emerald-500" /> : null}
+                    {apt.status === 'in_progress' ? (
                       <div className="flex items-center gap-2 px-3 py-1 bg-accent-cyan/10 text-accent-cyan rounded-lg text-[10px] font-bold uppercase">
                         <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-pulse" />
                         Em Atendimento
                       </div>
-                    )}
-                    {apt.status === 'next' && (
+                    ) : null}
+                    {apt.status === 'next' ? (
                       <div className="flex items-center gap-3">
                          <span className="text-[10px] font-bold text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded">PRÓXIMO</span>
                          <button className="p-2 hover:bg-white/5 rounded-lg transition-all"><ArrowRight size={18} /></button>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               ))}

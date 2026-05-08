@@ -46,7 +46,7 @@ export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: 
   }, [initialKpis, initialBarbers])
 
   return (
-    <div className="space-y-12 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+    <div className="space-y-12 animate-in fade-in duration-700">
       <AdminControls />
 
       {/* KPI Grid */}

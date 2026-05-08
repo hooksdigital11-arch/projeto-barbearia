@@ -9,16 +9,30 @@ import {
   moveStockSchema,
 } from './schemas'
 
+/**
+ * Cria um novo produto no inventário da organização.
+ * 
+ * @param formData Objeto FormData contendo:
+ *   - name (string, min 1)
+ *   - type ('revenda' | 'uso_interno')
+ *   - category (string)
+ *   - quantity (number, default 0)
+ *   - min_quantity (number, default 5)
+ *   - cost_cents (decimal string/number, convertido para centavos)
+ *   - price_cents (decimal string/number, convertido para centavos)
+ * 
+ * @returns { success: true } ou { error: string, issues?: ZodFlattenedError }
+ */
 export async function createProduct(formData: FormData) {
   const user = await requireUser()
   
-  const parsed = createProductSchema.safeParse({
+  const data = {
     name: formData.get('name'),
     type: formData.get('type'),
     category: formData.get('category'),
     description: formData.get('description'),
-    quantity: Number(formData.get('quantity')),
-    min_quantity: Number(formData.get('min_quantity')),
+    quantity: Number(formData.get('quantity') || 0),
+    min_quantity: Number(formData.get('min_quantity') || 5),
     cost_cents: formData.get('cost_cents')
       ? Math.round(Number(formData.get('cost_cents')) * 100)
       : null,
@@ -27,10 +41,15 @@ export async function createProduct(formData: FormData) {
       : null,
     supplier: formData.get('supplier'),
     supplier_phone: formData.get('supplier_phone'),
-  })
+  }
+
+  const parsed = createProductSchema.safeParse(data)
 
   if (!parsed.success) {
-    return { error: 'Dados inválidos', issues: parsed.error.flatten() }
+    return { 
+      error: 'Falha na validação. Verifique se o nome e tipo do produto estão corretos.', 
+      issues: parsed.error.flatten() 
+    }
   }
 
   const { error } = await supabaseAdmin.from('inventory').insert({
@@ -41,7 +60,7 @@ export async function createProduct(formData: FormData) {
 
   if (error) {
     console.error('[CREATE_PRODUCT]', error.message)
-    return { error: 'Erro ao criar produto' }
+    return { error: 'Ocorreu um erro ao salvar o produto no banco de dados. Verifique sua conexão.' }
   }
 
   revalidatePath('/admin/inventory')
@@ -90,6 +109,19 @@ export async function updateProduct(productId: string, formData: FormData) {
   return { success: true }
 }
 
+/**
+ * Realiza a movimentação de estoque (entrada ou saída) e registra o histórico.
+ * Em saídas de revenda, vincula o preço unitário atual para cálculo de faturamento histórico.
+ * 
+ * @param productId UUID do produto
+ * @param formData FormData contendo:
+ *   - direction ('in' | 'out')
+ *   - quantity (number)
+ *   - reason (string)
+ *   - observation (string, opcional)
+ * 
+ * @returns { success: true, newQuantity: number } ou { error: string }
+ */
 export async function moveStock(productId: string, formData: FormData) {
   const user = await requireUser()
   
@@ -101,7 +133,7 @@ export async function moveStock(productId: string, formData: FormData) {
   })
 
   if (!parsed.success) {
-    return { error: 'Dados inválidos' }
+    return { error: 'Quantidade ou direção da movimentação inválida.' }
   }
 
   // Buscar produto atual
@@ -112,7 +144,7 @@ export async function moveStock(productId: string, formData: FormData) {
     .eq('organization_id', user.organization_id)
     .single()
 
-  if (!product) return { error: 'Produto não encontrado' }
+  if (!product) return { error: 'Produto não localizado nesta barbearia.' }
 
   const newQuantity =
     parsed.data.direction === 'in'
@@ -120,7 +152,7 @@ export async function moveStock(productId: string, formData: FormData) {
       : product.quantity - parsed.data.quantity
 
   if (newQuantity < 0) {
-    return { error: 'Estoque insuficiente para essa saída' }
+    return { error: 'Operação negada: o estoque não pode ficar negativo.' }
   }
 
   // 1. Update Inventory Quantity
@@ -132,10 +164,10 @@ export async function moveStock(productId: string, formData: FormData) {
 
   if (updateError) {
     console.error('[MOVE_STOCK_UPDATE]', updateError.message)
-    return { error: 'Erro ao movimentar estoque' }
+    return { error: 'Erro ao atualizar saldo no inventário.' }
   }
 
-  // 2. Insert into inventory_movements
+  // 2. Insert into inventory_movements (Audit Log)
   const type = parsed.data.direction === 'out'
     ? (product.type === 'revenda' ? 'venda' : 'uso_interno')
     : (parsed.data.reason === 'Compra' ? 'entrada' : 'ajuste')
@@ -157,8 +189,7 @@ export async function moveStock(productId: string, formData: FormData) {
 
   if (insertError) {
     console.error('[MOVE_STOCK_INSERT]', insertError.message)
-    // We don't rollback the inventory update here, but we log the error. 
-    // In a robust system, this should be an RPC transaction.
+    // Registro falhou mas o saldo foi atualizado - logging para auditoria.
   }
 
   revalidatePath('/admin/inventory')

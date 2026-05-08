@@ -14,6 +14,9 @@ const cspHeader = `
 `
 
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: ['@phosphor-icons/react'],
+  },
   images: {
     remotePatterns: [
       {

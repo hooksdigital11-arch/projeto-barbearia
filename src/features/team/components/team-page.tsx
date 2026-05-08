@@ -1,15 +1,17 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
 import { Plus, UsersThree } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { TeamStatsCards } from './team-stats'
 import { ViewToggle } from './view-toggle'
 import { BarberCard } from './barber-card'
-import { BarberTable } from './barber-table'
-import { BarberDetailModal } from './barber-detail-modal'
-import { EditBarberModal } from './edit-barber-modal'
 import type { TeamMemberWithStats, TeamStats } from '../types'
+
+const BarberTable = dynamic(() => import('./barber-table').then(m => m.BarberTable), { ssr: false })
+const BarberDetailModal = dynamic(() => import('./barber-detail-modal').then(m => m.BarberDetailModal), { ssr: false })
+const EditBarberModal = dynamic(() => import('./edit-barber-modal').then(m => m.EditBarberModal), { ssr: false })
 
 interface TeamPageProps {
   members: TeamMemberWithStats[]
@@ -38,25 +40,33 @@ export function TeamPage({ members, stats, userRole, currentUserId }: TeamPagePr
   const colleagues = members.filter(m => m.id !== currentUserId)
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold font-syne text-white tracking-tight">Equipe</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {isAdmin ? 'Gerencie sua equipe e acompanhe a performance.' : 'Veja seus colegas e acompanhe a agenda.'}
+    <div className="space-y-16 animate-in fade-in duration-1000">
+      {/* Header com Design Assimétrico */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
+            <h1 className="text-5xl md:text-7xl font-black font-syne text-white tracking-tighter leading-none uppercase">
+              Equipe<span className="text-accent-cyan">.</span>
+            </h1>
+          </div>
+          <p className="text-text-secondary text-lg font-medium max-w-xl ml-7 border-l border-white/10 pl-6">
+            {isAdmin 
+              ? 'Gerencie sua equipe de especialistas. Acompanhe a performance individual e coordene a excelência no atendimento.' 
+              : 'Veja seus colegas de equipe e acompanhe a agenda coletiva da unidade.'}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4 ml-7 lg:ml-0">
           <ViewToggle view={view} setView={setView} />
         </div>
       </div>
 
       {/* KPI Cards (Admin only) */}
-      {isAdmin && <TeamStatsCards stats={stats} />}
+      {isAdmin ? <TeamStatsCards stats={stats} /> : null}
 
       {/* Barber view: Own profile highlighted */}
-      {!isAdmin && currentUser && (
+      {/* Barber view: Own profile highlighted */}
+      {!isAdmin && currentUser ? (
         <div className="space-y-4">
           <BarberCard
             member={currentUser}
@@ -67,15 +77,16 @@ export function TeamPage({ members, stats, userRole, currentUserId }: TeamPagePr
             isOwnProfile
           />
         </div>
-      )}
+      ) : null}
 
       {/* Section header for colleagues (barber view) */}
-      {!isAdmin && colleagues.length > 0 && (
+      {/* Section header for colleagues (barber view) */}
+      {!isAdmin && colleagues.length > 0 ? (
         <div className="flex items-center gap-3 mt-6">
           <UsersThree size={18} className="text-muted-foreground" />
           <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Colegas</h2>
         </div>
-      )}
+      ) : null}
 
       {/* Team List */}
       <div>
@@ -102,7 +113,7 @@ export function TeamPage({ members, stats, userRole, currentUserId }: TeamPagePr
           />
         )}
 
-        {(isAdmin ? members : colleagues).length === 0 && (
+        {(isAdmin ? members : colleagues).length === 0 ? (
           <div className="bg-white/5 border border-white/10 rounded-[2rem] p-20 text-center space-y-4">
             <div className="w-14 h-14 rounded-3xl bg-white/5 flex items-center justify-center mx-auto text-muted-foreground/30">
               <UsersThree size={28} weight="duotone" />
@@ -112,7 +123,7 @@ export function TeamPage({ members, stats, userRole, currentUserId }: TeamPagePr
               <p className="text-sm text-muted-foreground">A equipe aparecerá aqui assim que houver membros cadastrados.</p>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Modais */}

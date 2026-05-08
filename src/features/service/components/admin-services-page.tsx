@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Plus, PencilSimple, Trash, Copy, Scissors, CircleNotch, Play, Pause, X, Clock, CurrencyDollar } from '@phosphor-icons/react'
+import { Plus, PencilSimple, Trash, Copy, Scissors, CircleNotch, Play, Pause, X, Clock, CurrencyDollar, Package } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils/cn'
 import { toast } from 'sonner'
@@ -118,37 +118,52 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
   const categories = Array.from(new Set(services.map(s => s.category).filter(Boolean)))
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-8 bg-accent-cyan rounded-full shadow-[0_0_15px_rgba(0,229,255,0.5)]" />
-            <h1 className="text-4xl font-black font-syne text-white tracking-tighter uppercase leading-none">
-              Catálogo de <span className="text-accent-cyan">Serviços</span>
+    <div className="space-y-16 animate-in fade-in duration-1000">
+      {/* Header com Design Assimétrico */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
+            <h1 className="text-5xl md:text-7xl font-black font-syne text-white tracking-tighter leading-none uppercase">
+              Serviços<span className="text-accent-cyan">.</span>
             </h1>
           </div>
-          <p className="text-text-secondary text-lg font-medium">
-            Gerencie o cardápio completo da sua barbearia.
+          <p className="text-text-secondary text-lg font-medium max-w-xl ml-7 border-l border-white/10 pl-6">
+            Gerencie o cardápio completo da sua barbearia. Defina preços, tempos e categorias com foco total em experiência e rentabilidade.
           </p>
         </div>
-        <Button onClick={handleNew} variant="cyan" size="lg" className="gap-3 shadow-cyan-500/20 group active:scale-95">
-          <Plus size={20} weight="bold" className="group-hover:rotate-90 transition-transform duration-300" />
-          Novo Serviço
+
+        <Button 
+          onClick={handleNew} 
+          variant="cyan" 
+          size="lg" 
+          className="gap-4 px-8 py-7 rounded-[2rem] font-black text-xs uppercase tracking-widest bg-white text-black hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group ml-7 lg:ml-0"
+        >
+          <Plus size={22} weight="bold" className="group-hover:rotate-90 transition-transform duration-500" />
+          Novo Registro
         </Button>
       </div>
 
-      {/* KPI Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* KPI Cards com Design Pro Max */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {[
-          { label: 'Total', value: stats.total, color: 'text-white' },
-          { label: 'Ativos', value: stats.active, color: 'text-emerald-400' },
-          { label: 'Pausados', value: stats.inactive, color: 'text-amber-400' },
-          { label: 'Categorias', value: stats.categories, color: 'text-accent-cyan' },
-        ].map(kpi => (
-          <div key={kpi.label} className="glass-card p-6 flex flex-col gap-2 group hover:scale-[1.02] transition-all duration-500">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">{kpi.label}</span>
-            <span className={cn("text-3xl font-black tracking-tighter", kpi.color)}>{kpi.value}</span>
+          { label: 'Total', value: stats.total, color: '#8b5cf6', icon: Scissors, desc: 'Serviços cadastrados' },
+          { label: 'Ativos', value: stats.active, color: '#10b981', icon: Play, desc: 'Disponíveis para agendamento' },
+          { label: 'Pausados', value: stats.inactive, color: '#ef4444', icon: Pause, desc: 'Temporariamente suspensos' },
+          { label: 'Categorias', value: stats.categories, color: '#00e5ff', icon: Package, desc: 'Segmentação do catálogo' },
+        ].map((kpi, idx) => (
+          <div key={idx} className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-500 relative overflow-hidden group">
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 bg-white/[0.03] border border-white/10 group-hover:scale-110 transition-transform">
+                <kpi.icon size={24} weight="duotone" style={{ color: kpi.color }} />
+              </div>
+              <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{kpi.label}</h4>
+              <p className="text-4xl font-bold text-white tabular-nums tracking-tighter">{kpi.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest opacity-50">{kpi.desc}</p>
+            </div>
+            <div className="absolute -bottom-2 -right-2 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
+              <kpi.icon size={80} weight="duotone" />
+            </div>
           </div>
         ))}
       </div>
@@ -285,7 +300,7 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
             </table>
           </div>
 
-          {filtered.length === 0 && (
+          {filtered.length === 0 ? (
             <div className="p-32 text-center flex flex-col items-center gap-6">
               <div className="w-24 h-24 rounded-3xl bg-white/5 flex items-center justify-center text-text-secondary opacity-20">
                 <Scissors size={48} weight="thin" />
@@ -296,21 +311,21 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
               </div>
               <Button onClick={handleNew} variant="outline" size="sm">Criar Serviço</Button>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
       {/* Results Counter */}
-      {filtered.length > 0 && (
+      {filtered.length > 0 ? (
         <div className="flex items-center justify-center py-2">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-text-secondary opacity-40">
             {filtered.length} {filtered.length === 1 ? 'serviço' : 'serviços'}
           </p>
         </div>
-      )}
+      ) : null}
 
       {/* Modal */}
-      {isModalOpen && (
+      {isModalOpen ? (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
           <div className="glass-card p-10 w-full max-w-xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] border-white/20 animate-in zoom-in-95 duration-500 ease-out">
             <div className="flex items-center justify-between mb-8">
@@ -416,7 +431,7 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
             </form>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
