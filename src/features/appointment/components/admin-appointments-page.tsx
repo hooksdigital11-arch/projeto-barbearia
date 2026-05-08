@@ -105,11 +105,11 @@ export function AdminAppointmentsPage({
           { title: 'Concluídos', value: stats.completed, unit: '' },
           { title: 'Receita', value: stats.revenue / 100, unit: 'R$' }
         ].map((item, idx) => (
-          <div key={idx} className="p-12 bg-black flex flex-col justify-between h-48">
-            <p className="label-muted opacity-40">{item.title}</p>
-            <div className="flex items-baseline gap-1">
-              {item.unit && <span className="text-xl font-mono text-text-secondary">{item.unit}</span>}
-              <span className="text-5xl font-bold font-mono text-white tracking-tighter">
+          <div key={idx} className="p-12 bg-black flex flex-col justify-between h-48 group">
+            <p className="label-muted opacity-40 group-hover:opacity-100 transition-opacity">{item.title}</p>
+            <div className="flex items-baseline gap-2">
+              {item.unit && <span className="text-xl font-mono text-text-muted">{item.unit}</span>}
+              <span className="text-5xl font-bold font-mono text-white tracking-tighter group-hover:text-accent-cyan transition-colors">
                 {typeof item.value === 'number' ? item.value.toLocaleString('pt-BR') : item.value}
               </span>
             </div>
@@ -129,7 +129,7 @@ export function AdminAppointmentsPage({
                   'px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all',
                   period === id
                     ? 'bg-white text-black'
-                    : 'text-text-secondary hover:text-white'
+                    : 'text-text-muted hover:text-white'
                 )}
               >
                 {label}
@@ -143,7 +143,7 @@ export function AdminAppointmentsPage({
               placeholder="PESQUISAR REGISTROS..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="bg-transparent border-none w-full pl-8 h-10 text-xs font-bold uppercase tracking-widest outline-none placeholder:text-text-muted"
+              className="bg-transparent border-none w-full pl-8 h-10 text-[10px] font-bold uppercase tracking-[0.2em] outline-none placeholder:text-text-muted"
             />
           </div>
         </div>
@@ -151,7 +151,7 @@ export function AdminAppointmentsPage({
         {/* Results List */}
         <div className="min-h-[400px]">
           {isTransitioning ? (
-            <div className="flex flex-col items-center justify-center h-[400px] gap-4 text-text-secondary">
+            <div className="flex flex-col items-center justify-center h-[400px] gap-4 text-text-muted">
               <CircleNotch size={32} className="animate-spin text-accent-cyan" />
             </div>
           ) : filtered.length === 0 ? (
@@ -159,17 +159,17 @@ export function AdminAppointmentsPage({
               <p className="heading-section text-text-muted opacity-20">Nenhum registro encontrado</p>
             </div>
           ) : (
-            <div className="divide-y divide-white/5 border-t border-white/5">
+            <div className="divide-y divide-white/5">
               {filtered.map(appt => {
                 const barberColor = getBarberColor(appt.barber_id)
                 const startDt = new Date(appt.start_time)
                 const canEdit = !['completed', 'cancelled', 'no_show'].includes(appt.status)
 
                 return (
-                  <div key={appt.id} className="grid grid-cols-1 md:grid-cols-12 gap-8 py-10 px-4 hover:bg-white/[0.02] transition-colors items-center group">
+                  <div key={appt.id} className="grid grid-cols-1 md:grid-cols-12 gap-8 py-12 px-4 hover:bg-white/[0.02] transition-colors items-center group">
                     {/* Time Column */}
                     <div className="md:col-span-2 flex flex-col">
-                      <span className="text-3xl font-mono font-bold text-white tracking-tighter">
+                      <span className="text-4xl font-mono font-bold text-white tracking-tighter group-hover:text-accent-cyan transition-colors">
                         {startDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       <span className="label-muted opacity-40 mt-1">
@@ -178,18 +178,18 @@ export function AdminAppointmentsPage({
                     </div>
 
                     {/* Subject Column */}
-                    <div className="md:col-span-4 flex flex-col space-y-2">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: barberColor }} />
-                        <span className="text-lg font-bold text-white uppercase tracking-tight group-hover:text-accent-cyan transition-colors">
+                    <div className="md:col-span-4 flex flex-col space-y-3">
+                      <div className="flex items-center gap-4">
+                        <div className="w-1.5 h-8 rounded-full" style={{ backgroundColor: barberColor }} />
+                        <span className="text-xl font-bold text-white uppercase tracking-tight">
                           {appt.client.full_name}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-bold text-text-secondary uppercase tracking-[0.2em]">
+                      <div className="flex items-center gap-4 ml-5">
+                        <span className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">
                           {appt.service.name}
                         </span>
-                        <span className="text-[10px] font-mono text-text-muted">
+                        <span className="text-[10px] font-mono text-text-muted opacity-40">
                           {appt.duration_minutes} MIN
                         </span>
                       </div>
@@ -201,19 +201,18 @@ export function AdminAppointmentsPage({
                     </div>
 
                     {/* Actions Column */}
-                    <div className="md:col-span-3 flex items-center justify-end gap-6">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-4">
-                        <QuickStatusButton status={appt.status} appointmentId={appt.id} />
-                        {canEdit && (
-                          <button
-                            onClick={() => { setEditingAppointment(appt); setIsModalOpen(true) }}
-                            className="text-text-secondary hover:text-white transition-colors"
-                          >
-                            <ArrowRight size={20} weight="bold" />
-                          </button>
-                        )}
-                        {canEdit && <CancelButton appointmentId={appt.id} />}
-                      </div>
+                    <div className="md:col-span-3 flex items-center justify-end gap-6 opacity-0 group-hover:opacity-100 transition-all">
+                      <QuickStatusButton status={appt.status} appointmentId={appt.id} />
+                      {canEdit && (
+                        <button
+                          onClick={() => { setEditingAppointment(appt); setIsModalOpen(true) }}
+                          className="text-text-muted hover:text-white transition-colors"
+                          title="Editar"
+                        >
+                          <ArrowRight size={20} weight="bold" />
+                        </button>
+                      )}
+                      {canEdit && <CancelButton appointmentId={appt.id} />}
                     </div>
                   </div>
                 )

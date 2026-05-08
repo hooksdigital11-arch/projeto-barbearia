@@ -172,7 +172,7 @@ export const getClientsForMessaging = cache(async (group?: string): Promise<Clie
 export const getMessageTemplates = cache(async (): Promise<MessageTemplate[]> => {
   const user = await requireUser()
 
-  const { data, error } = await (supabaseAdmin as any)
+  const { data, error } = await supabaseAdmin
     .from('message_templates')
     .select('*')
     .eq('organization_id', user.organization_id)

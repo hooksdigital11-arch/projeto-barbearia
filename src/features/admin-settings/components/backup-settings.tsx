@@ -17,22 +17,22 @@ export function BackupSettings() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-16">
       <div>
-        <h2 className="text-2xl font-bold font-syne text-white">Backup e Exportação</h2>
-        <p className="text-muted-foreground">Mantenha seus dados seguros e exporte quando precisar</p>
+        <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter leading-none">Backup</h2>
+        <p className="label-muted mt-2">Mantenha seus dados seguros e exporte quando precisar</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-8 rounded-[2rem] bg-accent-blue/5 border border-accent-blue/10 space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-accent-blue/20 flex items-center justify-center text-accent-blue shadow-lg shadow-accent-blue/20">
-              <CloudArrowDown size={28} weight="duotone" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="p-10 rounded-[2.5rem] bg-white/[0.03] border border-white/[0.06] space-y-10">
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 rounded-2xl bg-black border border-white/[0.06] flex items-center justify-center text-white/20">
+              <CloudArrowDown size={32} />
             </div>
-            <h3 className="text-lg font-bold text-white">Exportar Dados</h3>
+            <h3 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Exportar</h3>
           </div>
           
-          <div className="grid gap-3">
+          <div className="space-y-3">
             {[
               { label: 'Todos os Dados', type: 'JSON', icon: FileCode },
               { label: 'Lista de Clientes', type: 'CSV', icon: FileText },
@@ -42,42 +42,39 @@ export function BackupSettings() {
               <button
                 key={item.label}
                 onClick={() => handleExport(item.label)}
-                className="flex items-center justify-between p-4 rounded-xl bg-black/40 hover:bg-black/60 border border-white/5 hover:border-accent-blue/30 transition-all group"
+                className="w-full flex items-center justify-between p-6 rounded-2xl border border-white/[0.06] hover:border-white/20 hover:bg-white/[0.02] transition-all group"
               >
-                <div className="flex items-center gap-3">
-                  <item.icon size={20} className="text-muted-foreground group-hover:text-accent-blue transition-colors" />
-                  <span className="text-sm font-medium text-white">{item.label}</span>
+                <div className="flex items-center gap-4">
+                  <item.icon size={20} className="text-text-muted group-hover:text-accent-cyan transition-colors" />
+                  <span className="text-sm font-bold text-white uppercase tracking-tight">{item.label}</span>
                 </div>
-                <ArrowRight size={16} className="text-muted-foreground group-hover:text-white group-hover:translate-x-1 transition-all" />
+                <ArrowRight size={16} className="text-text-muted group-hover:text-white group-hover:translate-x-1 transition-all" />
               </button>
             ))}
           </div>
         </div>
 
-        <div className="p-8 rounded-[2rem] bg-white/5 border border-white/5 space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-muted-foreground">
-              <Database size={28} weight="duotone" />
+        <div className="p-10 rounded-[2.5rem] bg-white/[0.03] border border-white/[0.06] space-y-10">
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 rounded-2xl bg-black border border-white/[0.06] flex items-center justify-center text-white/20">
+              <Database size={32} />
             </div>
-            <h3 className="text-lg font-bold text-white">Estado do Backup</h3>
+            <h3 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Status</h3>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-black/20">
-              <div className="flex items-center gap-3">
-                <Clock size={18} className="text-accent-cyan" />
-                <span className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Último Backup Automático</span>
-              </div>
-              <span className="text-xs font-bold text-white">Hoje às 03:00</span>
+          <div className="space-y-8">
+            <div className="p-8 rounded-2xl bg-black border border-white/[0.06]">
+              <p className="label-muted text-accent-cyan mb-2">Último Backup Automático</p>
+              <p className="text-2xl font-black text-white font-mono tracking-tighter">HOJE ÀS 03:00</p>
             </div>
 
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm font-medium text-text-muted leading-relaxed">
               Sua base de dados é backupeada automaticamente todos os dias às 03:00 da manhã no cluster do Supabase. 
             </p>
 
-            <div className="p-4 rounded-xl bg-accent-cyan/5 border border-accent-cyan/10">
-              <p className="text-xs text-accent-cyan leading-relaxed">
-                <strong>Nota:</strong> Em caso de necessidade de restauração de dados críticos, entre em contato com o suporte técnico do BarberSaaS.
+            <div className="p-6 rounded-2xl border border-white/[0.06] bg-accent-cyan/[0.02]">
+              <p className="text-[11px] font-black uppercase tracking-widest text-accent-cyan leading-relaxed">
+                Nota: Em caso de necessidade de restauração, entre em contato com o suporte técnico.
               </p>
             </div>
           </div>

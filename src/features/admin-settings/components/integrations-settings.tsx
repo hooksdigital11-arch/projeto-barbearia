@@ -6,63 +6,63 @@ import { cn } from '@/lib/utils/cn'
 
 export function IntegrationsSettings() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-16">
       <div>
-        <h2 className="text-2xl font-bold font-syne text-white">Integrações</h2>
-        <p className="text-muted-foreground">Conecte sua barbearia com outras ferramentas</p>
+        <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter">Integrações</h2>
+        <p className="label-muted mt-2">Conecte sua barbearia com o ecossistema digital</p>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-8">
         {/* WhatsApp Integration */}
-        <div className="p-8 rounded-[2rem] bg-emerald-500/5 border border-emerald-500/10 flex flex-col md:flex-row gap-8">
-          <div className="flex-1 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/20">
-                <WhatsappLogo size={28} weight="duotone" />
+        <div className="p-10 rounded-[2.5rem] bg-emerald-500/[0.03] border border-emerald-500/10 flex flex-col md:flex-row gap-10">
+          <div className="flex-1 space-y-6">
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 rounded-2xl bg-black border border-emerald-500/20 flex items-center justify-center text-emerald-500 transition-all">
+                <WhatsappLogo size={32} weight="bold" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-white leading-tight">WhatsApp Business</h3>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                  <span className="text-xs text-muted-foreground font-medium">Desconectado</span>
+              <div className="space-y-1">
+                <h3 className="text-xl font-black text-white uppercase tracking-tighter leading-none">WhatsApp Business</h3>
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 opacity-40" />
+                  <span className="text-[10px] text-text-muted font-black uppercase tracking-widest">Desconectado</span>
                 </div>
               </div>
             </div>
             
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm font-medium text-text-muted leading-relaxed max-w-lg">
               Envie lembretes automáticos, confirmações de agendamento e mensagens de boas-vindas diretamente para seus clientes pelo WhatsApp.
             </p>
 
-            <div className="pt-4 flex items-center gap-3">
-              <Button className="bg-emerald-500 hover:bg-emerald-400 text-white font-bold gap-2 px-6 rounded-xl">
+            <div className="pt-6 flex items-center gap-6">
+              <button className="px-10 py-3.5 rounded-full bg-emerald-500 text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all">
                 Conectar Agora
-              </Button>
-              <Button variant="ghost" className="text-muted-foreground hover:text-white hover:bg-white/5">
-                Saiba Mais
-              </Button>
+              </button>
+              <button className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted hover:text-white transition-colors">
+                Documentação
+              </button>
             </div>
           </div>
 
-          <div className="w-full md:w-48 aspect-square rounded-3xl bg-white flex flex-col items-center justify-center p-6 gap-2 opacity-50 grayscale">
-            <QrCode size={80} className="text-black" />
-            <p className="text-[10px] text-black font-bold uppercase tracking-widest">Conecte para ver</p>
+          <div className="w-full md:w-56 aspect-square rounded-3xl bg-white flex flex-col items-center justify-center p-8 gap-4 opacity-10">
+            <QrCode size={100} className="text-black" />
+            <p className="text-[10px] text-black font-black uppercase tracking-widest">Conecte para ver</p>
           </div>
         </div>
 
         {/* Placeholders for future integrations */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { name: 'Google Calendar', icon: GoogleLogo, color: 'text-blue-400' },
-            { name: 'Instagram', icon: InstagramLogo, color: 'text-pink-400' },
-            { name: 'Stripe Payments', icon: CreditCard, color: 'text-purple-400' },
+            { name: 'Google Calendar', icon: GoogleLogo, color: 'text-white/20' },
+            { name: 'Instagram', icon: InstagramLogo, color: 'text-white/20' },
+            { name: 'Stripe Payments', icon: CreditCard, color: 'text-white/20' },
           ].map((item) => (
-            <div key={item.name} className="p-6 rounded-[2rem] bg-white/5 border border-white/5 flex flex-col items-center text-center gap-4 opacity-50 cursor-not-allowed group hover:bg-white/[0.07] transition-all">
-              <div className={cn("w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center transition-all group-hover:scale-110", item.color)}>
-                <item.icon size={28} weight="duotone" />
+            <div key={item.name} className="p-10 rounded-[2.5rem] bg-white/[0.02] border border-white/[0.06] flex flex-col items-center text-center gap-6 opacity-40">
+              <div className="w-16 h-16 rounded-full border border-white/[0.06] flex items-center justify-center text-white/20">
+                <item.icon size={28} />
               </div>
-              <div>
-                <p className="text-sm font-bold text-white">{item.name}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mt-1">Em breve</p>
+              <div className="space-y-1">
+                <p className="text-sm font-black text-white uppercase tracking-tight leading-none">{item.name}</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-widest font-black">Em breve</p>
               </div>
             </div>
           ))}

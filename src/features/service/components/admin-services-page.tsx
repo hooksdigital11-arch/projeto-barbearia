@@ -146,10 +146,10 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
           { label: 'Pausados', value: stats.inactive },
           { label: 'Categorias', value: stats.categories },
         ].map((kpi, idx) => (
-          <div key={idx} className="p-12 bg-black flex flex-col justify-between h-48">
-            <p className="label-muted opacity-40">{kpi.label}</p>
+          <div key={idx} className="p-12 bg-black flex flex-col justify-between h-48 group">
+            <p className="label-muted opacity-40 group-hover:opacity-100 transition-opacity">{kpi.label}</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-5xl font-bold font-mono text-white tracking-tighter">{kpi.value}</span>
+              <span className="text-5xl font-bold font-mono text-white tracking-tighter group-hover:text-accent-cyan transition-colors">{kpi.value}</span>
             </div>
           </div>
         ))}
@@ -161,7 +161,7 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
           onClick={() => setCategoryFilter('')}
           className={cn(
             "px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all",
-            !categoryFilter ? "bg-white text-black" : "text-text-secondary hover:text-white"
+            !categoryFilter ? "bg-white text-black" : "text-text-muted hover:text-white"
           )}
         >
           TODOS
@@ -174,10 +174,10 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
               onClick={() => setCategoryFilter(categoryFilter === cat ? '' : cat!)}
               className={cn(
                 "px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all",
-                categoryFilter === cat ? "bg-white text-black" : "text-text-secondary hover:text-white"
+                categoryFilter === cat ? "bg-white text-black" : "text-text-muted hover:text-white"
               )}
             >
-              {(config?.label || cat).toUpperCase()}
+              {((config?.label || (cat || 'Geral'))).toUpperCase()}
             </button>
           )
         })}
@@ -206,14 +206,14 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                         {service.name}
                       </span>
                     </div>
-                    <p className="text-sm text-text-secondary font-medium leading-relaxed max-w-md ml-5">
+                    <p className="text-sm text-text-muted font-medium leading-relaxed max-w-md ml-5 uppercase tracking-tight opacity-60">
                       {service.description || 'Sem descrição detalhada.'}
                     </p>
                   </div>
 
                   {/* Details Column */}
                   <div className="md:col-span-2 flex flex-col space-y-1">
-                    <span className="text-2xl font-mono font-bold text-white tracking-tighter">
+                    <span className="text-3xl font-mono font-bold text-white tracking-tighter">
                       {service.duration_minutes}
                     </span>
                     <span className="label-muted opacity-40">MINUTOS</span>
@@ -221,7 +221,7 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
 
                   {/* Price Column */}
                   <div className="md:col-span-2 flex flex-col space-y-1">
-                    <span className="text-2xl font-mono font-bold text-accent-cyan tracking-tighter">
+                    <span className="text-3xl font-mono font-bold text-accent-cyan tracking-tighter">
                       {formatPrice(service.price_cents)}
                     </span>
                     <span className="label-muted opacity-40">VALOR UNITÁRIO</span>
@@ -244,24 +244,24 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                   </div>
 
                   {/* Actions Column */}
-                  <div className="md:col-span-2 flex items-center justify-end gap-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="md:col-span-2 flex items-center justify-end gap-6 opacity-0 group-hover:opacity-100 transition-all">
                     <button
                       onClick={() => handleToggleActive(service)}
                       className={cn(
-                        "text-text-secondary transition-colors",
+                        "text-text-muted transition-colors",
                         service.is_active ? "hover:text-emerald-400" : "hover:text-accent-cyan"
                       )}
                       title={service.is_active ? "Pausar" : "Ativar"}
                     >
                       {service.is_active ? <Pause size={20} weight="bold" /> : <Play size={20} weight="bold" />}
                     </button>
-                    <button onClick={() => handleDuplicate(service)} className="text-text-secondary hover:text-white transition-colors" title="Duplicar">
+                    <button onClick={() => handleDuplicate(service)} className="text-text-muted hover:text-white transition-colors" title="Duplicar">
                       <Copy size={20} weight="bold" />
                     </button>
-                    <button onClick={() => handleEdit(service)} className="text-text-secondary hover:text-white transition-colors" title="Editar">
+                    <button onClick={() => handleEdit(service)} className="text-text-muted hover:text-white transition-colors" title="Editar">
                       <PencilSimple size={20} weight="bold" />
                     </button>
-                    <button onClick={() => handleDelete(service.id)} className="text-text-secondary hover:text-red-400 transition-colors" title="Excluir">
+                    <button onClick={() => handleDelete(service.id)} className="text-text-muted hover:text-red-400 transition-colors" title="Excluir">
                       <Trash size={20} weight="bold" />
                     </button>
                   </div>
@@ -274,9 +274,12 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
 
       {/* Modal - Premium Overlay */}
       {isModalOpen ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 animate-in fade-in duration-300">
-          <div className="bg-[#0d0d0d] border border-white/10 p-12 w-full max-w-2xl rounded-none animate-in zoom-in-95 duration-500">
-            <div className="flex items-center justify-between mb-12">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 animate-in fade-in duration-300">
+          <div className="bg-black border border-white/10 p-12 w-full max-w-2xl rounded-none animate-in zoom-in-95 duration-500 relative">
+             {/* Subtle ambient glow behind modal */}
+             <div className="glass-glow bg-accent-cyan top-0 left-0 w-64 h-64" />
+
+            <div className="flex items-center justify-between mb-16 relative z-10">
               <PageTitle 
                 title={editingService?.id ? 'Editar' : 'Novo'} 
                 subtitle="Configuração de serviço" 
@@ -290,26 +293,26 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-12">
+            <form onSubmit={handleSubmit} className="space-y-16 relative z-10">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <label className="label-muted">NOME DO SERVIÇO</label>
                   <input
                     name="name"
                     required
                     defaultValue={editingService?.name || ''}
-                    className="bg-transparent border-b border-white/10 w-full py-4 text-xl font-bold uppercase tracking-tight outline-none focus:border-accent-cyan transition-colors"
+                    className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-bold uppercase tracking-tight outline-none focus:border-accent-cyan transition-colors"
                     placeholder="EX: CORTE DEGRADÊ"
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <label className="label-muted">CATEGORIA</label>
                   <select
                     name="category"
                     required
                     defaultValue={editingService?.category || 'corte'}
-                    className="bg-transparent border-b border-white/10 w-full py-4 text-xl font-bold uppercase tracking-tight outline-none focus:border-accent-cyan transition-colors appearance-none cursor-pointer"
+                    className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-bold uppercase tracking-tight outline-none focus:border-accent-cyan transition-colors appearance-none cursor-pointer"
                   >
                     <option value="corte">CORTE</option>
                     <option value="barba">BARBA</option>
@@ -319,7 +322,7 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <label className="label-muted">DESCRIÇÃO</label>
                 <textarea
                   name="description"
@@ -330,7 +333,7 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <label className="label-muted">DURAÇÃO (MIN)</label>
                   <input
                     name="duration"
@@ -339,10 +342,10 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                     step="15"
                     required
                     defaultValue={editingService?.duration_minutes || 30}
-                    className="bg-transparent border-b border-white/10 w-full py-4 text-3xl font-mono font-bold outline-none focus:border-accent-cyan transition-colors"
+                    className="bg-transparent border-b border-white/10 w-full py-4 text-4xl font-mono font-bold outline-none focus:border-accent-cyan transition-colors"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <label className="label-muted">PREÇO (R$)</label>
                   <input
                     name="price"
@@ -351,12 +354,12 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                     step="0.01"
                     required
                     defaultValue={editingService?.price_cents ? editingService.price_cents / 100 : ''}
-                    className="bg-transparent border-b border-white/10 w-full py-4 text-3xl font-mono font-bold text-accent-cyan outline-none focus:border-accent-cyan transition-colors"
+                    className="bg-transparent border-b border-white/10 w-full py-4 text-4xl font-mono font-bold text-accent-cyan outline-none focus:border-accent-cyan transition-colors"
                   />
                 </div>
               </div>
 
-              <div className="pt-8 flex flex-col md:flex-row gap-6">
+              <div className="pt-12 flex flex-col md:flex-row gap-6">
                 <button
                   type="submit"
                   className="btn-pill-primary flex-1"

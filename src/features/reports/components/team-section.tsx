@@ -35,64 +35,71 @@ export function TeamSection({ data }: TeamSectionProps) {
   }
 
   return (
-    <section className="space-y-6 pt-12 border-t border-white/5">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-1.5 h-6 bg-accent-cyan rounded-full" />
-        <h2 className="text-xl font-syne font-bold text-white uppercase tracking-tight">Equipe</h2>
+    <section className="space-y-10">
+      <div className="border-l-2 border-accent-cyan pl-8 py-2">
+        <h2 className="text-4xl md:text-5xl font-syne font-black text-white uppercase tracking-tighter leading-none">
+          Equipe
+        </h2>
+        <p className="label-muted mt-2">
+          Performance & Distribuição de Talentos
+        </p>
       </div>
 
       {/* Barber Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {barbers.map((barber) => (
-          <div key={barber.id} className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl relative overflow-hidden group">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-full bg-accent-cyan/10 flex items-center justify-center text-accent-cyan font-bold text-xl uppercase shrink-0">
+          <div key={barber.id} className="premium-card p-10 group">
+            <div className="flex items-center gap-6 mb-12">
+              <div className="w-16 h-16 rounded-full bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-white font-bold text-2xl uppercase shrink-0 group-hover:border-accent-cyan/30 transition-colors">
                 {barber.name.charAt(0)}
               </div>
               <div>
-                <h3 className="font-syne font-bold text-white">{barber.name}</h3>
-                <div className="flex items-center gap-1 text-yellow-400">
-                  <Star size={14} weight="fill" />
-                  <span className="text-sm font-bold">{barber.rating.toFixed(1)}</span>
+                <h3 className="text-2xl font-bold font-syne text-white tracking-tight leading-none mb-2">{barber.name}</h3>
+                <div className="flex items-center gap-2">
+                  <Star size={16} weight="fill" className="text-accent-cyan" />
+                  <span className="text-base font-bold font-mono text-white leading-none">{barber.rating.toFixed(1)}</span>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Atendimentos</p>
-                <p className="text-xl font-bold text-white">{barber.appointments}</p>
+            <div className="grid grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <p className="label-muted">Atendimentos</p>
+                <p className="text-3xl font-bold text-white font-mono">{barber.appointments}</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Receita</p>
-                <p className="text-xl font-bold text-accent-cyan">R$ {barber.revenue.toLocaleString('pt-BR')}</p>
+              <div className="space-y-2">
+                <p className="label-muted">Receita</p>
+                <p className="text-3xl font-bold text-accent-cyan font-mono tracking-tighter">
+                  <span className="text-xs align-top mr-1">R$</span>
+                  {barber.revenue.toLocaleString('pt-BR')}
+                </p>
               </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Conclusão</p>
-                <p className="text-sm font-bold text-white">{barber.completionRate}%</p>
+              <div className="space-y-2">
+                <p className="label-muted">Taxa de Conclusão</p>
+                <p className="text-base font-bold text-white font-mono">{barber.completionRate}%</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Cancelamentos</p>
-                <p className="text-sm font-bold text-red-400">{barber.cancellations}</p>
+              <div className="space-y-2">
+                <p className="label-muted">Cancelamentos</p>
+                <p className="text-base font-bold text-red-400 font-mono">{barber.cancellations}</p>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Revenue Comparison */}
-        <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
-          <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Comparativo de Receita</h3>
+        <div className="premium-card p-10">
+          <span className="label-muted mb-12 block">Comparativo de Receita</span>
           <div className="h-[300px]">
             <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={revenueComparison} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                  <XAxis dataKey="name" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `R$${v}`} />
+                  <CartesianGrid strokeDasharray="0" stroke="#ffffff05" vertical={false} />
+                  <XAxis dataKey="name" stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} />
+                  <YAxis stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} tickFormatter={(v) => `R$${v}`} />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                    contentStyle={{ backgroundColor: '#0d0d0d', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px' }}
                     cursor={{ fill: 'rgba(255,255,255,0.02)' }}
                   />
                   <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
@@ -103,17 +110,17 @@ export function TeamSection({ data }: TeamSectionProps) {
         </div>
 
         {/* Weekly Evolution */}
-        <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
-          <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Evolução de Atendimentos</h3>
+        <div className="premium-card p-10">
+          <span className="label-muted mb-12 block">Evolução de Atendimentos</span>
           <div className="h-[300px]">
             <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={weeklyEvolution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                  <XAxis dataKey="week" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
+                  <CartesianGrid strokeDasharray="0" stroke="#ffffff05" vertical={false} />
+                  <XAxis dataKey="week" stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} />
+                  <YAxis stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                    contentStyle={{ backgroundColor: '#0d0d0d', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px' }}
                   />
                   {barbers.map((b, i) => (
                     <Line 
@@ -121,7 +128,7 @@ export function TeamSection({ data }: TeamSectionProps) {
                       type="monotone" 
                       dataKey={b.name} 
                       stroke={TEAM_COLORS[i % TEAM_COLORS.length]} 
-                      strokeWidth={2} 
+                      strokeWidth={3} 
                       dot={false}
                     />
                   ))}
@@ -132,19 +139,18 @@ export function TeamSection({ data }: TeamSectionProps) {
         </div>
       </div>
 
-      <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
-        <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Distribuição de Serviços</h3>
+      <div className="premium-card p-10">
+        <span className="label-muted mb-12 block">Distribuição de Serviços</span>
         <div className="h-[400px]">
           <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={serviceDistribution}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                <XAxis dataKey="barberName" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="0" stroke="#ffffff05" vertical={false} />
+                <XAxis dataKey="barberName" stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} />
+                <YAxis stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                  contentStyle={{ backgroundColor: '#0d0d0d', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px' }}
                 />
-                <Legend />
                 {(() => {
                   const serviceNames = new Set<string>()
                   serviceDistribution.forEach(d => {
@@ -152,7 +158,7 @@ export function TeamSection({ data }: TeamSectionProps) {
                   })
                   const svcColors = ['#00e5ff', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899']
                   return Array.from(serviceNames).map((name, i) => (
-                    <Bar key={name} dataKey={name} stackId="a" fill={svcColors[i % svcColors.length]} />
+                    <Bar key={name} dataKey={name} stackId="a" fill={svcColors[i % svcColors.length]} radius={0} />
                   ))
                 })()}
               </BarChart>

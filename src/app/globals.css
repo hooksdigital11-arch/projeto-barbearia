@@ -4,11 +4,13 @@
 @theme {
   --font-syne: "Syne", sans-serif;
   --font-mono: "DM Mono", monospace;
+  --font-sans: "DM Sans", sans-serif;
 
   /* Premium Palette */
   --color-bg-black: #000000;
-  --color-bg-surface: #0d0d0d;
-  --color-bg-surface-hover: #161616;
+  --color-bg-surface: #0a0a0a;
+  --color-bg-panel: #111111;
+  --color-bg-hover: #1a1a1a;
   
   --color-accent-cyan: #00e5ff;
   --color-accent-blue: #3b82f6;
@@ -16,8 +18,8 @@
   --color-accent-emerald: #10b981;
   
   --color-text-primary: #ffffff;
-  --color-text-secondary: #888888;
-  --color-text-muted: #444444;
+  --color-text-secondary: #a0a0a0;
+  --color-text-muted: #666666;
 
   --radius-premium: 16px;
   --radius-pill: 999px;
@@ -28,10 +30,10 @@
   --foreground: #ffffff;
   
   --bg-primary: #000000;
-  --bg-secondary: #0d0d0d;
+  --bg-secondary: #0a0a0a;
   --accent-cyan: #00e5ff;
   --text-primary: #ffffff;
-  --text-secondary: #888888;
+  --text-secondary: #a0a0a0;
 
   --border-premium: rgba(255, 255, 255, 0.06);
 }
@@ -42,7 +44,7 @@
   }
   
   body {
-    @apply bg-bg-black text-text-primary selection:bg-accent-cyan/30;
+    @apply bg-bg-black text-text-primary selection:bg-accent-cyan/30 font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
   }
@@ -53,40 +55,48 @@
 
   /* Editorial Typography Scale */
   .heading-hero {
-    @apply font-syne font-black text-6xl md:text-7xl lg:text-8xl tracking-[-0.04em] uppercase leading-[0.9];
+    @apply font-syne font-black text-6xl md:text-7xl lg:text-9xl tracking-[-0.04em] uppercase leading-[0.85];
   }
   
   .heading-section {
-    @apply font-syne font-bold text-3xl md:text-4xl tracking-tight uppercase;
+    @apply font-syne font-bold text-4xl md:text-5xl tracking-tight uppercase;
+  }
+
+  input, select, textarea {
+    @apply focus:ring-0 focus:outline-none;
   }
 }
 
 @layer components {
   /* Premium Containers */
   .premium-card {
-    @apply bg-[#0d0d0d] border border-white/[0.06] rounded-[16px] transition-all duration-500;
+    @apply bg-[#111111] border border-white/[0.06] rounded-[16px] transition-all duration-500 overflow-hidden;
   }
   
   .premium-card-hover {
-    @apply hover:bg-[#161616] hover:border-white/[0.12];
+    @apply hover:bg-[#1a1a1a] hover:border-white/[0.12];
   }
 
   /* Interactive Elements */
   .btn-pill-primary {
-    @apply bg-accent-cyan text-black font-bold px-8 py-4 rounded-full transition-all duration-300 active:scale-95 hover:bg-white;
+    @apply bg-accent-cyan text-black font-bold px-8 py-4 rounded-full transition-all duration-300 active:scale-95 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-pill-secondary {
-    @apply border border-accent-cyan text-accent-cyan font-bold px-8 py-4 rounded-full transition-all duration-300 active:scale-95 hover:bg-accent-cyan/10;
+    @apply border border-accent-cyan text-accent-cyan font-bold px-8 py-4 rounded-full transition-all duration-300 active:scale-95 hover:bg-accent-cyan/10 disabled:opacity-50;
   }
 
   /* Data Display */
   .mono-data {
-    @apply font-mono text-white tracking-tight;
+    @apply font-mono text-white tracking-tighter;
   }
 
   .label-muted {
-    @apply text-[10px] font-bold text-text-secondary uppercase tracking-[0.2em];
+    @apply text-[10px] font-bold text-text-muted uppercase tracking-[0.25em];
+  }
+
+  .glass-glow {
+    @apply absolute pointer-events-none opacity-20 blur-[120px];
   }
 }
 
@@ -100,11 +110,16 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-white/20 rounded-full hover:bg-white/40 transition-colors;
+  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
 }
 
 /* Purposeful Animations */
 .animate-premium-in {
   @apply animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-out;
+}
+
+/* Remove zebra striping globally */
+table tr {
+  @apply bg-transparent;
 }
 

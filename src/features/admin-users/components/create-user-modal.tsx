@@ -73,66 +73,62 @@ export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalP
       />
       
       {/* Modal Content */}
-      <div className="relative w-full max-w-xl bg-card border border-white/5 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-300">
+      <div className="relative w-full max-w-xl bg-black border border-white/[0.06] rounded-[2rem] overflow-hidden animate-in zoom-in-95 fade-in duration-300">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">
-          <div>
-            <h2 className="text-xl font-bold font-syne text-white">Novo Usuário</h2>
-            <p className="text-sm text-muted-foreground">Cadastre um novo membro para sua equipe</p>
+        <div className="px-10 py-8 border-b border-white/[0.06]">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter">Novo Usuário</h2>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted mt-1">Equipe & Gestão</p>
+            </div>
+            <button 
+              onClick={onClose}
+              className="w-10 h-10 flex items-center justify-center text-text-muted hover:text-white transition-all rounded-full border border-white/5 hover:border-white/10"
+            >
+              <X size={20} />
+            </button>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 text-muted-foreground hover:text-white transition-colors rounded-full hover:bg-white/5"
-          >
-            <X size={24} />
-          </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-10">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
               {/* Full Name */}
               <FormField
                 control={form.control}
                 name="fullName"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nome Completo</FormLabel>
+                  <FormItem className="space-y-4">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Nome Completo</FormLabel>
                     <FormControl>
-                      <div className="relative group">
-                        <Input 
-                          {...field} 
-                          placeholder="Ex: Rafael Silva" 
-                          className="pl-10 bg-black/20 border-white/10 focus:border-accent-cyan transition-all"
-                        />
-                        <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-accent-cyan transition-colors" />
-                      </div>
+                      <input 
+                        {...field} 
+                        placeholder="Ex: Rafael Silva" 
+                        className="w-full px-8 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all"
+                      />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                   </FormItem>
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 {/* Email */}
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email Profissional</FormLabel>
+                    <FormItem className="space-y-4">
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Email Profissional</FormLabel>
                       <FormControl>
-                        <div className="relative group">
-                          <Input 
-                            {...field} 
-                            type="email"
-                            placeholder="rafael@barbearia.com" 
-                            className="pl-10 bg-black/20 border-white/10 focus:border-accent-cyan transition-all"
-                          />
-                          <Envelope size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-accent-cyan transition-colors" />
-                        </div>
+                        <input 
+                          {...field} 
+                          type="email"
+                          placeholder="rafael@barbearia.com" 
+                          className="w-full px-8 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all font-mono"
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                     </FormItem>
                   )}
                 />
@@ -142,46 +138,42 @@ export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalP
                   control={form.control}
                   name="phone"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Telefone</FormLabel>
+                    <FormItem className="space-y-4">
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Telefone</FormLabel>
                       <FormControl>
-                        <div className="relative group">
-                          <Input 
-                            {...field} 
-                            placeholder="(11) 99999-9999" 
-                            className="pl-10 bg-black/20 border-white/10 focus:border-accent-cyan transition-all"
-                          />
-                          <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-accent-cyan transition-colors" />
-                        </div>
+                        <input 
+                          {...field} 
+                          placeholder="(11) 99999-9999" 
+                          className="w-full px-8 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all font-mono"
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                     </FormItem>
                   )}
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 {/* Role Selector */}
                 <FormField
                   control={form.control}
                   name="role"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cargo / Role</FormLabel>
+                    <FormItem className="space-y-4">
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Cargo / Role</FormLabel>
                       <FormControl>
-                        <div className="relative group">
+                        <div className="relative">
                           <select 
                             {...field}
-                            className="w-full h-10 px-10 bg-black/20 border border-white/10 rounded-md text-sm focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan outline-none appearance-none transition-all"
+                            className="w-full h-[64px] px-8 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-base font-bold text-white focus:outline-none focus:border-accent-cyan/40 appearance-none transition-all font-mono"
                           >
-                            <option value="barber" className="bg-bg-primary">Barbeiro</option>
-                            <option value="admin" className="bg-bg-primary">Administrador</option>
-                            <option value="client" className="bg-bg-primary">Cliente</option>
+                            <option value="barber" className="bg-black">Barbeiro</option>
+                            <option value="admin" className="bg-black">Administrador</option>
+                            <option value="client" className="bg-black">Cliente</option>
                           </select>
-                          <Briefcase size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-accent-cyan transition-colors" />
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                     </FormItem>
                   )}
                 />
@@ -192,16 +184,16 @@ export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalP
                     control={form.control}
                     name="specialty"
                     render={({ field }) => (
-                      <FormItem className="animate-in slide-in-from-top-2 duration-300">
-                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Especialidade</FormLabel>
+                      <FormItem className="space-y-4 animate-premium-in">
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Especialidade</FormLabel>
                         <FormControl>
-                          <Input 
+                          <input 
                             {...field} 
                             placeholder="Ex: Corte e Barba" 
-                            className="bg-black/20 border-white/10 focus:border-accent-cyan transition-all"
+                            className="w-full px-8 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all"
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                       </FormItem>
                     )}
                   />
@@ -213,21 +205,18 @@ export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalP
                 control={form.control}
                 name="password"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Senha Temporária (Opcional)</FormLabel>
+                  <FormItem className="space-y-4">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Senha Temporária</FormLabel>
                     <FormControl>
-                      <div className="relative group">
-                        <Input 
-                          {...field} 
-                          type="password"
-                          placeholder="Deixe vazio para gerar automaticamente" 
-                          className="pl-10 bg-black/20 border-white/10 focus:border-accent-cyan transition-all"
-                        />
-                        <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-accent-cyan transition-colors" />
-                      </div>
+                      <input 
+                        {...field} 
+                        type="password"
+                        placeholder="Deixe vazio para gerar automaticamente" 
+                        className="w-full px-8 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all font-mono"
+                      />
                     </FormControl>
-                    <p className="text-[10px] text-muted-foreground/60 italic">Se vazio, uma senha segura será gerada.</p>
-                    <FormMessage />
+                    <p className="text-[9px] text-text-muted uppercase tracking-[0.2em] font-black">Senha automática recomendada para segurança inicial</p>
+                    <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                   </FormItem>
                 )}
               />
@@ -237,42 +226,40 @@ export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalP
                 control={form.control}
                 name="autoConfirm"
                 render={({ field }) => (
-                  <FormItem className="flex items-center space-x-3 space-y-0">
+                  <FormItem className="flex items-center space-x-4 space-y-0 p-6 rounded-2xl bg-white/[0.02] border border-white/[0.04]">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan"
+                        className="w-6 h-6 border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan"
                       />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="text-xs font-medium text-white cursor-pointer">
-                        Confirmar email automaticamente
+                    <div className="space-y-1.5 leading-none">
+                      <FormLabel className="text-xs font-black uppercase tracking-widest text-white cursor-pointer">
+                        Confirmar acesso imediato
                       </FormLabel>
-                      <p className="text-[10px] text-muted-foreground">O usuário poderá logar imediatamente.</p>
+                      <p className="text-[10px] text-text-muted font-medium">O usuário poderá logar sem validar o email manualmente.</p>
                     </div>
                   </FormItem>
                 )}
               />
 
               {/* Footer Ações */}
-              <div className="flex items-center justify-end gap-3 pt-6 border-t border-white/5">
-                <Button 
+              <div className="flex items-center justify-end gap-10 pt-10 border-t border-white/[0.06]">
+                <button 
                   type="button" 
-                  variant="ghost" 
                   onClick={onClose}
-                  className="hover:bg-white/5 text-muted-foreground hover:text-white"
+                  className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted hover:text-white transition-colors"
                 >
                   Cancelar
-                </Button>
-                <Button 
+                </button>
+                <button 
                   type="submit" 
                   disabled={isPending}
-                  className="bg-accent-cyan hover:bg-cyan-400 text-black font-bold gap-2 min-w-[140px]"
+                  className="px-12 py-5 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.3em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_0_20px_rgba(0,229,255,0.15)]"
                 >
-                  {isPending ? <CircleNotch size={20} className="animate-spin" /> : <FloppyDisk size={20} />}
-                  {isPending ? 'Criando...' : 'Salvar Usuário'}
-                </Button>
+                  {isPending ? 'Processando...' : 'Confirmar Cadastro'}
+                </button>
               </div>
             </form>
           </Form>

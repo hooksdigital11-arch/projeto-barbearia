@@ -9,12 +9,14 @@ import {
   UserPlus, 
   Ticket,
   ChartLineUp,
-  Users
-} from '@phosphor-icons/react/dist/ssr'
+  Users,
+  WhatsappLogo, 
+  Calendar, 
+  ChartBar 
+} from '@phosphor-icons/react'
 import { KPICard } from '@/components/shared/kpi-card'
 import { Skeleton, CardSkeleton, TableSkeleton } from '@/components/shared/loading-skeleton'
 import { cn } from '@/lib/utils/cn'
-import { WhatsappLogo, Calendar, ChartBar } from '@phosphor-icons/react/dist/ssr'
 import { createClient } from '@/lib/supabase/client'
 
 const RevenueChart = dynamic(() => import('./revenue-chart'), {

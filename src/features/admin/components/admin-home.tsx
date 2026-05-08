@@ -14,7 +14,7 @@ import {
   Package, 
   ChartPieSlice,
   ArrowRight
-} from '@phosphor-icons/react/dist/ssr'
+} from '@phosphor-icons/react'
 
 const modules = [
   {
@@ -84,18 +84,38 @@ export function AdminHome({ userName }: AdminHomeProps) {
   const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
 
   return (
-    <div className="space-y-32 py-20 animate-premium-in">
+    <div className="space-y-32 py-12 animate-premium-in">
       {/* Editorial Header - Balanced with precision */}
-      <div className="space-y-6">
-        <div className="space-y-2">
+      <div className="space-y-8">
+        <div className="space-y-4">
           <p className="label-muted opacity-40">{greeting}, {firstName}</p>
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black font-syne text-white tracking-tighter leading-none uppercase">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black font-syne text-white tracking-tighter leading-none uppercase">
             Comando<span className="text-accent-cyan">.</span>
           </h1>
         </div>
-        <p className="text-text-secondary text-lg font-medium leading-relaxed max-w-4xl">
+        <p className="text-text-secondary text-xl font-medium leading-relaxed max-w-4xl tracking-tight">
           Gerencie cada operação com precisão espacial. Sua barbearia, sob controle absoluto.
         </p>
+      </div>
+
+      {/* KPI Section - Precision Data at the top */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/5 border border-white/5 overflow-hidden">
+        {[
+          { label: 'Faturamento Hoje', value: '4.280', unit: 'R$' },
+          { label: 'Taxa de Ocupação', value: '94', unit: '%' },
+          { label: 'Novos Clientes', value: '12', unit: '' },
+        ].map((kpi, idx) => (
+          <div key={idx} className="p-12 bg-black flex flex-col justify-between h-48 group">
+            <p className="label-muted opacity-40 group-hover:opacity-100 transition-opacity">{kpi.label}</p>
+            <div className="flex items-baseline gap-2">
+              {kpi.unit === 'R$' && <span className="text-xl font-mono text-text-muted">{kpi.unit}</span>}
+              <span className="text-6xl font-bold font-mono text-white tracking-tighter group-hover:text-accent-cyan transition-colors">
+                {kpi.value}
+              </span>
+              {kpi.unit !== 'R$' && kpi.unit !== '' && <span className="text-xl font-mono text-text-muted">{kpi.unit}</span>}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Module Grid - Clean edges, no negative margins */}
@@ -105,14 +125,14 @@ export function AdminHome({ userName }: AdminHomeProps) {
             key={mod.href}
             href={mod.href}
             className={cn(
-              "group relative flex flex-col justify-between p-12 bg-black",
+              "group relative flex flex-col justify-between p-12 bg-black h-80",
               "hover:bg-[#0a0a0a] transition-all duration-500 active:scale-[0.99] outline-none"
             )}
           >
             <div className="space-y-12">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 flex items-center justify-center text-accent-cyan opacity-40 group-hover:opacity-100 transition-opacity duration-500">
-                  <mod.icon size={32} weight="duotone" />
+                  <mod.icon size={32} weight="bold" />
                 </div>
                 <ArrowRight 
                   size={24} 
@@ -121,35 +141,18 @@ export function AdminHome({ userName }: AdminHomeProps) {
                 />
               </div>
 
-              <div className="space-y-3">
-                <h3 className="text-2xl font-bold font-syne text-white tracking-tight uppercase">
+              <div className="space-y-4">
+                <h3 className="text-3xl font-bold font-syne text-white tracking-tight uppercase leading-none">
                   {mod.label}
                 </h3>
-                <p className="text-sm text-text-secondary font-medium tracking-tight">
+                <p className="text-sm text-text-muted font-medium tracking-tight uppercase leading-relaxed opacity-60 group-hover:opacity-100 transition-opacity">
                   {mod.description}
                 </p>
               </div>
             </div>
             
-            <div className="mt-12 h-[2px] w-0 bg-accent-cyan group-hover:w-12 transition-all duration-700" />
+            <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-accent-cyan group-hover:w-full transition-all duration-700" />
           </Link>
-        ))}
-      </div>
-
-      {/* KPI Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-16 py-20 border-t border-white/5">
-        {[
-          { label: 'Faturamento Hoje', value: 'R$ 4.280', unit: ',00' },
-          { label: 'Taxa de Ocupação', value: '94', unit: '%' },
-          { label: 'Novos Clientes', value: '12', unit: '' },
-        ].map((kpi, idx) => (
-          <div key={idx} className="space-y-2">
-            <p className="label-muted">{kpi.label}</p>
-            <div className="flex items-baseline gap-1">
-              <span className="text-5xl font-bold font-mono text-white tracking-tighter">{kpi.value}</span>
-              <span className="text-xl font-mono text-text-secondary">{kpi.unit}</span>
-            </div>
-          </div>
         ))}
       </div>
     </div>

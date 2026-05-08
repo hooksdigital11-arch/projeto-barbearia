@@ -30,7 +30,26 @@ export function ComandaActive({
   appointment,
   onBack,
 }: ComandaActiveProps) {
-  // ... (hooks e lógica existentes mantidos)
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false)
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false)
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+  const [receiptData, setReceiptData] = useState<any>(null)
+
+  const subtotal = items.reduce((acc, item) => acc + item.total_cents, 0)
+  const discount = 0 // Implementar lógica de desconto se houver no futuro
+  const total = subtotal - discount
+
+  if (receiptData) {
+    return (
+      <ComandaReceipt 
+        {...receiptData} 
+        onClose={() => {
+          setReceiptData(null)
+          onBack()
+        }} 
+      />
+    )
+  }
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-right-10 duration-1000 ease-out">
@@ -81,7 +100,7 @@ export function ComandaActive({
           </div>
           {/* Decoração de fundo */}
           <div className="absolute top-0 right-0 p-10 opacity-[0.02] transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-1000">
-            <Receipt size={240} weight="duotone" />
+            <Receipt size={240} />
           </div>
         </div>
       </div>
@@ -97,13 +116,13 @@ export function ComandaActive({
                 onClick={() => setIsServiceModalOpen(true)}
                 className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] tracking-widest hover:bg-white/10 active:scale-95 transition-all"
               >
-                <Plus size={16} weight="bold" className="mr-2 text-accent-cyan" /> SERVIÇO
+                <Plus size={16} className="mr-2 text-accent-cyan" /> SERVIÇO
               </Button>
               <Button 
                 onClick={() => setIsProductModalOpen(true)}
                 className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] tracking-widest hover:bg-white/10 active:scale-95 transition-all"
               >
-                <Plus size={16} weight="bold" className="mr-2 text-accent-blue" /> PRODUTO
+                <Plus size={16} className="mr-2 text-accent-blue" /> PRODUTO
               </Button>
             </div>
           </div>
@@ -116,7 +135,7 @@ export function ComandaActive({
             ) : (
               <div className="p-20 rounded-[3rem] border-2 border-dashed border-white/5 flex flex-col items-center justify-center text-muted-foreground gap-6 bg-white/[0.01]">
                 <div className="w-24 h-24 rounded-[2rem] bg-white/[0.03] flex items-center justify-center text-white/5">
-                  <Receipt size={48} weight="duotone" />
+                  <Receipt size={48} />
                 </div>
                 <p className="text-[10px] font-black uppercase tracking-[0.4em]">Aguardando lançamento de itens</p>
               </div>

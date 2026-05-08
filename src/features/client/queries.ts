@@ -15,7 +15,7 @@ export const getClientDashboardData = cache(async () => {
     .eq('user_id', user.id)
     .single()
 
-  const clientId = clientData?.id
+  const clientId = (clientData as any)?.id
 
   let preferredBarber = '---'
   let loyaltyStamps = 0
@@ -44,7 +44,7 @@ export const getClientDashboardData = cache(async () => {
       .eq('client_id', clientId)
       .order('start_time', { ascending: true })
 
-    const apps = appsData || []
+    const apps = (appsData || []) as any[]
     
     // Calculate preferred barber (most visits)
     const barberCounts = new Map<string, number>()
@@ -53,7 +53,8 @@ export const getClientDashboardData = cache(async () => {
         barberCounts.set(name, (barberCounts.get(name) || 0) + 1)
     })
     if (barberCounts.size > 0) {
-        preferredBarber = Array.from(barberCounts.entries()).sort((a, b) => b[1] - a[1])[0][0]
+        const sorted = Array.from(barberCounts.entries()).sort((a, b) => b[1] - a[1])
+        preferredBarber = sorted[0]?.[0] || '---'
     }
 
     const upcoming = apps.filter(a => new Date(a.start_time) >= new Date() && !['completed', 'cancelled', 'no_show'].includes(a.status))
@@ -92,6 +93,6 @@ export const getClientDashboardData = cache(async () => {
     },
     upcomingAppointments,
     history,
-    availableCoupons: []
+    availableCoupons: [] as any[]
   }
 })

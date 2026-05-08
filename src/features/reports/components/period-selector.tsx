@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar as CalendarIcon, X } from '@phosphor-icons/react/dist/ssr'
+import { Calendar as CalendarIcon, X } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 import { CustomDateModal } from './custom-date-modal'
 import type { ReportPeriod } from '../types'
@@ -58,17 +58,17 @@ export function PeriodSelector({ onPeriodChange }: PeriodSelectorProps) {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
-        <div className="flex p-1 bg-black/20 rounded-xl border border-white/5">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-6 premium-card">
+        <div className="flex gap-2">
           {periods.map((p) => (
             <button
               key={p.value}
               onClick={() => handlePeriodSelect(p.value)}
               className={cn(
-                "px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all",
+                "px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all",
                 activePeriod === p.value 
-                  ? "bg-accent-cyan text-black shadow-lg shadow-accent-cyan/20" 
-                  : "text-text-secondary hover:text-text-primary"
+                  ? "bg-accent-cyan text-black" 
+                  : "text-text-muted hover:text-white border border-white/10 hover:border-white/20"
               )}
             >
               {p.label}
@@ -76,15 +76,15 @@ export function PeriodSelector({ onPeriodChange }: PeriodSelectorProps) {
           ))}
         </div>
 
-        <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 cursor-pointer group">
+        <div className="flex items-center gap-6">
+          <label className="flex items-center gap-3 cursor-pointer group">
             <div className={cn(
-              "w-10 h-5 rounded-full p-1 transition-all",
-              compare ? "bg-accent-cyan" : "bg-white/10"
+              "w-12 h-6 rounded-full p-1 transition-all border border-white/10",
+              compare ? "bg-accent-cyan border-accent-cyan" : "bg-white/5"
             )}>
               <div className={cn(
-                "w-3 h-3 rounded-full bg-white transition-all",
-                compare ? "translate-x-5" : "translate-x-0"
+                "w-4 h-4 rounded-full transition-all",
+                compare ? "translate-x-6 bg-black" : "translate-x-0 bg-white/20"
               )} />
             </div>
             <input 
@@ -93,26 +93,25 @@ export function PeriodSelector({ onPeriodChange }: PeriodSelectorProps) {
               checked={compare} 
               onChange={(e) => setCompare(e.target.checked)} 
             />
-            <span className="text-xs font-medium text-text-secondary group-hover:text-text-primary transition-colors">
-              Comparar com anterior
+            <span className="text-[10px] font-black uppercase tracking-widest text-text-muted group-hover:text-white transition-colors">
+              Comparar
             </span>
           </label>
 
           {activePeriod === 'custom' && customRange ? (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-accent-cyan/10 border border-accent-cyan/20">
-              <span className="text-xs font-bold text-accent-cyan tracking-wider">
-                {new Date(customRange.start).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})} → {new Date(customRange.end).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
+            <div className="flex items-center gap-4 px-5 py-2.5 rounded-full bg-white/[0.03] border border-accent-cyan/30">
+              <span className="text-[10px] font-bold text-accent-cyan tracking-widest font-mono uppercase">
+                {new Date(customRange.start).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})} — {new Date(customRange.end).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
               </span>
               <button onClick={() => handlePeriodSelect('today')} className="text-accent-cyan hover:text-white transition-colors">
-                <X size={14} weight="bold" />
+                <X size={16} weight="bold" />
               </button>
             </div>
           ) : (
             <button 
               onClick={() => setShowCustom(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-bold hover:bg-white/10 transition-all"
+              className="flex items-center gap-3 px-6 py-2.5 rounded-full border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all"
             >
-              <CalendarIcon size={16} weight="duotone" />
               Personalizado
             </button>
           )}

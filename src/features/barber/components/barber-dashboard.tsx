@@ -13,7 +13,7 @@ import {
   UserMinus,
   Coffee,
   SignOut
-} from '@phosphor-icons/react/dist/ssr'
+} from '@phosphor-icons/react'
 import { ServiceTimer } from './service-timer'
 import { QuickNotes } from './quick-notes'
 import { cn } from '@/lib/utils/cn'

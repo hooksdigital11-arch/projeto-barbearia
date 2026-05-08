@@ -54,27 +54,24 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
   ] as const
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-16">
       <div>
-        <h2 className="text-2xl font-bold font-syne text-white">Notificações</h2>
-        <p className="text-muted-foreground">Escolha como você quer ser avisado sobre o que acontece na sua barbearia</p>
+        <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter">Notificações</h2>
+        <p className="label-muted mt-2">Controle como você e seus clientes são avisados</p>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Email Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-accent-cyan mb-4">
-              <Envelope size={20} weight="duotone" />
-              <h3 className="text-sm font-bold uppercase tracking-widest">Notificações por Email</h3>
-            </div>
+          <div className="space-y-6">
+            <h3 className="label-muted text-accent-cyan">Canais Digitais</h3>
             
             <div className="grid gap-4">
               {emailItems.map((item) => (
-                <div key={item.id} className="flex items-start justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
+                <div key={item.id} className="flex items-center justify-between p-8 rounded-[2rem] bg-white/[0.03] border border-white/[0.06] transition-all">
                   <div className="space-y-1">
-                    <p className="text-sm font-bold text-white">{item.label}</p>
-                    <p className="text-xs text-muted-foreground">{item.desc}</p>
+                    <p className="text-sm font-bold text-white uppercase tracking-tight">{item.label}</p>
+                    <p className="text-[11px] font-medium text-text-muted">{item.desc}</p>
                   </div>
                   <FormField
                     control={form.control}
@@ -85,7 +82,7 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
                           <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
-                            className="border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan"
+                            className="w-5 h-5 border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan"
                           />
                         </FormControl>
                       </FormItem>
@@ -95,23 +92,21 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
               ))}
             </div>
 
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="p-8 rounded-[2rem] bg-white/[0.03] border border-white/[0.06] flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-1">
-                <p className="text-sm font-bold text-white">Relatório Diário</p>
-                <p className="text-xs text-muted-foreground">Resumo do faturamento e agendamentos do dia anterior</p>
+                <p className="text-sm font-bold text-white uppercase tracking-tight">Relatório Diário</p>
+                <p className="text-[11px] font-medium text-text-muted">Resumo do faturamento e agendamentos do dia anterior</p>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
                 <FormField
                   control={form.control}
                   name="dailyReportTime"
                   render={({ field }) => (
-                    <div className="relative group">
-                      <input 
-                        {...field} 
-                        type="time" 
-                        className="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:border-accent-cyan outline-none"
-                      />
-                    </div>
+                    <input 
+                      {...field} 
+                      type="time" 
+                      className="bg-black border border-white/[0.06] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-accent-cyan/30 font-mono transition-all"
+                    />
                   )}
                 />
                 <FormField
@@ -123,7 +118,7 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          className="border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan"
+                          className="w-5 h-5 border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan"
                         />
                       </FormControl>
                     </FormItem>
@@ -134,17 +129,14 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
           </div>
 
           {/* WhatsApp Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-emerald-400 mb-4">
-              <ShareNetwork size={20} weight="duotone" />
-              <h3 className="text-sm font-bold uppercase tracking-widest">Automações WhatsApp</h3>
-            </div>
+          <div className="space-y-6">
+            <h3 className="label-muted text-emerald-500">Automações Diretas</h3>
             
-            <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 space-y-4">
+            <div className="p-10 rounded-[2.5rem] bg-emerald-500/[0.03] border border-emerald-500/10 space-y-10">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="text-sm font-bold text-white">Confirmação Automática</p>
-                  <p className="text-xs text-muted-foreground">Enviar confirmação instantânea para o cliente</p>
+                  <p className="text-sm font-bold text-white uppercase tracking-tight">Confirmação Automática</p>
+                  <p className="text-[11px] font-medium text-emerald-500/60 uppercase tracking-widest font-black">WhatsApp instantâneo</p>
                 </div>
                 <FormField
                   control={form.control}
@@ -155,7 +147,7 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          className="border-emerald-500/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                          className="w-5 h-5 border-emerald-500/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                         />
                       </FormControl>
                     </FormItem>
@@ -165,8 +157,8 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
               
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="text-sm font-bold text-white">Lembrete 24h</p>
-                  <p className="text-xs text-muted-foreground">Reduz o no-show enviando um lembrete automático</p>
+                  <p className="text-sm font-bold text-white uppercase tracking-tight">Lembrete 24h</p>
+                  <p className="text-[11px] font-medium text-emerald-500/60 uppercase tracking-widest font-black">Redução de No-Show</p>
                 </div>
                 <FormField
                   control={form.control}
@@ -177,7 +169,7 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          className="border-emerald-500/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                          className="w-5 h-5 border-emerald-500/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                         />
                       </FormControl>
                     </FormItem>
@@ -187,11 +179,14 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
             </div>
           </div>
 
-          <div className="flex justify-end pt-4">
-            <Button disabled={isPending} className="bg-accent-cyan hover:bg-cyan-400 text-black font-bold gap-2 px-8 py-6 rounded-2xl text-base shadow-lg shadow-cyan-500/20">
-              {isPending ? <CircleNotch size={20} className="animate-spin" /> : <FloppyDisk size={20} />}
-              Salvar Preferências
-            </Button>
+          <div className="flex justify-end pt-12 border-t border-white/[0.06]">
+            <button 
+              type="submit"
+              disabled={isPending} 
+              className="px-10 py-3.5 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              {isPending ? 'Salvando...' : 'Salvar Preferências'}
+            </button>
           </div>
         </form>
       </Form>

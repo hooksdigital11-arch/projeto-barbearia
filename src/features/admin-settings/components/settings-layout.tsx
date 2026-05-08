@@ -13,6 +13,7 @@ import {
   UserCircle, 
   Warning 
 } from '@phosphor-icons/react'
+import { PageTitle } from '@/components/shared/page-title'
 
 const sections = [
   { label: 'Geral', href: '/admin/settings/general', icon: Gear },
@@ -29,25 +30,15 @@ export function SettingsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   return (
-    <div className="space-y-16 animate-in fade-in duration-1000">
-      {/* Header com Design Assimétrico */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
-            <h1 className="text-5xl md:text-7xl font-black font-syne text-white tracking-tighter leading-none uppercase">
-              Ajustes<span className="text-accent-cyan">.</span>
-            </h1>
-          </div>
-          <p className="text-text-secondary text-lg font-medium max-w-xl ml-7 border-l border-white/10 pl-6">
-            Configurações globais da unidade. Personalize horários, serviços, notificações e segurança do seu negócio.
-          </p>
-        </div>
-      </div>
+    <div className="space-y-24">
+      <PageTitle 
+        title="Ajustes" 
+        subtitle="Configurações globais da unidade. Personalize horários, serviços, notificações e segurança do seu negócio." 
+      />
 
       <div className="flex flex-col lg:flex-row gap-12 min-h-[600px]">
-        {/* Sidebar Navigation Pro Max */}
-        <aside className="w-full lg:w-72 flex flex-col gap-2 sticky top-8">
+        {/* Sidebar Navigation: Minimalist & Border-Driven */}
+        <aside className="w-full lg:w-72 flex flex-col gap-0 sticky top-8">
           {sections.map((item) => {
             const isActive = pathname === item.href
             return (
@@ -55,40 +46,29 @@ export function SettingsLayout({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-4 px-6 py-4 rounded-[1.5rem] text-xs font-black uppercase tracking-[0.15em] transition-all duration-500 group relative overflow-hidden",
+                  "flex items-center gap-5 px-8 py-4 text-[10px] font-black uppercase tracking-[0.3em] transition-all border-l-2",
                   isActive 
-                    ? "bg-white text-black shadow-[0_15px_30px_rgba(255,255,255,0.1)]" 
-                    : "text-muted-foreground hover:text-white hover:bg-white/[0.03] border border-transparent hover:border-white/5",
-                  item.danger && !isActive && "hover:text-red-400 hover:bg-red-500/5",
-                  item.danger && isActive && "bg-red-500 text-white shadow-[0_15px_30px_rgba(239,68,68,0.2)]"
+                    ? (item.danger 
+                        ? "border-red-500 text-white bg-red-500/5" 
+                        : "border-accent-cyan text-white bg-accent-cyan/5") 
+                    : "border-transparent text-text-muted hover:text-white hover:bg-white/[0.02]",
                 )}
               >
                 <item.icon 
-                  size={20} 
-                  weight={isActive ? "fill" : "duotone"} 
-                  className={cn(
-                    "transition-all duration-500 group-hover:scale-110",
-                    isActive ? (item.danger ? "text-white" : "text-black") : "text-muted-foreground group-hover:text-white",
-                  )}
+                  size={18} 
+                  weight={isActive ? "bold" : "regular"} 
+                  className={cn(isActive && !item.danger && "text-accent-cyan")}
                 />
                 {item.label}
-                {isActive && !item.danger && (
-                  <div className="absolute right-4 w-1.5 h-1.5 bg-accent-cyan rounded-full shadow-[0_0_10px_rgba(0,229,255,1)]" />
-                )}
               </Link>
             )
           })}
         </aside>
 
-        {/* Main Content Area Pro Max */}
-        <main className="flex-1 max-w-4xl animate-in fade-in slide-in-from-right-10 duration-1000">
-          <div className="glass-card p-10 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-10 opacity-[0.01] pointer-events-none">
-              <Gear size={200} weight="duotone" />
-            </div>
-            <div className="relative z-10">
-              {children}
-            </div>
+        {/* Main Content Area */}
+        <main className="flex-1 max-w-4xl">
+          <div className="premium-card p-10">
+            {children}
           </div>
         </main>
       </div>

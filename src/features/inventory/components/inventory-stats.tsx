@@ -18,113 +18,69 @@ export function InventoryStatsCards({ stats, items, period, salesData, isLoading
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100)
   }
 
-  // Calcular faturamento real total do período
   const totalRevenue = useMemo(() => {
     let total = 0
     items.forEach(item => {
       if (item.type === 'revenda') {
         const sale = salesData.get(item.id)
-        if (sale) {
-          total += sale.faturamento
-        }
+        if (sale) total += sale.faturamento
       }
     })
     return total
   }, [items, salesData])
 
-  const Skeleton = () => (
-    <div className="space-y-4">
-      <div className="w-12 h-12 rounded-2xl bg-white/5 animate-pulse" />
-      <div className="space-y-2">
-        <div className="w-24 h-2 bg-white/5 animate-pulse rounded" />
-        <div className="w-16 h-8 bg-white/5 animate-pulse rounded" />
-      </div>
-    </div>
-  )
+  const kpis = [
+    { label: 'Total de Itens', value: stats.total, icon: Package, color: '#8b5cf6', desc: 'Volume em estoque' },
+    { 
+      label: 'Revenda', 
+      value: stats.revenda, 
+      icon: Tag, 
+      color: '#10b981', 
+      desc: `Faturamento: ${formatPrice(totalRevenue)}`,
+      subDesc: `Período: ${period}`
+    },
+    { label: 'Uso Interno', value: stats.usoInterno, icon: Wrench, color: '#3b82f6', desc: 'Insumos e materiais' },
+    { 
+      label: 'Alertas Críticos', 
+      value: stats.lowStock, 
+      icon: Warning, 
+      color: stats.lowStock > 0 ? '#ef4444' : '#a0a0a0', 
+      desc: stats.lowStock > 0 ? 'Estoque abaixo do mínimo' : 'Tudo sob controle' 
+    },
+  ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      {/* Total Items */}
-      <div className="p-6 rounded-[2.5rem] bg-accent-cyan/5 border border-white/5 backdrop-blur-xl space-y-4 hover:border-accent-cyan/20 transition-all duration-300 group">
-        {isLoading ? <Skeleton /> : (
-          <>
-            <div className="w-12 h-12 rounded-2xl bg-accent-cyan/10 flex items-center justify-center text-accent-cyan group-hover:scale-110 transition-transform duration-500">
-              <Package size={26} weight="duotone" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/5 border border-white/5 overflow-hidden">
+      {kpis.map((kpi, idx) => (
+        <div key={idx} className="p-10 bg-black flex flex-col justify-between h-48 group">
+          <div className="flex items-start justify-between">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-40 group-hover:opacity-100 transition-opacity">
+              {kpi.label}
+            </p>
+            <kpi.icon size={20} weight="bold" style={{ color: kpi.color }} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+          </div>
+          <div>
+            <div className="flex items-baseline gap-2">
+              <p className={cn(
+                "text-5xl font-bold font-mono tracking-tighter group-hover:text-accent-cyan transition-colors",
+                kpi.label === 'Alertas Críticos' && stats.lowStock > 0 ? "text-red-400" : "text-white"
+              )}>
+                {isLoading ? '...' : kpi.value}
+              </p>
             </div>
-            <div>
-              <p className="text-[10px] font-black text-accent-cyan/60 uppercase tracking-[0.2em]">Total de Itens</p>
-              <p className="text-4xl font-bold text-white font-syne mt-1">{stats.total}</p>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Revenda */}
-      <div className="p-6 rounded-[2.5rem] bg-green-500/5 border border-white/5 backdrop-blur-xl space-y-4 hover:border-green-500/20 transition-all duration-300 group">
-        {isLoading ? <Skeleton /> : (
-          <>
-            <div className="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-400 group-hover:scale-110 transition-transform duration-500">
-              <Tag size={26} weight="duotone" />
-            </div>
-            <div className="flex flex-col">
-              <p className="text-[10px] font-black text-green-400/60 uppercase tracking-[0.2em]">Revenda</p>
-              <div className="flex items-baseline gap-2 mt-1">
-                <p className="text-4xl font-bold text-white font-syne">{stats.revenda}</p>
-              </div>
-              <div className="mt-3 p-3 rounded-2xl bg-black/20 border border-white/5">
-                <p className="text-xs text-accent-cyan font-mono font-bold">
-                  {formatPrice(totalRevenue)}
+            <div className="mt-2 space-y-0.5">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest opacity-30 group-hover:opacity-60 transition-opacity">
+                {kpi.desc}
+              </p>
+              {kpi.subDesc && (
+                <p className="text-[8px] text-accent-cyan/60 uppercase tracking-widest font-black">
+                  {kpi.subDesc}
                 </p>
-                <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest mt-1">faturamento {period}</p>
-              </div>
+              )}
             </div>
-          </>
-        )}
-      </div>
-
-      {/* Uso Interno */}
-      <div className="p-6 rounded-[2.5rem] bg-blue-500/5 border border-white/5 backdrop-blur-xl space-y-4 hover:border-blue-500/20 transition-all duration-300 group">
-        {isLoading ? <Skeleton /> : (
-          <>
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform duration-500">
-              <Wrench size={26} weight="duotone" />
-            </div>
-            <div>
-              <p className="text-[10px] font-black text-blue-400/60 uppercase tracking-[0.2em]">Uso Interno</p>
-              <p className="text-4xl font-bold text-white font-syne mt-1">{stats.usoInterno}</p>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Alerts */}
-      <div className={cn(
-        "p-6 rounded-[2.5rem] border backdrop-blur-xl space-y-4 transition-all duration-500 group",
-        stats.lowStock > 0 
-          ? "bg-red-500/10 border-red-500/30 shadow-[0_0_30px_rgba(239,68,68,0.1)]" 
-          : "bg-white/5 border-white/5"
-      )}>
-        {isLoading ? <Skeleton /> : (
-          <>
-            <div className={cn(
-              "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110",
-              stats.lowStock > 0 ? "bg-red-500/20 text-red-400" : "bg-white/10 text-muted-foreground"
-            )}>
-              <Warning size={26} weight={stats.lowStock > 0 ? "fill" : "duotone"} />
-            </div>
-            <div>
-              <p className={cn(
-                "text-[10px] font-black uppercase tracking-[0.2em]",
-                stats.lowStock > 0 ? "text-red-400/60" : "text-muted-foreground/60"
-              )}>Alertas Críticos</p>
-              <p className={cn(
-                "text-4xl font-bold font-syne mt-1",
-                stats.lowStock > 0 ? "text-red-400" : "text-white"
-              )}>{stats.lowStock}</p>
-            </div>
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

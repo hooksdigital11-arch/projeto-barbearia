@@ -11,6 +11,7 @@ import { LowStockAlert } from './low-stock-alert'
 import { InventoryFilters } from './inventory-filters'
 import { deleteProduct, reactivateProduct, getSalesByPeriodAction } from '../actions'
 import { toast } from 'sonner'
+import { PageTitle } from '@/components/shared/page-title'
 import type { InventoryItem, InventoryStats } from '../types'
 
 const InventoryTable = dynamic(() => import('./inventory-table').then(m => m.InventoryTable), { ssr: false })
@@ -138,7 +139,7 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
   }
 
   return (
-    <div className="space-y-12 animate-in fade-in duration-1000">
+    <div className="space-y-16 animate-premium-in">
       <LowStockAlert
         count={stats.lowStock}
         onFilter={() => {
@@ -149,28 +150,23 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
         }}
       />
 
-      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10">
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-syne text-white tracking-tighter leading-none">
-              Estoque<span className="text-accent-cyan">.</span>
-            </h1>
-          </div>
-          <p className="text-text-secondary text-lg font-medium max-w-md ml-7 border-l border-white/10 pl-6">
-            Controle total de produtos, insumos e movimentações. Gestão inteligente para evitar rupturas.
-          </p>
-        </div>
+      {/* Editorial Header */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
+        <PageTitle 
+          title="Estoque" 
+          subtitle="Controle total de produtos, insumos e movimentações. Gestão inteligente para evitar rupturas e otimizar o fluxo de caixa." 
+          className="mb-0" 
+        />
 
         <div className="flex items-center gap-4 ml-7 lg:ml-0">
           {userRole === 'admin' && (
             <button
               onClick={() => setShowCost(!showCost)}
               className={cn(
-                "px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 border",
+                "px-6 py-4 rounded-3xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 border",
                 showCost 
                   ? "bg-accent-cyan/10 text-accent-cyan border-accent-cyan/20 shadow-[0_0_20px_rgba(0,229,255,0.1)]" 
-                  : "bg-white/5 text-muted-foreground border-white/10 hover:text-white"
+                  : "bg-white/5 text-muted-foreground border-white/10 hover:text-white hover:border-white/20"
               )}
             >
               {showCost ? 'Ocultar Custos' : 'Ver Custos'}
@@ -180,9 +176,9 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
           {userRole === 'admin' && (
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-3 px-8 py-4 bg-white text-black rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group"
+              className="flex items-center gap-4 px-10 py-8 bg-white text-black rounded-3xl font-black text-xs uppercase tracking-[0.2em] hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group"
             >
-              <Plus size={20} weight="bold" className="group-hover:rotate-90 transition-transform duration-500" />
+              <Plus size={22} weight="bold" className="group-hover:rotate-90 transition-transform duration-500" />
               Novo Item
             </button>
           )}

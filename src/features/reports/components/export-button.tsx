@@ -1,6 +1,6 @@
 'use client'
 
-import { DownloadSimple } from '@phosphor-icons/react/dist/ssr'
+import { DownloadSimple } from '@phosphor-icons/react'
 
 interface ExportCSVButtonProps {
   kpis: {
@@ -101,9 +101,8 @@ export function ExportButton(props: ExportCSVButtonProps) {
   return (
     <button
       onClick={handleExport}
-      className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent-cyan text-black font-bold uppercase tracking-wider text-xs hover:bg-accent-cyan/90 transition-all shadow-lg shadow-accent-cyan/20"
+      className="px-8 py-3 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all"
     >
-      <DownloadSimple size={18} weight="bold" />
       Exportar CSV
     </button>
   )

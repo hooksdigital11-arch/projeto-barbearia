@@ -1,17 +1,12 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { useTransition } from 'react'
+import { Scissors, Package, Trash } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils/cn'
+import { toast } from 'sonner'
 import { ComandaItem } from '../types'
 import { removeComandaItem } from '../actions'
-import { useTransition } from 'react'
-import { toast } from 'sonner'
-
-interface ComandaItemRowProps {
-  item: ComandaItem
-}
-
-import { Scissors, Package, Trash } from '@phosphor-icons/react'
 
 interface ComandaItemRowProps {
   item: ComandaItem

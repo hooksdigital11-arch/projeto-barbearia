@@ -521,6 +521,53 @@ export type Database = {
         }
         Relationships: []
       }
+      message_templates: {
+        Row: {
+          id: string
+          organization_id: string
+          name: string
+          description: string | null
+          content: string
+          trigger_type: string
+          is_active: boolean
+          is_system: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          name: string
+          description?: string | null
+          content: string
+          trigger_type?: string
+          is_active?: boolean
+          is_system?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          name?: string
+          description?: string | null
+          content?: string
+          trigger_type?: string
+          is_active?: boolean
+          is_system?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

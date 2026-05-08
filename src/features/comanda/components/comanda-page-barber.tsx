@@ -65,7 +65,7 @@ export function ComandaPageBarber({
           className="gap-4 px-8 py-7 rounded-[2rem] font-black text-xs uppercase tracking-widest bg-white text-black hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group ml-7 lg:ml-0"
           onClick={() => alert('Venda avulsa em desenvolvimento')}
         >
-          <Plus size={22} weight="bold" className="group-hover:rotate-90 transition-transform duration-500" />
+          <Plus size={22} className="group-hover:rotate-90 transition-transform duration-500" />
           Venda Avulsa
         </Button>
       </div>

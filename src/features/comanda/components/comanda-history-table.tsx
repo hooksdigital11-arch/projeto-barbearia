@@ -1,8 +1,8 @@
 'use client'
 
 import { ComandaItemWithRelations } from '../types'
-import { Card, CardContent } from '@/components/ui/card'
-import { Check, Clock } from 'lucide-react'
+import { Check, Clock } from '@phosphor-icons/react'
+import { cn } from '@/lib/utils/cn'
 
 interface ComandaHistoryTableProps {
   items: ComandaItemWithRelations[]
@@ -10,7 +10,6 @@ interface ComandaHistoryTableProps {
 
 export function ComandaHistoryTable({ items }: ComandaHistoryTableProps) {
   // Group items by client and paid_at (unique transaction)
-  // For simplicity, we'll treat each paid item as a record, or group by client+time
   const grouped = items.reduce((acc, item) => {
     const key = `${item.client_id}-${item.paid_at}`
     if (!acc[key]) {
@@ -39,50 +38,67 @@ export function ComandaHistoryTable({ items }: ComandaHistoryTableProps) {
   }
 
   return (
-    <div className="rounded-xl border border-white/5 overflow-hidden">
-      <table className="w-full text-sm text-left border-collapse">
-        <thead className="bg-[#141414] text-muted-foreground font-medium uppercase text-xs">
-          <tr>
-            <th className="px-6 py-4">Cliente</th>
-            <th className="px-6 py-4">Barbeiro</th>
-            <th className="px-6 py-4">Itens</th>
-            <th className="px-6 py-4">Total</th>
-            <th className="px-6 py-4">Pagamento</th>
-            <th className="px-6 py-4">Status</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-white/5 bg-[#0a0a0a]">
-          {records.map((row, idx) => (
-            <tr key={idx} className="hover:bg-white/5 transition-colors">
-              <td className="px-6 py-4 font-medium text-white">{row.client}</td>
-              <td className="px-6 py-4 text-muted-foreground">{row.barber}</td>
-              <td className="px-6 py-4 text-center text-white">{row.itemCount}</td>
-              <td className="px-6 py-4 font-semibold text-white">R$ {(row.total / 100).toFixed(2)}</td>
-              <td className="px-6 py-4 text-muted-foreground">
-                {row.method ? methodMap[row.method] : '—'}
-              </td>
-              <td className="px-6 py-4">
-                {row.status === 'pago' ? (
-                  <span className="flex items-center gap-1 text-success text-xs font-bold uppercase">
-                    Pago <Check className="w-3 h-3" />
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-accent text-xs font-bold uppercase">
-                    Aberta <Clock className="w-3 h-3" />
-                  </span>
-                )}
-              </td>
+    <div className="overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-white/5 bg-white/[0.01]">
+              <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Cliente</th>
+              <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Barbeiro</th>
+              <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground text-center">Itens</th>
+              <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Total</th>
+              <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Pagamento</th>
+              <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground text-right">Status</th>
             </tr>
-          ))}
-          {records.length === 0 && (
-            <tr>
-              <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                Nenhuma comanda encontrada no período.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-white/[0.03]">
+            {records.map((row, idx) => (
+              <tr key={idx} className="group/row hover:bg-white/[0.02] transition-all duration-300">
+                <td className="px-8 py-6 font-bold text-white group-hover/row:text-accent-cyan transition-colors">{row.client}</td>
+                <td className="px-8 py-6 text-sm text-text-secondary font-medium">{row.barber}</td>
+                <td className="px-8 py-6 text-center">
+                  <span className="px-2 py-1 rounded-lg bg-white/5 text-xs font-mono font-bold text-white">
+                    {row.itemCount}
+                  </span>
+                </td>
+                <td className="px-8 py-6">
+                  <span className="text-base font-black text-white tracking-tight">
+                    R$ {(row.total / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </td>
+                <td className="px-8 py-6">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-text-secondary opacity-60">
+                    {row.method ? methodMap[row.method] : '—'}
+                  </span>
+                </td>
+                <td className="px-8 py-6 text-right">
+                  {row.status === 'pago' ? (
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest">
+                      <Check size={12} weight="bold" />
+                      Pago
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest">
+                      <Clock size={12} weight="bold" />
+                      Aberta
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
+            {records.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-8 py-32 text-center">
+                  <div className="flex flex-col items-center gap-4 opacity-20">
+                    <Clock size={48} weight="thin" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em]">Nenhuma comanda processada</p>
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

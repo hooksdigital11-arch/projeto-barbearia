@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { TeamStatsCards } from './team-stats'
 import { ViewToggle } from './view-toggle'
 import { BarberCard } from './barber-card'
+import { PageTitle } from '@/components/shared/page-title'
 import type { TeamMemberWithStats, TeamStats } from '../types'
 
 const BarberTable = dynamic(() => import('./barber-table').then(m => m.BarberTable), { ssr: false })
@@ -40,22 +41,16 @@ export function TeamPage({ members, stats, userRole, currentUserId }: TeamPagePr
   const colleagues = members.filter(m => m.id !== currentUserId)
 
   return (
-    <div className="space-y-16 animate-in fade-in duration-1000">
-      {/* Header com Design Assimétrico */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
-            <h1 className="text-5xl md:text-7xl font-black font-syne text-white tracking-tighter leading-none uppercase">
-              Equipe<span className="text-accent-cyan">.</span>
-            </h1>
-          </div>
-          <p className="text-text-secondary text-lg font-medium max-w-xl ml-7 border-l border-white/10 pl-6">
-            {isAdmin 
-              ? 'Gerencie sua equipe de especialistas. Acompanhe a performance individual e coordene a excelência no atendimento.' 
-              : 'Veja seus colegas de equipe e acompanhe a agenda coletiva da unidade.'}
-          </p>
-        </div>
+    <div className="space-y-16 animate-premium-in">
+      {/* Editorial Header */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
+        <PageTitle 
+          title="Equipe" 
+          subtitle={isAdmin 
+            ? 'Gerencie sua equipe de especialistas. Acompanhe a performance individual e coordene a excelência no atendimento.' 
+            : 'Veja seus colegas de equipe e acompanhe a agenda coletiva da unidade.'}
+          className="mb-0" 
+        />
         <div className="flex items-center gap-4 ml-7 lg:ml-0">
           <ViewToggle view={view} setView={setView} />
         </div>

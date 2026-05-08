@@ -81,50 +81,43 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
   }
 
   return (
-    <div className="space-y-12">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="flex items-center gap-6">
+    <div className="space-y-16">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-10">
+        <div className="flex items-center gap-10">
           <div className="relative group">
-            <div className="w-24 h-24 rounded-3xl bg-accent-gradient p-[2px] shadow-2xl shadow-accent-cyan/20">
-              <div className="w-full h-full rounded-[22px] bg-bg-secondary flex items-center justify-center text-3xl font-bold text-white overflow-hidden">
-                {initialData?.full_name?.[0] || 'A'}
-              </div>
+            <div className="w-28 h-28 rounded-full bg-accent-cyan flex items-center justify-center text-4xl font-black text-black">
+              {initialData?.full_name?.[0] || 'A'}
             </div>
-            <button className="absolute -bottom-2 -right-2 p-2 bg-accent-cyan text-black rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100">
-              <PencilSimple size={16} weight="bold" />
-            </button>
           </div>
-          <div>
-            <h2 className="text-2xl font-bold font-syne text-white">{initialData?.full_name}</h2>
-            <p className="text-muted-foreground uppercase text-xs font-bold tracking-widest mt-1">Administrador Master</p>
+          <div className="space-y-2">
+            <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter leading-none">{initialData?.full_name}</h2>
+            <p className="label-muted">Administrador Master</p>
           </div>
         </div>
 
-        <Button 
-          variant="ghost" 
+        <button 
           onClick={() => logout()}
-          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 gap-2 rounded-xl"
+          className="px-6 py-2 rounded-full border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-red-500 hover:text-white transition-all"
         >
-          <SignOut size={18} />
           Encerrar Sessão
-        </Button>
+        </button>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-10">
               <FormField
                 control={form.control}
                 name="fullName"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Seu Nome</FormLabel>
+                  <FormItem className="space-y-3">
+                    <FormLabel className="label-muted">Seu Nome</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input {...field} className="pl-10 bg-black/20 border-white/10 focus:border-accent-cyan" />
-                        <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                      </div>
+                      <input 
+                        {...field} 
+                        className="w-full px-6 py-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/30 transition-all" 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -135,33 +128,35 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
                 control={form.control}
                 name="email"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email de Acesso</FormLabel>
+                  <FormItem className="space-y-3">
+                    <FormLabel className="label-muted">Email de Acesso</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input {...field} type="email" disabled className="pl-10 bg-black/20 border-white/10 opacity-50 cursor-not-allowed" />
-                        <Envelope size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                      </div>
+                      <input 
+                        {...field} 
+                        type="email" 
+                        disabled 
+                        className="w-full px-6 py-4 bg-black/20 border border-white/[0.06] rounded-2xl text-sm font-medium text-white/40 cursor-not-allowed font-mono" 
+                      />
                     </FormControl>
-                    <p className="text-[10px] text-muted-foreground italic">O email não pode ser alterado por aqui.</p>
+                    <p className="text-[10px] text-text-muted uppercase font-black tracking-widest">Acesso restrito para alteração</p>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-10">
               <FormField
                 control={form.control}
                 name="phone"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Telefone</FormLabel>
+                  <FormItem className="space-y-3">
+                    <FormLabel className="label-muted">Telefone</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input {...field} className="pl-10 bg-black/20 border-white/10 focus:border-accent-cyan" />
-                        <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                      </div>
+                      <input 
+                        {...field} 
+                        className="w-full px-6 py-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/30 transition-all font-mono" 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -172,17 +167,14 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
                 control={form.control}
                 name="bio"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Biografia / Notas</FormLabel>
+                  <FormItem className="space-y-3">
+                    <FormLabel className="label-muted">Biografia / Notas</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <textarea 
-                          {...field} 
-                          rows={2}
-                          className="w-full pl-10 p-3 bg-black/20 border border-white/10 rounded-xl focus:border-accent-cyan outline-none text-sm transition-all"
-                        />
-                        <Article size={18} className="absolute left-3 top-4 text-muted-foreground" />
-                      </div>
+                      <textarea 
+                        {...field} 
+                        rows={4}
+                        className="w-full px-6 py-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/30 transition-all resize-none"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -191,121 +183,116 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
-              <div className="w-10 h-10 rounded-xl bg-accent-cyan/10 flex items-center justify-center text-accent-cyan">
-                <Lock size={20} weight="duotone" />
+          <div className="pt-12 border-t border-white/[0.06] flex flex-col md:flex-row items-center justify-between gap-6">
+            <button 
+              type="button" 
+              onClick={() => setIsPasswordModalOpen(true)}
+              className="flex items-center gap-4 group"
+            >
+              <div className="w-12 h-12 rounded-full border border-white/[0.06] flex items-center justify-center text-white/40 group-hover:border-accent-cyan group-hover:text-accent-cyan transition-all">
+                <Lock size={20} />
               </div>
-              <div>
-                <p className="text-sm font-bold text-white">Segurança da Conta</p>
-                <button 
-                  type="button" 
-                  onClick={() => setIsPasswordModalOpen(true)}
-                  className="text-xs text-accent-cyan hover:underline text-left"
-                >
-                  Alterar senha de acesso
-                </button>
+              <div className="text-left">
+                <p className="text-xs font-black uppercase tracking-widest text-white">Segurança</p>
+                <p className="text-[10px] font-medium text-text-muted group-hover:text-accent-cyan transition-colors">Alterar senha de acesso</p>
               </div>
-            </div>
+            </button>
 
-            <Button disabled={isPending} className="w-full md:w-auto bg-accent-cyan hover:bg-cyan-400 text-black font-bold gap-2 px-8 py-6 rounded-2xl text-base shadow-lg shadow-cyan-500/20">
-              {isPending ? <CircleNotch size={20} className="animate-spin" /> : <FloppyDisk size={20} />}
-              Atualizar Perfil
-            </Button>
+            <button 
+              type="submit"
+              disabled={isPending} 
+              className="px-10 py-3.5 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              {isPending ? 'Salvando...' : 'Atualizar Perfil'}
+            </button>
           </div>
         </form>
       </Form>
 
       {/* Modal de Alteração de Senha */}
       {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-[#141414] border border-white/10 rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-accent-cyan/10 flex items-center justify-center text-accent-cyan">
-                  <Lock size={20} weight="duotone" />
-                </div>
-                <h3 className="text-xl font-bold font-syne text-white">Alterar Senha</h3>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4">
+          <div className="bg-black border border-white/[0.06] rounded-[2.5rem] p-10 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between mb-10">
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black font-syne text-white uppercase tracking-tighter leading-none">Nova Senha</h3>
+                <p className="label-muted">Segurança da conta</p>
               </div>
               <button 
                 onClick={() => setIsPasswordModalOpen(false)}
-                className="p-2 text-muted-foreground hover:text-white transition-colors rounded-lg hover:bg-white/5"
+                className="w-10 h-10 flex items-center justify-center text-text-muted hover:text-white transition-colors"
               >
-                <X size={20} />
+                <X size={24} />
               </button>
             </div>
 
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-white">Senha Atual</label>
+            <form onSubmit={handlePasswordSubmit} className="space-y-8">
+              <div className="space-y-3">
+                <label className="label-muted">Senha Atual</label>
                 <div className="relative">
                   <input 
                     name="currentPassword" 
                     type={showCurrentPassword ? 'text' : 'password'}
                     required 
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
-                    placeholder="Digite sua senha atual"
+                    className="w-full px-6 py-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/30 transition-all"
                   />
                   <button 
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
                   >
-                    {showCurrentPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
+                    {showCurrentPassword ? <EyeSlash size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-2 pt-2">
-                <label className="text-sm font-medium text-white">Nova Senha</label>
+              <div className="space-y-3">
+                <label className="label-muted">Nova Senha</label>
                 <div className="relative">
                   <input 
                     name="newPassword" 
                     type={showNewPassword ? 'text' : 'password'}
                     required 
                     minLength={6}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
-                    placeholder="Nova senha (mínimo 6 caracteres)"
+                    className="w-full px-6 py-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/30 transition-all"
                   />
                   <button 
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
                   >
-                    {showNewPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
+                    {showNewPassword ? <EyeSlash size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-white">Confirmar Nova Senha</label>
+              <div className="space-y-3">
+                <label className="label-muted">Confirmar Nova Senha</label>
                 <input 
                   name="confirmPassword" 
                   type={showNewPassword ? 'text' : 'password'}
                   required 
                   minLength={6}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
-                  placeholder="Confirme a nova senha"
+                  className="w-full px-6 py-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/30 transition-all"
                 />
               </div>
 
-              <div className="pt-6 flex gap-3">
-                <Button 
+              <div className="pt-6 flex gap-4">
+                <button 
                   type="button" 
                   onClick={() => setIsPasswordModalOpen(false)} 
-                  variant="ghost" 
-                  className="flex-1 rounded-xl text-white hover:bg-white/5"
+                  className="flex-1 py-3.5 rounded-full border border-white/[0.06] text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/5 transition-all"
                   disabled={isChangingPassword}
                 >
                   Cancelar
-                </Button>
-                <Button 
+                </button>
+                <button 
                   type="submit" 
-                  className="flex-1 bg-accent-cyan hover:bg-cyan-400 text-black font-bold rounded-xl"
+                  className="flex-1 py-3.5 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                   disabled={isChangingPassword}
                 >
-                  {isChangingPassword ? <CircleNotch size={20} className="animate-spin" /> : 'Atualizar Senha'}
-                </Button>
+                  {isChangingPassword ? 'Atualizando...' : 'Salvar'}
+                </button>
               </div>
             </form>
           </div>

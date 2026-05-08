@@ -11,7 +11,7 @@ import {
   Phone, 
   ChatCircle, 
   CaretRight 
-} from '@phosphor-icons/react/dist/ssr'
+} from '@phosphor-icons/react'
 import { Input } from '@/components/ui/input'
 
 interface ConversationPanelProps {

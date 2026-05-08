@@ -129,60 +129,71 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold font-syne text-white">Dados da Barbearia</h2>
-        <p className="text-muted-foreground">Informações públicas e de contato da sua unidade</p>
+    <div className="space-y-16">
+      <div className="border-l-2 border-accent-cyan pl-8 py-2">
+        <h2 className="text-4xl md:text-5xl font-black font-syne text-white uppercase tracking-tighter leading-none">Dados da Unidade</h2>
+        <p className="label-muted mt-2">Identidade visual & Informações públicas</p>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-          {/* Logo Section */}
-          <div className="flex flex-col md:flex-row items-center gap-8 p-6 rounded-3xl bg-white/5 border border-white/5">
-            <div className="relative group">
-              <div className="w-32 h-32 rounded-[2rem] bg-black/40 border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden transition-all group-hover:border-accent-cyan/50">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
+          {/* Logo Section: Precise & Layered */}
+          <div className="flex flex-col lg:flex-row items-center gap-12 p-12 rounded-[2rem] bg-white/[0.02] border border-white/[0.06]">
+            <div className="relative group shrink-0">
+              <div className="w-48 h-48 rounded-[3rem] bg-black border border-white/[0.1] flex items-center justify-center overflow-hidden transition-all group-hover:border-accent-cyan/40">
                 {form.watch('logoUrl') ? (
                   <Image src={form.watch('logoUrl')!} alt="Logo" fill className="object-cover" />
                 ) : (
-                  <Storefront size={40} weight="duotone" className="text-muted-foreground" />
+                  <Storefront size={56} className="text-white/5" />
                 )}
                 {isUploading ? (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
-                    <CircleNotch size={24} className="animate-spin text-accent-cyan" />
+                  <div className="absolute inset-0 bg-black/80 flex items-center justify-center backdrop-blur-sm">
+                    <CircleNotch size={32} className="animate-spin text-accent-cyan" />
                   </div>
                 ) : null}
               </div>
-              <button type="button" onClick={() => fileInputRef.current?.click()} className="absolute -bottom-2 -right-2 p-3 bg-accent-cyan text-black rounded-2xl shadow-xl hover:scale-105 transition-all">
-                <UploadSimple size={20} weight="bold" />
+              <button 
+                type="button" 
+                onClick={() => fileInputRef.current?.click()} 
+                className="absolute -bottom-2 -right-2 w-14 h-14 flex items-center justify-center bg-accent-cyan text-black rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(0,229,255,0.2)]"
+              >
+                <UploadSimple size={24} weight="bold" />
               </button>
               <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
             </div>
-            <div className="space-y-2 text-center md:text-left">
-              <h3 className="text-lg font-bold text-white">Logo da Marca</h3>
-              <p className="text-xs text-muted-foreground max-w-[280px]">Quadrada, máx. 5MB, 1080x1080px.</p>
+            <div className="space-y-4 text-center lg:text-left">
+              <h3 className="text-2xl font-bold text-white tracking-tight leading-none font-syne">Logo da Marca</h3>
+              <p className="text-sm text-text-muted max-w-[320px] font-medium leading-relaxed">
+                Esta imagem será exibida nos agendamentos, mensagens e faturas. Recomendamos o uso de uma versão quadrada da sua logo.
+              </p>
               {form.watch('logoUrl') ? (
-                <button type="button" onClick={() => form.setValue('logoUrl', '')} className="text-[10px] text-red-400 uppercase font-bold tracking-widest hover:underline flex items-center gap-1 mt-2 justify-center md:justify-start">
-                  <Trash size={12} /> Remover Logo
+                <button 
+                  type="button" 
+                  onClick={() => form.setValue('logoUrl', '')} 
+                  className="text-[10px] text-red-400 font-black uppercase tracking-[0.2em] hover:text-red-300 transition-colors flex items-center gap-2 mt-6 justify-center lg:justify-start"
+                >
+                  <Trash size={16} /> Remover Logo
                 </button>
               ) : null}
             </div>
           </div>
 
-          {/* Form Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Form Fields: Grid & DM Mono */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Nome da Barbearia</FormLabel>
+                <FormItem className="space-y-4">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Nome da Barbearia</FormLabel>
                   <FormControl>
-                    <div className="relative">
-                      <Input {...field} value={field.value ?? ''} className="pl-10 bg-black/20 border-white/10 focus:border-accent-cyan" />
-                      <Storefront size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    </div>
+                    <input 
+                      {...field} 
+                      value={field.value ?? ''} 
+                      className="w-full px-8 py-5 bg-black border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all font-sans" 
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                 </FormItem>
               )}
             />
@@ -191,34 +202,37 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Email de Contato</FormLabel>
+                <FormItem className="space-y-4">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Email de Contato</FormLabel>
                   <FormControl>
-                    <div className="relative">
-                      <Input {...field} value={field.value ?? ''} type="email" className="pl-10 bg-black/20 border-white/10 focus:border-accent-cyan" />
-                      <Envelope size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    </div>
+                    <input 
+                      {...field} 
+                      value={field.value ?? ''} 
+                      type="email" 
+                      className="w-full px-8 py-5 bg-black border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all font-mono" 
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                 </FormItem>
               )}
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <FormField
               control={form.control}
               name="phone"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Telefone</FormLabel>
+                <FormItem className="space-y-4">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Telefone</FormLabel>
                   <FormControl>
-                    <div className="relative">
-                      <Input {...field} value={field.value ?? ''} className="pl-10 bg-black/20 border-white/10 focus:border-accent-cyan" />
-                      <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    </div>
+                    <input 
+                      {...field} 
+                      value={field.value ?? ''} 
+                      className="w-full px-8 py-5 bg-black border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all font-mono" 
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                 </FormItem>
               )}
             />
@@ -227,32 +241,37 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
               control={form.control}
               name="zipCode"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase text-muted-foreground">CEP</FormLabel>
+                <FormItem className="space-y-4">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">CEP</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value ?? ''} className="bg-black/20 border-white/10 focus:border-accent-cyan" />
+                    <input 
+                      {...field} 
+                      value={field.value ?? ''} 
+                      className="w-full px-8 py-5 bg-black border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all font-mono" 
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                 </FormItem>
               )}
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="md:col-span-3">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+            <div className="lg:col-span-3">
               <FormField
                 control={form.control}
                 name="address"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Endereço (Rua/Av)</FormLabel>
+                  <FormItem className="space-y-4">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Endereço (Rua/Av)</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input {...field} value={field.value ?? ''} className="pl-10 bg-black/20 border-white/10 focus:border-accent-cyan" />
-                        <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                      </div>
+                      <input 
+                        {...field} 
+                        value={field.value ?? ''} 
+                        className="w-full px-8 py-5 bg-black border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all" 
+                      />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                   </FormItem>
                 )}
               />
@@ -261,28 +280,36 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
               control={form.control}
               name="number"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Nº</FormLabel>
+                <FormItem className="space-y-4">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Nº</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value ?? ''} className="bg-black/20 border-white/10 focus:border-accent-cyan" />
+                    <input 
+                      {...field} 
+                      value={field.value ?? ''} 
+                      className="w-full px-8 py-5 bg-black border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all font-mono" 
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                 </FormItem>
               )}
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <FormField
               control={form.control}
               name="neighborhood"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Bairro</FormLabel>
+                <FormItem className="space-y-4">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Bairro</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value ?? ''} className="bg-black/20 border-white/10 focus:border-accent-cyan" />
+                    <input 
+                      {...field} 
+                      value={field.value ?? ''} 
+                      className="w-full px-8 py-5 bg-black border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all" 
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                 </FormItem>
               )}
             />
@@ -290,12 +317,16 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
               control={form.control}
               name="city"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Cidade</FormLabel>
+                <FormItem className="space-y-4">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Cidade</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value ?? ''} className="bg-black/20 border-white/10 focus:border-accent-cyan" />
+                    <input 
+                      {...field} 
+                      value={field.value ?? ''} 
+                      className="w-full px-8 py-5 bg-black border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all" 
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                 </FormItem>
               )}
             />
@@ -303,12 +334,17 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
               control={form.control}
               name="state"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase text-muted-foreground">UF</FormLabel>
+                <FormItem className="space-y-4">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">UF</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value ?? ''} maxLength={2} className="bg-black/20 border-white/10 focus:border-accent-cyan uppercase" />
+                    <input 
+                      {...field} 
+                      value={field.value ?? ''} 
+                      maxLength={2} 
+                      className="w-full px-8 py-5 bg-black border border-white/[0.06] rounded-2xl text-base font-bold text-white focus:outline-none focus:border-accent-cyan/40 uppercase transition-all font-mono" 
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
                 </FormItem>
               )}
             />
@@ -318,29 +354,35 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
             control={form.control}
             name="description"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Descrição / Bio</FormLabel>
+              <FormItem className="space-y-4">
+                <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Descrição / Bio</FormLabel>
                 <FormControl>
-                  <div className="relative">
-                    <textarea 
-                      {...field} 
-                      value={field.value ?? ''}
-                      rows={3}
-                      className="w-full pl-10 p-3 bg-black/20 border border-white/10 rounded-xl focus:border-accent-cyan outline-none text-sm transition-all"
-                    />
-                    <TextT size={18} className="absolute left-3 top-4 text-muted-foreground" />
-                  </div>
+                  <textarea 
+                    {...field} 
+                    value={field.value ?? ''}
+                    rows={4}
+                    placeholder="Conte um pouco sobre sua barbearia para seus clientes..."
+                    className="w-full px-8 py-6 bg-black border border-white/[0.06] rounded-3xl text-base font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all resize-none leading-relaxed"
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
               </FormItem>
             )}
           />
 
-          <div className="flex justify-end pt-4">
-            <Button disabled={isPending} className="bg-accent-cyan hover:bg-cyan-400 text-black font-bold gap-2 px-8 py-6 rounded-2xl text-base shadow-lg shadow-cyan-500/20">
-              {isPending ? <CircleNotch size={20} className="animate-spin" /> : <FloppyDisk size={20} />}
-              Salvar Configurações
-            </Button>
+          <div className="flex justify-end pt-12 border-t border-white/[0.06]">
+            <button 
+              type="submit"
+              disabled={isPending} 
+              className="px-12 py-5 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.3em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_0_30px_rgba(0,229,255,0.2)]"
+            >
+              {isPending ? (
+                <div className="flex items-center gap-3">
+                  <CircleNotch size={16} className="animate-spin" />
+                  Salvando...
+                </div>
+              ) : 'Confirmar Alterações'}
+            </button>
           </div>
         </form>
       </Form>

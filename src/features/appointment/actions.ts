@@ -221,7 +221,7 @@ export async function updateAppointmentStatus(formData: FormData) {
 
   const { error } = await query
 
-  if (!error && parsed.data.status === 'completed' && apptBefore?.status !== 'completed') {
+  if (!error && parsed.data.status === 'completed' && apptBefore && apptBefore.status !== 'completed') {
     // Atualiza os status do cliente manualmente (já que a trigger SQL pode não estar ativa)
     const { data: client } = await supabaseAdmin
       .from('clients')

@@ -56,10 +56,10 @@ export function BusinessHours({ initialData }: { initialData: any }) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-16">
       <div>
-        <h2 className="text-2xl font-bold font-syne text-white">Horários de Funcionamento</h2>
-        <p className="text-muted-foreground">Defina quando sua barbearia está aberta para agendamentos</p>
+        <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter">Horários</h2>
+        <p className="label-muted mt-2">Defina as janelas de operação para agendamentos</p>
       </div>
 
       <Form {...form}>
@@ -69,13 +69,13 @@ export function BusinessHours({ initialData }: { initialData: any }) {
               <div 
                 key={day.id} 
                 className={cn(
-                  "flex flex-col md:flex-row md:items-center justify-between p-4 rounded-2xl border transition-all",
+                  "flex flex-col md:flex-row md:items-center justify-between p-8 rounded-[2rem] border transition-all",
                   form.watch(`${day.id}.isOpen`) 
-                    ? "bg-white/5 border-white/10" 
-                    : "bg-black/20 border-white/5 opacity-60"
+                    ? "bg-white/[0.03] border-white/[0.06]" 
+                    : "bg-black/20 border-white/5 opacity-40"
                 )}
               >
-                <div className="flex items-center gap-4 min-w-[160px]">
+                <div className="flex items-center gap-6 min-w-[200px]">
                   <FormField
                     control={form.control}
                     name={`${day.id}.isOpen`}
@@ -85,10 +85,10 @@ export function BusinessHours({ initialData }: { initialData: any }) {
                           <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
-                            className="border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan"
+                            className="w-5 h-5 border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan"
                           />
                         </FormControl>
-                        <FormLabel className="ml-3 text-sm font-bold text-white cursor-pointer uppercase tracking-tight">
+                        <FormLabel className="ml-4 text-sm font-bold text-white cursor-pointer uppercase tracking-tight">
                           {day.label}
                         </FormLabel>
                       </FormItem>
@@ -97,11 +97,11 @@ export function BusinessHours({ initialData }: { initialData: any }) {
                 </div>
 
                 <div className={cn(
-                  "flex items-center gap-3 mt-4 md:mt-0 transition-all",
+                  "flex items-center gap-6 mt-4 md:mt-0 transition-all",
                   !form.watch(`${day.id}.isOpen`) && "pointer-events-none opacity-20"
                 )}>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Início</span>
+                  <div className="flex items-center gap-3">
+                    <span className="label-muted">Início</span>
                     <FormField
                       control={form.control}
                       name={`${day.id}.open`}
@@ -109,16 +109,16 @@ export function BusinessHours({ initialData }: { initialData: any }) {
                         <input 
                           {...field} 
                           type="time" 
-                          className="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:border-accent-cyan outline-none"
+                          className="bg-black border border-white/[0.06] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-accent-cyan/30 font-mono transition-all"
                         />
                       )}
                     />
                   </div>
                   
-                  <div className="w-4 h-[1px] bg-white/20" />
+                  <div className="w-6 h-[1px] bg-white/10" />
 
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Fim</span>
+                  <div className="flex items-center gap-3">
+                    <span className="label-muted">Fim</span>
                     <FormField
                       control={form.control}
                       name={`${day.id}.close`}
@@ -126,7 +126,7 @@ export function BusinessHours({ initialData }: { initialData: any }) {
                         <input 
                           {...field} 
                           type="time" 
-                          className="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:border-accent-cyan outline-none"
+                          className="bg-black border border-white/[0.06] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-accent-cyan/30 font-mono transition-all"
                         />
                       )}
                     />
@@ -135,20 +135,23 @@ export function BusinessHours({ initialData }: { initialData: any }) {
 
                 <div className="hidden md:block">
                   {!form.watch(`${day.id}.isOpen`) ? (
-                    <span className="text-xs font-bold text-red-400/50 uppercase tracking-widest">Fechado</span>
+                    <span className="text-[10px] font-black text-red-500 uppercase tracking-widest opacity-40">Fechado</span>
                   ) : (
-                    <span className="text-xs font-bold text-accent-cyan/50 uppercase tracking-widest">Aberto</span>
+                    <span className="text-[10px] font-black text-accent-cyan uppercase tracking-widest">Aberto</span>
                   )}
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="flex justify-end pt-8">
-            <Button disabled={isPending} className="bg-accent-cyan hover:bg-cyan-400 text-black font-bold gap-2 px-8 py-6 rounded-2xl text-base shadow-lg shadow-cyan-500/20">
-              {isPending ? <CircleNotch size={20} className="animate-spin" /> : <FloppyDisk size={20} />}
-              Salvar Horários
-            </Button>
+          <div className="flex justify-end pt-12 border-t border-white/[0.06]">
+            <button 
+              type="submit"
+              disabled={isPending} 
+              className="px-10 py-3.5 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              {isPending ? 'Salvando...' : 'Salvar Horários'}
+            </button>
           </div>
         </form>
       </Form>

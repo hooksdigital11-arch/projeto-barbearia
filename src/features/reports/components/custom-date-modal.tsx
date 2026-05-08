@@ -61,16 +61,16 @@ export function CustomDateModal({ onApply, onClose }: CustomDateModalProps) {
 
   const applyShortcut = (days: number, currentYear: boolean = false) => {
     const today = new Date()
-    const endStr = today.toISOString().split('T')[0]
+    const endStr = today.toISOString().split('T')[0] ?? ''
 
     let startStr = ''
     if (currentYear) {
       const yearStart = new Date(today.getFullYear(), 0, 1)
-      startStr = yearStart.toISOString().split('T')[0]
+      startStr = yearStart.toISOString().split('T')[0] ?? ''
     } else {
       const start = new Date(today)
       start.setDate(start.getDate() - days)
-      startStr = start.toISOString().split('T')[0]
+      startStr = start.toISOString().split('T')[0] ?? ''
     }
 
     setStartDate(startStr)
@@ -84,9 +84,13 @@ export function CustomDateModal({ onApply, onClose }: CustomDateModalProps) {
 
   const formatDateLabel = (dateStr: string) => {
     if (!dateStr) return '---'
-    const [year, month, day] = dateStr.split('-')
+    const parts = dateStr.split('-')
+    const year = parts[0] ?? ''
+    const month = parts[1] ?? '1'
+    const day = parts[2] ?? ''
     const months = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
-    return `${day} ${months[parseInt(month) - 1]} ${year}`
+    const monthIdx = parseInt(month) - 1
+    return `${day} ${months[monthIdx] ?? '---'} ${year}`
   }
 
   return (

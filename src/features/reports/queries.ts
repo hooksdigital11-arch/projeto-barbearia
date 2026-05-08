@@ -170,6 +170,7 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
     .map(([date, cents]) => ({
       date: date.split('-').slice(1).reverse().join('/'),
       revenue: cents / 100,
+      previousRevenue: 0
     }))
 
   const barberPerformance = Object.entries(barberMap).map(([id, b]) => ({
@@ -362,12 +363,12 @@ export const getClientsReport = cache(async (startDate: string, endDate: string)
   // Top Clients
   const topClients = allClients
     .map(c => ({
-      id: c.id,
-      name: c.full_name,
-      avatarUrl: null,
-      visits: visitCounts[c.id] || 0,
-      totalSpent: (spentCounts[c.id] || 0) / 100,
-      lastVisit: 'N/A', // Simplified for now
+      id: String(c.id),
+      name: String(c.full_name),
+      avatarUrl: null as string | null,
+      visits: Number(visitCounts[c.id] || 0),
+      totalSpent: Number((spentCounts[c.id] || 0) / 100),
+      lastVisit: 'N/A',
       loyaltyPoints: 0
     }))
     .sort((a, b) => b.totalSpent - a.totalSpent)
@@ -462,13 +463,13 @@ export const getLoyaltyReport = cache(async (startDate: string, endDate: string)
   
   const { data: stamps } = await supabaseAdmin
     .from('loyalty_stamps')
-    .select('id, client_id, status, created_at')
+    .select('id, client_id, type, created_at')
     .eq('organization_id', user.organization_id)
 
   const allStamps = stamps ?? []
   const activeMembers = new Set(allStamps.map(s => s.client_id)).size
-  const redemptions = allStamps.filter(s => s.status === 'redeemed').length
-  const stampsDistributed = allStamps.length
+  const redemptions = allStamps.filter(s => s.type === 'redeem').length
+  const stampsDistributed = allStamps.filter(s => s.type === 'stamp').length
 
   return {
     kpis: {

@@ -121,7 +121,7 @@ export async function closeComanda(formData: FormData) {
       .from('appointments')
       .select('status')
       .eq('id', parsed.data.appointment_id)
-      .single()
+      .single() as { data: { status: string } | null }
 
     await (supabase
       .from('appointments') as any)
@@ -131,18 +131,18 @@ export async function closeComanda(formData: FormData) {
 
     if (apptBefore?.status !== 'completed') {
       const totalCents = items.reduce((sum: number, i: ComandaItem) => sum + i.total_cents, 0) - (parsed.data.discount_cents || 0)
-      const { data: client } = await supabase
+      const { data: client } = await (supabase
         .from('clients')
         .select('total_visits, total_spent_cents')
         .eq('id', parsed.data.client_id)
-        .single()
+        .single() as any)
 
-      if (client) {
+      if (client && typeof client === 'object') {
         await supabase
           .from('clients')
           .update({
-            total_visits: (client.total_visits || 0) + 1,
-            total_spent_cents: (client.total_spent_cents || 0) + totalCents,
+            total_visits: ((client as any).total_visits || 0) + 1,
+            total_spent_cents: ((client as any).total_spent_cents || 0) + totalCents,
             last_visit_at: new Date().toISOString()
           })
           .eq('id', parsed.data.client_id)

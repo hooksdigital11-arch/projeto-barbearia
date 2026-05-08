@@ -13,7 +13,9 @@ import {
   Cell, 
   Legend,
   LineChart,
-  Line
+  Line,
+  AreaChart,
+  Area
 } from 'recharts'
 import { KPICard } from '@/components/shared/kpi-card'
 import type { AppointmentReport } from '../types'
@@ -30,61 +32,42 @@ export function AppointmentsSection({ data }: AppointmentsSectionProps) {
 
   return (
     <section className="space-y-10 pt-12 border-t border-white/5">
-      <div className="flex items-center gap-6">
-        <div className="flex flex-col items-center">
-          <div className="w-1.5 h-8 bg-purple-500 rounded-full shadow-[0_0_15px_rgba(139,92,246,0.5)]" />
-          <div className="w-1.5 h-1.5 bg-purple-500/40 rounded-full mt-2" />
-        </div>
-        <div>
-          <h2 className="text-3xl font-syne font-black text-white uppercase tracking-tighter leading-none">
-            Fluxo de Agenda
-          </h2>
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] mt-1">
-            Demanda & Conversão
-          </p>
-        </div>
+      <div className="border-l-2 border-accent-cyan pl-8 py-2">
+        <h2 className="text-4xl md:text-5xl font-syne font-black text-white uppercase tracking-tighter leading-none">
+          Agenda
+        </h2>
+        <p className="label-muted mt-2">
+          Fluxo & Conversão de Clientes
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {[
-          { title: 'Total', value: kpis.total, trend: kpis.totalChange, icon: CalendarCheck, color: '#8b5cf6' },
-          { title: 'Concluídos', value: kpis.completed, trend: kpis.completedChange, icon: CheckCircle, color: '#10b981' },
-          { title: 'Cancelados', value: kpis.cancelled, trend: kpis.cancelledChange, icon: CalendarX, color: '#ef4444', inverted: true },
-          { title: 'No-show', value: kpis.noShow, trend: kpis.noShowChange, icon: UserMinus, color: '#f59e0b', inverted: true },
-          { title: 'Conversão', value: `${kpis.completionRate.toFixed(0)}%`, trend: kpis.completionRateChange, icon: CheckCircle, color: '#3b82f6' }
+          { title: 'Total', value: kpis.total, trend: kpis.totalChange },
+          { title: 'Concluídos', value: kpis.completed, trend: kpis.completedChange },
+          { title: 'Cancelados', value: kpis.cancelled, trend: kpis.cancelledChange, inverted: true },
+          { title: 'No-show', value: kpis.noShow, trend: kpis.noShowChange, inverted: true },
+          { title: 'Conversão', value: `${kpis.completionRate.toFixed(0)}%`, trend: kpis.completionRateChange }
         ].map((item, idx) => (
-          <div key={idx} className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-500 relative overflow-hidden group">
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
-                <item.icon size={20} weight="duotone" style={{ color: item.color }} />
-                <span className={cn(
-                  "text-[10px] font-black",
-                  (item.trend ?? 0) >= 0 
-                    ? (item.inverted ? "text-red-400" : "text-green-400") 
-                    : (item.inverted ? "text-green-400" : "text-red-400")
-                )}>
-                  {item.trend && item.trend >= 0 ? '+' : ''}{item.trend?.toFixed(1)}%
-                </span>
-              </div>
-              <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.1em] mb-1">{item.title}</h4>
-              <p className="text-2xl font-bold text-white tabular-nums tracking-tighter">{item.value}</p>
-            </div>
-            <div className="absolute -bottom-2 -right-2 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
-              <item.icon size={64} weight="duotone" />
-            </div>
-          </div>
+          <KPICard 
+            key={idx}
+            title={item.title}
+            value={item.value}
+            trend={item.trend}
+            isPositive={item.inverted ? (item.trend ?? 0) <= 0 : (item.trend ?? 0) >= 0}
+          />
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Status Distribution */}
-        <div className="p-10 rounded-[3rem] bg-white/[0.02] border border-white/5 backdrop-blur-xl group">
-          <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] mb-10">Status de Atendimento</h3>
-          <div className="h-[300px] flex items-center relative">
+        <div className="premium-card p-10">
+          <span className="label-muted mb-12 block">Status de Atendimento</span>
+          <div className="h-[350px] flex items-center relative">
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Agenda</p>
-                <p className="text-2xl font-black text-white tabular-nums">100%</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted mb-2">Mix</p>
+                <p className="text-5xl font-bold text-white tabular-nums font-syne leading-none">100%</p>
               </div>
             </div>
             <ClientOnly>
@@ -92,19 +75,21 @@ export function AppointmentsSection({ data }: AppointmentsSectionProps) {
                 <PieChart>
                   <Pie
                     data={statusDistribution}
-                    innerRadius={80}
-                    outerRadius={100}
-                    paddingAngle={5}
+                    innerRadius={110}
+                    outerRadius={125}
+                    paddingAngle={8}
                     dataKey="count"
                     nameKey="status"
                     stroke="none"
+                    cornerRadius={40}
                   >
                     {statusDistribution.map((entry, index) => (
                       <Cell key={index} fill={entry.color} className="outline-none" />
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px' }}
+                    contentStyle={{ backgroundColor: '#0d0d0d', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '16px' }}
+                    itemStyle={{ color: '#fff', fontSize: '12px', fontFamily: 'DM Mono' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -112,34 +97,54 @@ export function AppointmentsSection({ data }: AppointmentsSectionProps) {
           </div>
         </div>
 
-        {/* Peak Hours com Area Chart */}
-        <div className="p-10 rounded-[3rem] bg-white/[0.02] border border-white/5 backdrop-blur-xl">
-          <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] mb-10">Horários de Pico</h3>
-          <div className="h-[300px]">
+        {/* Peak Hours */}
+        <div className="premium-card p-10">
+          <span className="label-muted mb-12 block">Horários de Pico</span>
+          <div className="h-[350px]">
             <ClientOnly>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={peakHours}>
+                <AreaChart data={peakHours} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.2} />
-                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+                    <linearGradient id="peakGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#00e5ff" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#00e5ff" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="0" stroke="#ffffff05" vertical={false} />
-                  <XAxis dataKey="hour" stroke="#ffffff20" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666' }} />
-                  <YAxis stroke="#ffffff20" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666' }} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px' }}
+                  <CartesianGrid strokeDasharray="0" stroke="#ffffff03" vertical={false} />
+                  <XAxis 
+                    dataKey="hour" 
+                    stroke="#ffffff10" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tick={{ fill: '#666', fontFamily: 'DM Mono' }}
+                    interval={2}
                   />
-                  <Line 
+                  <YAxis 
+                    stroke="#ffffff10" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tick={{ fill: '#666', fontFamily: 'DM Mono' }}
+                    allowDecimals={false}
+                  />
+                  <Tooltip 
+                    cursor={{ stroke: '#ffffff10', strokeWidth: 1 }}
+                    contentStyle={{ backgroundColor: '#0d0d0d', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '16px' }}
+                    itemStyle={{ color: '#00e5ff', fontSize: '12px', fontWeight: 'bold', fontFamily: 'DM Mono' }}
+                    labelStyle={{ color: '#666', fontSize: '10px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '2px' }}
+                  />
+                  <Area 
                     type="monotone" 
                     dataKey="count" 
-                    stroke="#8b5cf6" 
+                    stroke="#00e5ff" 
                     strokeWidth={4} 
-                    dot={false}
-                    activeDot={{ r: 6, fill: '#8b5cf6', stroke: '#fff', strokeWidth: 2 }}
+                    fillOpacity={1} 
+                    fill="url(#peakGradient)"
+                    activeDot={{ r: 6, fill: '#00e5ff', stroke: '#000', strokeWidth: 2 }}
+                    animationDuration={2000}
                   />
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             </ClientOnly>
           </div>
