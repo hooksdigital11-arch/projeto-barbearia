@@ -21,7 +21,11 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
 
   const { data, error } = await supabaseAdmin
     .from('appointments')
-    .select('id, price_cents, start_time, status')
+    .select(`
+      id, price_cents, start_time, status, barber_id, service_id,
+      barber:profiles!appointments_barber_id_fkey(full_name),
+      service:services(name)
+    `)
     .eq('organization_id', user.organization_id)
     .eq('status', 'completed')
     .gte('start_time', startDate)
@@ -41,18 +45,50 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
 
   const rows = data ?? []
 
-  // KPIs
-  const totalCents    = rows.reduce((s, r) => s + (r.price_cents ?? 0), 0)
+  // KPIs, Performance por Barbeiro e Serviços
+  let totalCents = 0
+  const byDay: Record<string, number> = {}
+  const barberMap: Record<string, { name: string, cents: number, count: number }> = {}
+  const serviceMap: Record<string, { name: string, count: number }> = {}
+
+  for (const r of rows) {
+    totalCents += r.price_cents ?? 0
+    
+    // Gráfico
+    const day = r.start_time.split('T')[0]
+    byDay[day] = (byDay[day] ?? 0) + (r.price_cents ?? 0)
+
+    // Barbeiros
+    const bid = r.barber_id
+    if (bid) {
+      if (!barberMap[bid]) {
+        barberMap[bid] = { 
+          name: (r.barber as any)?.full_name || 'Desconhecido', 
+          cents: 0, 
+          count: 0 
+        }
+      }
+      barberMap[bid].cents += r.price_cents ?? 0
+      barberMap[bid].count += 1
+    }
+
+    // Serviços
+    const sid = r.service_id
+    if (sid) {
+      if (!serviceMap[sid]) {
+        serviceMap[sid] = { 
+          name: (r.service as any)?.name || 'Serviço', 
+          count: 0 
+        }
+      }
+      serviceMap[sid].count += 1
+    }
+  }
+
   const totalRevenue  = totalCents / 100
   const totalComandas = rows.length
   const averageTicket = totalComandas > 0 ? totalRevenue / totalComandas : 0
 
-  // Receita por dia (para gráfico)
-  const byDay: Record<string, number> = {}
-  for (const r of rows) {
-    const day = r.start_time.split('T')[0]           // 'YYYY-MM-DD'
-    byDay[day] = (byDay[day] ?? 0) + (r.price_cents ?? 0)
-  }
   const chartData = Object.entries(byDay)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, cents]) => ({
@@ -60,7 +96,46 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
       revenue: cents / 100,
     }))
 
-  // Formas de pagamento — buscar se a coluna existir
+  const barberPerformance = Object.entries(barberMap).map(([id, b]) => ({
+    barberId: id,
+    name: b.name,
+    revenue: b.cents / 100,
+    appointments: b.count,
+    averageTicket: b.count > 0 ? (b.cents / 100) / b.count : 0
+  })).sort((a, b) => b.revenue - a.revenue)
+
+  const topServices = Object.entries(serviceMap).map(([id, s]) => ({
+    id,
+    name: s.name,
+    quantity: s.count
+  })).sort((a, b) => b.quantity - a.quantity).slice(0, 5)
+
+  // Top Produtos (comanda_items)
+  const { data: prodData } = await supabaseAdmin
+    .from('comanda_items')
+    .select('id, name, quantity, total_cents, item_type')
+    .eq('organization_id', user.organization_id)
+    .eq('item_type', 'product')
+    .eq('paid', true)
+    .gte('paid_at', startDate)
+    .lte('paid_at', end.toISOString())
+
+  const productMap: Record<string, { name: string, count: number }> = {}
+  for (const p of (prodData ?? [])) {
+    const name = p.name || 'Produto'
+    if (!productMap[name]) {
+      productMap[name] = { name, count: 0 }
+    }
+    productMap[name].count += (p.quantity || 1)
+  }
+
+  const topProducts = Object.entries(productMap).map(([name, p]) => ({
+    id: name,
+    name: p.name,
+    quantity: p.count
+  })).sort((a, b) => b.quantity - a.quantity).slice(0, 5)
+
+  // Formas de pagamento
   const { data: payData } = await supabaseAdmin
     .from('appointments')
     .select('payment_method, price_cents')
@@ -97,9 +172,9 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
     },
     chartData,
     paymentMethods,
-    topServices: [],
-    topProducts: [],
-    barberPerformance: []
+    topServices,
+    topProducts,
+    barberPerformance
   }
 })
 

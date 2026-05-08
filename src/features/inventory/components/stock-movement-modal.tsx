@@ -7,12 +7,17 @@ import { Input } from '@/components/ui/input'
 import { moveStock } from '../actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
+import { useInventoryMovements } from '@/hooks/use-inventory-movements'
+import { createClient } from '@/lib/supabase/client'
 import type { InventoryItem } from '../types'
 
-export function StockMovementModal({ isOpen, onClose, product }: { isOpen: boolean, onClose: () => void, product: InventoryItem | null }) {
+export function StockMovementModal({ isOpen, onClose, product, onSuccess }: { isOpen: boolean, onClose: () => void, product: InventoryItem | null, onSuccess?: () => void }) {
   const [isPending, startTransition] = useTransition()
   const [direction, setDirection] = useState<'in' | 'out'>('in')
   const [quantity, setQuantity] = useState(0)
+  
+  const { registerMovement } = useInventoryMovements()
+  const supabase = createClient()
 
   if (!isOpen || !product) return null
 
@@ -31,16 +36,46 @@ export function StockMovementModal({ isOpen, onClose, product }: { isOpen: boole
     }
 
     const formData = new FormData(e.currentTarget)
-    formData.set('direction', direction)
-    formData.set('quantity', quantity.toString())
+    const reason = formData.get('reason') as string
+    const notes = formData.get('observation') as string
     
     startTransition(async () => {
-      const result = await moveStock(product.id, formData)
-      if (result.success) {
+      try {
+        // Executar em paralelo: atualizar estoque e registrar movimentação
+        const promises = []
+
+        // 1. Debitar/Creditar estoque
+        promises.push(
+          supabase
+            .from('inventory')
+            .update({ quantity: newQuantity })
+            .eq('id', product.id)
+        )
+
+        // 2. Registrar movimentação
+        promises.push(
+          registerMovement({
+            organization_id: product.organization_id,
+            inventory_id: product.id,
+            type: direction === 'out' 
+              ? (product.type === 'revenda' ? 'venda' : 'uso_interno') 
+              : (reason === 'Compra' ? 'entrada' : 'ajuste'),
+            quantity: quantity,
+            unit_price_cents: (direction === 'out' && product.type === 'revenda') ? product.price_cents : null,
+            notes: notes
+          })
+        )
+
+        const results = await Promise.all(promises)
+        const updateError = (results[0] as any).error
+        if (updateError) throw new Error(updateError.message)
+
         toast.success('Estoque atualizado com sucesso!')
+        onSuccess?.()
         onClose()
-      } else {
-        toast.error(result.error || 'Erro ao movimentar estoque.')
+      } catch (err: any) {
+        console.error('[StockMovement]', err.message)
+        toast.error(`Erro: ${err.message}`)
       }
     })
   }
@@ -120,11 +155,29 @@ export function StockMovementModal({ isOpen, onClose, product }: { isOpen: boole
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Motivo</label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Motivo</label>
+                {direction === 'out' && (
+                  <span className={cn(
+                    "text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider",
+                    product.type === 'revenda' 
+                      ? "bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20" 
+                      : "bg-white/10 text-muted-foreground border border-white/10"
+                  )}>
+                    {product.type === 'revenda' ? 'Venda' : 'Uso Interno'}
+                  </span>
+                )}
+              </div>
+              
               <select 
                 name="reason" 
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all appearance-none"
+                disabled={direction === 'out'}
+                value={direction === 'out' ? (product.type === 'revenda' ? 'Venda' : 'Uso') : undefined}
+                className={cn(
+                  "w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all appearance-none",
+                  direction === 'out' && "opacity-80 cursor-not-allowed"
+                )}
               >
                 {direction === 'in' ? (
                   <>
@@ -143,6 +196,9 @@ export function StockMovementModal({ isOpen, onClose, product }: { isOpen: boole
                   </>
                 )}
               </select>
+              {direction === 'out' && (
+                <input type="hidden" name="reason" value={product.type === 'revenda' ? 'Venda' : 'Uso'} />
+              )}
             </div>
 
             <div className="space-y-2">

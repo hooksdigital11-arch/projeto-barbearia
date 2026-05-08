@@ -20,6 +20,8 @@ interface InventoryFiltersProps {
   filters: Filters
   setFilters: (f: Filters) => void
   inactiveCount: number
+  period: 'hoje' | 'semana' | 'mes' | 'ano'
+  setPeriod: (p: 'hoje' | 'semana' | 'mes' | 'ano') => void
 }
 
 const TABS = [
@@ -29,10 +31,17 @@ const TABS = [
   { value: 'inactive' as const, label: 'Inativos' },
 ]
 
+const PERIODS = [
+  { value: 'hoje' as const, label: 'Hoje' },
+  { value: 'semana' as const, label: 'Esta Semana' },
+  { value: 'mes' as const, label: 'Este Mês' },
+  { value: 'ano' as const, label: 'Este Ano' },
+]
+
 const CATEGORIES = ['pomada', 'shampoo', 'lamina', 'tesoura', 'oleo', 'creme', 'outros']
 
 export function InventoryFilters({
-  activeTab, setActiveTab, search, setSearch, filters, setFilters, inactiveCount
+  activeTab, setActiveTab, search, setSearch, filters, setFilters, inactiveCount, period, setPeriod
 }: InventoryFiltersProps) {
   const [showPanel, setShowPanel] = useState(false)
   
@@ -67,14 +76,32 @@ export function InventoryFilters({
           ))}
         </div>
 
-        {/* Search + Filter button */}
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        {/* Period Selector + Search + Filter button */}
+        <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+          {/* Seletor de Período */}
+          <div className="flex p-1 bg-black/40 border border-white/10 rounded-2xl w-full md:w-auto">
+            {PERIODS.map(p => (
+              <button
+                key={p.value}
+                onClick={() => setPeriod(p.value)}
+                className={cn(
+                  "flex-1 md:flex-none px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all",
+                  period === p.value
+                    ? "bg-white/10 text-accent-cyan"
+                    : "text-muted-foreground hover:text-white"
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
           <div className="relative flex-1 md:w-80">
             <MagnifyingGlass size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar produto, categoria ou fornecedor..."
+              placeholder="Buscar produto..."
               className="pl-10 bg-black/40 border-white/10 rounded-2xl focus:border-accent-cyan transition-all"
             />
           </div>

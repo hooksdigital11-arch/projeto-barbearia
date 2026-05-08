@@ -2,9 +2,32 @@
 
 import { Package, Tag, Wrench, Warning } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
-import type { InventoryStats } from '../types'
+import type { InventoryStats, InventoryItem } from '../types'
 
-export function InventoryStatsCards({ stats }: { stats: InventoryStats }) {
+interface InventoryStatsCardsProps {
+  stats: InventoryStats
+  items: InventoryItem[]
+  period: 'hoje' | 'semana' | 'mes' | 'ano'
+  salesData: Map<string, { qtdVendida: number, faturamento: number }>
+  isLoading?: boolean
+}
+
+export function InventoryStatsCards({ stats, items, period, salesData, isLoading }: InventoryStatsCardsProps) {
+  const formatPrice = (cents: number) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100)
+  }
+
+  // Calcular faturamento real total do período
+  let totalRevenue = 0
+  items.forEach(item => {
+    if (item.type === 'revenda') {
+      const sale = salesData.get(item.id)
+      if (sale) {
+        totalRevenue += sale.faturamento
+      }
+    }
+  })
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       <div className="p-6 rounded-[2rem] bg-accent-cyan/5 border border-accent-cyan/10 space-y-3">
@@ -21,9 +44,17 @@ export function InventoryStatsCards({ stats }: { stats: InventoryStats }) {
         <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400">
           <Tag size={24} weight="duotone" />
         </div>
-        <div>
+        <div className="flex flex-col">
           <p className="text-[10px] font-bold text-green-400/60 uppercase tracking-widest">Revenda</p>
-          <p className="text-3xl font-bold text-white font-syne">{stats.revenda}</p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-3xl font-bold text-white font-syne">{stats.revenda}</p>
+          </div>
+          <div className="mt-1">
+            <p className="text-[10px] text-accent-cyan font-mono font-bold tracking-tight">
+              {formatPrice(totalRevenue)}
+            </p>
+            <p className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">faturamento {period}</p>
+          </div>
         </div>
       </div>
 

@@ -11,9 +11,14 @@ interface InventoryTableProps {
   onDelete: (item: InventoryItem) => void
   canManage: boolean
   showCost: boolean
+  period: 'hoje' | 'semana' | 'mes' | 'ano'
+  salesData: Map<string, { qtdVendida: number, faturamento: number }>
+  isLoading?: boolean
 }
 
-export function InventoryTable({ items, onEdit, onMove, onDelete, canManage, showCost }: InventoryTableProps) {
+export function InventoryTable({ 
+  items, onEdit, onMove, onDelete, canManage, showCost, period, salesData, isLoading 
+}: InventoryTableProps) {
   const formatPrice = (cents: number | null | undefined) => {
     if (cents === null || cents === undefined) return '—'
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100)
@@ -27,10 +32,11 @@ export function InventoryTable({ items, onEdit, onMove, onDelete, canManage, sho
             <tr className="bg-white/5 border-b border-white/5">
               <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Produto</th>
               <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tipo</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">Qtd</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">Mínimo</th>
+              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">Estoque</th>
               {showCost && <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Custo</th>}
               <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Preço Venda</th>
+              <th className="hidden md:table-cell px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">Qtd Vendida</th>
+              <th className="hidden md:table-cell px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-right">Faturamento</th>
               <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-right">Ações</th>
             </tr>
           </thead>
@@ -38,7 +44,13 @@ export function InventoryTable({ items, onEdit, onMove, onDelete, canManage, sho
             {items.map((item) => {
               const isLowStock = item.quantity <= (item.min_quantity ?? 5)
               const isOut = item.quantity === 0
+              const isRevenda = item.type === 'revenda'
               
+              // Dados de venda REAIS do Map
+              const sale = salesData.get(item.id)
+              const qtdVendida = sale?.qtdVendida ?? 0
+              const faturamento = sale?.faturamento ?? 0
+
               return (
                 <tr 
                   key={item.id} 
@@ -66,11 +78,11 @@ export function InventoryTable({ items, onEdit, onMove, onDelete, canManage, sho
                   <td className="px-6 py-5">
                     <span className={cn(
                       "text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border",
-                      item.type === 'revenda' 
+                      isRevenda 
                         ? "bg-green-500/10 text-green-400 border-green-500/20" 
                         : "bg-blue-500/10 text-blue-400 border-blue-500/20"
                     )}>
-                      {item.type === 'revenda' ? 'Revenda' : 'Uso Interno'}
+                      {isRevenda ? 'Revenda' : 'Uso Interno'}
                     </span>
                   </td>
                   <td className="px-6 py-5 text-center">
@@ -84,9 +96,6 @@ export function InventoryTable({ items, onEdit, onMove, onDelete, canManage, sho
                       </p>
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-center">
-                    <p className="text-xs text-muted-foreground font-medium">{item.min_quantity}</p>
-                  </td>
                   {showCost && (
                     <td className="px-6 py-5">
                       <span className="font-mono text-sm text-muted-foreground">{formatPrice(item.cost_cents)}</span>
@@ -95,10 +104,39 @@ export function InventoryTable({ items, onEdit, onMove, onDelete, canManage, sho
                   <td className="px-6 py-5">
                     <span className={cn(
                       "font-mono text-sm",
-                      item.type === 'revenda' ? "text-accent-cyan" : "text-muted-foreground"
+                      isRevenda ? "text-accent-cyan" : "text-muted-foreground"
                     )}>
-                      {item.type === 'revenda' ? formatPrice(item.price_cents) : '—'}
+                      {isRevenda ? formatPrice(item.price_cents) : '—'}
                     </span>
+                  </td>
+                  {/* Novas colunas Qtd Vendida e Faturamento */}
+                  <td className="hidden md:table-cell px-6 py-5 text-center">
+                    {isRevenda ? (
+                      isLoading ? (
+                        <div className="w-8 h-4 bg-white/5 animate-pulse rounded mx-auto" />
+                      ) : (
+                        <span className={cn(
+                          "text-sm font-bold",
+                          qtdVendida === 0 ? "text-white/20" : "text-white"
+                        )}>
+                          {qtdVendida === 0 ? '—' : qtdVendida}
+                        </span>
+                      )
+                    ) : null}
+                  </td>
+                  <td className="hidden md:table-cell px-6 py-5 text-right">
+                    {isRevenda ? (
+                      isLoading ? (
+                        <div className="w-20 h-4 bg-white/5 animate-pulse rounded ml-auto" />
+                      ) : (
+                        <span className={cn(
+                          "text-sm font-bold font-mono",
+                          faturamento === 0 ? "text-white/20" : "text-accent-cyan"
+                        )}>
+                          {faturamento === 0 ? '—' : formatPrice(faturamento)}
+                        </span>
+                      )
+                    ) : null}
                   </td>
                   <td className="px-6 py-5 text-right">
                     <div className="flex items-center justify-end gap-1">

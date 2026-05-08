@@ -115,7 +115,13 @@ export function ReportsPage({
           title="Relatórios & Insights" 
           subtitle="Analise a performance financeira e operacional da sua barbearia" 
         />
-        <ExportButton startDate={dates.start} endDate={dates.end} />
+        <ExportButton 
+          kpis={revenue.kpis as any}
+          chartData={revenue.chartData as any}
+          paymentMethods={revenue.paymentMethods as any}
+          barberPerformance={(revenue as any).barberPerformance || []}
+          period={`${new Date(dates.start).toLocaleDateString('pt-BR')} → ${new Date(dates.end).toLocaleDateString('pt-BR')}`}
+        />
       </div>
 
       <PeriodSelector onPeriodChange={handlePeriodChange} />

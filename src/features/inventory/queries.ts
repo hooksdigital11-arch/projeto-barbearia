@@ -27,7 +27,8 @@ export const getInventory = cache(async (activeOnly = true): Promise<InventoryIt
     return []
   }
   
-  return data as InventoryItem[]
+  const items = data as InventoryItem[]
+  return items
 })
 
 export const getInventoryStats = cache(async (): Promise<InventoryStats> => {

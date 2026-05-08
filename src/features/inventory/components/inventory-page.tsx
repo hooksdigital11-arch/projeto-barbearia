@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { useState, useMemo, useTransition, useEffect } from 'react'
 import { Plus, ArrowCounterClockwise } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { InventoryStatsCards } from './inventory-stats'
@@ -11,6 +12,7 @@ import { CreateProductModal } from './create-product-modal'
 import { EditProductModal } from './edit-product-modal'
 import { StockMovementModal } from './stock-movement-modal'
 import { deleteProduct, reactivateProduct } from '../actions'
+import { useInventoryMovements } from '@/hooks/use-inventory-movements'
 import { toast } from 'sonner'
 import type { InventoryItem, InventoryStats } from '../types'
 
@@ -31,9 +33,14 @@ interface InventoryPageProps {
 }
 
 export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: InventoryPageProps) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'all' | 'revenda' | 'uso_interno' | 'inactive'>('all')
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
+  const [period, setPeriod] = useState<'hoje' | 'semana' | 'mes' | 'ano'>('mes')
+  const [salesData, setSalesData] = useState<Map<string, { qtdVendida: number, faturamento: number }>>(new Map())
+  const [isLoadingSales, setIsLoadingSales] = useState(false)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   // Modais
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -41,6 +48,43 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
   const [movingProduct, setMovingProduct] = useState<InventoryItem | null>(null)
 
   const [isPending, startTransition] = useTransition()
+  const { fetchSalesByPeriod } = useInventoryMovements()
+
+  const organizationId = activeItems[0]?.organization_id || inactiveItems[0]?.organization_id
+
+  useEffect(() => {
+    if (!organizationId) return
+
+    async function loadSales() {
+      setIsLoadingSales(true)
+      const now = new Date()
+      let start = new Date()
+      const end = new Date()
+
+      if (period === 'hoje') {
+        start.setHours(0, 0, 0, 0)
+        end.setHours(23, 59, 59, 999)
+      } else if (period === 'semana') {
+        // Segunda-feira desta semana
+        const day = start.getDay()
+        const diff = start.getDate() - day + (day === 0 ? -6 : 1)
+        start.setDate(diff)
+        start.setHours(0, 0, 0, 0)
+      } else if (period === 'mes') {
+        start.setDate(1)
+        start.setHours(0, 0, 0, 0)
+      } else if (period === 'ano') {
+        start.setMonth(0, 1)
+        start.setHours(0, 0, 0, 0)
+      }
+
+      const data = await fetchSalesByPeriod(organizationId, start, end)
+      setSalesData(data)
+      setIsLoadingSales(false)
+    }
+
+    loadSales()
+  }, [period, organizationId, refreshTrigger])
 
   const sourceItems = activeTab === 'inactive' ? inactiveItems : activeItems
 
@@ -80,6 +124,11 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
     })
   }
 
+  const handleMovementSuccess = () => {
+    router.refresh()
+    setRefreshTrigger(prev => prev + 1)
+  }
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       <LowStockAlert
@@ -106,7 +155,7 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
         )}
       </div>
 
-      <InventoryStatsCards stats={stats} />
+      <InventoryStatsCards stats={stats} items={activeItems} period={period} salesData={salesData} isLoading={isLoadingSales} />
 
       <div className="space-y-6">
         <InventoryFilters
@@ -117,6 +166,8 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
           filters={filters}
           setFilters={setFilters}
           inactiveCount={inactiveItems.length}
+          period={period}
+          setPeriod={setPeriod}
         />
 
         {activeTab === 'inactive' ? (
@@ -134,13 +185,21 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
             onDelete={handleDelete}
             canManage={userRole === 'admin'}
             showCost={userRole === 'admin'}
+            period={period}
+            salesData={salesData}
+            isLoading={isLoadingSales}
           />
         )}
       </div>
 
       <CreateProductModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
       <EditProductModal isOpen={!!editingProduct} onClose={() => setEditingProduct(null)} product={editingProduct} />
-      <StockMovementModal isOpen={!!movingProduct} onClose={() => setMovingProduct(null)} product={movingProduct} />
+      <StockMovementModal 
+        isOpen={!!movingProduct} 
+        onClose={() => setMovingProduct(null)} 
+        product={movingProduct} 
+        onSuccess={handleMovementSuccess}
+      />
     </div>
   )
 }

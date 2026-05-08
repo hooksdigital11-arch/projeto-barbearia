@@ -3,6 +3,8 @@
 import { 
   LineChart, 
   Line, 
+  AreaChart,
+  Area,
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -24,7 +26,7 @@ interface RevenueSectionProps {
   data: RevenueReport
 }
 
-const PAYMENT_COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b']
+const PAYMENT_COLORS = ['#00e5ff', '#ff007f', '#7000ff', '#00ff9d']
 
 export function RevenueSection({ data }: RevenueSectionProps) {
   const { kpis, chartData, paymentMethods, topServices, topProducts, barberPerformance } = data
@@ -74,7 +76,7 @@ export function RevenueSection({ data }: RevenueSectionProps) {
           <div className="h-[300px]">
             <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
+                <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                   <XAxis 
                     dataKey="date" 
@@ -91,28 +93,26 @@ export function RevenueSection({ data }: RevenueSectionProps) {
                     tickFormatter={(val) => `R$ ${val}`}
                   />
                   <Tooltip 
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
                     contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
                     itemStyle={{ color: '#00e5ff', fontSize: '12px' }}
                   />
-                  <Line 
-                    type="monotone" 
+                  <Bar 
                     dataKey="revenue" 
-                    stroke="#00e5ff" 
-                    strokeWidth={3} 
-                    dot={false}
-                    activeDot={{ r: 6, stroke: '#00e5ff', strokeWidth: 2, fill: '#0a0a0a' }}
+                    fill="#00e5ff" 
+                    radius={[6, 6, 0, 0]} 
+                    maxBarSize={50}
                   />
                   {chartData[0]?.previousRevenue !== undefined && (
-                    <Line 
-                      type="monotone" 
+                    <Bar 
                       dataKey="previousRevenue" 
-                      stroke="#a0a0a0" 
-                      strokeDasharray="5 5" 
-                      strokeWidth={2} 
-                      dot={false} 
+                      fill="#a0a0a0" 
+                      fillOpacity={0.3}
+                      radius={[6, 6, 0, 0]} 
+                      maxBarSize={50}
                     />
                   )}
-                </LineChart>
+                </BarChart>
               </ResponsiveContainer>
             </ClientOnly>
           </div>
@@ -129,22 +129,58 @@ export function RevenueSection({ data }: RevenueSectionProps) {
                     data={paymentMethods}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
+                    innerRadius={0}
+                    outerRadius={100}
+                    paddingAngle={2}
                     dataKey="value"
                     nameKey="method"
+                    stroke="#141414"
+                    strokeWidth={2}
+                    label={({
+                      cx,
+                      cy,
+                      midAngle,
+                      innerRadius,
+                      outerRadius,
+                      percent,
+                      index,
+                    }) => {
+                      const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                      const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
+                      const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
+                
+                      return (
+                        <text
+                          x={x}
+                          y={y}
+                          fill="white"
+                          textAnchor={x > cx ? 'start' : 'end'}
+                          dominantBaseline="central"
+                          className="text-[10px] font-bold"
+                        >
+                          {`${(percent * 100).toFixed(0)}%`}
+                        </text>
+                      );
+                    }}
+                    labelLine={false}
                   >
                     {paymentMethods.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={PAYMENT_COLORS[index % PAYMENT_COLORS.length]} />
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={PAYMENT_COLORS[index % PAYMENT_COLORS.length]} 
+                      />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                    itemStyle={{ fontSize: '12px' }}
+                  />
                   <Legend 
                     verticalAlign="bottom" 
                     align="center"
-                    formatter={(value, entry: any) => (
-                      <span className="text-xs text-text-secondary">{value} ({entry.payload.percentage.toFixed(1)}%)</span>
+                    iconType="circle"
+                    formatter={(value) => (
+                      <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider ml-1">{value}</span>
                     )}
                   />
                 </PieChart>
@@ -158,18 +194,43 @@ export function RevenueSection({ data }: RevenueSectionProps) {
         {/* Top Serviços */}
         <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
           <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Top 5 Serviços</h3>
-          <div className="h-[300px]">
+          <div className="h-[300px] flex items-center">
             <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topServices} layout="vertical" margin={{ left: 40 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
-                  <XAxis type="number" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis dataKey="name" type="category" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} width={80} />
+                <PieChart>
+                  <Pie
+                    data={topServices}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={0}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="quantity"
+                    nameKey="name"
+                    stroke="#141414"
+                    strokeWidth={2}
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                  >
+                    {topServices.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={PAYMENT_COLORS[index % PAYMENT_COLORS.length]} 
+                      />
+                    ))}
+                  </Pie>
                   <Tooltip 
                     contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                    itemStyle={{ fontSize: '12px' }}
                   />
-                  <Bar dataKey="quantity" fill="#00e5ff" radius={[0, 4, 4, 0]} />
-                </BarChart>
+                  <Legend 
+                    verticalAlign="bottom" 
+                    align="center"
+                    iconType="circle"
+                    formatter={(value) => (
+                      <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider ml-1">{value}</span>
+                    )}
+                  />
+                </PieChart>
               </ResponsiveContainer>
             </ClientOnly>
           </div>
@@ -180,18 +241,43 @@ export function RevenueSection({ data }: RevenueSectionProps) {
         {/* Top Produtos */}
         <div className="p-6 bg-bg-secondary/50 border border-white/5 rounded-2xl backdrop-blur-xl">
           <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Top 5 Produtos</h3>
-          <div className="h-[300px]">
+          <div className="h-[300px] flex items-center">
             <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topProducts} layout="vertical" margin={{ left: 40 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
-                  <XAxis type="number" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis dataKey="name" type="category" stroke="#a0a0a0" fontSize={10} tickLine={false} axisLine={false} width={80} />
+                <PieChart>
+                  <Pie
+                    data={topProducts}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={0}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="quantity"
+                    nameKey="name"
+                    stroke="#141414"
+                    strokeWidth={2}
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                  >
+                    {topProducts.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={PAYMENT_COLORS[(index + 2) % PAYMENT_COLORS.length]} 
+                      />
+                    ))}
+                  </Pie>
                   <Tooltip 
                     contentStyle={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                    itemStyle={{ fontSize: '12px' }}
                   />
-                  <Bar dataKey="quantity" fill="#f59e0b" radius={[0, 4, 4, 0]} />
-                </BarChart>
+                  <Legend 
+                    verticalAlign="bottom" 
+                    align="center"
+                    iconType="circle"
+                    formatter={(value) => (
+                      <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider ml-1">{value}</span>
+                    )}
+                  />
+                </PieChart>
               </ResponsiveContainer>
             </ClientOnly>
           </div>
