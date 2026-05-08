@@ -18,6 +18,13 @@ export interface ServiceSalesData {
   totalRevenue: number
 }
 
+export interface ProductSalesData {
+  name: string
+  category: string
+  quantity: number
+  totalRevenue: number
+}
+
 export interface BarberRevenueData {
   barberId: string
   name: string
@@ -32,6 +39,10 @@ export interface RevenueReport {
   kpis: {
     totalRevenue: number
     totalRevenueChange: number
+    serviceRevenue: number
+    serviceRevenueChange: number
+    productRevenue: number
+    productRevenueChange: number
     averageTicket: number
     averageTicketChange: number
     totalComandas: number
@@ -42,8 +53,15 @@ export interface RevenueReport {
   chartData: RevenueData[]
   paymentMethods: PaymentMethodData[]
   topServices: ServiceSalesData[]
-  topProducts: ServiceSalesData[]
+  topProducts: ProductSalesData[]
   barberPerformance: BarberRevenueData[]
+  consumedStock: {
+    inventoryId: string
+    name: string
+    category: string
+    type: 'venda' | 'uso_interno'
+    qtdSaida: number
+  }[]
 }
 
 export interface AppointmentStatusData {

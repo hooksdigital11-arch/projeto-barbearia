@@ -7,17 +7,12 @@ import { Input } from '@/components/ui/input'
 import { moveStock } from '../actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
-import { useInventoryMovements } from '@/hooks/use-inventory-movements'
-import { createClient } from '@/lib/supabase/client'
 import type { InventoryItem } from '../types'
 
 export function StockMovementModal({ isOpen, onClose, product, onSuccess }: { isOpen: boolean, onClose: () => void, product: InventoryItem | null, onSuccess?: () => void }) {
   const [isPending, startTransition] = useTransition()
   const [direction, setDirection] = useState<'in' | 'out'>('in')
   const [quantity, setQuantity] = useState(0)
-  
-  const { registerMovement } = useInventoryMovements()
-  const supabase = createClient()
 
   if (!isOpen || !product) return null
 
@@ -36,39 +31,22 @@ export function StockMovementModal({ isOpen, onClose, product, onSuccess }: { is
     }
 
     const formData = new FormData(e.currentTarget)
-    const reason = formData.get('reason') as string
-    const notes = formData.get('observation') as string
+    // direction is not in the form since it's a state, we need to append it
+    formData.append('direction', direction)
+    formData.append('quantity', String(quantity))
     
+    // Ensure reason is present even if select is disabled
+    if (direction === 'out') {
+      formData.set('reason', product.type === 'revenda' ? 'Venda' : 'Uso')
+    }
+
     startTransition(async () => {
       try {
-        // Executar em paralelo: atualizar estoque e registrar movimentação
-        const promises = []
-
-        // 1. Debitar/Creditar estoque
-        promises.push(
-          supabase
-            .from('inventory')
-            .update({ quantity: newQuantity })
-            .eq('id', product.id)
-        )
-
-        // 2. Registrar movimentação
-        promises.push(
-          registerMovement({
-            organization_id: product.organization_id,
-            inventory_id: product.id,
-            type: direction === 'out' 
-              ? (product.type === 'revenda' ? 'venda' : 'uso_interno') 
-              : (reason === 'Compra' ? 'entrada' : 'ajuste'),
-            quantity: quantity,
-            unit_price_cents: (direction === 'out' && product.type === 'revenda') ? product.price_cents : null,
-            notes: notes
-          })
-        )
-
-        const results = await Promise.all(promises)
-        const updateError = (results[0] as any).error
-        if (updateError) throw new Error(updateError.message)
+        const result = await moveStock(product.id, formData)
+        
+        if (result?.error) {
+          throw new Error(result.error)
+        }
 
         toast.success('Estoque atualizado com sucesso!')
         onSuccess?.()

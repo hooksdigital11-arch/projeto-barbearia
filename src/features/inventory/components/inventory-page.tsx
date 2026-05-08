@@ -11,8 +11,7 @@ import { InventoryTable } from './inventory-table'
 import { CreateProductModal } from './create-product-modal'
 import { EditProductModal } from './edit-product-modal'
 import { StockMovementModal } from './stock-movement-modal'
-import { deleteProduct, reactivateProduct } from '../actions'
-import { useInventoryMovements } from '@/hooks/use-inventory-movements'
+import { deleteProduct, reactivateProduct, getSalesByPeriodAction } from '../actions'
 import { toast } from 'sonner'
 import type { InventoryItem, InventoryStats } from '../types'
 
@@ -48,7 +47,6 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
   const [movingProduct, setMovingProduct] = useState<InventoryItem | null>(null)
 
   const [isPending, startTransition] = useTransition()
-  const { fetchSalesByPeriod } = useInventoryMovements()
 
   const organizationId = activeItems[0]?.organization_id || inactiveItems[0]?.organization_id
 
@@ -78,9 +76,18 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
         start.setHours(0, 0, 0, 0)
       }
 
-      const data = await fetchSalesByPeriod(organizationId, start, end)
-      setSalesData(data)
-      setIsLoadingSales(false)
+      try {
+        const dataArray = await getSalesByPeriodAction(start.toISOString(), end.toISOString())
+        const newSalesMap = new Map<string, { qtdVendida: number, faturamento: number }>()
+        dataArray.forEach(item => {
+          newSalesMap.set(item.id, { qtdVendida: item.qtdVendida, faturamento: item.faturamento })
+        })
+        setSalesData(newSalesMap)
+      } catch (err) {
+        console.error('Failed to load sales data:', err)
+      } finally {
+        setIsLoadingSales(false)
+      }
     }
 
     loadSales()
