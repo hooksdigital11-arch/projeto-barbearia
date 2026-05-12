@@ -14,8 +14,8 @@ export function ComandaHistoryTable({ items }: ComandaHistoryTableProps) {
     const key = `${item.client_id}-${item.paid_at}`
     if (!acc[key]) {
       acc[key] = {
-        client: item.client?.full_name || 'Desconhecido',
-        barber: item.barber?.full_name || 'Desconhecido',
+        client: item.client?.full_name || 'DESCONHECIDO',
+        barber: item.barber?.full_name || 'DESCONHECIDO',
         itemCount: 0,
         total: 0,
         method: item.payment_method,
@@ -31,74 +31,66 @@ export function ComandaHistoryTable({ items }: ComandaHistoryTableProps) {
   const records = Object.values(grouped).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
 
   const methodMap: Record<string, string> = {
-    cash: 'Dinheiro',
+    cash: 'DINHEIRO',
     pix: 'PIX',
-    credit_card: 'Crédito',
-    debit_card: 'Débito',
+    credit_card: 'CRÉDITO',
+    debit_card: 'DÉBITO',
   }
 
   return (
-    <div className="overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-white/5 bg-white/[0.01]">
-              <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Cliente</th>
-              <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Barbeiro</th>
-              <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground text-center">Itens</th>
-              <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Total</th>
-              <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Pagamento</th>
-              <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground text-right">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/[0.03]">
-            {records.map((row, idx) => (
-              <tr key={idx} className="group/row hover:bg-white/[0.02] transition-all duration-300">
-                <td className="px-8 py-6 font-bold text-white group-hover/row:text-accent-cyan transition-colors">{row.client}</td>
-                <td className="px-8 py-6 text-sm text-text-secondary font-medium">{row.barber}</td>
-                <td className="px-8 py-6 text-center">
-                  <span className="px-2 py-1 rounded-lg bg-white/5 text-xs font-mono font-bold text-white">
-                    {row.itemCount}
-                  </span>
-                </td>
-                <td className="px-8 py-6">
-                  <span className="text-base font-black text-white tracking-tight">
-                    R$ {(row.total / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </td>
-                <td className="px-8 py-6">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-text-secondary opacity-60">
-                    {row.method ? methodMap[row.method] : '—'}
-                  </span>
-                </td>
-                <td className="px-8 py-6 text-right">
-                  {row.status === 'pago' ? (
-                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest">
-                      <Check size={12} weight="bold" />
-                      Pago
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest">
-                      <Clock size={12} weight="bold" />
-                      Aberta
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {records.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-8 py-32 text-center">
-                  <div className="flex flex-col items-center gap-4 opacity-20">
-                    <Clock size={48} weight="thin" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.4em]">Nenhuma comanda processada</p>
-                  </div>
-                </td>
-              </tr>
+    <div className="space-y-[4px]">
+      {records.map((row, idx) => (
+        <div
+          key={idx}
+          className="grid grid-cols-[1.8fr_1.4fr_70px_100px_110px_90px] gap-[14px] items-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] py-[14px] px-[18px] group hover:bg-bg-surface hover:border-[#222] transition-all"
+        >
+          {/* Cliente */}
+          <span className="text-[12px] font-medium text-text-secondary truncate uppercase tracking-tight">
+            {row.client}
+          </span>
+
+          {/* Barbeiro */}
+          <span className="text-[10px] font-medium text-[#333] truncate uppercase tracking-wide">
+            {row.barber}
+          </span>
+
+          {/* Itens */}
+          <div className="flex justify-center">
+            <span className="text-[10px] font-medium text-text-nav bg-white/[0.02] border-[0.5px] border-white/5 px-2 py-0.5 rounded-[4px]">
+              {row.itemCount}
+            </span>
+          </div>
+
+          {/* Total */}
+          <div className="text-right">
+            <span className="text-[13px] font-medium text-text-secondary tracking-tight tabular-nums">
+              R$ {(row.total / 100).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+            </span>
+          </div>
+
+          {/* Pagamento */}
+          <div className="flex justify-center">
+            <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-widest">
+              {row.method ? methodMap[row.method] : '—'}
+            </span>
+          </div>
+
+          {/* Status */}
+          <div className="flex justify-end">
+            {row.status === 'pago' ? (
+              <div className="flex items-center gap-1.5 text-accent-main">
+                <div className="w-[4px] h-[4px] rounded-full bg-accent-main" />
+                <span className="text-[9px] font-medium uppercase tracking-[0.05em]">PAGO</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-amber-500/80">
+                <div className="w-[4px] h-[4px] rounded-full bg-amber-500" />
+                <span className="text-[9px] font-medium uppercase tracking-[0.05em]">ABERTA</span>
+              </div>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

@@ -3,11 +3,10 @@
 import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
 import { Plus, UsersThree } from '@phosphor-icons/react'
-import { Button } from '@/components/ui/button'
 import { TeamStatsCards } from './team-stats'
 import { ViewToggle } from './view-toggle'
 import { BarberCard } from './barber-card'
-import { PageTitle } from '@/components/shared/page-title'
+import { cn } from '@/lib/utils/cn'
 import type { TeamMemberWithStats, TeamStats } from '../types'
 
 const BarberTable = dynamic(() => import('./barber-table').then(m => m.BarberTable), { ssr: false })
@@ -41,17 +40,21 @@ export function TeamPage({ members, stats, userRole, currentUserId }: TeamPagePr
   const colleagues = members.filter(m => m.id !== currentUserId)
 
   return (
-    <div className="space-y-16 animate-premium-in">
-      {/* Editorial Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
-        <PageTitle 
-          title="Equipe" 
-          subtitle={isAdmin 
-            ? 'Gerencie sua equipe de especialistas. Acompanhe a performance individual e coordene a excelência no atendimento.' 
-            : 'Veja seus colegas de equipe e acompanhe a agenda coletiva da unidade.'}
-          className="mb-0" 
-        />
-        <div className="flex items-center gap-4 ml-7 lg:ml-0">
+    <div className="animate-premium-in py-8 space-y-12">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+        <div className="space-y-2">
+          <h1 className="text-[32px] font-medium text-text-primary tracking-[-0.02em] uppercase">
+            EQUIPE<span className="text-accent-main">.</span>
+          </h1>
+          <p className="text-[11px] text-[#333] leading-[1.5] max-w-[480px] font-medium uppercase tracking-wide">
+            {isAdmin 
+              ? 'Gerencie sua equipe de especialistas. Acompanhe a performance individual e coordene a excelência no atendimento.' 
+              : 'Veja seus colegas de equipe e acompanhe a agenda coletiva da unidade.'}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-4 shrink-0">
           <ViewToggle view={view} setView={setView} />
         </div>
       </div>
@@ -59,34 +62,36 @@ export function TeamPage({ members, stats, userRole, currentUserId }: TeamPagePr
       {/* KPI Cards (Admin only) */}
       {isAdmin ? <TeamStatsCards stats={stats} /> : null}
 
-      {/* Barber view: Own profile highlighted */}
-      {/* Barber view: Own profile highlighted */}
-      {!isAdmin && currentUser ? (
-        <div className="space-y-4">
-          <BarberCard
-            member={currentUser}
-            onView={setViewingMember}
-            onEdit={setEditingMember}
-            canManage={false}
-            showRevenue={false}
-            isOwnProfile
-          />
-        </div>
-      ) : null}
-
-      {/* Section header for colleagues (barber view) */}
-      {/* Section header for colleagues (barber view) */}
-      {!isAdmin && colleagues.length > 0 ? (
-        <div className="flex items-center gap-3 mt-6">
-          <UsersThree size={18} className="text-muted-foreground" />
-          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Colegas</h2>
-        </div>
-      ) : null}
-
       {/* Team List */}
-      <div>
+      <div className="space-y-6">
+        {/* Barber view: Own profile header */}
+        {!isAdmin && currentUser && (
+          <div className="space-y-4">
+             <div className="flex items-center gap-3">
+              <div className="w-[4px] h-[4px] rounded-full bg-accent-cyan" />
+              <h2 className="text-[10px] font-medium text-accent-cyan uppercase tracking-[0.2em]">Seu Perfil</h2>
+            </div>
+            <BarberCard
+              member={currentUser}
+              onView={setViewingMember}
+              onEdit={setEditingMember}
+              canManage={false}
+              showRevenue={false}
+              isOwnProfile
+            />
+          </div>
+        )}
+
+        {/* Section header for colleagues (barber view) */}
+        {!isAdmin && colleagues.length > 0 && (
+          <div className="flex items-center gap-3 mt-12 mb-6">
+            <div className="w-[4px] h-[4px] rounded-full bg-[#333]" />
+            <h2 className="text-[10px] font-medium text-[#333] uppercase tracking-[0.2em]">Colegas de Equipe</h2>
+          </div>
+        )}
+
         {view === 'cards' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[10px]">
             {(isAdmin ? members : colleagues).map(member => (
               <BarberCard
                 key={member.id}
@@ -108,17 +113,12 @@ export function TeamPage({ members, stats, userRole, currentUserId }: TeamPagePr
           />
         )}
 
-        {(isAdmin ? members : colleagues).length === 0 ? (
-          <div className="bg-white/5 border border-white/10 rounded-[2rem] p-20 text-center space-y-4">
-            <div className="w-14 h-14 rounded-3xl bg-white/5 flex items-center justify-center mx-auto text-muted-foreground/30">
-              <UsersThree size={28} weight="duotone" />
-            </div>
-            <div>
-              <p className="text-white font-bold">Nenhum membro encontrado</p>
-              <p className="text-sm text-muted-foreground">A equipe aparecerá aqui assim que houver membros cadastrados.</p>
-            </div>
+        {(isAdmin ? members : colleagues).length === 0 && (
+          <div className="bg-bg-sidebar border-[0.5px] border-dashed border-border-main rounded-[10px] p-[60px] text-center">
+            <UsersThree size={32} weight="regular" className="text-[#1e1e1e] mx-auto mb-4" />
+            <p className="text-[10px] font-medium text-[#222] tracking-[0.1em] uppercase">Nenhum membro encontrado</p>
           </div>
-        ) : null}
+        )}
       </div>
 
       {/* Modais */}

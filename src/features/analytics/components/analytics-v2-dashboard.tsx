@@ -23,7 +23,7 @@ export function AnalyticsV2Dashboard({ initialData, organizationId }: { initialD
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-700">
       <div className="flex flex-col gap-2">
-        <h1 className="text-4xl font-black font-syne text-white tracking-tighter">
+        <h1 className="text-4xl font-black font-syne text-text-primary tracking-tighter">
           Dashboard <span className="text-accent-cyan">Analítico V2</span>
         </h1>
         <p className="text-text-secondary font-medium">Dados agregados em tempo real via PostgreSQL Triggers.</p>
@@ -39,7 +39,7 @@ export function AnalyticsV2Dashboard({ initialData, organizationId }: { initialD
             <span className="text-[10px] font-bold text-accent-cyan bg-accent-cyan/10 px-2 py-1 rounded-full uppercase">Hoje</span>
           </div>
           <p className="text-sm font-bold text-text-secondary uppercase tracking-widest">Receita Total</p>
-          <h3 className="text-3xl font-black text-white mt-1">
+          <h3 className="text-3xl font-black text-text-primary mt-1">
             R$ {stats.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </h3>
         </div>
@@ -47,12 +47,12 @@ export function AnalyticsV2Dashboard({ initialData, organizationId }: { initialD
         {/* Ticket Médio Card */}
         <div className="glass-card p-6 border-white/5">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-white/5 rounded-2xl text-white">
+            <div className="p-3 bg-white/5 rounded-2xl text-text-primary">
               <TrendUp size={24} weight="duotone" />
             </div>
           </div>
           <p className="text-sm font-bold text-text-secondary uppercase tracking-widest">Ticket Médio</p>
-          <h3 className="text-3xl font-black text-white mt-1">
+          <h3 className="text-3xl font-black text-text-primary mt-1">
             R$ {stats.averageTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </h3>
         </div>
@@ -60,12 +60,12 @@ export function AnalyticsV2Dashboard({ initialData, organizationId }: { initialD
         {/* Agendamentos Card */}
         <div className="glass-card p-6 border-white/5">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-white/5 rounded-2xl text-white">
+            <div className="p-3 bg-white/5 rounded-2xl text-text-primary">
               <CalendarCheck size={24} weight="duotone" />
             </div>
           </div>
           <p className="text-sm font-bold text-text-secondary uppercase tracking-widest">Agendamentos</p>
-          <h3 className="text-3xl font-black text-white mt-1">
+          <h3 className="text-3xl font-black text-text-primary mt-1">
             {stats.appointments.total}
           </h3>
         </div>
@@ -79,7 +79,7 @@ export function AnalyticsV2Dashboard({ initialData, organizationId }: { initialD
             <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full uppercase">Concluídos</span>
           </div>
           <p className="text-sm font-bold text-text-secondary uppercase tracking-widest">Taxa de Sucesso</p>
-          <h3 className="text-3xl font-black text-white mt-1">
+          <h3 className="text-3xl font-black text-text-primary mt-1">
             {stats.appointments.total > 0 
               ? Math.round((stats.appointments.completed / stats.appointments.total) * 100) 
               : 0}%
@@ -89,7 +89,7 @@ export function AnalyticsV2Dashboard({ initialData, organizationId }: { initialD
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
          <div className="glass-card p-8 border-white/5">
-            <h3 className="text-xl font-bold font-syne text-white mb-6">Distribuição de Status</h3>
+            <h3 className="text-xl font-bold font-syne text-text-primary mb-6">Distribuição de Status</h3>
             <div className="space-y-4">
                <StatusItem label="Concluídos" count={stats.appointments.completed} color="bg-emerald-500" total={stats.appointments.total} />
                <StatusItem label="Cancelados" count={stats.appointments.canceled} color="bg-red-500" total={stats.appointments.total} />
@@ -100,7 +100,7 @@ export function AnalyticsV2Dashboard({ initialData, organizationId }: { initialD
          <div className="glass-card p-8 border-accent-cyan/10 bg-accent-cyan/5 flex flex-col items-center justify-center text-center space-y-4">
             <Warning size={48} weight="duotone" className="text-accent-cyan opacity-50" />
             <div>
-               <h4 className="text-lg font-bold text-white">Arquitetura de Eventos Ativa</h4>
+               <h4 className="text-lg font-bold text-text-primary">Arquitetura de Eventos Ativa</h4>
                <p className="text-sm text-text-secondary max-w-xs mx-auto">
                   Este dashboard não faz cálculos manuais. Ele consome uma View do Postgres alimentada por Triggers.
                </p>
@@ -117,7 +117,7 @@ function StatusItem({ label, count, color, total }: { label: string, count: numb
     <div className="space-y-2">
       <div className="flex justify-between text-sm">
         <span className="text-text-secondary">{label}</span>
-        <span className="text-white font-bold">{count}</span>
+        <span className="text-text-primary font-bold">{count}</span>
       </div>
       <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
         <div className={`h-full ${color} transition-all duration-1000`} style={{ width: `${percentage}%` }} />

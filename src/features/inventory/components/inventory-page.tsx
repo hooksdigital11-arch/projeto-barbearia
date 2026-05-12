@@ -2,16 +2,14 @@
 
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { useState, useMemo, useTransition, useEffect, useCallback } from 'react'
+import { useState, useMemo, useTransition, useEffect } from 'react'
 import { Plus, ArrowCounterClockwise } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
-import { Button } from '@/components/ui/button'
 import { InventoryStatsCards } from './inventory-stats'
 import { LowStockAlert } from './low-stock-alert'
 import { InventoryFilters } from './inventory-filters'
 import { deleteProduct, reactivateProduct, getSalesByPeriodAction } from '../actions'
 import { toast } from 'sonner'
-import { PageTitle } from '@/components/shared/page-title'
 import type { InventoryItem, InventoryStats } from '../types'
 
 const InventoryTable = dynamic(() => import('./inventory-table').then(m => m.InventoryTable), { ssr: false })
@@ -46,11 +44,9 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
   const [salesData, setSalesData] = useState<Map<string, { qtdVendida: number, faturamento: number }>>(new Map())
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
-  // Modais
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<InventoryItem | null>(null)
   const [movingProduct, setMovingProduct] = useState<InventoryItem | null>(null)
-
 
   const organizationId = activeItems[0]?.organization_id || inactiveItems[0]?.organization_id
 
@@ -100,27 +96,24 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
   const filteredItems = useMemo(() => {
     return sourceItems.filter(item => {
       const matchesType = activeTab === 'all' || activeTab === 'inactive' || item.type === activeTab
-
       const safeName = (item.name || '').toLowerCase()
       const safeCategory = (item.category || '').toLowerCase()
       const safeSupplier = (item.supplier || '').toLowerCase()
       const q = search.toLowerCase()
       const matchesSearch = !q || safeName.includes(q) || safeCategory.includes(q) || safeSupplier.includes(q)
-
       const matchesCategory = !filters.category || item.category === filters.category
       const matchesMinQty = !filters.minQty || item.quantity >= Number(filters.minQty)
       const matchesMaxQty = !filters.maxQty || item.quantity <= Number(filters.maxQty)
       const matchesLowStock = !filters.lowStockOnly || item.quantity <= (item.min_quantity ?? 5)
-
       return matchesType && matchesSearch && matchesCategory && matchesMinQty && matchesMaxQty && matchesLowStock
     })
   }, [sourceItems, activeTab, search, filters])
 
   const handleDelete = (product: InventoryItem) => {
-    if (!confirm(`Deseja realmente EXCLUIR PERMANENTEMENTE o produto "${product.name}"? Esta ação não pode ser desfeita.`)) return
+    if (!confirm(`Deseja realmente EXCLUIR PERMANENTEMENTE o produto "${product.name}"?`)) return
     startTransition(async () => {
       const result = await deleteProduct(product.id)
-      if (result.success) toast.success('Produto excluído permanentemente.')
+      if (result.success) toast.success('Produto excluído!')
       else toast.error(result.error)
     })
   }
@@ -139,7 +132,7 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
   }
 
   return (
-    <div className="space-y-16 animate-premium-in">
+    <div className="space-y-12 animate-premium-in py-8">
       <LowStockAlert
         count={stats.lowStock}
         onFilter={() => {
@@ -150,45 +143,46 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
         }}
       />
 
-      {/* Editorial Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
-        <PageTitle 
-          title="Estoque" 
-          subtitle="Controle total de produtos, insumos e movimentações. Gestão inteligente para evitar rupturas e otimizar o fluxo de caixa." 
-          className="mb-0" 
-        />
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+        <div className="space-y-2">
+          <h1 className="text-[32px] font-medium text-text-primary tracking-[-0.02em] uppercase">
+            ESTOQUE<span className="text-accent-main">.</span>
+          </h1>
+          <p className="text-[11px] text-[#333] leading-[1.5] max-w-[460px] font-medium uppercase tracking-wide">
+            Controle total de produtos, insumos e movimentações. Gestão inteligente para evitar rupturas e otimizar o fluxo de caixa.
+          </p>
+        </div>
 
-        <div className="flex items-center gap-4 ml-7 lg:ml-0">
+        <div className="flex items-center gap-4 shrink-0">
           {userRole === 'admin' && (
             <button
               onClick={() => setShowCost(!showCost)}
               className={cn(
-                "px-6 py-4 rounded-3xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 border",
+                "px-[18px] py-[9px] rounded-[8px] border-[0.5px] text-[9px] font-medium uppercase tracking-[0.1em] transition-all flex flex-col items-center justify-center text-center",
                 showCost 
-                  ? "bg-accent-cyan/10 text-accent-cyan border-accent-cyan/20 shadow-[0_0_20px_rgba(0,229,255,0.1)]" 
-                  : "bg-white/5 text-muted-foreground border-white/10 hover:text-white hover:border-white/20"
+                  ? "bg-[#1c1c1c] text-text-secondary border-[#2a2a2a]" 
+                  : "bg-bg-sidebar text-text-nav border-border-main hover:text-[#777]"
               )}
             >
-              {showCost ? 'Ocultar Custos' : 'Ver Custos'}
+              <span className="leading-tight">{showCost ? 'OCULTAR' : 'VER'}</span>
+              <span className="leading-tight">CUSTOS</span>
             </button>
           )}
           
           {userRole === 'admin' && (
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-4 px-10 py-8 bg-white text-black rounded-3xl font-black text-xs uppercase tracking-[0.2em] hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group"
+              className="flex items-center gap-2 px-[18px] py-[10px] bg-accent-main text-black rounded-[8px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 active:scale-95"
             >
-              <Plus size={22} weight="bold" className="group-hover:rotate-90 transition-transform duration-500" />
-              Novo Item
+              <Plus size={14} weight="bold" />
+              NOVO ITEM
             </button>
           )}
         </div>
       </div>
 
-      <div className="relative">
-        <div className="absolute -top-20 -left-20 w-64 h-64 bg-accent-cyan/5 rounded-full blur-[100px] pointer-events-none" />
-        <InventoryStatsCards stats={stats} items={activeItems} period={period} salesData={salesData} isLoading={isPending} />
-      </div>
+      <InventoryStatsCards stats={stats} items={activeItems} period={period} salesData={salesData} isLoading={isPending} />
 
       <div className="space-y-6">
         <InventoryFilters
@@ -217,10 +211,10 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
             onMove={setMovingProduct}
             onDelete={handleDelete}
             canManage={userRole === 'admin'}
-            showCost={userRole === 'admin'}
+            showCost={showCost}
             period={period}
             salesData={salesData}
-             isLoading={isPending}
+            isLoading={isPending}
           />
         )}
       </div>
@@ -237,7 +231,6 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
   )
 }
 
-// Tabela de inativos inline
 function InactiveTable({
   items, onReactivate, canManage, isPending
 }: {
@@ -248,73 +241,54 @@ function InactiveTable({
 }) {
   if (items.length === 0) {
     return (
-      <div className="bg-white/5 border border-white/10 rounded-[2rem] p-20 text-center space-y-4">
-        <div className="w-14 h-14 rounded-3xl bg-white/5 flex items-center justify-center mx-auto text-muted-foreground/30">
-          <ArrowCounterClockwise size={28} weight="duotone" />
-        </div>
-        <div>
-          <p className="text-white font-bold">Nenhum produto inativo</p>
-          <p className="text-sm text-muted-foreground">Produtos desativados aparecerão aqui.</p>
-        </div>
+      <div className="bg-bg-sidebar border-[0.5px] border-dashed border-border-main rounded-[10px] p-[60px] text-center">
+        <ArrowCounterClockwise size={32} weight="regular" className="text-[#1e1e1e] mx-auto mb-4" />
+        <p className="text-[10px] font-medium text-[#222] tracking-[0.1em] uppercase">Nenhum produto inativo</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-[2rem] overflow-hidden">
-      <div className="px-6 py-4 bg-red-500/5 border-b border-red-500/10 flex items-center gap-2">
-        <span className="text-xs font-bold uppercase tracking-widest text-red-400">
-          {items.length} produto{items.length > 1 ? 's' : ''} desativado{items.length > 1 ? 's' : ''}
+    <div className="space-y-[4px]">
+      <div className="px-[18px] py-1">
+        <span className="text-[9px] font-medium uppercase tracking-widest text-[#333]">
+          {items.length} PRODUTO{items.length > 1 ? 'S' : ''} DESATIVADO{items.length > 1 ? 'S' : ''}
         </span>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-white/5 border-b border-white/5">
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Produto</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tipo</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">Estoque</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Fornecedor</th>
-              {canManage && <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-right">Ações</th>}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {items.map((item) => (
-              <tr key={item.id} className="opacity-60 hover:opacity-100 transition-all group">
-                <td className="px-6 py-5">
-                  <div>
-                    <p className="font-bold text-white text-sm line-through decoration-red-500/50">{item.name}</p>
-                    <span className="text-[10px] text-muted-foreground uppercase">{item.category}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-5">
-                  <span className="text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider bg-white/5 border border-white/10 text-muted-foreground">
-                    {item.type === 'revenda' ? 'Revenda' : 'Uso Interno'}
-                  </span>
-                </td>
-                <td className="px-6 py-5 text-center">
-                  <span className="text-sm text-muted-foreground">{item.quantity}</span>
-                </td>
-                <td className="px-6 py-5">
-                  <span className="text-sm text-muted-foreground">{item.supplier || '—'}</span>
-                </td>
-                {canManage && (
-                  <td className="px-6 py-5 text-right">
-                    <button
-                      disabled={isPending}
-                      onClick={() => onReactivate(item)}
-                      className="flex items-center gap-1.5 ml-auto px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500/20 transition-all disabled:opacity-50"
-                    >
-                      <ArrowCounterClockwise size={14} weight="bold" />
-                      Reativar
-                    </button>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {items.map((item) => (
+        <div 
+          key={item.id} 
+          className="grid grid-cols-[2fr_100px_70px_1fr_100px] gap-[12px] items-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] py-[13px] px-[18px] opacity-40 hover:opacity-100 transition-all"
+        >
+          <div>
+            <p className="text-[12px] font-medium text-text-secondary uppercase tracking-tight line-through">{item.name}</p>
+            <span className="text-[9px] text-[#2e2e2e] font-medium uppercase tracking-wider">{item.category}</span>
+          </div>
+          <div className="text-center">
+            <span className="text-[9px] px-2 py-0.5 rounded-[4px] bg-bg-surface text-[#333] font-medium uppercase tracking-wider">
+              {item.type === 'revenda' ? 'Revenda' : 'Uso Interno'}
+            </span>
+          </div>
+          <div className="text-center">
+            <span className="text-[11px] font-medium text-[#444]">{item.quantity}</span>
+          </div>
+          <div>
+            <span className="text-[11px] font-medium text-[#333] uppercase">{item.supplier || '—'}</span>
+          </div>
+          {canManage && (
+            <div className="flex justify-end">
+              <button
+                disabled={isPending}
+                onClick={() => onReactivate(item)}
+                className="flex items-center gap-1.5 px-[12px] py-[6px] bg-bg-sidebar border border-border-main rounded-[6px] text-[9px] font-medium text-[#444] tracking-[0.07em] uppercase hover:text-[#666] hover:border-[#333] transition-all disabled:opacity-20"
+              >
+                <ArrowCounterClockwise size={12} weight="bold" />
+                Reativar
+              </button>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   )
 }

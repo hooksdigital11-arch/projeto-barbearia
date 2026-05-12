@@ -10,30 +10,30 @@ interface ViewToggleProps {
 
 export function ViewToggle({ view, setView }: ViewToggleProps) {
   return (
-    <div className="flex p-1 bg-white/5 border border-white/10 rounded-xl">
+    <div className="flex p-[3px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] items-center">
       <button
         onClick={() => setView('cards')}
         className={cn(
-          "p-2 rounded-lg transition-all",
+          "w-[32px] h-[28px] rounded-[5px] flex items-center justify-center transition-all duration-300",
           view === 'cards'
-            ? "bg-accent-cyan text-black"
-            : "text-muted-foreground hover:text-white"
+            ? "bg-[#1c1c1c] text-text-secondary"
+            : "text-[#3d3d3d] hover:text-text-nav"
         )}
         title="Visualização em cards"
       >
-        <SquaresFour size={18} weight={view === 'cards' ? 'fill' : 'regular'} />
+        <SquaresFour size={15} weight={view === 'cards' ? 'fill' : 'regular'} />
       </button>
       <button
         onClick={() => setView('table')}
         className={cn(
-          "p-2 rounded-lg transition-all",
+          "w-[32px] h-[28px] rounded-[5px] flex items-center justify-center transition-all duration-300",
           view === 'table'
-            ? "bg-accent-cyan text-black"
-            : "text-muted-foreground hover:text-white"
+            ? "bg-[#1c1c1c] text-text-secondary"
+            : "text-[#3d3d3d] hover:text-text-nav"
         )}
         title="Visualização em tabela"
       >
-        <List size={18} weight={view === 'table' ? 'fill' : 'regular'} />
+        <List size={15} weight={view === 'table' ? 'fill' : 'regular'} />
       </button>
     </div>
   )

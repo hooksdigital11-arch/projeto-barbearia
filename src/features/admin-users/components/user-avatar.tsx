@@ -13,34 +13,50 @@ interface UserAvatarProps {
 export function UserAvatar({ name, url, role, className }: UserAvatarProps) {
   const initials = name
     .split(' ')
+    .filter(n => n.length > 0)
     .map((n) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2)
 
-  const roleColors: Record<string, string> = {
-    admin: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    barber: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    client: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  // Unique color hash
+  const getHashColor = (str: string) => {
+    let hash = 0
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash)
+    }
+    const colors = [
+      '#3b82f6', // blue
+      '#8b5cf6', // violet
+      '#ec4899', // pink
+      '#f97316', // orange
+      '#06b6d4', // cyan
+      '#10b981', // emerald
+      '#f59e0b', // amber
+      '#6366f1', // indigo
+    ]
+    return colors[Math.abs(hash) % colors.length]
   }
 
-  const colorClass = roleColors[role || 'client'] || roleColors.client
+  const bgColor = getHashColor(name || 'User')
 
   if (url) {
     return (
-      <div className={cn("relative w-10 h-10 rounded-full overflow-hidden border", className)}>
+      <div className={cn("relative w-[34px] h-[34px] rounded-full overflow-hidden border border-white/10 shrink-0", className)}>
         <img src={url} alt={name} className="w-full h-full object-cover" />
       </div>
     )
   }
 
   return (
-    <div className={cn(
-      "w-10 h-10 rounded-full border flex items-center justify-center font-bold text-sm",
-      colorClass,
-      className
-    )}>
-      {initials || <User size={20} weight="duotone" />}
+    <div 
+      className={cn(
+        "w-[34px] h-[34px] rounded-full flex items-center justify-center font-medium text-[11px] text-text-primary shrink-0",
+        className
+      )}
+      style={{ backgroundColor: bgColor }}
+    >
+      {initials || <User size={18} weight="bold" />}
     </div>
   )
 }

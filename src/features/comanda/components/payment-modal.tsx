@@ -49,10 +49,10 @@ export function PaymentModal({ isOpen, onClose, clientId, appointmentId, subtota
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#141414] border-white/10 sm:max-w-md p-0 overflow-hidden">
+      <DialogContent className="bg-bg-surface border-white/10 sm:max-w-md p-0 overflow-hidden">
         <div className="p-6 border-b border-white/5">
           <DialogHeader>
-            <DialogTitle className="font-syne uppercase tracking-tight text-white text-center">Fechar Comanda</DialogTitle>
+            <DialogTitle className="font-syne uppercase tracking-tight text-text-primary text-center">Fechar Comanda</DialogTitle>
           </DialogHeader>
         </div>
 
@@ -109,7 +109,7 @@ export function PaymentModal({ isOpen, onClose, clientId, appointmentId, subtota
           </div>
 
           <div className="flex gap-4 pt-4">
-            <Button variant="ghost" className="flex-1 h-12 text-muted-foreground hover:text-white" onClick={onClose} disabled={isPending}>
+            <Button variant="ghost" className="flex-1 h-12 text-muted-foreground hover:text-text-primary" onClick={onClose} disabled={isPending}>
               CANCELAR
             </Button>
             <Button 

@@ -2,8 +2,6 @@
 
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
-import { Phone, Calendar, Scissors } from '@phosphor-icons/react'
-import { ClientAvatar } from './client-avatar'
 import type { ClientRecord } from '../types'
 
 interface ClientCardProps {
@@ -27,81 +25,57 @@ function formatDate(dateStr: string | null): string {
   })
 }
 
-const statusBadge = {
-  active: 'bg-emerald-500/10 text-emerald-400',
-  blocked: 'bg-red-500/10 text-red-400',
-  inactive: 'bg-white/10 text-text-secondary',
-}
-
-const statusLabel = {
-  active: 'Ativo',
-  blocked: 'Bloqueado',
-  inactive: 'Inativo',
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '??'
+  const first = parts[0] ?? ''
+  const last = parts[parts.length - 1] ?? ''
+  if (parts.length === 1) return first.slice(0, 2).toUpperCase()
+  return ((first[0] ?? '') + (last[0] ?? '')).toUpperCase()
 }
 
 export function ClientCard({ client, basePath, showFinancials }: ClientCardProps) {
   return (
     <Link
       href={`${basePath}/${client.id}`}
-      className={cn(
-        'group block rounded-2xl border border-white/5 bg-card/20 backdrop-blur-xl p-5',
-        'transition-all duration-300 hover:border-accent-cyan/30 hover:bg-card/30',
-        'hover:shadow-lg hover:shadow-accent-cyan/5'
-      )}
+      className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] p-[18px] group hover:bg-bg-surface hover:border-[#222] transition-all"
     >
-      {/* Top: Avatar + Name + Status */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <ClientAvatar name={client.full_name} size="lg" />
-          <div className="min-w-0">
-            <h3 className="text-white font-bold truncate group-hover:text-accent-cyan transition-colors">
-              {client.full_name}
-            </h3>
-            {client.phone && (
-              <p className="text-xs text-text-secondary flex items-center gap-1 mt-0.5">
-                <Phone size={11} weight="duotone" />
-                {client.phone}
-              </p>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="relative w-[38px] h-[38px] rounded-full bg-[#1e1e2e] flex items-center justify-center shrink-0">
+            <span className="text-[12px] font-medium text-[#8b7cf6]">
+              {getInitials(client.full_name || '')}
+            </span>
+            {client.status === 'active' && (
+              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-accent-main border-[1.5px] border-[#0f0f0f]" />
             )}
           </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[14px] font-medium text-text-primary truncate uppercase tracking-[0.02em] group-hover:text-accent-main transition-colors">
+              {client.full_name}
+            </span>
+            <span className="text-[9px] text-[#2a2a2a] font-medium truncate uppercase">
+              {client.phone || 'SEM TELEFONE'}
+            </span>
+          </div>
         </div>
-        <span className={cn('text-[10px] font-medium px-2 py-0.5 rounded-md', statusBadge[client.status])}>
-          {statusLabel[client.status]}
-        </span>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="p-2.5 rounded-xl bg-white/5 text-center">
-          <p className="text-xs text-text-secondary flex items-center justify-center gap-1 mb-0.5">
-            <Scissors size={10} weight="duotone" />
-            Visitas
-          </p>
-          <p className="text-sm font-bold text-white">{client.total_visits || 0}</p>
+      <div className="grid grid-cols-3 gap-2 pt-4 border-t-[0.5px] border-border-main">
+        <div className="flex flex-col">
+          <span className="text-[8px] text-[#2a2a2a] font-medium uppercase tracking-[0.07em]">VISITAS</span>
+          <span className="text-[12px] font-medium text-text-secondary">{client.total_visits || 0}</span>
         </div>
-        <div className="p-2.5 rounded-xl bg-white/5 text-center">
-          <p className="text-xs text-text-secondary flex items-center justify-center gap-1 mb-0.5">
-            <Calendar size={10} weight="duotone" />
-            Última
-          </p>
-          <p className="text-sm font-bold text-white">{formatDate(client.last_visit_at)}</p>
+        <div className="flex flex-col">
+          <span className="text-[8px] text-[#2a2a2a] font-medium uppercase tracking-[0.07em]">ÚLTIMA</span>
+          <span className="text-[12px] font-medium text-text-secondary">{formatDate(client.last_visit_at)}</span>
         </div>
-        {showFinancials && (
-          <div className="p-2.5 rounded-xl bg-white/5 text-center">
-            <p className="text-xs text-text-secondary mb-0.5">Total</p>
-            <p className="text-sm font-bold text-accent-cyan">
-              {formatCurrency(client.total_spent_cents || 0)}
-            </p>
-          </div>
-        )}
-        {!showFinancials && (
-          <div className="p-2.5 rounded-xl bg-white/5 text-center">
-            <p className="text-xs text-text-secondary mb-0.5">Barbeiro</p>
-            <p className="text-sm font-bold text-white truncate">
-              {client.preferred_barber?.full_name || '--'}
-            </p>
-          </div>
-        )}
+        <div className="flex flex-col items-end">
+          <span className="text-[8px] text-[#2a2a2a] font-medium uppercase tracking-[0.07em]">TOTAL</span>
+          <span className="text-[12px] font-medium text-text-secondary">
+            {showFinancials ? formatCurrency(client.total_spent_cents || 0).replace('R$', '').trim() : '---'}
+          </span>
+        </div>
       </div>
     </Link>
   )

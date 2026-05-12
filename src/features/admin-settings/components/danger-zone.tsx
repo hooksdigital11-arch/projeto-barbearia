@@ -1,9 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Warning, Trash, Power, ShieldWarning, CircleNotch, CheckCircle } from '@phosphor-icons/react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Warning, Trash, Power, CheckCircle, CircleNotch } from '@phosphor-icons/react'
 import { deactivateOrganization, activateOrganization } from '../actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
@@ -43,112 +41,131 @@ export function DangerZone({ initialStatus = 'active' }: { initialStatus?: strin
   const isInactive = status === 'inactive'
 
   return (
-    <div className="space-y-16">
-      <div>
-        <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter flex items-center gap-6">
-          <Warning size={40} className="text-red-500" />
-          Zona de Perigo
-        </h2>
-        <p className="label-muted mt-2">Ações críticas e irreversíveis para sua unidade</p>
-      </div>
+    <div className="max-w-4xl">
+      <div className="bg-bg-sidebar border-[0.5px] border-[#2a1010] rounded-[10px] overflow-hidden shadow-[0_10px_40px_rgba(192,64,64,0.03)]">
+        
+        {/* Header */}
+        <div className="bg-[#0d0808] border-b-[0.5px] border-[#2a1010] p-[20px_24px] flex items-center gap-3">
+          <div className="w-[36px] h-[36px] bg-[#2a0d0d] border-[0.5px] border-[#c0404033] rounded-[8px] flex items-center justify-center text-[#c04040]">
+            <Warning size={18} weight="bold" />
+          </div>
+          <div className="flex flex-col">
+            <h2 className="text-[18px] font-medium text-[#e05050] uppercase tracking-[0.04em]">Zona de Perigo</h2>
+            <p className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#4a2020]">Ações críticas e irreversíveis para sua unidade</p>
+          </div>
+        </div>
 
-      <div className="grid gap-6">
-        {/* Deactivate Section */}
-        <div className={cn(
-          "p-10 rounded-[2.5rem] border transition-all duration-700 relative overflow-hidden",
-          isInactive 
-            ? "border-emerald-500/20 bg-emerald-500/[0.03]" 
-            : "border-red-500/10 bg-red-500/[0.03]"
-        )}>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
-            <div className="space-y-3">
-              <h3 className={cn(
-                "text-xl font-black uppercase tracking-tighter flex items-center gap-3",
-                isInactive ? "text-emerald-500" : "text-white"
-              )}>
+        {/* Actions List */}
+        <div className="flex flex-col">
+          
+          {/* Desativar / Reativar */}
+          <div className="p-[20px_24px] border-b-[0.5px] border-[#1a0808] flex items-center justify-between gap-6 transition-all duration-500">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-2">
                 {isInactive ? (
-                  <CheckCircle size={24} />
+                  <CheckCircle size={16} weight="bold" className="text-accent-main" />
                 ) : (
-                  <Power size={24} />
+                  <Power size={16} weight="bold" className="text-[#c04040]" />
                 )}
-                {isInactive ? 'Barbearia Desativada' : 'Desativar Unidade'}
-              </h3>
-              <p className="text-sm font-medium text-text-muted max-w-md leading-relaxed">
+                <span className={cn(
+                  "text-[14px] font-medium tracking-[0.04em] uppercase",
+                  isInactive ? "text-accent-main" : "text-[#e05050]"
+                )}>
+                  {isInactive ? 'Barbearia Suspensa' : 'Desativar Unidade'}
+                </span>
+              </div>
+              <p className="text-[11px] text-[#4a2a2a] leading-[1.6] max-w-[440px]">
                 {isInactive 
                   ? 'A unidade está suspensa. Os clientes não conseguem agendar e os funcionários não têm acesso ao sistema.' 
                   : 'Suspende temporariamente todas as atividades. Usuários não poderão logar e o agendamento será bloqueado.'}
               </p>
+              {!isInactive && (
+                <span className="text-[10px] text-[#c04040] font-medium uppercase tracking-wider">Esta ação é reversível.</span>
+              )}
             </div>
+            
             <button 
               onClick={isInactive ? handleActivate : handleDeactivate}
               disabled={isPending}
               className={cn(
-                "px-10 py-3.5 rounded-full font-black uppercase tracking-[0.2em] text-[10px] transition-all",
+                "flex items-center gap-2 border-[0.5px] rounded-[8px] p-[10px_18px] text-[10px] font-medium uppercase tracking-[0.08em] transition-all flex-shrink-0",
                 isInactive 
-                  ? "bg-emerald-500 text-black hover:scale-[1.02] active:scale-[0.98]"
-                  : "border border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white"
+                  ? "bg-[#0d2e29] border-accent-main/20 text-accent-main hover:bg-accent-main hover:text-black"
+                  : "bg-transparent border-[#c04040] text-[#c04040] hover:bg-[#2a0d0d]"
               )}
             >
-              {isPending ? 'Processando...' : (isInactive ? 'Reativar Unidade' : 'Desativar Unidade')}
+              {isPending ? (
+                <CircleNotch size={14} className="animate-spin" />
+              ) : (
+                <>
+                  <Power size={14} weight="bold" />
+                  {isInactive ? 'Reativar Agora' : 'Desativar'}
+                </>
+              )}
             </button>
           </div>
-        </div>
 
-        {/* Delete Section */}
-        <div className="p-10 rounded-[2.5rem] border border-red-500/10 bg-red-500/[0.03] space-y-12">
-          <div className="space-y-4">
-            <h3 className="text-2xl font-black text-red-500 flex items-center gap-4 uppercase tracking-tighter leading-none">
-              <Trash size={32} />
-              Exclusão Permanente
-            </h3>
-            <p className="text-sm font-medium text-text-muted max-w-2xl leading-relaxed">
-              Apaga permanentemente todos os dados: usuários, serviços, histórico de agendamentos, clientes e financeiro. 
-              <strong className="text-red-500 ml-2 font-black">ESTA AÇÃO É IRREVERSÍVEL.</strong>
-            </p>
-          </div>
-
-          {!showDeleteConfirm ? (
-            <button 
-              onClick={() => setShowDeleteConfirm(true)}
-              className="px-10 py-3.5 rounded-full bg-red-500 text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all"
-            >
-              Deletar Organização
-            </button>
-          ) : (
-            <div className="space-y-8">
-              <div className="p-6 rounded-2xl border border-red-500/20 bg-red-500/5">
-                <p className="text-[10px] text-red-500 font-black uppercase tracking-[0.2em]">Confirmação Necessária</p>
+          {/* Exclusão Permanente */}
+          <div className="p-[20px_24px] bg-[#0d0808] relative overflow-hidden group">
+            {/* Glow effect */}
+            <div className="absolute inset-0 pointer-events-none opacity-40" 
+              style={{ background: 'radial-gradient(ellipse at 50% 100%, #c0404008, transparent)' }} />
+            
+            <div className="flex flex-col gap-1.5 relative z-10">
+              <div className="flex items-center gap-2">
+                <Trash size={16} weight="bold" className="text-[#c04040]" />
+                <span className="text-[14px] font-medium text-[#e05050] tracking-[0.04em] uppercase">Exclusão Permanente</span>
               </div>
-              <div className="space-y-4">
-                <p className="text-sm font-bold text-white uppercase tracking-tight">Para confirmar, digite <span className="text-red-500 font-black">DELETAR ORGANIZAÇÃO</span> abaixo:</p>
-                <div className="flex flex-col md:flex-row gap-6">
-                  <input 
-                    value={confirmText}
-                    onChange={(e) => setConfirmText(e.target.value)}
-                    placeholder="Digite o texto de confirmação"
-                    className="flex-1 px-6 py-4 bg-black border border-red-500/20 rounded-2xl text-white placeholder:text-red-500/20 focus:outline-none focus:border-red-500/50 transition-all font-bold"
-                  />
-                  <div className="flex gap-4">
-                    <button 
-                      disabled={confirmText !== 'DELETAR ORGANIZAÇÃO' || isPending}
-                      className="px-10 py-3.5 rounded-full bg-red-500 text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-20"
-                    >
-                      Confirmar
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setShowDeleteConfirm(false)
-                        setConfirmText('')
-                      }}
-                      className="px-8 py-3.5 rounded-full border border-white/[0.06] text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/5 transition-all"
-                    >
-                      Cancelar
-                    </button>
+              <p className="text-[11px] text-[#4a2a2a] leading-[1.6] max-w-[440px]">
+                Apaga permanentemente todos os dados da sua organização, incluindo usuários, serviços, histórico e financeiro.
+              </p>
+              <span className="text-[10px] text-[#c04040] font-medium uppercase tracking-wider">Esta ação é irreversível.</span>
+
+              {!showDeleteConfirm ? (
+                <button 
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="flex items-center gap-2 w-fit bg-[#c04040] text-text-primary px-[20px] py-[11px] rounded-[8px] text-[10px] font-medium uppercase tracking-[0.1em] mt-[14px] hover:bg-[#a03030] transition-all shadow-[0_0_20px_rgba(192,64,64,0.15)]"
+                >
+                  <Trash size={14} weight="bold" />
+                  Deletar Organização
+                </button>
+              ) : (
+                <div className="mt-6 space-y-4 animate-in slide-in-from-top-4 duration-300">
+                  <div className="bg-[#1a0d0d] border-[0.5px] border-[#c0404033] rounded-[8px] p-4">
+                    <p className="text-[10px] text-text-primary font-medium uppercase tracking-tight">
+                      Para confirmar, digite <span className="text-[#c04040] font-bold">DELETAR ORGANIZAÇÃO</span> abaixo:
+                    </p>
+                    <div className="flex flex-col md:flex-row gap-3 mt-4">
+                      <input 
+                        value={confirmText}
+                        onChange={(e) => setConfirmText(e.target.value)}
+                        placeholder="Digite o texto de confirmação"
+                        className="flex-1 bg-black border-[0.5px] border-[#2a1010] rounded-[8px] p-[10px_14px] text-[12px] text-text-primary placeholder:text-[#3a1a1a] focus:outline-none focus:border-[#c04040] transition-all"
+                      />
+                      <div className="flex gap-2">
+                        <button 
+                          disabled={confirmText !== 'DELETAR ORGANIZAÇÃO' || isPending}
+                          className="px-[20px] py-[10px] rounded-[8px] bg-[#c04040] text-text-primary text-[10px] font-medium uppercase tracking-wider hover:opacity-90 disabled:opacity-20 transition-all shadow-[0_0_20px_rgba(192,64,64,0.15)]"
+                        >
+                          Confirmar
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setShowDeleteConfirm(false)
+                            setConfirmText('')
+                          }}
+                          className="px-[18px] py-[10px] rounded-[8px] bg-transparent border-[0.5px] border-border-main text-[10px] font-medium text-[#444] uppercase tracking-wider hover:bg-bg-surface transition-all"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
-          )}
+          </div>
+
         </div>
       </div>
     </div>

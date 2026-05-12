@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Plus, PencilSimple, Trash, Copy, Scissors, CircleNotch, Play, Pause, X } from '@phosphor-icons/react'
-import { Button } from '@/components/ui/button'
+import { Plus, PencilSimple, Trash, Play, Pause, X, CircleNotch } from '@phosphor-icons/react'
 import { deleteService, createService, updateService, toggleServiceStatus } from '../actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
@@ -35,28 +34,17 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
 
   const handleToggleActive = (service: Service) => {
     const newStatus = !service.is_active
-    // Optimistic update
     setServices(prev => prev.map(s => s.id === service.id ? { ...s, is_active: newStatus } : s))
     
     startTransition(async () => {
       const result = await toggleServiceStatus(service.id, newStatus)
       if (!result.success) {
         toast.error(result.error)
-        // Revert
         setServices(prev => prev.map(s => s.id === service.id ? { ...s, is_active: !newStatus } : s))
       } else {
         toast.success(newStatus ? 'Serviço ativado!' : 'Serviço pausado!')
       }
     })
-  }
-
-  const handleDuplicate = (service: Service) => {
-    setEditingService({ 
-      ...service, 
-      id: undefined, 
-      name: `${service.name} (Cópia)` 
-    })
-    setIsModalOpen(true)
   }
 
   const handleEdit = (service: Service) => {
@@ -93,7 +81,6 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
       if (result.success) {
         toast.success(editingService?.id ? 'Serviço atualizado!' : 'Serviço criado!')
         setIsModalOpen(false)
-        // O revalidateTag do Next.js atualizará a página, mas para UI otimista recarregamos
         window.location.reload() 
       } else {
         toast.error(result.error || 'Erro ao salvar serviço')
@@ -102,164 +89,164 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
   }
 
   return (
-    <div className="space-y-16">
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 border-l-2 border-accent-cyan pl-8 py-2">
-        <div className="space-y-2">
-          <h2 className="text-4xl md:text-5xl font-black font-syne text-white uppercase tracking-tighter leading-none">Serviços</h2>
-          <p className="label-muted">Gerencie o cardápio de experiências e valores do seu negócio</p>
+    <div className="space-y-10 max-w-5xl">
+      {/* Header Container */}
+      <div className="flex items-start justify-between">
+        <div className="space-y-0.5">
+          <h2 className="text-[14px] font-medium text-text-primary uppercase tracking-wider">Catálogo de Serviços</h2>
+          <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a]">Gerencie o cardápio de experiências e valores do seu negócio</p>
         </div>
         <button 
           onClick={handleNew} 
-          className="px-10 py-4 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-3 shrink-0 shadow-[0_0_20px_rgba(0,229,255,0.15)]"
+          className="flex items-center gap-2 bg-accent-main text-black px-4 py-[9px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.08em] hover:opacity-90 transition-all shrink-0"
         >
-          <Plus size={18} weight="bold" />
+          <Plus size={14} weight="bold" />
           Novo Serviço
         </button>
       </div>
 
-      <div className="premium-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/[0.06] bg-white/[0.01]">
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Serviço</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Duração</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Investimento</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Status</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted text-right">Gestão</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-                {services.map((service) => (
-                  <tr key={service.id} className="hover:bg-white/[0.02] transition-colors group/row">
-                    <td className="px-10 py-8">
-                      <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 rounded-2xl bg-black border border-white/[0.08] flex items-center justify-center text-white/20 group-hover/row:text-accent-cyan group-hover/row:border-accent-cyan/40 transition-all">
-                          <Scissors size={24} />
-                        </div>
-                        <div className="space-y-1.5">
-                          <p className="font-bold text-white text-lg tracking-tight leading-none group-hover/row:text-accent-cyan transition-colors">{service.name}</p>
-                          <p className="text-[9px] text-text-muted uppercase font-black tracking-[0.2em] font-syne">{service.category}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-10 py-8">
-                      <span className="text-sm font-bold text-white font-mono tracking-tight">
-                        {service.duration_minutes} MIN
-                      </span>
-                    </td>
-                    <td className="px-10 py-8">
-                      <span className="font-mono text-lg font-black text-accent-cyan tracking-tighter">
-                        {formatPrice(service.price_cents)}
-                      </span>
-                    </td>
-                    <td className="px-10 py-8">
-                      <div className="flex items-center gap-3">
-                        <div className={cn(
-                          "w-1.5 h-1.5 rounded-full transition-all shadow-[0_0_8px_rgba(0,0,0,0)]",
-                          service.is_active ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" : "bg-white/10"
-                        )} />
-                        <span className={cn(
-                          "text-[10px] font-black uppercase tracking-[0.2em] font-mono",
-                          service.is_active ? "text-emerald-500" : "text-text-muted"
-                        )}>
-                          {service.is_active ? 'Ativo' : 'Pausado'}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-10 py-8 text-right">
-                      <div className="flex items-center justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all translate-x-2 group-hover/row:translate-x-0">
-                        <button 
-                          onClick={() => handleToggleActive(service)}
-                          title={service.is_active ? 'Pausar' : 'Ativar'}
-                          className={cn(
-                            "w-11 h-11 flex items-center justify-center rounded-full border border-white/5 transition-all hover:bg-white/5",
-                            service.is_active ? "text-emerald-500 hover:border-emerald-500/40" : "text-text-muted hover:text-white hover:border-white/40"
-                          )} 
-                        >
-                          {service.is_active ? <Pause size={18} weight="bold" /> : <Play size={18} weight="bold" />}
-                        </button>
-                        <button 
-                          onClick={() => handleEdit(service)} 
-                          title="Editar"
-                          className="w-11 h-11 flex items-center justify-center rounded-full border border-white/5 text-text-muted hover:text-white hover:border-white/40 hover:bg-white/5 transition-all"
-                        >
-                          <PencilSimple size={18} weight="bold" />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(service.id)}
-                          title="Remover"
-                          className="w-11 h-11 flex items-center justify-center rounded-full border border-white/5 text-text-muted hover:text-red-400 hover:border-red-400/40 hover:bg-red-400/5 transition-all"
-                        >
-                          <Trash size={18} weight="bold" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-          </table>
+      {/* Services Table */}
+      <div className="space-y-2.5">
+        {/* Table Head */}
+        <div className="grid grid-cols-[2fr_90px_90px_80px_70px_70px] gap-3 px-3.5 pb-2.5 items-center">
+          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a]">Serviço</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a] text-center">Categoria</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a] text-center">Duração</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a] text-center">Investimento</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a] text-center">Status</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a] text-right pr-2">Ações</span>
         </div>
-        {services.length === 0 && (
-          <div className="p-40 text-center flex flex-col items-center gap-10">
-            <div className="w-1.5 h-12 bg-white/5" />
-            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-text-muted">Nenhum serviço disponível</p>
-            <button 
-              onClick={handleNew} 
-              className="px-10 py-4 rounded-full border border-accent-cyan/30 text-accent-cyan text-[10px] font-black uppercase tracking-[0.3em] hover:bg-accent-cyan hover:text-black transition-all"
+
+        {/* Table Rows */}
+        <div className="flex flex-col gap-2.5">
+          {services.map((service) => (
+            <div 
+              key={service.id}
+              className="grid grid-cols-[2fr_90px_90px_80px_70px_70px] gap-3 items-center bg-bg-surface border-[0.5px] border-border-main rounded-[8px] p-[12px_14px] hover:bg-bg-surface hover:border-[#222] transition-all relative group"
             >
-              Começar agora
-            </button>
-          </div>
-        )}
+              {/* Left Accent Bar */}
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-[28px] bg-accent-main opacity-[0.35] rounded-[2px]" />
+
+              {/* Service Info */}
+              <div className="flex flex-col truncate pl-1">
+                <span className="text-[11px] font-medium text-text-secondary truncate uppercase">{service.name}</span>
+                <span className="text-[9px] text-[#2e2e2e] truncate uppercase tracking-wider">{service.description || 'sem descrição'}</span>
+              </div>
+
+              {/* Category Badge */}
+              <div className="flex justify-center">
+                <span className={cn(
+                  "px-[8px] py-[3px] rounded-[5px] text-[8px] font-medium uppercase tracking-[0.05em] border-[0.5px]",
+                  service.category?.toUpperCase() === 'CORTE' ? "bg-[#0d2e1a] text-[#00c070] border-[#00c07033]" :
+                  service.category?.toUpperCase() === 'BARBA' ? "bg-[#0d1e2e] text-[#6b9fff] border-[#6b9fff33]" :
+                  service.category?.toUpperCase() === 'COMBO' ? "bg-[#1e1a0d] text-[#c0a000] border-[#c0a00033]" :
+                  "bg-bg-surface text-[#444] border-[#222]"
+                )}>
+                  {service.category}
+                </span>
+              </div>
+
+              {/* Duration */}
+              <span className="text-[10px] text-[#444] text-center font-medium">{service.duration_minutes} MIN</span>
+
+              {/* Price */}
+              <span className="text-[10px] text-text-secondary text-center font-medium">{formatPrice(service.price_cents)}</span>
+
+              {/* Status */}
+              <div className="flex items-center justify-center gap-1.5">
+                <div className={cn(
+                  "w-[5px] h-[5px] rounded-full",
+                  service.is_active ? "bg-accent-main" : "bg-[#2a2a2a]"
+                )} />
+                <span className="text-[9px] text-[#333] uppercase tracking-wider">{service.is_active ? 'ATIVO' : 'OFF'}</span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-2 pr-1">
+                <button 
+                  onClick={() => handleEdit(service)}
+                  title="Editar" 
+                  className="text-[#2e2e2e] hover:text-[#666] transition-all"
+                >
+                  <PencilSimple size={13} weight="bold" />
+                </button>
+                <button 
+                  onClick={() => handleToggleActive(service)}
+                  disabled={isPending}
+                  title={service.is_active ? 'Pausar' : 'Ativar'}
+                  className="text-[#2e2e2e] hover:text-[#666] transition-all"
+                >
+                  {service.is_active ? <Pause size={13} weight="bold" /> : <Play size={13} weight="bold" />}
+                </button>
+                <button 
+                  onClick={() => handleDelete(service.id)}
+                  disabled={isPending}
+                  title="Excluir" 
+                  className="text-[#2e2e2e] hover:text-[#ef4444] transition-all"
+                >
+                  <Trash size={13} weight="bold" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Modal: Redesigned for Editorial Precision */}
+      {/* Empty State */}
+      {services.length === 0 && (
+        <div className="py-20 text-center flex flex-col items-center justify-center gap-4">
+          <div className="w-px h-8 bg-[#161616]" />
+          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#333]">Nenhum serviço cadastrado</p>
+        </div>
+      )}
+
+      {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-black border border-white/[0.06] rounded-[2.5rem] p-12 w-full max-w-xl shadow-2xl animate-in zoom-in-95 fade-in duration-300">
-            <div className="flex items-center justify-between mb-16">
-              <div className="space-y-2 border-l-2 border-accent-cyan pl-6">
-                <h3 className="text-3xl font-black font-syne text-white uppercase tracking-tighter leading-none">
-                  {editingService?.id ? 'Editar Serviço' : 'Novo Serviço'}
-                </h3>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Configurações técnicas & comerciais</p>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/85 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setIsModalOpen(false)} />
+          <div className="relative w-full max-w-[500px] bg-bg-black border border-border-main rounded-[12px] overflow-hidden shadow-2xl animate-in zoom-in-95 fade-in duration-300">
+            <div className="px-6 py-5 border-b border-border-main/50">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <h3 className="text-[16px] font-medium text-text-primary uppercase tracking-[0.02em]">
+                    {editingService?.id ? 'Editar Serviço' : 'Novo Serviço'}
+                  </h3>
+                  <p className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Configurações técnicas & comerciais</p>
+                </div>
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="w-[28px] h-[28px] flex items-center justify-center text-[#444] hover:text-text-primary transition-all rounded-full"
+                >
+                  <X size={16} />
+                </button>
               </div>
-              <button 
-                onClick={() => setIsModalOpen(false)}
-                className="w-12 h-12 flex items-center justify-center text-text-muted hover:text-white transition-all rounded-full border border-white/5 hover:border-white/10"
-              >
-                <X size={24} weight="bold" />
-              </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-10">
-              <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Nome da Experiência</label>
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Nome da Experiência</label>
                 <input 
                   name="name" 
                   required 
                   defaultValue={editingService?.name || ''} 
-                  className="w-full px-8 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-xl font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all"
+                  className="w-full px-[14px] py-[11px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all"
                   placeholder="Ex: Corte Degrade Editorial"
                 />
               </div>
 
-              <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Descrição</label>
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Descrição</label>
                 <textarea 
                   name="description" 
                   defaultValue={editingService?.description || ''} 
-                  rows={4}
-                  className="w-full px-8 py-6 bg-white/[0.03] border border-white/[0.06] rounded-3xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all resize-none leading-relaxed"
-                  placeholder="Descreva os diferenciais deste serviço para o cliente..."
+                  className="w-full px-[14px] py-[11px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all h-[72px] resize-none"
+                  placeholder="Descreva os diferenciais deste serviço..."
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-10">
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Duração (min)</label>
+              <div className="grid grid-cols-2 gap-[10px]">
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Duração (min)</label>
                   <input 
                     name="duration" 
                     type="number" 
@@ -267,11 +254,11 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                     step="15" 
                     required 
                     defaultValue={editingService?.duration_minutes || 30} 
-                    className="w-full px-6 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-center font-mono text-2xl font-black text-white focus:outline-none focus:border-accent-cyan/40 transition-all"
+                    className="w-full px-[14px] py-[11px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all"
                   />
                 </div>
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Preço (R$)</label>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Preço (R$)</label>
                   <input 
                     name="price" 
                     type="number" 
@@ -279,43 +266,42 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                     step="0.01" 
                     required 
                     defaultValue={editingService?.price_cents ? editingService.price_cents / 100 : ''} 
-                    className="w-full px-6 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-center font-mono text-2xl font-black text-accent-cyan focus:outline-none focus:border-accent-cyan/40 transition-all"
+                    className="w-full px-[14px] py-[11px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all"
                   />
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Categoria</label>
-                <div className="relative">
-                  <select 
-                    name="category" 
-                    required 
-                    defaultValue={editingService?.category || 'corte'} 
-                    className="w-full px-8 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-black uppercase tracking-[0.2em] text-white focus:outline-none focus:border-accent-cyan/40 transition-all appearance-none cursor-pointer font-mono"
-                  >
-                    <option value="corte" className="bg-black">Corte</option>
-                    <option value="barba" className="bg-black">Barba</option>
-                    <option value="combo" className="bg-black">Combo</option>
-                    <option value="outros" className="bg-black">Outros</option>
-                  </select>
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Categoria</label>
+                <select 
+                  name="category" 
+                  required 
+                  defaultValue={editingService?.category || 'corte'} 
+                  className="w-full px-[14px] py-[11px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 appearance-none"
+                >
+                  <option value="corte" className="bg-bg-black">Corte</option>
+                  <option value="barba" className="bg-bg-black">Barba</option>
+                  <option value="combo" className="bg-bg-black">Combo</option>
+                  <option value="outros" className="bg-bg-black">Outros</option>
+                </select>
               </div>
 
-              <div className="pt-12 flex gap-6 border-t border-white/[0.06]">
+              <div className="grid grid-cols-2 gap-[10px] pt-4 border-t-[0.5px] border-border-main">
                 <button 
                   type="button" 
                   onClick={() => setIsModalOpen(false)} 
-                  className="flex-1 py-5 rounded-full border border-white/[0.06] text-text-muted text-[10px] font-black uppercase tracking-[0.3em] hover:text-white hover:bg-white/5 transition-all"
+                  className="py-[11px] rounded-[7px] bg-bg-sidebar border-[0.5px] border-border-main text-[10px] font-medium text-[#444] uppercase tracking-wider hover:bg-bg-surface transition-all"
                   disabled={isPending}
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-[1.5] py-5 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.3em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_0_20px_rgba(0,229,255,0.15)]"
+                  className="flex items-center justify-center gap-2 py-[11px] rounded-[7px] bg-accent-main text-black text-[10px] font-medium uppercase tracking-wider hover:opacity-90 disabled:opacity-50 transition-all shadow-[0_0_20px_color-mix(in_srgb,var(--accent)_10%,transparent)]"
                   disabled={isPending}
                 >
-                  {isPending ? 'Processando...' : 'Confirmar Registro'}
+                  {isPending ? <CircleNotch size={14} className="animate-spin" /> : <Plus size={14} weight="bold" />}
+                  Confirmar Registro
                 </button>
               </div>
             </form>
@@ -325,4 +311,3 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
     </div>
   )
 }
-

@@ -118,50 +118,53 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
   const categories = Array.from(new Set(services.map(s => s.category).filter(Boolean)))
 
   return (
-    <div className="space-y-24 py-12 animate-premium-in">
-      {/* Editorial Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
-        <PageTitle 
-          title="Serviços" 
-          subtitle="Gestão do catálogo de experiências" 
-          className="mb-0" 
-        />
+    <div className="space-y-12 py-8 animate-premium-in">
+      {/* Minimalist Header */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <h1 className="text-[36px] font-medium font-syne text-text-primary tracking-[-0.02em] uppercase leading-none">
+            Serviços<span className="text-accent-main">.</span>
+          </h1>
+          <p className="text-[12px] text-text-secondary font-medium tracking-tight">Gestão do catálogo de experiências</p>
+        </div>
 
         <button
-          className="btn-pill-primary w-fit"
+          className="bg-accent-main text-black px-5 py-2.5 rounded-[8px] transition-all hover:opacity-90 active:scale-[0.98]"
           onClick={handleNew}
         >
-          <div className="flex items-center gap-3">
-            <Plus size={20} weight="bold" />
-            <span className="uppercase tracking-widest text-[11px]">Novo Serviço</span>
+          <div className="flex items-center gap-2">
+            <Plus size={14} weight="regular" />
+            <span className="tracking-[0.08em] text-[11px] font-medium uppercase">Novo Serviço</span>
           </div>
         </button>
       </div>
 
-      {/* KPI Cards - Precision Data */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-white/5 border border-white/5 overflow-hidden">
+      {/* KPI Cards - Minimalist Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[10px]">
         {[
-          { label: 'Total', value: stats.total },
-          { label: 'Ativos', value: stats.active },
-          { label: 'Pausados', value: stats.inactive },
-          { label: 'Categorias', value: stats.categories },
-        ].map((kpi, idx) => (
-          <div key={idx} className="p-12 bg-black flex flex-col justify-between h-48 group">
-            <p className="label-muted opacity-40 group-hover:opacity-100 transition-opacity">{kpi.label}</p>
+          { label: 'TOTAL', value: stats.total },
+          { label: 'ATIVOS', value: stats.active },
+          { label: 'PAUSADOS', value: stats.inactive },
+          { label: 'CATEGORIAS', value: stats.categories },
+        ].map((item, idx) => (
+          <div key={idx} className="bg-bg-surface border-[0.5px] border-border-main rounded-[10px] p-[18px] px-[20px] flex flex-col justify-between h-[110px]">
+            <p className="text-[10px] tracking-[0.1em] text-[#444] font-medium uppercase">{item.label}</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-5xl font-bold font-mono text-white tracking-tighter group-hover:text-accent-cyan transition-colors">{kpi.value}</span>
+              <span className="text-[26px] font-medium text-text-primary tracking-tight">
+                {item.value}
+              </span>
             </div>
           </div>
         ))}
       </div>
 
       {/* Category Filters */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide border-b border-white/5">
+      <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide border-b-[0.5px] border-border-main">
         <button
           onClick={() => setCategoryFilter('')}
           className={cn(
-            "px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all",
-            !categoryFilter ? "bg-white text-black" : "text-text-muted hover:text-white"
+            "px-5 py-2 rounded-[6px] text-[10px] font-medium uppercase tracking-[0.08em] transition-all",
+            !categoryFilter ? "bg-[#1e1e1e] text-text-primary" : "text-text-nav hover:text-text-muted"
           )}
         >
           TODOS
@@ -173,8 +176,8 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
               key={cat}
               onClick={() => setCategoryFilter(categoryFilter === cat ? '' : cat!)}
               className={cn(
-                "px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all",
-                categoryFilter === cat ? "bg-white text-black" : "text-text-muted hover:text-white"
+                "px-5 py-2 rounded-[6px] text-[10px] font-medium uppercase tracking-[0.08em] transition-all",
+                categoryFilter === cat ? "bg-[#1e1e1e] text-text-primary" : "text-text-nav hover:text-text-muted"
               )}
             >
               {((config?.label || (cat || 'Geral'))).toUpperCase()}
@@ -184,85 +187,88 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
       </div>
 
       {/* Services List */}
-      <div className="min-h-[400px]">
+      <div className="min-h-[400px] space-y-6">
+        {/* Column Header */}
+        <div className="grid grid-cols-[2fr_64px_110px_70px_88px] gap-3 px-[18px] pb-2 border-b-[0.5px] border-border-main">
+          <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em]">SERVIÇO</span>
+          <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em] text-right">DURAÇÃO</span>
+          <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em] text-right">PREÇO</span>
+          <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em] text-center">STATUS</span>
+          <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em] text-right">AÇÕES</span>
+        </div>
+
         {filtered.length === 0 ? (
           <div className="flex flex-col items-start py-20">
-            <p className="heading-section text-text-muted opacity-20">Nenhum serviço encontrado</p>
+            <p className="text-2xl font-medium text-[#222] tracking-tight uppercase">Nenhum registro</p>
           </div>
         ) : (
-          <div className="divide-y divide-white/5">
+          <div className="space-y-[4px]">
             {filtered.map(service => {
-              const catConfig = CATEGORY_CONFIG[(service.category as ServiceCategory) || 'outros']
               return (
-                <div key={service.id} className="grid grid-cols-1 md:grid-cols-12 gap-8 py-12 px-4 hover:bg-white/[0.02] transition-colors items-center group">
-                  {/* Name & Desc Column */}
-                  <div className="md:col-span-5 flex flex-col space-y-3">
-                    <div className="flex items-center gap-4">
-                      <div 
-                        className="w-1.5 h-8 rounded-full" 
-                        style={{ backgroundColor: catConfig.color }} 
-                      />
-                      <span className="text-xl font-bold text-white uppercase tracking-tight group-hover:text-accent-cyan transition-colors">
+                <div 
+                  key={service.id} 
+                  className="grid grid-cols-[2fr_64px_110px_70px_88px] gap-3 py-[14px] px-[18px] items-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] group hover:bg-bg-surface hover:border-[#222] transition-all"
+                >
+                  {/* Name & Desc */}
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="w-[2px] h-[30px] bg-accent-main opacity-35 rounded-[2px] shrink-0" />
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[12px] font-medium text-text-secondary uppercase tracking-[0.05em] truncate">
                         {service.name}
                       </span>
-                    </div>
-                    <p className="text-sm text-text-muted font-medium leading-relaxed max-w-md ml-5 uppercase tracking-tight opacity-60">
-                      {service.description || 'Sem descrição detalhada.'}
-                    </p>
-                  </div>
-
-                  {/* Details Column */}
-                  <div className="md:col-span-2 flex flex-col space-y-1">
-                    <span className="text-3xl font-mono font-bold text-white tracking-tighter">
-                      {service.duration_minutes}
-                    </span>
-                    <span className="label-muted opacity-40">MINUTOS</span>
-                  </div>
-
-                  {/* Price Column */}
-                  <div className="md:col-span-2 flex flex-col space-y-1">
-                    <span className="text-3xl font-mono font-bold text-accent-cyan tracking-tighter">
-                      {formatPrice(service.price_cents)}
-                    </span>
-                    <span className="label-muted opacity-40">VALOR UNITÁRIO</span>
-                  </div>
-
-                  {/* Status Column */}
-                  <div className="md:col-span-1">
-                    <div className="flex items-center gap-2">
-                      <div className={cn(
-                        "w-2 h-2 rounded-full",
-                        service.is_active ? "bg-emerald-500" : "bg-red-500"
-                      )} />
-                      <span className={cn(
-                        "text-[9px] font-bold uppercase tracking-widest",
-                        service.is_active ? "text-emerald-400" : "text-red-400"
-                      )}>
-                        {service.is_active ? 'ATIVO' : 'PAUSADO'}
+                      <span className="text-[9px] text-[#2e2e2e] font-medium uppercase truncate">
+                        {service.description || 'SEM DESCRIÇÃO'}
                       </span>
                     </div>
                   </div>
 
-                  {/* Actions Column */}
-                  <div className="md:col-span-2 flex items-center justify-end gap-6 opacity-0 group-hover:opacity-100 transition-all">
+                  {/* Duration */}
+                  <div className="flex items-baseline justify-end gap-1">
+                    <span className="text-[17px] font-medium text-text-primary tracking-tight leading-none">
+                      {service.duration_minutes}
+                    </span>
+                    <span className="text-[8px] text-[#333] font-medium uppercase">MIN</span>
+                  </div>
+
+                  {/* Price */}
+                  <div className="flex items-baseline justify-end gap-1">
+                    <span className="text-[9px] text-[#444] font-medium uppercase">R$</span>
+                    <span className="text-[14px] font-medium text-text-secondary tracking-tight">
+                      {(service.price_cents / 100).toFixed(2)}
+                    </span>
+                  </div>
+
+                  {/* Status */}
+                  <div className="flex items-center justify-center gap-2">
+                    <div className={cn(
+                      "w-[5px] h-[5px] rounded-full",
+                      service.is_active ? "bg-accent-main" : "bg-red-500 opacity-40"
+                    )} />
+                    <span className={cn(
+                      "text-[9px] font-medium uppercase tracking-[0.08em]",
+                      service.is_active ? "text-accent-main" : "text-[#333]"
+                    )}>
+                      {service.is_active ? 'ATIVO' : 'PAUSADO'}
+                    </span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-end gap-[12px]">
                     <button
                       onClick={() => handleToggleActive(service)}
-                      className={cn(
-                        "text-text-muted transition-colors",
-                        service.is_active ? "hover:text-emerald-400" : "hover:text-accent-cyan"
-                      )}
+                      className="text-[#2e2e2e] hover:text-[#666] transition-colors"
                       title={service.is_active ? "Pausar" : "Ativar"}
                     >
-                      {service.is_active ? <Pause size={20} weight="bold" /> : <Play size={20} weight="bold" />}
+                      {service.is_active ? <Pause size={14} weight="regular" /> : <Play size={14} weight="regular" />}
                     </button>
-                    <button onClick={() => handleDuplicate(service)} className="text-text-muted hover:text-white transition-colors" title="Duplicar">
-                      <Copy size={20} weight="bold" />
+                    <button onClick={() => handleDuplicate(service)} className="text-[#2e2e2e] hover:text-[#666] transition-colors" title="Duplicar">
+                      <Copy size={14} weight="regular" />
                     </button>
-                    <button onClick={() => handleEdit(service)} className="text-text-muted hover:text-white transition-colors" title="Editar">
-                      <PencilSimple size={20} weight="bold" />
+                    <button onClick={() => handleEdit(service)} className="text-[#2e2e2e] hover:text-[#666] transition-colors" title="Editar">
+                      <PencilSimple size={14} weight="regular" />
                     </button>
-                    <button onClick={() => handleDelete(service.id)} className="text-text-muted hover:text-red-400 transition-colors" title="Excluir">
-                      <Trash size={20} weight="bold" />
+                    <button onClick={() => handleDelete(service.id)} className="text-[#2e2e2e] hover:text-red-900 transition-colors" title="Excluir">
+                      <Trash size={14} weight="regular" />
                     </button>
                   </div>
                 </div>
@@ -272,97 +278,114 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
         )}
       </div>
 
-      {/* Modal - Premium Overlay */}
+      {/* Modal - Individual Box Design */}
       {isModalOpen ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 animate-in fade-in duration-300">
-          <div className="bg-black border border-white/10 p-12 w-full max-w-2xl rounded-none animate-in zoom-in-95 duration-500 relative">
-             {/* Subtle ambient glow behind modal */}
-             <div className="glass-glow bg-accent-cyan top-0 left-0 w-64 h-64" />
-
-            <div className="flex items-center justify-between mb-16 relative z-10">
-              <PageTitle 
-                title={editingService?.id ? 'Editar' : 'Novo'} 
-                subtitle="Configuração de serviço" 
-                className="mb-0" 
-              />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 animate-in fade-in duration-300">
+          <div className="bg-bg-surface border-[0.5px] border-border-main p-[28px] px-[30px] w-full max-w-[500px] rounded-[12px] animate-in zoom-in-95 duration-500 relative">
+            <div className="flex items-start justify-between mb-8">
+              <div className="space-y-1">
+                <h2 className="text-[28px] font-medium text-text-primary tracking-[-0.02em] leading-none uppercase">
+                  Novo<span className="text-accent-main">.</span>
+                </h2>
+                <p className="text-[11px] text-[#383838] font-medium uppercase tracking-wider">Configuração de serviço</p>
+              </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 text-text-muted hover:text-white transition-colors"
+                className="w-7 h-7 flex items-center justify-center bg-[#1a1a1a] border-[0.5px] border-[#2a2a2a] rounded-[6px] text-[#444] transition-all hover:text-text-primary hover:border-[#444]"
               >
-                <X size={32} weight="bold" />
+                <X size={13} weight="regular" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-16 relative z-10">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div className="space-y-4">
-                  <label className="label-muted">NOME DO SERVIÇO</label>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Block 1: Name & Category */}
+              <div className="grid grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-medium text-[#444] uppercase tracking-[0.1em]">Nome do Serviço</label>
                   <input
                     name="name"
                     required
                     defaultValue={editingService?.name || ''}
-                    className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-bold uppercase tracking-tight outline-none focus:border-accent-cyan transition-colors"
+                    className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] py-[11px] text-[12px] font-medium text-text-secondary tracking-[0.04em] outline-none transition-all focus:border-accent-main/20 placeholder:text-[11px] placeholder:text-[#2a2a2a]"
                     placeholder="EX: CORTE DEGRADÊ"
                   />
                 </div>
 
-                <div className="space-y-4">
-                  <label className="label-muted">CATEGORIA</label>
-                  <select
-                    name="category"
-                    required
-                    defaultValue={editingService?.category || 'corte'}
-                    className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-bold uppercase tracking-tight outline-none focus:border-accent-cyan transition-colors appearance-none cursor-pointer"
-                  >
-                    <option value="corte">CORTE</option>
-                    <option value="barba">BARBA</option>
-                    <option value="combo">COMBO</option>
-                    <option value="outros">OUTROS</option>
-                  </select>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-medium text-[#444] uppercase tracking-[0.1em]">Categoria</label>
+                  <div className="relative">
+                    <select
+                      name="category"
+                      required
+                      defaultValue={editingService?.category || 'corte'}
+                      className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] py-[11px] text-[12px] font-medium text-text-secondary tracking-[0.04em] outline-none transition-all focus:border-accent-main/20 appearance-none cursor-pointer"
+                    >
+                      <option value="corte">CORTE</option>
+                      <option value="barba">BARBA</option>
+                      <option value="combo">COMBO</option>
+                      <option value="outros">OUTROS</option>
+                    </select>
+                    <div className="absolute right-[12px] top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
+                      <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <label className="label-muted">DESCRIÇÃO</label>
+              {/* Block 2: Description */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-medium text-[#444] uppercase tracking-[0.1em]">Descrição</label>
                 <textarea
                   name="description"
                   defaultValue={editingService?.description || ''}
-                  className="bg-transparent border-b border-white/10 w-full py-4 text-lg font-medium outline-none focus:border-accent-cyan transition-colors resize-none h-24"
+                  className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] py-[11px] text-[12px] font-medium text-text-secondary tracking-[0.04em] outline-none transition-all focus:border-accent-main/20 resize-none h-20 placeholder:text-[11px] placeholder:text-[#2a2a2a]"
                   placeholder="DESCREVA O SERVIÇO..."
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div className="space-y-4">
-                  <label className="label-muted">DURAÇÃO (MIN)</label>
-                  <input
-                    name="duration"
-                    type="number"
-                    min="15"
-                    step="15"
-                    required
-                    defaultValue={editingService?.duration_minutes || 30}
-                    className="bg-transparent border-b border-white/10 w-full py-4 text-4xl font-mono font-bold outline-none focus:border-accent-cyan transition-colors"
-                  />
+              {/* Separator */}
+              <div className="h-[0.5px] bg-[#1a1a1a]" />
+
+              {/* Block 3: Duration & Price */}
+              <div className="grid grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-medium text-[#444] uppercase tracking-[0.1em]">Duração</label>
+                  <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[12px] px-[14px] h-[68px] flex flex-col justify-center">
+                    <input
+                      name="duration"
+                      type="number"
+                      min="15"
+                      step="15"
+                      required
+                      defaultValue={editingService?.duration_minutes || 30}
+                      className="bg-transparent border-none w-full p-0 text-[24px] font-medium text-text-primary outline-none leading-none"
+                    />
+                    <p className="text-[8px] text-[#2e2e2e] font-medium uppercase tracking-[0.1em] mt-1 leading-none">MINUTOS</p>
+                  </div>
                 </div>
-                <div className="space-y-4">
-                  <label className="label-muted">PREÇO (R$)</label>
-                  <input
-                    name="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    required
-                    defaultValue={editingService?.price_cents ? editingService.price_cents / 100 : ''}
-                    className="bg-transparent border-b border-white/10 w-full py-4 text-4xl font-mono font-bold text-accent-cyan outline-none focus:border-accent-cyan transition-colors"
-                  />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-medium text-[#444] uppercase tracking-[0.1em]">Preço</label>
+                  <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[12px] px-[14px] flex items-center h-[68px]">
+                    <span className="text-[10px] text-[#333] font-medium uppercase mr-2 mt-1 shrink-0">R$</span>
+                    <input
+                      name="price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      required
+                      defaultValue={editingService?.price_cents ? editingService.price_cents / 100 : ''}
+                      className="bg-transparent border-none w-full p-0 text-[24px] font-medium text-text-primary outline-none leading-none"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="pt-12 flex flex-col md:flex-row gap-6">
+              <div className="pt-4 grid grid-cols-2 gap-3">
                 <button
                   type="submit"
-                  className="btn-pill-primary flex-1"
+                  className="bg-accent-main text-black py-[13px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 active:scale-[0.98]"
                   disabled={isPending}
                 >
                   {isPending ? 'SALVANDO...' : 'CONFIRMAR REGISTRO'}
@@ -370,7 +393,7 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="btn-pill-secondary flex-1"
+                  className="bg-bg-sidebar border-[0.5px] border-border-main text-[#444] py-[13px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:border-[#333] hover:text-[#777] active:scale-[0.98]"
                   disabled={isPending}
                 >
                   DESCARTAR

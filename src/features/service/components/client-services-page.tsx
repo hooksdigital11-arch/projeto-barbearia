@@ -38,7 +38,7 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
       <div className="space-y-2">
         <div className="flex items-center gap-3">
           <div className="w-2 h-8 bg-accent-cyan rounded-full shadow-[0_0_15px_rgba(0,229,255,0.5)]" />
-          <h1 className="text-4xl font-black font-syne text-white tracking-tighter uppercase leading-none">
+          <h1 className="text-4xl font-black font-syne text-text-primary tracking-tighter uppercase leading-none">
             Escolha seu <span className="text-accent-cyan">Serviço</span>
           </h1>
         </div>
@@ -64,7 +64,7 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
           onClick={() => setCategoryFilter('')}
           className={cn(
             "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shrink-0",
-            !categoryFilter ? "bg-white text-black shadow-lg" : "bg-white/5 text-text-secondary border border-white/5 hover:text-white"
+            !categoryFilter ? "bg-white text-black shadow-lg" : "bg-white/5 text-text-secondary border border-white/5 hover:text-text-primary"
           )}
         >
           Todos
@@ -79,7 +79,7 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
                 "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shrink-0",
                 categoryFilter === cat
                   ? "bg-white text-black shadow-lg"
-                  : "bg-white/5 text-text-secondary border border-white/5 hover:text-white"
+                  : "bg-white/5 text-text-secondary border border-white/5 hover:text-text-primary"
               )}
             >
               {config?.label || cat}
@@ -135,7 +135,7 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
                       {config.label}
                     </span>
                   </div>
-                  <p className="text-xl font-bold text-white mt-2 group-hover:text-accent-cyan transition-colors leading-tight">{service.name}</p>
+                  <p className="text-xl font-bold text-text-primary mt-2 group-hover:text-accent-cyan transition-colors leading-tight">{service.name}</p>
                   {service.description && (
                     <p className="text-xs text-text-secondary mt-2 line-clamp-2 opacity-60">{service.description}</p>
                   )}
@@ -161,7 +161,7 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
           <div className="w-24 h-24 rounded-3xl bg-white/5 flex items-center justify-center text-text-secondary opacity-20">
             <Scissors size={48} weight="thin" />
           </div>
-          <p className="text-xl font-bold font-syne text-white uppercase tracking-tight">Nenhum serviço encontrado</p>
+          <p className="text-xl font-bold font-syne text-text-primary uppercase tracking-tight">Nenhum serviço encontrado</p>
           <p className="text-text-secondary">Tente outro termo de busca.</p>
         </div>
       )}
@@ -172,7 +172,7 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
           <div className="glass-card p-4 pr-5 flex items-center gap-5 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] border-accent-cyan/20">
             <div className="flex flex-col min-w-0">
               <span className="text-[10px] font-black uppercase tracking-widest text-text-secondary">Selecionado</span>
-              <span className="text-base font-bold text-white truncate max-w-[200px]">{selected.name}</span>
+              <span className="text-base font-bold text-text-primary truncate max-w-[200px]">{selected.name}</span>
               <span className="text-sm font-mono text-accent-cyan font-bold">{formatPrice(selected.price_cents)} • {selected.duration_minutes}min</span>
             </div>
             <Button asChild variant="cyan" size="lg" className="shrink-0 shadow-cyan-500/30">

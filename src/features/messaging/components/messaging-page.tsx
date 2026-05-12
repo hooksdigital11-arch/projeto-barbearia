@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { KPICard } from '@/components/shared/kpi-card'
 import { ConversationPanel, ChatPanel } from './chat-interface'
 import { BroadcastModal } from './broadcast-modal'
 import { TemplateModal } from './template-modal'
@@ -12,13 +11,11 @@ import {
   Lightning, 
   FileText, 
   TrendUp, 
-  Users, 
   Warning, 
   Calendar,
-  Sparkle,
-  CircleNotch
+  CircleNotch,
+  ChatCircleText
 } from '@phosphor-icons/react'
-import { PageTitle } from '@/components/shared/page-title'
 import { cn } from '@/lib/utils/cn'
 
 interface MessagingPageProps {
@@ -72,73 +69,62 @@ export function MessagingPage({
   }
 
   return (
-    <div className="space-y-16 animate-premium-in">
-      {/* Editorial Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
-        <PageTitle 
-          title="Mensagens" 
-          subtitle="Gestão de relacionamento de alto nível. Comunique-se com seus clientes via WhatsApp com templates inteligentes e disparos em massa." 
-          className="mb-0" 
-        />
+    <div className="space-y-10 animate-in fade-in duration-700">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <h1 className="text-[32px] font-medium tracking-[-0.02em] text-text-primary">
+            MENSAGENS<span className="text-accent-main">.</span>
+          </h1>
+          <p className="text-[11px] text-[#333] leading-[1.5] max-w-[440px] uppercase tracking-wide">
+            Gestão de relacionamento de alto nível. Comunique-se com seus clientes via WhatsApp com templates inteligentes e disparos em massa.
+          </p>
+        </div>
 
-        <div className="flex items-center gap-4 ml-7 lg:ml-0">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setIsTemplateOpen(true)}
-            className="px-6 py-4 rounded-3xl text-[10px] font-black uppercase tracking-widest bg-white/5 text-muted-foreground border border-white/10 hover:text-white hover:border-white/20 transition-all duration-300"
+            className="flex items-center gap-2 bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[16px] py-[10px] text-[10px] font-medium text-[#666] uppercase tracking-[0.08em] transition-all hover:border-[#333] hover:text-[#aaa]"
           >
-            <div className="flex items-center gap-3">
-              <FileText size={18} weight="bold" />
-              <span>Templates</span>
-            </div>
+            <FileText size={14} weight="regular" />
+            Templates
           </button>
           {isAdmin && (
             <button
               onClick={() => setIsBroadcastOpen(true)}
-              className="flex items-center gap-4 px-10 py-8 bg-white text-black rounded-3xl font-black text-xs uppercase tracking-[0.2em] hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group"
+              className="flex items-center gap-2 bg-accent-main text-black rounded-[8px] px-[16px] py-[10px] text-[10px] font-medium uppercase tracking-[0.08em] transition-all hover:opacity-90"
             >
-              <Lightning size={22} weight="bold" className="group-hover:rotate-12 transition-transform" />
+              <Lightning size={14} weight="bold" />
               Disparo em Massa
             </button>
           )}
         </div>
       </div>
 
-      {/* KPI Section - Precision Data Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/5 border border-white/5 overflow-hidden">
+      {/* KPI Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Enviadas Hoje', value: stats.today, icon: ChatCircle, color: '#00e5ff', desc: 'Mensagens processadas hoje' },
-          { label: 'Esta Semana', value: stats.week, icon: Calendar, color: '#8b5cf6', desc: 'Volume semanal acumulado' },
-          { label: 'Este Mês', value: stats.month, icon: TrendUp, color: '#10b981', desc: 'Crescimento mensal' },
-          { label: 'Taxa de Erro', value: stats.failed, icon: Warning, color: stats.failed > 0 ? '#ef4444' : '#a0a0a0', desc: 'Falhas de entrega' }
-        ].map((kpi, idx) => (
-          <div key={idx} className="p-10 bg-black flex flex-col justify-between h-48 group">
-            <div className="flex items-start justify-between">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-40 group-hover:opacity-100 transition-opacity">
-                {kpi.label}
-              </p>
-              <kpi.icon size={20} weight="bold" style={{ color: kpi.color }} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+          { label: 'Enviadas Hoje', value: stats.today, icon: ChatCircle, color: 'var(--accent, #00d4aa)' },
+          { label: 'Esta Semana', value: stats.week, icon: Calendar, color: 'var(--accent, #00d4aa)' },
+          { label: 'Este Mês', value: stats.month, icon: TrendUp, color: 'var(--accent, #00d4aa)' },
+          { label: 'Taxa de Erro', value: stats.failed, icon: Warning, color: stats.failed > 0 ? '#ef4444' : '#333' }
+        ].map((kpi, i) => (
+          <div key={i} className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] p-[20px_22px] space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.12em]">{kpi.label}</span>
+              <kpi.icon size={16} weight="duotone" className="text-[#333]" />
             </div>
-            <div>
-              <p className="text-5xl font-bold font-mono text-white tracking-tighter group-hover:text-accent-cyan transition-colors">
-                {kpi.value}
-              </p>
-              <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest opacity-30 group-hover:opacity-60 transition-opacity">
-                {kpi.desc}
-              </p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-[24px] font-medium text-text-primary tracking-tight">{kpi.value}</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Chat Interface Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-[400px,1fr] gap-0 border border-white/5 bg-black overflow-hidden"
-        style={{ height: 'calc(100vh - 450px)', minHeight: '600px' }}
-      >
-        {/* Left Panel: Conversations */}
-        <div className="border-r border-white/5 flex flex-col bg-black">
-          <div className="px-8 py-6 border-b border-white/5">
-            <h3 className="label-muted opacity-40">Conversas Ativas</h3>
-          </div>
+      {/* Main Chat Area */}
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] overflow-hidden min-h-[320px] h-[calc(100vh-400px)]">
+        {/* Left Column: Conversations */}
+        <div className="border-r-[0.5px] border-border-main flex flex-col bg-bg-sidebar">
           <ConversationPanel
             conversations={conversations}
             allClients={clients}
@@ -147,15 +133,12 @@ export function MessagingPage({
           />
         </div>
 
-        {/* Right Panel: Active Chat */}
-        <div className="flex flex-col bg-black relative">
-          {/* Subtle ambient glow */}
-          <div className="glass-glow bg-accent-cyan top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 opacity-10" />
-          
+        {/* Right Column: Central de Atendimento */}
+        <div className="flex flex-col bg-bg-sidebar">
           {selectedClientId ? (
             loadingMessages ? (
-              <div className="flex-1 flex items-center justify-center relative z-10">
-                <CircleNotch size={32} className="animate-spin text-accent-cyan" />
+              <div className="flex-1 flex items-center justify-center">
+                <CircleNotch size={24} className="animate-spin text-[#333]" />
               </div>
             ) : (
               <ChatPanel
@@ -167,15 +150,16 @@ export function MessagingPage({
               />
             )
           ) : (
-            <div className="flex-1 flex flex-col items-start justify-center p-16 relative z-10">
-              <div className="space-y-6">
-                <h3 className="text-4xl font-syne font-bold text-white tracking-tighter uppercase leading-none">
-                  Central de<br/>Atendimento<span className="text-accent-cyan">.</span>
-                </h3>
-                <p className="text-sm text-text-muted max-w-sm uppercase tracking-widest leading-relaxed opacity-60">
-                  Selecione uma conversa para iniciar o atendimento.
-                </p>
+            <div className="flex-1 flex flex-col items-center justify-center p-10 text-center animate-in fade-in zoom-in-95 duration-500">
+              <div className="w-[48px] h-[48px] bg-bg-surface border-[0.5px] border-border-main rounded-full flex items-center justify-center text-[#2a2a2a] mb-4">
+                <ChatCircleText size={20} weight="regular" />
               </div>
+              <h3 className="text-[24px] font-medium text-[#1e1e1e] tracking-[-0.02em] leading-tight uppercase">
+                Central de<br/>Atendimento<span className="text-accent-main">.</span>
+              </h3>
+              <p className="text-[10px] text-[#222] uppercase tracking-[0.06em] mt-2">
+                Selecione uma conversa para iniciar o atendimento
+              </p>
             </div>
           )}
         </div>

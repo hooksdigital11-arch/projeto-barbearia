@@ -3,17 +3,14 @@
 import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Bell, Envelope, ShareNetwork, FloppyDisk, CircleNotch, Clock } from '@phosphor-icons/react'
+import { FloppyDisk, CircleNotch, Clock } from '@phosphor-icons/react'
 import { notificationPreferencesSchema, type NotificationPreferencesInput } from '../schemas'
 import { updateNotifications } from '../actions'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
 } from '@/components/ui/form'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
@@ -47,79 +44,97 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
   }
 
   const emailItems = [
-    { id: 'emailNewOrder', label: 'Nova comanda', desc: 'Receba um aviso quando uma comanda for finalizada' },
-    { id: 'emailClientArrived', label: 'Cliente chegando', desc: 'Aviso quando o cliente entra na barbearia' },
-    { id: 'emailNewAppointment', label: 'Novo agendamento', desc: 'Notificação instantânea de novas reservas' },
-    { id: 'emailCancellation', label: 'Cancelamentos', desc: 'Fique sabendo de horários liberados' },
+    { id: 'emailNewOrder', label: 'Nova comanda', desc: 'Receba um aviso quando uma comanda for finalizada', tag: 'EMAIL' },
+    { id: 'emailClientArrived', label: 'Cliente chegando', desc: 'Aviso quando o cliente entra na barbearia', tag: 'DASHBOARD' },
+    { id: 'emailNewAppointment', label: 'Novo agendamento', desc: 'Notificação instantânea de novas reservas', tag: 'EMAIL' },
+    { id: 'emailCancellation', label: 'Cancelamentos', desc: 'Fique sabendo de horários liberados', tag: 'EMAIL' },
   ] as const
 
+  // Custom Toggle UI (Still using field.value and field.onChange)
+  const Toggle = ({ value, onChange }: { value: boolean, onChange: (v: boolean) => void }) => (
+    <div 
+      onClick={() => onChange(!value)}
+      className={cn(
+        "w-[36px] h-[20px] rounded-[10px] relative cursor-pointer transition-all duration-200 border-[0.5px]",
+        value 
+          ? "bg-accent-main border-accent-main" 
+          : "bg-[#1e1e1e] border-[#2a2a2a]"
+      )}
+    >
+      <div className={cn(
+        "w-[14px] h-[14px] rounded-full absolute top-[2px] transition-all duration-200",
+        value 
+          ? "bg-black left-[18px]" 
+          : "bg-[#444] left-[2px]"
+      )} />
+    </div>
+  )
+
   return (
-    <div className="space-y-16">
-      <div>
-        <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter">Notificações</h2>
-        <p className="label-muted mt-2">Controle como você e seus clientes são avisados</p>
+    <div className="space-y-10 max-w-4xl">
+      <div className="space-y-0.5">
+        <h2 className="text-[15px] font-medium text-text-primary uppercase tracking-[0.02em]">Notificações</h2>
+        <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a] mb-[18px]">Controle como você e seus clientes são avisados</p>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Email Section */}
-          <div className="space-y-6">
-            <h3 className="label-muted text-accent-cyan">Canais Digitais</h3>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+          
+          {/* Canais Digitais */}
+          <div className="space-y-4">
+            <h3 className="text-[9px] font-medium uppercase tracking-[0.12em] text-accent-main">Canais Digitais</h3>
             
-            <div className="grid gap-4">
+            <div className="flex flex-col gap-1.5">
               {emailItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-8 rounded-[2rem] bg-white/[0.03] border border-white/[0.06] transition-all">
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-white uppercase tracking-tight">{item.label}</p>
-                    <p className="text-[11px] font-medium text-text-muted">{item.desc}</p>
+                <div key={item.id} className="flex items-center justify-between gap-[14px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[14px_16px]">
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-medium text-text-secondary tracking-[0.04em] uppercase">{item.label}</span>
+                    <span className="text-[10px] text-[#2e2e2e] leading-tight">{item.desc}</span>
+                    <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-accent-main mt-0.5">{item.tag}</span>
                   </div>
                   <FormField
                     control={form.control}
                     name={item.id}
                     render={({ field }) => (
-                      <FormItem className="flex items-center space-y-0">
+                      <FormItem className="space-y-0">
                         <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            className="w-5 h-5 border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan"
-                          />
+                          <Toggle value={field.value} onChange={field.onChange} />
                         </FormControl>
                       </FormItem>
                     )}
                   />
                 </div>
               ))}
-            </div>
 
-            <div className="p-8 rounded-[2rem] bg-white/[0.03] border border-white/[0.06] flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-white uppercase tracking-tight">Relatório Diário</p>
-                <p className="text-[11px] font-medium text-text-muted">Resumo do faturamento e agendamentos do dia anterior</p>
-              </div>
-              <div className="flex items-center gap-6">
-                <FormField
-                  control={form.control}
-                  name="dailyReportTime"
-                  render={({ field }) => (
-                    <input 
-                      {...field} 
-                      type="time" 
-                      className="bg-black border border-white/[0.06] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-accent-cyan/30 font-mono transition-all"
-                    />
-                  )}
-                />
+              {/* Relatório Diário Row */}
+              <div className="flex items-center justify-between gap-[14px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[14px_16px]">
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-medium text-text-secondary tracking-[0.04em] uppercase">Relatório Diário</span>
+                  <span className="text-[10px] text-[#2e2e2e] leading-tight">Resumo do faturamento e agendamentos do dia anterior</span>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[6px] p-[5px_10px] flex items-center gap-1.5">
+                      <Clock size={12} className="text-[#333]" />
+                      <FormField
+                        control={form.control}
+                        name="dailyReportTime"
+                        render={({ field }) => (
+                          <input 
+                            {...field} 
+                            type="time" 
+                            className="bg-transparent border-none text-[11px] text-text-secondary focus:outline-none w-[60px]"
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
                 <FormField
                   control={form.control}
                   name="emailDailyReport"
                   render={({ field }) => (
-                    <FormItem className="flex items-center space-y-0">
+                    <FormItem className="space-y-0">
                       <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          className="w-5 h-5 border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan"
-                        />
+                        <Toggle value={field.value} onChange={field.onChange} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -128,49 +143,45 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
             </div>
           </div>
 
-          {/* WhatsApp Section */}
-          <div className="space-y-6">
-            <h3 className="label-muted text-emerald-500">Automações Diretas</h3>
+          <div className="h-[0.5px] bg-[#161616]" />
+
+          {/* Automações Diretas */}
+          <div className="space-y-4">
+            <h3 className="text-[9px] font-medium uppercase tracking-[0.12em] text-accent-main">Automações Diretas</h3>
             
-            <div className="p-10 rounded-[2.5rem] bg-emerald-500/[0.03] border border-emerald-500/10 space-y-10">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-bold text-white uppercase tracking-tight">Confirmação Automática</p>
-                  <p className="text-[11px] font-medium text-emerald-500/60 uppercase tracking-widest font-black">WhatsApp instantâneo</p>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between gap-[14px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[14px_16px]">
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-medium text-text-secondary tracking-[0.04em] uppercase">Confirmação Automática</span>
+                  <span className="text-[10px] text-[#2e2e2e] leading-tight">Envio de mensagem instantânea via WhatsApp</span>
+                  <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-accent-main mt-0.5">WHATSAPP</span>
                 </div>
                 <FormField
                   control={form.control}
                   name="whatsappConfirmations"
                   render={({ field }) => (
-                    <FormItem className="flex items-center space-y-0">
+                    <FormItem className="space-y-0">
                       <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          className="w-5 h-5 border-emerald-500/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
-                        />
+                        <Toggle value={field.value} onChange={field.onChange} />
                       </FormControl>
                     </FormItem>
                   )}
                 />
               </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-bold text-white uppercase tracking-tight">Lembrete 24h</p>
-                  <p className="text-[11px] font-medium text-emerald-500/60 uppercase tracking-widest font-black">Redução de No-Show</p>
+
+              <div className="flex items-center justify-between gap-[14px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[14px_16px]">
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-medium text-text-secondary tracking-[0.04em] uppercase">Lembrete 24h</span>
+                  <span className="text-[10px] text-[#2e2e2e] leading-tight">Notificação enviada um dia antes do agendamento</span>
+                  <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-accent-main mt-0.5">REDUÇÃO DE NO-SHOW</span>
                 </div>
                 <FormField
                   control={form.control}
                   name="whatsappReminders"
                   render={({ field }) => (
-                    <FormItem className="flex items-center space-y-0">
+                    <FormItem className="space-y-0">
                       <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          className="w-5 h-5 border-emerald-500/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
-                        />
+                        <Toggle value={field.value} onChange={field.onChange} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -179,13 +190,19 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
             </div>
           </div>
 
-          <div className="flex justify-end pt-12 border-t border-white/[0.06]">
+          {/* Footer Actions */}
+          <div className="pt-4 border-t-[0.5px] border-border-main/50 flex justify-end">
             <button 
               type="submit"
-              disabled={isPending} 
-              className="px-10 py-3.5 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+              disabled={isPending}
+              className="flex items-center gap-2 bg-accent-main text-black px-[18px] py-[10px] rounded-[7px] text-[10px] font-medium uppercase tracking-wider hover:opacity-90 disabled:opacity-50 transition-all shadow-[0_0_20px_color-mix(in_srgb,var(--accent)_10%,transparent)]"
             >
-              {isPending ? 'Salvando...' : 'Salvar Preferências'}
+              {isPending ? (
+                <CircleNotch size={14} className="animate-spin" />
+              ) : (
+                <FloppyDisk size={14} weight="bold" />
+              )}
+              Salvar Preferências
             </button>
           </div>
         </form>

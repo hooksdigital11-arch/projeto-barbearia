@@ -26,23 +26,23 @@ const STATUS_ACTION_LABEL: Partial<Record<AppointmentStatus, string>> = {
 export function StatusBadge({ status, appointmentId, interactive = false }: StatusBadgeProps) {
   const cfg = STATUS_CONFIG[status]
   
-  // Custom semantic colors for premium look
-  const semanticColors: Record<string, { bg: string, text: string }> = {
-    scheduled: { bg: 'rgba(59, 130, 246, 0.08)', text: '#3b82f6' },
-    in_progress: { bg: 'rgba(245, 158, 11, 0.08)', text: '#f59e0b' },
-    completed: { bg: 'rgba(16, 185, 129, 0.08)', text: '#10b981' },
-    cancelled: { bg: 'rgba(239, 68, 68, 0.08)', text: '#ef4444' },
-    no_show: { bg: 'rgba(255, 255, 255, 0.08)', text: '#888888' },
+  // Minimalist semantic colors
+  const semanticColors: Record<string, { bg: string, text: string, border: string }> = {
+    scheduled: { bg: '#111', text: '#555', border: '#1e1e1e' },
+    in_progress: { bg: '#2e260d', text: '#f59e0b', border: '#f59e0b33' },
+    completed: { bg: '#0d2e29', text: 'var(--accent, #00d4aa)', border: 'var(--accent-20, #00d4aa33)' },
+    cancelled: { bg: '#2e0d0d', text: '#ef4444', border: '#ef444433' },
+    no_show: { bg: '#111', text: '#333', border: '#1e1e1e' },
   }
 
-  const colors = semanticColors[status] || { bg: 'rgba(255, 255, 255, 0.08)', text: '#888888' }
+  const colors = semanticColors[status] || semanticColors.scheduled
 
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.1em]'
+        'inline-flex items-center px-3 py-1 rounded-[6px] text-[10px] font-medium uppercase tracking-[0.08em] border-[0.5px]'
       )}
-      style={{ backgroundColor: colors.bg, color: colors.text }}
+      style={{ backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }}
     >
       {cfg.label}
     </span>
@@ -78,7 +78,7 @@ export function QuickStatusButton({
     <button
       onClick={handleAdvance}
       disabled={isPending}
-      className="btn-pill-primary px-4 py-1.5 text-[10px] uppercase tracking-widest disabled:opacity-50 h-auto"
+      className="bg-accent-main text-black px-4 py-1.5 rounded-[6px] text-[10px] font-medium uppercase tracking-wider transition-all hover:opacity-90 disabled:opacity-50"
     >
       {isPending ? '...' : label}
     </button>
@@ -101,7 +101,7 @@ export function CancelButton({ appointmentId }: { appointmentId: string }) {
     <button
       onClick={handleCancel}
       disabled={isPending}
-      className="btn-pill-secondary px-4 py-1.5 text-[10px] uppercase tracking-widest border-red-500/50 text-red-400 hover:bg-red-500/10 h-auto"
+      className="border-[0.5px] border-[#2e0d0d] text-[#ef4444] px-4 py-1.5 rounded-[6px] text-[10px] font-medium uppercase tracking-wider transition-all hover:bg-[#2e0d0d] disabled:opacity-50"
     >
       {isPending ? '...' : 'Cancelar'}
     </button>

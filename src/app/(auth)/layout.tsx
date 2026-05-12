@@ -26,7 +26,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             <div className="space-y-4 animate-in fade-in slide-in-from-left-8 duration-700">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_20px_rgba(0,229,255,0.6)]" />
-                <h1 className="text-6xl font-black font-syne text-white tracking-tighter leading-none">
+                <h1 className="text-6xl font-black font-syne text-text-primary tracking-tighter leading-none">
                   Barber<span className="text-accent-cyan">Pro</span>
                 </h1>
               </div>

@@ -44,9 +44,9 @@ export function AddServiceModal({ isOpen, onClose, clientId, appointmentId, onAd
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#141414] border-white/10 max-w-lg">
+      <DialogContent className="bg-bg-surface border-white/10 max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-syne uppercase tracking-tight text-white">Adicionar Serviço</DialogTitle>
+          <DialogTitle className="font-syne uppercase tracking-tight text-text-primary">Adicionar Serviço</DialogTitle>
         </DialogHeader>
         <div className="space-y-3 mt-4 max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10">
           {services.map(service => (
@@ -56,7 +56,7 @@ export function AddServiceModal({ isOpen, onClose, clientId, appointmentId, onAd
               onClick={() => handleAdd(service)}
             >
               <div>
-                <p className="font-bold text-white uppercase text-sm tracking-wide">{service.name}</p>
+                <p className="font-bold text-text-primary uppercase text-sm tracking-wide">{service.name}</p>
                 <p className="text-xs text-muted-foreground">{service.duration_minutes} min</p>
               </div>
               <div className="flex items-center gap-4">

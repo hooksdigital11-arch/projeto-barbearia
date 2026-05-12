@@ -3,11 +3,9 @@
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { User, Envelope, Phone, Article, Lock, FloppyDisk, CircleNotch, SignOut, PencilSimple, X, Eye, EyeSlash } from '@phosphor-icons/react'
+import { SignOut, Lock, Key, FloppyDisk, CircleNotch, X, Eye, EyeSlash } from '@phosphor-icons/react'
 import { adminProfileSchema, type AdminProfileInput } from '../schemas'
 import { updateAdminProfile, updatePassword } from '../actions'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   Form,
   FormControl,
@@ -18,19 +16,15 @@ import {
 } from '@/components/ui/form'
 import { toast } from 'sonner'
 import { logout } from '@/features/auth/actions'
+import { cn } from '@/lib/utils/cn'
 
 export function ProfileSettings({ initialData }: { initialData: any }) {
   const [isPending, startTransition] = useTransition()
-  
-  // Estados para o modal de alteração de senha
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isChangingPassword, startPasswordTransition] = useTransition()
-  
-  // Visibilidade de senhas
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   
-  // Form principal
   const form = useForm<AdminProfileInput>({
     resolver: zodResolver(adminProfileSchema),
     defaultValues: {
@@ -81,129 +75,150 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
   }
 
   return (
-    <div className="space-y-16">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-10">
-        <div className="flex items-center gap-10">
-          <div className="relative group">
-            <div className="w-28 h-28 rounded-full bg-accent-cyan flex items-center justify-center text-4xl font-black text-black">
-              {initialData?.full_name?.[0] || 'A'}
-            </div>
+    <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] overflow-hidden max-w-4xl">
+      {/* Hero Header */}
+      <div className="relative p-[22px_24px] border-b-[0.5px] border-border-main/50 flex items-center justify-between gap-4 overflow-hidden">
+        {/* Glow effect */}
+        <div className="absolute left-0 top-0 w-full h-full pointer-events-none opacity-40" 
+          style={{ background: 'radial-gradient(ellipse at 10% 50%, var(--accent-04, #00d4aa06), transparent)' }} />
+        
+        <div className="flex items-center gap-[18px] relative z-10">
+          <div className="w-[56px] h-[56px] rounded-[12px] bg-[#1a1a2e] border-[0.5px] border-[#2a2a3e] flex items-center justify-center text-[20px] font-medium text-[#8b7cf6]">
+            {initialData?.full_name?.[0] || 'A'}
           </div>
-          <div className="space-y-2">
-            <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter leading-none">{initialData?.full_name}</h2>
-            <p className="label-muted">Administrador Master</p>
+          <div className="flex flex-col">
+            <h2 className="text-[22px] font-medium text-text-primary tracking-[-0.01em] leading-tight">{initialData?.full_name}</h2>
+            <div className="flex items-center gap-[5px] mt-1">
+              <div className="w-[5px] h-[5px] rounded-full bg-accent-main opacity-60" />
+              <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#383838]">Administrador Master</span>
+            </div>
           </div>
         </div>
 
         <button 
           onClick={() => logout()}
-          className="px-6 py-2 rounded-full border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-red-500 hover:text-white transition-all"
+          className="flex items-center gap-2 bg-transparent border-[0.5px] border-[#3a1a1a] rounded-[7px] p-[8px_14px] text-[10px] font-medium uppercase tracking-[0.08em] text-[#c04040] hover:bg-[#1a0d0d] hover:border-[#c04040] transition-all relative z-10"
         >
+          <SignOut size={14} weight="bold" />
           Encerrar Sessão
         </button>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div className="space-y-10">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-0">
+          {/* Main Form Fields */}
+          <div className="p-[22px_24px] space-y-6">
+            {/* Row 1: Name + Phone */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[12px]">
               <FormField
                 control={form.control}
                 name="fullName"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel className="label-muted">Seu Nome</FormLabel>
+                  <FormItem className="space-y-1.5">
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Seu Nome</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
-                        className="w-full px-6 py-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/30 transition-all" 
+                        className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[11px_14px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all" 
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[9px] text-red-500" />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
-                name="email"
+                name="phone"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel className="label-muted">Email de Acesso</FormLabel>
+                  <FormItem className="space-y-1.5">
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Telefone</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
-                        type="email" 
-                        disabled 
-                        className="w-full px-6 py-4 bg-black/20 border border-white/[0.06] rounded-2xl text-sm font-medium text-white/40 cursor-not-allowed font-mono" 
+                        className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[11px_14px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all" 
                       />
                     </FormControl>
-                    <p className="text-[10px] text-text-muted uppercase font-black tracking-widest">Acesso restrito para alteração</p>
-                    <FormMessage />
+                    <FormMessage className="text-[9px] text-red-500" />
                   </FormItem>
                 )}
               />
             </div>
 
-            <div className="space-y-10">
+            {/* Row 2: Email + Bio */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[12px]">
               <FormField
                 control={form.control}
-                name="phone"
+                name="email"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel className="label-muted">Telefone</FormLabel>
+                  <FormItem className="space-y-1.5">
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Email de Acesso</FormLabel>
                     <FormControl>
-                      <input 
-                        {...field} 
-                        className="w-full px-6 py-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/30 transition-all font-mono" 
-                      />
+                      <div className="space-y-1.5">
+                        <input 
+                          {...field} 
+                          type="email" 
+                          disabled 
+                          className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[11px_14px] text-[12px] text-[#2e2e2e] cursor-not-allowed" 
+                        />
+                        <p className="text-[9px] text-[#2a2a2a] uppercase tracking-[0.06em]">Acesso restrito para alteração</p>
+                      </div>
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="bio"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel className="label-muted">Biografia / Notas</FormLabel>
+                  <FormItem className="space-y-1.5">
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Biografia / Notas</FormLabel>
                     <FormControl>
                       <textarea 
                         {...field} 
-                        rows={4}
-                        className="w-full px-6 py-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/30 transition-all resize-none"
+                        className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[11px_14px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all h-[40px] resize-none"
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[9px] text-red-500" />
                   </FormItem>
                 )}
               />
             </div>
           </div>
 
-          <div className="pt-12 border-t border-white/[0.06] flex flex-col md:flex-row items-center justify-between gap-6">
+          {/* Security Section */}
+          <div className="bg-bg-sidebar border-t-[0.5px] border-border-main/50 p-[16px_24px] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-[34px] h-[34px] bg-bg-surface border-[0.5px] border-border-main rounded-[8px] flex items-center justify-center text-[#444]">
+                <Lock size={16} weight="bold" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[11px] font-medium text-text-muted uppercase tracking-wider">Segurança</span>
+                <span className="text-[9px] text-[#2a2a2a] uppercase tracking-wider mt-0.5">Mantenha sua conta protegida</span>
+              </div>
+            </div>
             <button 
               type="button" 
               onClick={() => setIsPasswordModalOpen(true)}
-              className="flex items-center gap-4 group"
+              className="flex items-center gap-2 bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] p-[8px_14px] text-[10px] font-medium uppercase tracking-[0.08em] text-text-nav hover:border-[#2a2a2a] hover:text-text-muted transition-all"
             >
-              <div className="w-12 h-12 rounded-full border border-white/[0.06] flex items-center justify-center text-white/40 group-hover:border-accent-cyan group-hover:text-accent-cyan transition-all">
-                <Lock size={20} />
-              </div>
-              <div className="text-left">
-                <p className="text-xs font-black uppercase tracking-widest text-white">Segurança</p>
-                <p className="text-[10px] font-medium text-text-muted group-hover:text-accent-cyan transition-colors">Alterar senha de acesso</p>
-              </div>
+              <Key size={14} weight="bold" />
+              Atualizar Senha
             </button>
+          </div>
 
+          {/* Footer Actions */}
+          <div className="p-[14px_24px] border-t-[0.5px] border-border-main/50 flex justify-end">
             <button 
               type="submit"
-              disabled={isPending} 
-              className="px-10 py-3.5 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+              disabled={isPending}
+              className="flex items-center gap-2 bg-accent-main text-black px-[18px] py-[10px] rounded-[7px] text-[10px] font-medium uppercase tracking-wider hover:opacity-90 disabled:opacity-50 transition-all shadow-[0_0_20px_color-mix(in_srgb,var(--accent)_10%,transparent)]"
             >
-              {isPending ? 'Salvando...' : 'Atualizar Perfil'}
+              {isPending ? (
+                <CircleNotch size={14} className="animate-spin" />
+              ) : (
+                <FloppyDisk size={14} weight="bold" />
+              )}
+              Salvar Perfil
             </button>
           </div>
         </form>
@@ -211,87 +226,91 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
 
       {/* Modal de Alteração de Senha */}
       {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4">
-          <div className="bg-black border border-white/[0.06] rounded-[2.5rem] p-10 w-full max-w-md shadow-2xl">
-            <div className="flex items-center justify-between mb-10">
-              <div className="space-y-2">
-                <h3 className="text-2xl font-black font-syne text-white uppercase tracking-tighter leading-none">Nova Senha</h3>
-                <p className="label-muted">Segurança da conta</p>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/85 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setIsPasswordModalOpen(false)} />
+          <div className="relative w-full max-w-[400px] bg-bg-black border border-border-main rounded-[12px] overflow-hidden shadow-2xl animate-in zoom-in-95 fade-in duration-300">
+            <div className="px-6 py-5 border-b border-border-main/50">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <h3 className="text-[16px] font-medium text-text-primary uppercase tracking-[0.02em]">Nova Senha</h3>
+                  <p className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Segurança da conta</p>
+                </div>
+                <button 
+                  onClick={() => setIsPasswordModalOpen(false)}
+                  className="w-[28px] h-[28px] flex items-center justify-center text-[#444] hover:text-text-primary transition-all rounded-full"
+                >
+                  <X size={16} />
+                </button>
               </div>
-              <button 
-                onClick={() => setIsPasswordModalOpen(false)}
-                className="w-10 h-10 flex items-center justify-center text-text-muted hover:text-white transition-colors"
-              >
-                <X size={24} />
-              </button>
             </div>
 
-            <form onSubmit={handlePasswordSubmit} className="space-y-8">
-              <div className="space-y-3">
-                <label className="label-muted">Senha Atual</label>
+            <form onSubmit={handlePasswordSubmit} className="p-6 space-y-6">
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Senha Atual</label>
                 <div className="relative">
                   <input 
                     name="currentPassword" 
                     type={showCurrentPassword ? 'text' : 'password'}
                     required 
-                    className="w-full px-6 py-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/30 transition-all"
+                    className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[11px_14px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all"
                   />
                   <button 
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#333] hover:text-text-nav transition-colors"
                   >
-                    {showCurrentPassword ? <EyeSlash size={20} /> : <Eye size={20} />}
+                    {showCurrentPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="label-muted">Nova Senha</label>
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Nova Senha</label>
                 <div className="relative">
                   <input 
                     name="newPassword" 
                     type={showNewPassword ? 'text' : 'password'}
                     required 
                     minLength={6}
-                    className="w-full px-6 py-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/30 transition-all"
+                    className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[11px_14px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all"
                   />
                   <button 
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#333] hover:text-text-nav transition-colors"
                   >
-                    {showNewPassword ? <EyeSlash size={20} /> : <Eye size={20} />}
+                    {showNewPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="label-muted">Confirmar Nova Senha</label>
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Confirmar Nova Senha</label>
                 <input 
                   name="confirmPassword" 
                   type={showNewPassword ? 'text' : 'password'}
                   required 
                   minLength={6}
-                  className="w-full px-6 py-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/30 transition-all"
+                  className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[11px_14px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all"
                 />
               </div>
 
-              <div className="pt-6 flex gap-4">
+              <div className="grid grid-cols-2 gap-[10px] pt-4 border-t-[0.5px] border-border-main">
                 <button 
                   type="button" 
                   onClick={() => setIsPasswordModalOpen(false)} 
-                  className="flex-1 py-3.5 rounded-full border border-white/[0.06] text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/5 transition-all"
+                  className="py-[11px] rounded-[7px] bg-bg-sidebar border-[0.5px] border-border-main text-[10px] font-medium text-[#444] uppercase tracking-wider hover:bg-bg-surface transition-all"
                   disabled={isChangingPassword}
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-1 py-3.5 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 py-[11px] rounded-[7px] bg-accent-main text-black text-[10px] font-medium uppercase tracking-wider hover:opacity-90 disabled:opacity-50 transition-all shadow-[0_0_20px_color-mix(in_srgb,var(--accent)_10%,transparent)]"
                   disabled={isChangingPassword}
                 >
-                  {isChangingPassword ? 'Atualizando...' : 'Salvar'}
+                  {isChangingPassword ? <CircleNotch size={14} className="animate-spin" /> : <Plus size={14} weight="bold" />}
+                  Atualizar Senha
                 </button>
               </div>
             </form>
@@ -301,4 +320,3 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
     </div>
   )
 }
-

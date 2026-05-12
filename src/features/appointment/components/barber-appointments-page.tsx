@@ -41,7 +41,7 @@ export function BarberAppointmentsPage({
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <p className="text-xs font-bold text-accent-cyan uppercase tracking-[0.2em] mb-2">AGENDA DO DIA</p>
-          <h1 className="text-3xl font-bold font-syne text-white uppercase tracking-tight leading-none">
+          <h1 className="text-3xl font-bold font-syne text-text-primary uppercase tracking-tight leading-none">
             Meus Agendamentos
           </h1>
           <p className="text-muted-foreground mt-2 text-sm">
@@ -65,7 +65,7 @@ export function BarberAppointmentsPage({
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest">EM ANDAMENTO AGORA</p>
-              <h2 className="text-xl font-bold text-white font-syne">{inProgress.client.full_name}</h2>
+              <h2 className="text-xl font-bold text-text-primary font-syne">{inProgress.client.full_name}</h2>
               <p className="text-sm text-muted-foreground">{inProgress.service.name} · {inProgress.duration_minutes}min</p>
             </div>
             <div className="flex flex-col gap-2 items-end shrink-0">
@@ -83,7 +83,7 @@ export function BarberAppointmentsPage({
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-accent-cyan uppercase tracking-widest">PRÓXIMO CLIENTE</p>
-              <h2 className="text-xl font-bold text-white font-syne">{nextAppointment.client.full_name}</h2>
+              <h2 className="text-xl font-bold text-text-primary font-syne">{nextAppointment.client.full_name}</h2>
               <p className="text-sm text-muted-foreground">
                 {nextAppointment.service.name} · {new Date(nextAppointment.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
               </p>
@@ -104,7 +104,7 @@ export function BarberAppointmentsPage({
         {upcoming.length === 0 && past.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-white/5 rounded-3xl text-muted-foreground">
             <Calendar className="w-10 h-10 opacity-20 mb-4" />
-            <p className="font-medium text-white">Nenhum agendamento hoje</p>
+            <p className="font-medium text-text-primary">Nenhum agendamento hoje</p>
             <p className="text-sm opacity-60 mt-1">Clique em "Agendar Cliente" para criar um.</p>
           </div>
         ) : (
@@ -172,13 +172,13 @@ function AppointmentCard({
   return (
     <div
       className={cn(
-        'group relative flex items-center gap-4 p-4 rounded-2xl border border-white/5 bg-[#141414] hover:border-white/10 transition-all',
+        'group relative flex items-center gap-4 p-4 rounded-2xl border border-white/5 bg-bg-surface hover:border-white/10 transition-all',
         dimmed && 'opacity-50'
       )}
     >
       {/* Time column */}
       <div className="w-14 shrink-0 text-center">
-        <p className="text-sm font-bold text-white">
+        <p className="text-sm font-bold text-text-primary">
           {startDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
         </p>
         <p className="text-[10px] text-muted-foreground">{appt.duration_minutes}min</p>
@@ -189,11 +189,11 @@ function AppointmentCard({
 
       {/* Content */}
       <div className="flex-1 min-w-0 space-y-1">
-        <p className="text-sm font-bold text-white truncate">{appt.client.full_name}</p>
+        <p className="text-sm font-bold text-text-primary truncate">{appt.client.full_name}</p>
         <div className="flex items-center gap-3">
           <p className="text-xs text-muted-foreground truncate">{appt.service.name}</p>
-          <span className="text-xs font-bold text-white/40">·</span>
-          <p className="text-xs font-medium text-white">R$ {(appt.price_cents / 100).toFixed(2)}</p>
+          <span className="text-xs font-bold text-text-primary/40">·</span>
+          <p className="text-xs font-medium text-text-primary">R$ {(appt.price_cents / 100).toFixed(2)}</p>
         </div>
       </div>
 
@@ -207,7 +207,7 @@ function AppointmentCard({
           <>
             <button
               onClick={onEdit}
-              className="text-[10px] font-bold uppercase px-3 py-1 rounded-lg bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white transition-colors"
+              className="text-[10px] font-bold uppercase px-3 py-1 rounded-lg bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-text-primary transition-colors"
             >
               Editar
             </button>

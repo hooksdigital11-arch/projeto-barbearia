@@ -1,177 +1,155 @@
 'use client'
 
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  Legend
-} from 'recharts'
-import { KPICard } from '@/components/shared/kpi-card'
+import { useEffect, useRef, useState } from 'react'
 import type { ClientReport } from '../types'
-import { Users, UserPlus, ArrowsClockwise, HeartStraight } from '@phosphor-icons/react/dist/ssr'
-import { ClientOnly } from '@/components/shared/client-only'
-
-const FREQ_COLORS = ['#10b981', '#06b6d4', '#6366f1', '#a855f7']
+import { cn } from '@/lib/utils/cn'
+import { useThemeColors } from '@/lib/hooks/use-theme-colors'
 
 interface ClientsSectionProps {
   data: ClientReport
 }
 
+const GRID = '#1a1a1a'
+const TICK = '#333'
+
+const baseOpts = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#141414',
+      borderColor: '#2a2a2a',
+      borderWidth: 0.5,
+      titleColor: '#888',
+      bodyColor: '#ccc',
+      padding: 8
+    }
+  },
+  scales: {
+    x: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 } } },
+    y: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 } }, beginAtZero: true }
+  }
+}
+
 export function ClientsSection({ data }: ClientsSectionProps) {
-  const { kpis, newClientsChart, frequencyDistribution, birthdays, topClients } = data
+  const { kpis, newClientsChart, topClients } = data
+  const lineChartRef = useRef<HTMLCanvasElement>(null)
+  const retentionChartRef = useRef<HTMLCanvasElement>(null)
+  const [isLoaded, setIsLoaded] = useState(false)
+  const { accent: C, secondary: C2 } = useThemeColors()
+
+  useEffect(() => {
+    const checkChart = () => {
+      if (window.Chart) setIsLoaded(true)
+      else setTimeout(checkChart, 100)
+    }
+    checkChart()
+  }, [])
+
+  useEffect(() => {
+    if (!isLoaded || !lineChartRef.current || !retentionChartRef.current) return
+
+    const Chart = window.Chart
+    
+    const lineChart = new Chart(lineChartRef.current, {
+      type: 'line',
+      data: {
+        labels: ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
+        datasets: [{ data: newClientsChart.map(d => d.count), borderColor: C, backgroundColor: C + '18', tension: 0.4, fill: true, pointBackgroundColor: C, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2 }]
+      },
+      options: { ...baseOpts, responsive: true, maintainAspectRatio: false }
+    })
+
+    const retentionChart = new Chart(retentionChartRef.current, {
+      type: 'doughnut',
+      data: {
+        labels: ['Retidos','Perdidos'],
+        datasets: [{ data: [kpis.retentionRate, 100 - kpis.retentionRate], backgroundColor: [C2, '#1a1a1a'], borderColor: '#111', borderWidth: 2 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '72%',
+        plugins: { legend: { display: false }, tooltip: { enabled: false } }
+      }
+    })
+
+    return () => {
+      lineChart.destroy()
+      retentionChart.destroy()
+    }
+  }, [isLoaded, newClientsChart, kpis.retentionRate, C, C2])
 
   return (
-    <section className="space-y-10">
-      <div className="border-l-2 border-accent-cyan pl-8 py-2">
-        <h2 className="text-4xl md:text-5xl font-syne font-black text-white uppercase tracking-tighter leading-none">
-          Clientes
-        </h2>
-        <p className="label-muted mt-2">
-          Retenção & Crescimento de Base
-        </p>
+    <div className="space-y-2.5">
+      {/* Metrics Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[14px_16px]">
+          <div className="text-[9px] tracking-[0.1em] text-[#383838] mb-2 uppercase">Total</div>
+          <div className="text-[22px] font-medium text-text-primary leading-none">{kpis.totalActive}</div>
+        </div>
+        <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[14px_16px]">
+          <div className="text-[9px] tracking-[0.1em] text-[#383838] mb-2 uppercase">Ativos</div>
+          <div className="text-[22px] font-medium text-text-primary leading-none">{kpis.totalActive}</div>
+        </div>
+        <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[14px_16px]">
+          <div className="text-[9px] tracking-[0.1em] text-[#383838] mb-2 uppercase">Novos</div>
+          <div className="text-[22px] font-medium text-text-primary leading-none">{kpis.newClients}</div>
+        </div>
+        <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[14px_16px]">
+          <div className="text-[9px] tracking-[0.1em] text-[#383838] mb-2 uppercase">Retenção</div>
+          <div className="text-[22px] font-medium text-accent-main leading-none">{kpis.retentionRate.toFixed(0)}%</div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KPICard
-          title="Total Ativos"
-          value={kpis.totalActive}
-          trend={kpis.totalActiveChange}
-        />
-        <KPICard
-          title="Novos Clientes"
-          value={kpis.newClients}
-          trend={kpis.newClientsChange}
-        />
-        <KPICard
-          title="Recorrentes"
-          value={kpis.recurringClients}
-          trend={kpis.recurringClientsChange}
-        />
-        <KPICard
-          title="Taxa de Retenção"
-          value={`${kpis.retentionRate.toFixed(1)}%`}
-          trend={kpis.retentionRateChange}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Novos Clientes por Dia */}
-        <div className="premium-card p-10">
-          <span className="label-muted mb-12 block">Novos Clientes</span>
-          <div className="h-[300px]">
-            <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={newClientsChart} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="0" stroke="#ffffff05" vertical={false} />
-                  <XAxis dataKey="date" stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} />
-                  <YAxis stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0d0d0d', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px' }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="count" 
-                    stroke="#00e5ff" 
-                    fill="#00e5ff10" 
-                    strokeWidth={3}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </ClientOnly>
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-[10px]">
+        <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[16px_18px]">
+          <div className="text-[9px] tracking-[0.1em] text-[#2a2a2a] mb-3 uppercase">Novos Clientes — Semana</div>
+          <div className="relative w-full h-[120px]">
+            <canvas ref={lineChartRef} />
           </div>
         </div>
 
-        {/* Frequência */}
-        <div className="premium-card p-10 flex flex-col">
-          <span className="label-muted mb-12 block">Frequência de Visitas</span>
-          <div className="flex-1 flex items-center relative">
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted mb-2">Visitas</p>
-                <p className="text-5xl font-bold text-white tabular-nums font-syne leading-none">100%</p>
-              </div>
+        <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[16px_18px]">
+          <div className="text-[9px] tracking-[0.1em] text-[#2a2a2a] mb-3 uppercase">Retenção de Clientes</div>
+          <div className="flex items-center justify-center gap-5 py-2">
+            <div className="relative w-[110px] h-[110px] shrink-0">
+              <canvas ref={retentionChartRef} />
             </div>
-            <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-full animate-pulse mx-auto aspect-square max-w-[200px]" />}>
-              <ResponsiveContainer width="100%" height={350}>
-                <PieChart>
-                  <Pie
-                    data={frequencyDistribution}
-                    innerRadius={110}
-                    outerRadius={125}
-                    paddingAngle={8}
-                    dataKey="count"
-                    nameKey="range"
-                    stroke="none"
-                    cornerRadius={40}
-                  >
-                    {frequencyDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={FREQ_COLORS[index % FREQ_COLORS.length]} className="outline-none" />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0d0d0d', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '16px' }}
-                    itemStyle={{ color: '#fff', fontSize: '12px', fontFamily: 'DM Mono' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </ClientOnly>
+            <div>
+              <div className="text-[28px] font-medium text-text-primary tracking-[-0.02em]">{kpis.retentionRate.toFixed(0)}%</div>
+              <div className="text-[10px] text-[#333] mt-1 uppercase tracking-widest">Clientes retidos</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Top Clientes Table */}
-      <div className="premium-card">
-        <div className="px-10 py-8 border-b border-white/[0.06]">
-          <span className="label-muted">Top 10 Clientes</span>
-        </div>
+      {/* Ranking Table */}
+      <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[16px_18px]">
+        <div className="text-[9px] tracking-[0.1em] text-[#2a2a2a] mb-3 uppercase">Ranking de Clientes</div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-white/[0.06]">
-                <th className="px-10 py-6 label-muted">Cliente</th>
-                <th className="px-10 py-6 label-muted text-center">Visitas</th>
-                <th className="px-10 py-6 label-muted text-right">Gasto Total</th>
-                <th className="px-10 py-6 label-muted text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.06]">
-              {topClients.map((client) => (
-                <tr key={client.id} className="hover:bg-bg-hover transition-colors group">
-                  <td className="px-10 py-8">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-white font-bold text-sm uppercase shrink-0 group-hover:border-accent-cyan/30 transition-colors">
-                        {client.name.charAt(0)}
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-base font-bold text-white tracking-tight">{client.name}</p>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Última: {client.lastVisit}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-10 py-8 text-center text-base font-bold text-white font-mono">{client.visits}</td>
-                  <td className="px-10 py-8 text-right text-base font-bold text-accent-cyan font-mono">
-                    R$ {client.totalSpent.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="px-10 py-8 text-right">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] text-text-secondary text-[10px] font-black uppercase tracking-widest group-hover:border-accent-cyan/20 transition-colors">
-                      {client.loyaltyPoints} carimbos
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="min-w-[600px]">
+            <div className="grid grid-cols-[1.6fr_1fr_60px_80px_80px] gap-2.5 pb-2 border-b-[0.5px] border-border-main mb-0.5">
+              <div className="text-[8px] tracking-[0.1em] text-[#2a2a2a] uppercase">Cliente</div>
+              <div className="text-[8px] tracking-[0.1em] text-[#2a2a2a] uppercase">Status</div>
+              <div className="text-[8px] tracking-[0.1em] text-[#2a2a2a] uppercase">Visitas</div>
+              <div className="text-[8px] tracking-[0.1em] text-[#2a2a2a] uppercase text-right">Faturamento</div>
+              <div className="text-[8px] tracking-[0.1em] text-[#2a2a2a] uppercase text-right">Última Visita</div>
+            </div>
+            {topClients.map((c, i) => (
+              <div key={i} className="grid grid-cols-[1.6fr_1fr_60px_80px_80px] gap-2.5 py-2.5 items-center border-b-[0.5px] border-border-main last:border-0">
+                <div className="text-[10px] text-text-muted font-medium uppercase truncate">{c.name}</div>
+                <div className="text-[10px] text-accent-main font-medium uppercase tracking-tight">Ativo</div>
+                <div className="text-[10px] text-text-nav uppercase">{c.visits}</div>
+                <div className="text-[10px] text-accent-main font-medium uppercase text-right">R$ {c.totalSpent.toLocaleString()}</div>
+                <div className="text-[10px] text-text-nav uppercase text-right">{c.lastVisit}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

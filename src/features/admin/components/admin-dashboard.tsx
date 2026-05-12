@@ -97,7 +97,7 @@ export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: 
         <div className="relative glass-card p-10 overflow-hidden">
           <div className="flex items-center justify-between mb-8">
             <div className="space-y-1">
-              <h3 className="text-2xl font-bold font-syne text-white tracking-tight">Fluxo de Receita</h3>
+              <h3 className="text-2xl font-bold font-syne text-text-primary tracking-tight">Fluxo de Receita</h3>
               <p className="text-text-secondary text-sm">Acompanhamento financeiro detalhado</p>
             </div>
             <div className="flex items-center gap-2">
@@ -120,7 +120,7 @@ export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: 
           <div className="glass-card p-10">
             <div className="flex items-center justify-between mb-10">
               <div className="space-y-1">
-                <h3 className="text-2xl font-bold font-syne text-white flex items-center gap-3 tracking-tight">
+                <h3 className="text-2xl font-bold font-syne text-text-primary flex items-center gap-3 tracking-tight">
                   <Users size={28} weight="bold" className="text-accent-cyan" />
                   Performance da Equipe
                 </h3>
@@ -146,7 +146,7 @@ export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: 
                         {barber.name[0]}
                       </div>
                       <div>
-                        <p className="font-bold text-lg text-white group-hover:text-accent-cyan transition-colors">{barber.name}</p>
+                        <p className="font-bold text-lg text-text-primary group-hover:text-accent-cyan transition-colors">{barber.name}</p>
                         <div className="flex items-center gap-3 mt-1">
                           <span className="text-xs text-text-secondary font-medium px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
                             {barber.rating} ⭐
@@ -172,7 +172,7 @@ export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: 
                       </div>
 
                       <div className="text-right min-w-[120px]">
-                        <p className="text-xl font-black text-white tracking-tight">R$ {barber.revenue}</p>
+                        <p className="text-xl font-black text-text-primary tracking-tight">R$ {barber.revenue}</p>
                         <div className="w-20 h-1.5 bg-white/10 rounded-full mt-3 ml-auto overflow-hidden shadow-inner">
                           <div 
                             className="h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_currentColor]" 
@@ -196,7 +196,7 @@ export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: 
         <div className="space-y-6">
           <div className="glass-card p-10 h-full">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-bold font-syne text-white flex items-center gap-3 tracking-tight">
+              <h3 className="text-2xl font-bold font-syne text-text-primary flex items-center gap-3 tracking-tight">
                 <ChartLineUp size={28} weight="bold" className="text-accent-cyan" />
                 Feed
               </h3>
@@ -210,10 +210,10 @@ export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: 
                     "absolute top-0 left-0 w-1 h-full",
                     activity.status === 'completed' ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" : "bg-accent-cyan shadow-[0_0_10px_rgba(0,229,255,0.5)]"
                   )} />
-                  <p className="text-sm font-black uppercase tracking-widest text-text-secondary group-hover:text-white transition-colors">
+                  <p className="text-sm font-black uppercase tracking-widest text-text-secondary group-hover:text-text-primary transition-colors">
                     {activity.status === 'completed' ? 'Finalizado' : 'Novo Agendamento'}
                   </p>
-                  <p className="text-sm text-white font-medium mt-1">
+                  <p className="text-sm text-text-primary font-medium mt-1">
                     {activity.client_name} <span className="text-text-secondary font-normal">
                       {activity.status === 'completed' ? `pagou R$ ${activity.value}` : 'agendou um horário'}
                     </span>
@@ -229,7 +229,7 @@ export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: 
               )}
             </div>
             
-            <button className="w-full mt-10 py-4 text-xs font-black uppercase tracking-[0.2em] text-text-secondary hover:text-white transition-all border-t border-white/5 group active:scale-95">
+            <button className="w-full mt-10 py-4 text-xs font-black uppercase tracking-[0.2em] text-text-secondary hover:text-text-primary transition-all border-t border-white/5 group active:scale-95">
               Ver histórico completo
             </button>
           </div>

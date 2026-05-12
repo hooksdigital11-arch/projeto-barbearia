@@ -20,9 +20,9 @@ import {
   Prohibit,
   WhatsappLogo,
   ArrowCounterClockwise,
+  Clock,
 } from '@phosphor-icons/react'
 import Link from 'next/link'
-import { KPICard } from '@/components/shared/kpi-card'
 import { ClientAvatar } from './client-avatar'
 import { EditClientModal } from './edit-client-modal'
 import { ClientHistoryTab } from './client-history-tab'
@@ -38,17 +38,6 @@ interface ClientProfileProps {
   role: 'admin' | 'barber'
   basePath: string
   loyaltyGoal: number
-}
-
-const statusBadge = {
-  active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  blocked: 'bg-red-500/10 text-red-400 border-red-500/20',
-  inactive: 'bg-white/10 text-text-secondary border-white/10',
-}
-const statusLabel = {
-  active: '🟢 Ativo',
-  blocked: '🔴 Bloqueado',
-  inactive: '⚫ Inativo',
 }
 
 type Tab = 'history' | 'upcoming' | 'loyalty' | 'notes'
@@ -92,8 +81,7 @@ export function ClientProfileComponent({
   const showFinancials = isAdmin
 
   function handleDelete() {
-    if (!confirm(`Remover ${client.full_name}?\n\nEste cliente tem ${client.total_visits || 0} visitas e ${formatCurrency(client.totalSpentCalc)} gastos.\n\nO cliente será desativado (soft delete).`)) return
-
+    if (!confirm(`Remover ${client.full_name}?`)) return
     startTransition(async () => {
       const result = await deleteClientAction(client.id)
       if (result.error) toast.error(result.error)
@@ -127,201 +115,194 @@ export function ClientProfileComponent({
   }
 
   const tabs: { key: Tab; label: string; count?: number }[] = [
-    { key: 'history', label: 'Histórico', count: client.pastAppointments.length },
-    { key: 'upcoming', label: 'Próximos', count: client.upcomingAppointments.length },
-    { key: 'loyalty', label: 'Fidelidade' },
-    { key: 'notes', label: 'Notas' },
+    { key: 'history', label: 'HISTÓRICO', count: client.pastAppointments.length },
+    { key: 'upcoming', label: 'PRÓXIMOS', count: client.upcomingAppointments.length },
+    { key: 'loyalty', label: 'FIDELIDADE' },
+    { key: 'notes', label: 'NOTAS' },
   ]
 
   return (
-    <>
+    <div className="animate-premium-in py-8">
       {/* Back button */}
       <Link
         href={basePath}
-        className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-[7px] text-[11px] text-[#333] tracking-[0.06em] hover:text-[#666] transition-all mb-8 uppercase font-medium"
       >
-        <ArrowLeft size={16} weight="bold" />
+        <ArrowLeft size={14} weight="regular" />
         Voltar
       </Link>
 
-      {/* Header Card */}
-      <div className="rounded-2xl border border-white/5 bg-card/20 backdrop-blur-xl p-6 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-start gap-5">
-          <ClientAvatar name={client.full_name} size="xl" />
+      {/* Profile Card */}
+      <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] p-[20px] px-[22px] flex items-center gap-[18px] mb-8">
+        <div className="w-[56px] h-[56px] rounded-full bg-[#6b21a8] flex items-center justify-center shrink-0">
+          <span className="text-[18px] font-medium text-text-primary uppercase">
+            {client.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
+          </span>
+        </div>
 
-          <div className="flex-1 min-w-0 space-y-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h1 className="text-2xl font-bold text-white font-syne">{client.full_name}</h1>
-                <span className={cn('inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-md border mt-1', statusBadge[client.status])}>
-                  {statusLabel[client.status]}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={() => setIsEditOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 text-text-secondary hover:text-white hover:bg-white/10 transition-colors text-sm font-medium border border-white/10"
-                >
-                  <PencilSimple size={14} weight="bold" />
-                  Editar
-                </button>
-
-                {/* More menu */}
-                <div className="relative">
-                  <button
-                    onClick={() => setShowMenu(!showMenu)}
-                    className="p-2 rounded-xl bg-white/5 text-text-secondary hover:text-white hover:bg-white/10 transition-colors border border-white/10"
-                  >
-                    <DotsThreeVertical size={18} weight="bold" />
-                  </button>
-
-                  {showMenu && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-                      <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/10 bg-bg-secondary shadow-2xl shadow-black/50 z-50 py-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <button
-                          onClick={() => { openWhatsApp(); setShowMenu(false) }}
-                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-text-secondary hover:text-white hover:bg-white/5 transition-colors"
-                        >
-                          <WhatsappLogo size={16} weight="duotone" />
-                          Enviar WhatsApp
-                        </button>
-                        {isAdmin && client.status === 'active' && (
-                          <button
-                            onClick={() => { handleBlock(); setShowMenu(false) }}
-                            disabled={isPending}
-                            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-text-secondary hover:text-yellow-400 hover:bg-yellow-500/5 transition-colors"
-                          >
-                            <Prohibit size={16} weight="duotone" />
-                            Bloquear cliente
-                          </button>
-                        )}
-                        {isAdmin && client.status === 'blocked' && (
-                          <button
-                            onClick={() => { handleReactivate(); setShowMenu(false) }}
-                            disabled={isPending}
-                            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-text-secondary hover:text-emerald-400 hover:bg-emerald-500/5 transition-colors"
-                          >
-                            <ArrowCounterClockwise size={16} weight="duotone" />
-                            Reativar cliente
-                          </button>
-                        )}
-                        {isAdmin && (
-                          <>
-                            <div className="border-t border-white/5 my-1" />
-                            <button
-                              onClick={() => { handleDelete(); setShowMenu(false) }}
-                              disabled={isPending}
-                              className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/5 transition-colors"
-                            >
-                              <Trash size={16} weight="duotone" />
-                              Remover cliente
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </>
-                  )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <h1 className="text-[18px] font-medium text-text-primary uppercase tracking-tight truncate max-w-[300px]">
+                {client.full_name}
+              </h1>
+              {client.status === 'active' && (
+                <div className="bg-[#0d2e1a] border-[0.5px] border-accent-main/20 rounded-[5px] px-[10px] py-[3px] flex items-center gap-1.5">
+                  <div className="w-[5px] h-[5px] rounded-full bg-accent-main" />
+                  <span className="text-[9px] font-medium text-accent-main tracking-[0.08em] uppercase">ATIVO</span>
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* Info items */}
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              {client.phone && (
-                <span className="text-sm text-text-secondary flex items-center gap-1.5">
-                  <Phone size={14} weight="duotone" />
-                  {client.phone}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsEditOpen(true)}
+                className="flex items-center gap-2 bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[14px] py-[8px] text-[10px] font-medium text-text-muted tracking-[0.08em] uppercase transition-all hover:border-[#333] hover:text-text-secondary"
+              >
+                <PencilSimple size={12} weight="regular" />
+                EDITAR
+              </button>
+
+              <div className="relative">
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="w-[32px] h-[32px] flex items-center justify-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] text-text-nav transition-all hover:text-text-primary hover:border-[#444]"
+                >
+                  <DotsThreeVertical size={16} weight="regular" />
+                </button>
+
+                {showMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                    <div className="absolute right-0 top-[38px] min-w-[170px] bg-bg-surface border-[0.5px] border-[#222] rounded-[8px] p-1 shadow-none z-50 animate-in fade-in zoom-in-95 duration-200">
+                      <button
+                        onClick={() => { openWhatsApp(); setShowMenu(false) }}
+                        className="flex items-center justify-start gap-[9px] w-full px-[12px] py-[9px] text-[11px] text-text-muted tracking-[0.04em] rounded-[6px] transition-all hover:bg-[#1a1a1a] hover:text-text-secondary group/item uppercase font-medium text-left whitespace-nowrap"
+                      >
+                        <WhatsappLogo size={14} weight="regular" className="text-[#444] group-hover/item:text-text-muted transition-colors shrink-0" />
+                        WhatsApp
+                      </button>
+
+                      {isAdmin && (
+                        <>
+                          <div className="h-[0.5px] bg-[#1e1e1e] my-[4px]" />
+                          {client.status === 'active' ? (
+                            <button
+                              onClick={() => { handleBlock(); setShowMenu(false) }}
+                              className="flex items-center justify-start gap-[9px] w-full px-[12px] py-[9px] text-[11px] text-[#c04040] tracking-[0.04em] rounded-[6px] transition-all hover:bg-[#1a0f0f] hover:text-[#e05050] group/item uppercase font-medium text-left whitespace-nowrap"
+                            >
+                              <Prohibit size={14} weight="regular" className="text-[#7a2020] group-hover/item:text-[#c04040] transition-colors shrink-0" />
+                              Bloquear cliente
+                            </button>
+                          ) : client.status === 'blocked' ? (
+                            <button
+                              onClick={() => { handleReactivate(); setShowMenu(false) }}
+                              className="flex items-center justify-start gap-[9px] w-full px-[12px] py-[9px] text-[11px] text-accent-main tracking-[0.04em] rounded-[6px] transition-all hover:bg-accent-main/10 group/item uppercase font-medium text-left whitespace-nowrap"
+                            >
+                              <ArrowCounterClockwise size={14} weight="regular" className="text-accent-main/40 group-hover/item:text-accent-main transition-colors shrink-0" />
+                              Reativar cliente
+                            </button>
+                          ) : null}
+
+                          <div className="h-[0.5px] bg-[#1e1e1e] my-[4px]" />
+                          <button
+                            onClick={() => { handleDelete(); setShowMenu(false) }}
+                            className="flex items-center justify-start gap-[9px] w-full px-[12px] py-[9px] text-[11px] text-red-500/80 tracking-[0.04em] rounded-[6px] transition-all hover:bg-red-500/10 hover:text-red-500 group/item uppercase font-medium text-left whitespace-nowrap"
+                          >
+                            <Trash size={14} weight="regular" className="text-red-500/40 group-hover/item:text-red-500/80 transition-colors shrink-0" />
+                            Excluir Registro
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-[20px]">
+            {client.phone && (
+              <div className="flex items-center gap-1.5">
+                <Phone size={12} weight="regular" className="text-[#2a2a2a]" />
+                <span className="text-[10px] text-[#383838] font-medium uppercase">{client.phone}</span>
+              </div>
+            )}
+            {client.email && (
+              <div className="flex items-center gap-1.5">
+                <Envelope size={12} weight="regular" className="text-[#2a2a2a]" />
+                <span className="text-[10px] text-[#383838] font-medium uppercase truncate max-w-[150px]">{client.email}</span>
+              </div>
+            )}
+            {client.birthday && (
+              <div className="flex items-center gap-1.5">
+                <Cake size={12} weight="regular" className="text-[#2a2a2a]" />
+                <span className="text-[10px] text-[#383838] font-medium uppercase">
+                  {formatDate(client.birthday)} ({calculateAge(client.birthday)} ANOS)
                 </span>
-              )}
-              {client.email && (
-                <span className="text-sm text-text-secondary flex items-center gap-1.5">
-                  <Envelope size={14} weight="duotone" />
-                  {client.email}
-                </span>
-              )}
-              {client.birthday && (
-                <span className="text-sm text-text-secondary flex items-center gap-1.5">
-                  <Cake size={14} weight="duotone" />
-                  {formatDate(client.birthday)} ({calculateAge(client.birthday)} anos)
-                </span>
-              )}
-              {client.preferred_barber && (
-                <span className="text-sm text-text-secondary flex items-center gap-1.5">
-                  <User size={14} weight="duotone" />
-                  Barbeiro pref: {client.preferred_barber.full_name}
-                </span>
-              )}
-              <span className="text-sm text-text-secondary flex items-center gap-1.5">
-                <Calendar size={14} weight="duotone" />
-                Cliente desde: {formatDate(client.created_at)}
+              </div>
+            )}
+            <div className="flex items-center gap-1.5">
+              <Calendar size={12} weight="regular" className="text-[#2a2a2a]" />
+              <span className="text-[10px] text-[#383838] font-medium uppercase">
+                DESDE: {formatDate(client.created_at)}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <KPICard
-          title="Visitas"
-          value={client.total_visits || client.pastAppointments.length}
-          icon={<Scissors size={20} weight="duotone" />}
-        />
-        {showFinancials ? (
-          <KPICard
-            title="Total Gasto"
-            value={formatCurrency(client.totalSpentCalc)}
-            icon={<CurrencyDollar size={20} weight="duotone" />}
-          />
-        ) : (
-          <KPICard
-            title="Última Visita"
-            value={formatDate(client.last_visit_at)}
-            icon={<Calendar size={20} weight="duotone" />}
-          />
-        )}
-        {showFinancials ? (
-          <KPICard
-            title="Ticket Médio"
-            value={formatCurrency(client.avgTicket)}
-            icon={<CurrencyDollar size={20} weight="duotone" />}
-          />
-        ) : (
-          <KPICard
-            title="Próximos"
-            value={client.upcomingAppointments.length}
-            icon={<Calendar size={20} weight="duotone" />}
-          />
-        )}
-        <KPICard
-          title="Fidelidade"
-          value={`${client.stampBalance}/${loyaltyGoal}`}
-          icon={<Star size={20} weight="duotone" />}
-        />
+      {/* Metrics */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-[10px] mb-8">
+        {[
+          { label: 'VISITAS', value: client.total_visits || client.pastAppointments.length, icon: Scissors },
+          { 
+            label: showFinancials ? 'TOTAL GASTO' : 'ÚLTIMA VISITA', 
+            value: showFinancials ? formatCurrency(client.totalSpentCalc) : formatDate(client.last_visit_at), 
+            icon: showFinancials ? CurrencyDollar : Calendar,
+            isMonetary: showFinancials
+          },
+          { 
+            label: showFinancials ? 'TICKET MÉDIO' : 'PRÓXIMOS', 
+            value: showFinancials ? formatCurrency(client.avgTicket) : client.upcomingAppointments.length, 
+            icon: showFinancials ? CurrencyDollar : Calendar,
+            isMonetary: showFinancials
+          },
+          { label: 'FIDELIDADE', value: `${client.stampBalance}/${loyaltyGoal}`, icon: Star },
+        ].map((metric, idx) => (
+          <div key={idx} className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[16px] px-[18px] flex flex-col items-start gap-[8px]">
+            <metric.icon size={14} weight="regular" className="text-[#2a2a2a] mb-[10px]" />
+            <p className="text-[9px] font-medium text-[#2e2e2e] tracking-[0.1em] uppercase">{metric.label}</p>
+            <p className={cn(
+              "font-medium text-text-primary tracking-tight leading-none",
+              metric.isMonetary ? "text-[18px]" : "text-[22px]"
+            )}>
+              {metric.value}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-white/5 overflow-x-auto">
+      <div className="flex gap-1 mb-8 border-b-[0.5px] border-border-main overflow-x-auto scrollbar-hide">
         {tabs.map(tab => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={cn(
-              'flex items-center gap-1.5 px-4 py-3 text-sm font-medium transition-all border-b-2 -mb-px whitespace-nowrap',
+              "flex items-center gap-2 px-4 py-[10px] text-[11px] font-medium tracking-[0.06em] transition-all border-b-2 -mb-px whitespace-nowrap",
               activeTab === tab.key
-                ? 'text-accent-cyan border-accent-cyan'
-                : 'text-text-secondary border-transparent hover:text-white hover:border-white/20'
+                ? "text-text-primary border-accent-main"
+                : "text-[#333] border-transparent hover:text-[#666]"
             )}
           >
             {tab.label}
             {tab.count !== undefined && (
               <span className={cn(
-                'text-[10px] px-1.5 py-0.5 rounded-md',
+                "text-[9px] font-medium px-1.5 py-0.5 rounded-[4px] transition-all",
                 activeTab === tab.key
-                  ? 'bg-accent-cyan/10 text-accent-cyan'
-                  : 'bg-white/5 text-text-secondary'
+                  ? "bg-[var(--accent-15, #00d4aa22)] text-accent-main"
+                  : "bg-[#1e1e1e] text-text-nav"
               )}>
                 {tab.count}
               </span>
@@ -330,8 +311,8 @@ export function ClientProfileComponent({
         ))}
       </div>
 
-      {/* Tab content */}
-      <div className="min-h-[200px]">
+      {/* Content */}
+      <div className="min-h-[300px]">
         {activeTab === 'history' && (
           <ClientHistoryTab
             appointments={client.pastAppointments}
@@ -365,6 +346,6 @@ export function ClientProfileComponent({
         barbers={barbers}
         isAdmin={isAdmin}
       />
-    </>
+    </div>
   )
 }

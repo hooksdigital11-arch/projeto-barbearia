@@ -179,13 +179,13 @@ export function WaitingListCard({ entry, role }: WaitingListCardProps) {
             #{entry.position}
           </div>
           <div className="min-w-0">
-            <h3 className="text-white font-bold text-base truncate">
+            <h3 className="text-text-primary font-bold text-base truncate">
               {entry.client?.full_name || 'Cliente'}
             </h3>
             <div className="flex items-center gap-2 text-xs text-text-secondary mt-0.5">
               <Scissors size={12} weight="duotone" />
               <span className="truncate">{entry.service?.name || 'Serviço'}</span>
-              <span className="text-white/20">|</span>
+              <span className="text-text-primary/20">|</span>
               {entry.barber ? (
                 <span className="flex items-center gap-1">
                   <span
@@ -193,7 +193,7 @@ export function WaitingListCard({ entry, role }: WaitingListCardProps) {
                     style={{ backgroundColor: barberColor }}
                   />
                   <span className="truncate">{entry.barber.full_name}</span>
-                  <span className="text-white/30">(preferido)</span>
+                  <span className="text-text-primary/30">(preferido)</span>
                 </span>
               ) : (
                 <span className="text-text-secondary">Qualquer barbeiro</span>

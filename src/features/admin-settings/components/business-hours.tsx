@@ -3,10 +3,9 @@
 import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Clock, FloppyDisk, CircleNotch } from '@phosphor-icons/react'
+import { FloppyDisk, CircleNotch, Check } from '@phosphor-icons/react'
 import { businessHoursSchema, type BusinessHoursInput } from '../schemas'
 import { updateBusinessHours } from '../actions'
-import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   Form,
@@ -56,101 +55,113 @@ export function BusinessHours({ initialData }: { initialData: any }) {
   }
 
   return (
-    <div className="space-y-16">
-      <div>
-        <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter">Horários</h2>
-        <p className="label-muted mt-2">Defina as janelas de operação para agendamentos</p>
+    <div className="space-y-10 max-w-4xl">
+      <div className="space-y-0.5">
+        <h2 className="text-[16px] font-medium text-text-primary uppercase tracking-[0.02em]">Horários</h2>
+        <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a]">Defina as janelas de operação para agendamentos</p>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid gap-4">
-            {days.map((day) => (
-              <div 
-                key={day.id} 
-                className={cn(
-                  "flex flex-col md:flex-row md:items-center justify-between p-8 rounded-[2rem] border transition-all",
-                  form.watch(`${day.id}.isOpen`) 
-                    ? "bg-white/[0.03] border-white/[0.06]" 
-                    : "bg-black/20 border-white/5 opacity-40"
-                )}
-              >
-                <div className="flex items-center gap-6 min-w-[200px]">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-0">
+          <div className="flex flex-col">
+            {days.map((day, idx) => {
+              const isOpen = form.watch(`${day.id}.isOpen`)
+              
+              return (
+                <div 
+                  key={day.id} 
+                  className={cn(
+                    "grid grid-cols-[24px_130px_1fr_auto_1fr_90px] gap-3 items-center py-[13px] transition-all",
+                    idx !== days.length - 1 && "border-bottom-[0.5px] border-border-main",
+                    !isOpen && "opacity-40"
+                  )}
+                  style={{ borderBottom: idx !== days.length - 1 ? '0.5px solid #141414' : 'none' }}
+                >
+                  {/* Checkbox */}
                   <FormField
                     control={form.control}
                     name={`${day.id}.isOpen`}
                     render={({ field }) => (
-                      <FormItem className="flex items-center space-y-0">
+                      <FormItem className="space-y-0">
                         <FormControl>
                           <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
-                            className="w-5 h-5 border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan"
+                            className="w-4 h-4 border-[0.5px] border-[#2a2a2a] rounded-[4px] bg-bg-surface data-[state=checked]:bg-accent-main data-[state=checked]:border-accent-main transition-all"
                           />
                         </FormControl>
-                        <FormLabel className="ml-4 text-sm font-bold text-white cursor-pointer uppercase tracking-tight">
-                          {day.label}
-                        </FormLabel>
                       </FormItem>
                     )}
                   />
-                </div>
 
-                <div className={cn(
-                  "flex items-center gap-6 mt-4 md:mt-0 transition-all",
-                  !form.watch(`${day.id}.isOpen`) && "pointer-events-none opacity-20"
-                )}>
-                  <div className="flex items-center gap-3">
-                    <span className="label-muted">Início</span>
-                    <FormField
-                      control={form.control}
-                      name={`${day.id}.open`}
-                      render={({ field }) => (
-                        <input 
-                          {...field} 
-                          type="time" 
-                          className="bg-black border border-white/[0.06] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-accent-cyan/30 font-mono transition-all"
-                        />
-                      )}
-                    />
+                  {/* Day Name */}
+                  <span className={cn(
+                    "text-[11px] font-medium uppercase tracking-wide transition-colors",
+                    isOpen ? "text-text-secondary" : "text-text-muted"
+                  )}>
+                    {day.label}
+                  </span>
+
+                  {/* Open Time */}
+                  <FormField
+                    control={form.control}
+                    name={`${day.id}.open`}
+                    render={({ field }) => (
+                      <input 
+                        {...field} 
+                        type="time" 
+                        disabled={!isOpen}
+                        className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] p-[8px_12px] text-[11px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all disabled:opacity-20"
+                      />
+                    )}
+                  />
+
+                  {/* ATÉ */}
+                  <span className="text-[9px] text-[#2a2a2a] uppercase tracking-[0.08em] font-medium w-8 text-center">ATÉ</span>
+
+                  {/* Close Time */}
+                  <FormField
+                    control={form.control}
+                    name={`${day.id}.close`}
+                    render={({ field }) => (
+                      <input 
+                        {...field} 
+                        type="time" 
+                        disabled={!isOpen}
+                        className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] p-[8px_12px] text-[11px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all disabled:opacity-20"
+                      />
+                    )}
+                  />
+
+                  {/* Badge */}
+                  <div className="flex justify-end">
+                    <span className={cn(
+                      "px-[10px] py-[4px] rounded-[5px] text-[9px] font-medium uppercase tracking-[0.08em] border-[0.5px] w-fit",
+                      isOpen 
+                        ? "bg-[#0d2e1a] text-[#00c070] border-[#00c07033]" 
+                        : "bg-[#2e1a1a] text-[#c04040] border-[#c0404033]"
+                    )}>
+                      {isOpen ? 'ABERTO' : 'FECHADO'}
+                    </span>
                   </div>
-                  
-                  <div className="w-6 h-[1px] bg-white/10" />
-
-                  <div className="flex items-center gap-3">
-                    <span className="label-muted">Fim</span>
-                    <FormField
-                      control={form.control}
-                      name={`${day.id}.close`}
-                      render={({ field }) => (
-                        <input 
-                          {...field} 
-                          type="time" 
-                          className="bg-black border border-white/[0.06] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-accent-cyan/30 font-mono transition-all"
-                        />
-                      )}
-                    />
-                  </div>
                 </div>
-
-                <div className="hidden md:block">
-                  {!form.watch(`${day.id}.isOpen`) ? (
-                    <span className="text-[10px] font-black text-red-500 uppercase tracking-widest opacity-40">Fechado</span>
-                  ) : (
-                    <span className="text-[10px] font-black text-accent-cyan uppercase tracking-widest">Aberto</span>
-                  )}
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
-          <div className="flex justify-end pt-12 border-t border-white/[0.06]">
+          {/* Footer Actions */}
+          <div className="pt-6 mt-4 border-t-[0.5px] border-border-main/50 flex justify-end">
             <button 
               type="submit"
-              disabled={isPending} 
-              className="px-10 py-3.5 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+              disabled={isPending}
+              className="flex items-center gap-2 bg-accent-main text-black px-[18px] py-[10px] rounded-[7px] text-[10px] font-medium uppercase tracking-wider hover:opacity-90 disabled:opacity-50 transition-all shadow-[0_0_20px_color-mix(in_srgb,var(--accent)_10%,transparent)]"
             >
-              {isPending ? 'Salvando...' : 'Salvar Horários'}
+              {isPending ? (
+                <CircleNotch size={14} className="animate-spin" />
+              ) : (
+                <FloppyDisk size={14} weight="bold" />
+              )}
+              Salvar Horários
             </button>
           </div>
         </form>

@@ -66,7 +66,7 @@ export function ComandaActive({
         <div className="space-y-2">
           <div className="flex items-center gap-4">
             <div className="w-2 h-10 bg-accent-cyan rounded-full shadow-[0_0_20px_rgba(0,229,255,0.4)]" />
-            <h1 className="text-4xl font-black font-syne text-white uppercase tracking-tighter">
+            <h1 className="text-4xl font-black font-syne text-text-primary uppercase tracking-tighter">
               Checkout<span className="text-accent-cyan">.</span>
             </h1>
           </div>
@@ -83,7 +83,7 @@ export function ComandaActive({
                 {clientName[0]}
               </div>
               <div className="space-y-1">
-                <h2 className="text-3xl font-bold text-white tracking-tighter">{clientName}</h2>
+                <h2 className="text-3xl font-bold text-text-primary tracking-tighter">{clientName}</h2>
                 {appointment && (
                   <div className="flex items-center gap-3 text-muted-foreground font-medium bg-white/5 px-4 py-1.5 rounded-full border border-white/5 w-fit">
                     <span className="text-accent-cyan text-xs font-black uppercase tracking-widest">{appointment.service?.name}</span>
@@ -114,13 +114,13 @@ export function ComandaActive({
             <div className="flex gap-4">
               <Button 
                 onClick={() => setIsServiceModalOpen(true)}
-                className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] tracking-widest hover:bg-white/10 active:scale-95 transition-all"
+                className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-text-primary font-black text-[10px] tracking-widest hover:bg-white/10 active:scale-95 transition-all"
               >
                 <Plus size={16} className="mr-2 text-accent-cyan" /> SERVIÇO
               </Button>
               <Button 
                 onClick={() => setIsProductModalOpen(true)}
-                className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] tracking-widest hover:bg-white/10 active:scale-95 transition-all"
+                className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-text-primary font-black text-[10px] tracking-widest hover:bg-white/10 active:scale-95 transition-all"
               >
                 <Plus size={16} className="mr-2 text-accent-blue" /> PRODUTO
               </Button>
@@ -134,7 +134,7 @@ export function ComandaActive({
               ))
             ) : (
               <div className="p-20 rounded-[3rem] border-2 border-dashed border-white/5 flex flex-col items-center justify-center text-muted-foreground gap-6 bg-white/[0.01]">
-                <div className="w-24 h-24 rounded-[2rem] bg-white/[0.03] flex items-center justify-center text-white/5">
+                <div className="w-24 h-24 rounded-[2rem] bg-white/[0.03] flex items-center justify-center text-text-primary/5">
                   <Receipt size={48} />
                 </div>
                 <p className="text-[10px] font-black uppercase tracking-[0.4em]">Aguardando lançamento de itens</p>
@@ -147,7 +147,7 @@ export function ComandaActive({
         <div className="sticky top-8">
           <div className="relative group">
             <div className="absolute -inset-1 bg-accent-cyan/20 rounded-[3rem] blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-1000" />
-            <div className="relative p-10 rounded-[3rem] bg-[#141414] border border-white/10 shadow-2xl flex flex-col overflow-hidden">
+            <div className="relative p-10 rounded-[3rem] bg-bg-surface border border-white/10 shadow-2xl flex flex-col overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-accent-cyan via-accent-blue to-accent-cyan animate-gradient-x" />
               
               <div className="mb-10 text-center space-y-2">
@@ -158,7 +158,7 @@ export function ComandaActive({
               <div className="space-y-6 flex-1">
                 <div className="flex justify-between items-center px-2">
                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Subtotal</span>
-                  <span className="text-lg font-bold text-white tabular-nums">R$ {(subtotal / 100).toFixed(2)}</span>
+                  <span className="text-lg font-bold text-text-primary tabular-nums">R$ {(subtotal / 100).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center px-2">
                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Descontos</span>
@@ -168,7 +168,7 @@ export function ComandaActive({
                 <div className="pt-8 mt-4 border-t-2 border-dashed border-white/10">
                   <div className="flex flex-col gap-2">
                     <span className="text-[10px] font-black text-accent-cyan uppercase tracking-[0.4em] text-center">Total a Pagar</span>
-                    <span className="text-6xl font-black text-white text-center font-syne tracking-tighter shadow-glow-cyan">
+                    <span className="text-6xl font-black text-text-primary text-center font-syne tracking-tighter shadow-glow-cyan">
                       R$ {(total / 100).toFixed(0)}<span className="text-2xl">,{(total % 100).toString().padStart(2, '0')}</span>
                     </span>
                   </div>
@@ -191,7 +191,7 @@ export function ComandaActive({
                 
                 <button 
                   onClick={onBack}
-                  className="w-full py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-white transition-colors"
+                  className="w-full py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-text-primary transition-colors"
                 >
                   Manter em aberto
                 </button>

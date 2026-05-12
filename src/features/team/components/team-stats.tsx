@@ -5,27 +5,26 @@ import type { TeamStats } from '../types'
 
 export function TeamStatsCards({ stats }: { stats: TeamStats }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/5 border border-white/5 overflow-hidden">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
       {[
-        { label: 'Total da Equipe', value: stats.total, icon: UsersThree, color: '#8b5cf6', desc: 'Profissionais cadastrados' },
-        { label: 'Ativos Agora', value: stats.active, icon: UserCheck, color: '#10b981', desc: 'Disponíveis para escala' },
-        { label: 'Agendamentos', value: stats.todayAppointments, icon: CalendarCheck, color: '#3b82f6', desc: 'Volume de hoje' },
-        { label: 'Rating Médio', value: stats.avgRating > 0 ? `${stats.avgRating.toFixed(1)} ★` : '5.0 ★', icon: Star, color: '#ffcc00', desc: 'Satisfação dos clientes' },
+        { label: 'TOTAL DA EQUIPE', value: stats.total, icon: UsersThree, desc: 'Profissionais cadastrados' },
+        { label: 'ATIVOS AGORA', value: stats.active, icon: UserCheck, desc: 'Disponíveis para escala' },
+        { label: 'AGENDAMENTOS', value: stats.todayAppointments, icon: CalendarCheck, desc: 'Volume de hoje' },
+        { label: 'RATING MÉDIO', value: stats.avgRating > 0 ? stats.avgRating.toFixed(1) : '5.0', icon: Star, desc: 'Satisfação dos clientes', isRating: true },
       ].map((kpi, idx) => (
-        <div key={idx} className="p-10 bg-black flex flex-col justify-between h-48 group">
-          <div className="flex items-start justify-between">
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-40 group-hover:opacity-100 transition-opacity">
-              {kpi.label}
-            </p>
-            <kpi.icon size={20} weight="bold" style={{ color: kpi.color }} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+        <div key={idx} className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[16px] px-[18px] flex flex-col justify-between h-[110px]">
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] font-medium text-[#383838] tracking-[0.12em] uppercase">{kpi.label}</span>
+            <kpi.icon size={14} weight="regular" className="text-accent-main opacity-35" />
           </div>
-          <div>
-            <p className="text-5xl font-bold font-mono text-white tracking-tighter group-hover:text-accent-cyan transition-colors">
+          <div className="space-y-1">
+            <div className="text-[26px] text-text-primary font-medium flex items-center gap-1.5 leading-none">
               {kpi.value}
-            </p>
-            <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest opacity-30 group-hover:opacity-60 transition-opacity">
-              {kpi.desc}
-            </p>
+              {kpi.isRating && (
+                <span className="text-[16px] text-[#d4aa00]">★</span>
+              )}
+            </div>
+            <p className="text-[8px] text-[#2a2a2a] tracking-[0.07em] font-medium uppercase">{kpi.desc}</p>
           </div>
         </div>
       ))}

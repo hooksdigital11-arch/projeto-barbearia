@@ -2,9 +2,10 @@
 
 import { useTransition, useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { X, PencilSimple } from '@phosphor-icons/react'
+import { X, PencilSimple, CaretDown, Check } from '@phosphor-icons/react'
 import { updateClientAction } from '../actions'
 import type { ClientRecord, BarberOption } from '../types'
+import { cn } from '@/lib/utils/cn'
 
 interface EditClientModalProps {
   isOpen: boolean
@@ -66,132 +67,146 @@ export function EditClientModal({ isOpen, onClose, client, barbers, isAdmin }: E
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose} />
 
-      <div className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-bg-secondary shadow-2xl shadow-black/50 overflow-hidden animate-in fade-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg rounded-[12px] border border-border-main bg-bg-surface overflow-hidden animate-in fade-in zoom-in-95 duration-500 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-white/5 sticky top-0 bg-bg-secondary z-10">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-yellow-500/10">
-              <PencilSimple size={20} weight="bold" className="text-yellow-400" />
+        <div className="flex items-center justify-between p-[28px] pb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-[34px] h-[34px] flex items-center justify-center bg-[#1a1400] border-[0.5px] border-[#3a2e00] rounded-[7px] text-[#d4aa00] shrink-0">
+              <PencilSimple size={18} weight="regular" />
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-white font-syne">Editar Cliente</h2>
-              <p className="text-xs text-text-secondary">{client.full_name}</p>
+            <div className="space-y-0.5">
+              <h2 className="text-[14px] font-medium text-text-primary uppercase tracking-tight">Editar Cliente</h2>
+              <p className="text-[10px] text-[#383838] font-medium uppercase tracking-[0.04em]">{client.full_name}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-text-secondary hover:text-white hover:bg-white/5 transition-colors"
+            className="w-7 h-7 flex items-center justify-center bg-[#1a1a1a] border-[0.5px] border-[#252525] rounded-[6px] text-[#444] transition-all hover:text-text-primary hover:border-[#444]"
           >
-            <X size={20} weight="bold" />
+            <X size={13} weight="regular" />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Nome */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-text-secondary">Nome completo *</label>
-            <input
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-              minLength={2}
-              maxLength={100}
-              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 focus:border-accent-cyan/50 transition-all"
-            />
-          </div>
-
-          {/* Telefone */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-text-secondary">Telefone *</label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(formatPhone(e.target.value))}
-              required
-              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 focus:border-accent-cyan/50 transition-all font-mono"
-            />
-          </div>
-
-          {/* Email */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-text-secondary">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 focus:border-accent-cyan/50 transition-all"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {/* Aniversário */}
+        {/* Form Content */}
+        <div className="overflow-y-auto px-[28px] pb-[28px]">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Nome */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-text-secondary">Aniversário</label>
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">
+                Nome completo <span className="text-accent-main">*</span>
+              </label>
               <input
-                type="date"
-                value={birthday}
-                onChange={(e) => setBirthday(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 focus:border-accent-cyan/50 transition-all [color-scheme:dark]"
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 placeholder:text-[11px] placeholder:text-[#2a2a2a] uppercase"
               />
             </div>
 
-            {/* Barbeiro preferido */}
+            {/* Telefone */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-text-secondary">Barbeiro pref.</label>
-              <select
-                value={preferredBarberId}
-                onChange={(e) => setPreferredBarberId(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 focus:border-accent-cyan/50 transition-all appearance-none"
-              >
-                <option value="" className="bg-bg-secondary text-text-secondary">Nenhum</option>
-                {barbers.map(b => (
-                  <option key={b.id} value={b.id} className="bg-bg-secondary text-white">
-                    {b.full_name}
-                  </option>
-                ))}
-              </select>
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">
+                Telefone <span className="text-accent-main">*</span>
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(formatPhone(e.target.value))}
+                required
+                className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 placeholder:text-[11px] placeholder:text-[#2a2a2a]"
+              />
             </div>
-          </div>
 
-          {/* Status (Admin only) */}
-          {isAdmin && (
+            {/* Email */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-text-secondary">Status</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as 'active' | 'inactive' | 'blocked')}
-                className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 focus:border-accent-cyan/50 transition-all appearance-none"
-              >
-                <option value="active" className="bg-bg-secondary text-white">Ativo</option>
-                <option value="blocked" className="bg-bg-secondary text-white">Bloqueado</option>
-                <option value="inactive" className="bg-bg-secondary text-white">Inativo</option>
-              </select>
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 placeholder:text-[11px] placeholder:text-[#2a2a2a] uppercase"
+              />
             </div>
-          )}
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-text-secondary hover:text-white hover:bg-white/10 transition-colors text-sm font-medium"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isPending || !fullName || !phone}
-              className="flex-1 px-4 py-3 rounded-xl bg-accent-cyan text-black font-bold text-sm hover:bg-accent-cyan/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            >
-              {isPending ? 'Salvando...' : 'Salvar'}
-            </button>
-          </div>
-        </form>
+            <div className="grid grid-cols-2 gap-[10px]">
+              {/* Aniversário */}
+              <div className="space-y-2">
+                <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Aniversário</label>
+                <input
+                  type="date"
+                  value={birthday}
+                  onChange={(e) => setBirthday(e.target.value)}
+                  className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 [color-scheme:dark]"
+                />
+              </div>
+
+              {/* Barbeiro preferido */}
+              <div className="space-y-2">
+                <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Barbeiro pref.</label>
+                <div className="relative">
+                  <select
+                    value={preferredBarberId}
+                    onChange={(e) => setPreferredBarberId(e.target.value)}
+                    className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 appearance-none cursor-pointer uppercase"
+                  >
+                    <option value="" className="bg-bg-surface">Nenhum</option>
+                    {barbers.map(b => (
+                      <option key={b.id} value={b.id} className="bg-bg-surface">
+                        {b.full_name.toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-[10px] top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
+                    <CaretDown size={14} weight="regular" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Status (Admin only) */}
+            {isAdmin && (
+              <div className="space-y-2">
+                <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Status</label>
+                <div className="relative">
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as 'active' | 'inactive' | 'blocked')}
+                    className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 appearance-none cursor-pointer uppercase"
+                  >
+                    <option value="active" className="bg-bg-surface">Ativo</option>
+                    <option value="blocked" className="bg-bg-surface">Bloqueado</option>
+                    <option value="inactive" className="bg-bg-surface">Inativo</option>
+                  </select>
+                  <div className="absolute right-[10px] top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
+                    <CaretDown size={14} weight="regular" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="grid grid-cols-2 gap-[10px] pt-[18px] border-t-[0.5px] border-border-main">
+              <button
+                type="button"
+                onClick={onClose}
+                className="bg-bg-sidebar border-[0.5px] border-border-main text-[#444] py-[12px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:border-[#333] hover:text-[#777]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isPending || !fullName || !phone}
+                className="flex items-center justify-center gap-2 bg-accent-main text-black py-[12px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Check size={14} weight="bold" />
+                {isPending ? 'SALVANDO...' : 'SALVAR ALTERAÇÕES'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

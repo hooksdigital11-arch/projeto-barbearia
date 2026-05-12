@@ -89,7 +89,7 @@ export function SignupForm() {
       >
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold font-syne text-white tracking-tight">
+          <h1 className="text-4xl font-bold font-syne text-text-primary tracking-tight">
             Crie sua conta
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -103,14 +103,14 @@ export function SignupForm() {
           name="fullName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white text-sm font-medium">Nome Completo</FormLabel>
+              <FormLabel className="text-text-primary text-sm font-medium">Nome Completo</FormLabel>
               <FormControl>
                 <div className="relative group">
                   <Input
                     {...field}
                     placeholder="Ex: João Silva"
                     disabled={isPending}
-                    className="pl-11 bg-card/50 border-cyan-500/20 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                    className="pl-11 bg-card/50 border-cyan-500/20 text-text-primary focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all"
                   />
                   <User
                     size={20}
@@ -131,7 +131,7 @@ export function SignupForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white text-sm font-medium">Email</FormLabel>
+                <FormLabel className="text-text-primary text-sm font-medium">Email</FormLabel>
                 <FormControl>
                   <div className="relative group">
                     <Input
@@ -139,7 +139,7 @@ export function SignupForm() {
                       type="email"
                       placeholder="seu@email.com"
                       disabled={isPending}
-                      className="pl-11 bg-card/50 border-cyan-500/20 text-white focus:border-cyan-500 transition-all"
+                      className="pl-11 bg-card/50 border-cyan-500/20 text-text-primary focus:border-cyan-500 transition-all"
                     />
                     <EnvelopeSimple
                       size={20}
@@ -159,14 +159,14 @@ export function SignupForm() {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white text-sm font-medium">Telefone</FormLabel>
+                <FormLabel className="text-text-primary text-sm font-medium">Telefone</FormLabel>
                 <FormControl>
                   <div className="relative group">
                     <Input
                       {...field}
                       placeholder="(11) 98765-4321"
                       disabled={isPending}
-                      className="pl-11 bg-card/50 border-cyan-500/20 text-white focus:border-cyan-500 transition-all"
+                      className="pl-11 bg-card/50 border-cyan-500/20 text-text-primary focus:border-cyan-500 transition-all"
                       onChange={(e) => {
                         let val = e.target.value.replace(/\D/g, '')
                         if (val.length > 11) val = val.slice(0, 11)
@@ -198,7 +198,7 @@ export function SignupForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white text-sm font-medium">Senha</FormLabel>
+                <FormLabel className="text-text-primary text-sm font-medium">Senha</FormLabel>
                 <FormControl>
                   <div className="relative group">
                     <Input
@@ -206,7 +206,7 @@ export function SignupForm() {
                       type="password"
                       placeholder="••••••••"
                       disabled={isPending}
-                      className="pl-11 bg-card/50 border-cyan-500/20 text-white focus:border-cyan-500 transition-all"
+                      className="pl-11 bg-card/50 border-cyan-500/20 text-text-primary focus:border-cyan-500 transition-all"
                     />
                     <LockSimple
                       size={20}
@@ -246,7 +246,7 @@ export function SignupForm() {
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white text-sm font-medium">Confirmar Senha</FormLabel>
+                <FormLabel className="text-text-primary text-sm font-medium">Confirmar Senha</FormLabel>
                 <FormControl>
                   <div className="relative group">
                     <Input
@@ -254,7 +254,7 @@ export function SignupForm() {
                       type="password"
                       placeholder="••••••••"
                       disabled={isPending}
-                      className="pl-11 bg-card/50 border-cyan-500/20 text-white focus:border-cyan-500 transition-all"
+                      className="pl-11 bg-card/50 border-cyan-500/20 text-text-primary focus:border-cyan-500 transition-all"
                     />
                     <LockSimple
                       size={20}
@@ -302,7 +302,7 @@ export function SignupForm() {
         <Button
           type="submit"
           disabled={isPending}
-          className="w-full h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold text-base transition-all duration-300 active:scale-[0.98] disabled:opacity-50 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] mt-4"
+          className="w-full h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-text-primary font-bold text-base transition-all duration-300 active:scale-[0.98] disabled:opacity-50 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] mt-4"
         >
           {isPending ? (
             <div className="flex items-center justify-center space-x-2">

@@ -102,7 +102,7 @@ export function LoginForm() {
 
         {/* Header */}
         <div className="space-y-3">
-          <h1 className="text-5xl font-black font-syne text-white tracking-tighter leading-none">
+          <h1 className="text-5xl font-black font-syne text-text-primary tracking-tighter leading-none">
             Bem-vindo <span className="text-accent-cyan">de volta</span>
           </h1>
           <p className="text-text-secondary text-lg font-medium leading-relaxed">
@@ -159,7 +159,7 @@ export function LoginForm() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-0 top-0 h-full w-14 flex items-center justify-center text-text-secondary hover:text-white transition-colors p-0.5"
+                      className="absolute right-0 top-0 h-full w-14 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors p-0.5"
                       disabled={isPending}
                     >
                       {showPassword ? (
@@ -191,7 +191,7 @@ export function LoginForm() {
                     className="w-5 h-5 border-white/20 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan rounded-lg"
                   />
                 </FormControl>
-                <FormLabel className="text-sm font-bold text-text-secondary cursor-pointer hover:text-white transition-colors uppercase tracking-widest text-[10px]">
+                <FormLabel className="text-sm font-bold text-text-secondary cursor-pointer hover:text-text-primary transition-colors uppercase tracking-widest text-[10px]">
                   Lembrar acesso
                 </FormLabel>
               </FormItem>

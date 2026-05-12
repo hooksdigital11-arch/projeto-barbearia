@@ -2,9 +2,10 @@
 
 import { useTransition, useState } from 'react'
 import { toast } from 'sonner'
-import { X, Plus } from '@phosphor-icons/react'
+import { X, Plus, CaretDown, ListBullets } from '@phosphor-icons/react'
 import { joinQueue } from '../actions'
 import type { ServiceOption, BarberOption, ClientOption } from '../types'
+import { cn } from '@/lib/utils/cn'
 
 interface AddToQueueModalProps {
   isOpen: boolean
@@ -67,123 +68,141 @@ export function AddToQueueModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm animate-in fade-in duration-300"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-bg-secondary shadow-2xl shadow-black/50 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-md rounded-[12px] border border-border-main bg-bg-surface overflow-hidden animate-in fade-in zoom-in-95 duration-500 flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-white/5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-accent-cyan/10">
-              <Plus size={20} weight="bold" className="text-accent-cyan" />
+        <div className="flex items-center justify-between p-[28px] pb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-[34px] h-[34px] flex items-center justify-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] text-accent-main shrink-0">
+              <Plus size={18} weight="regular" />
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-white font-syne">Adicionar à Fila</h2>
-              <p className="text-xs text-text-secondary">Cliente será adicionado à fila de espera</p>
+            <div className="space-y-0.5">
+              <h2 className="text-[14px] font-medium text-text-primary uppercase tracking-tight">Adicionar à Fila</h2>
+              <p className="text-[10px] text-[#383838] font-medium uppercase tracking-[0.03em]">Cliente será adicionado à fila de espera</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-text-secondary hover:text-white hover:bg-white/5 transition-colors"
+            className="w-7 h-7 flex items-center justify-center bg-[#1a1a1a] border-[0.5px] border-[#252525] rounded-[6px] text-[#444] transition-all hover:text-text-primary hover:border-[#444]"
           >
-            <X size={20} weight="bold" />
+            <X size={13} weight="regular" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Cliente */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-text-secondary">Cliente *</label>
-            <select
-              value={clientId}
-              onChange={(e) => handleClientChange(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 focus:border-accent-cyan/50 transition-all appearance-none"
-            >
-              <option value="" className="bg-bg-secondary text-text-secondary">
-                Selecionar cliente...
-              </option>
-              {clients.map(c => (
-                <option key={c.id} value={c.id} className="bg-bg-secondary text-white">
-                  {c.full_name} {c.phone ? `— ${c.phone}` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="overflow-y-auto px-[28px] pb-[28px]">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Cliente */}
+            <div className="space-y-2">
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">
+                Cliente <span className="text-accent-main">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  value={clientId}
+                  onChange={(e) => handleClientChange(e.target.value)}
+                  required
+                  className="w-full appearance-none bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] pr-[36px] py-[11px] text-[12px] font-medium text-text-secondary tracking-[0.03em] outline-none transition-all focus:border-accent-main/20 uppercase cursor-pointer"
+                >
+                  <option value="" className="bg-bg-surface">SELECIONAR CLIENTE...</option>
+                  {clients.map(c => (
+                    <option key={c.id} value={c.id} className="bg-bg-surface">
+                      {c.full_name.toUpperCase()} {c.phone ? `— ${c.phone}` : ''}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-[12px] top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
+                  <CaretDown size={14} weight="regular" />
+                </div>
+              </div>
+            </div>
 
-          {/* Serviço */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-text-secondary">Serviço desejado *</label>
-            <select
-              value={serviceId}
-              onChange={(e) => setServiceId(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 focus:border-accent-cyan/50 transition-all appearance-none"
-            >
-              <option value="" className="bg-bg-secondary text-text-secondary">
-                Selecionar serviço...
-              </option>
-              {services.map(s => (
-                <option key={s.id} value={s.id} className="bg-bg-secondary text-white">
-                  {s.name} ({s.duration_minutes}min)
-                </option>
-              ))}
-            </select>
-          </div>
+            {/* Serviço */}
+            <div className="space-y-2">
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">
+                Serviço desejado <span className="text-accent-main">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  value={serviceId}
+                  onChange={(e) => setServiceId(e.target.value)}
+                  required
+                  className="w-full appearance-none bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] pr-[36px] py-[11px] text-[12px] font-medium text-text-secondary tracking-[0.03em] outline-none transition-all focus:border-accent-main/20 uppercase cursor-pointer"
+                >
+                  <option value="" className="bg-bg-surface">SELECIONAR SERVIÇO...</option>
+                  {services.map(s => (
+                    <option key={s.id} value={s.id} className="bg-bg-surface">
+                      {s.name.toUpperCase()} ({s.duration_minutes}MIN)
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-[12px] top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
+                  <CaretDown size={14} weight="regular" />
+                </div>
+              </div>
+            </div>
 
-          {/* Barbeiro preferido */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-text-secondary">Barbeiro preferido</label>
-            <select
-              value={barberId}
-              onChange={(e) => setBarberId(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 focus:border-accent-cyan/50 transition-all appearance-none"
-            >
-              <option value="" className="bg-bg-secondary text-text-secondary">
-                Qualquer barbeiro
-              </option>
-              {barbers.map(b => (
-                <option key={b.id} value={b.id} className="bg-bg-secondary text-white">
-                  {b.full_name}
-                </option>
-              ))}
-            </select>
-          </div>
+            {/* Barbeiro preferido */}
+            <div className="space-y-2">
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Barbeiro preferido</label>
+              <div className="relative">
+                <select
+                  value={barberId}
+                  onChange={(e) => setBarberId(e.target.value)}
+                  className="w-full appearance-none bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] pr-[36px] py-[11px] text-[12px] font-medium text-text-secondary tracking-[0.03em] outline-none transition-all focus:border-accent-main/20 uppercase cursor-pointer"
+                >
+                  <option value="" className="bg-bg-surface">QUALQUER BARBEIRO</option>
+                  {barbers.map(b => (
+                    <option key={b.id} value={b.id} className="bg-bg-surface">
+                      {b.full_name.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-[12px] top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
+                  <CaretDown size={14} weight="regular" />
+                </div>
+              </div>
+            </div>
 
-          {/* Telefone WhatsApp */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-text-secondary">WhatsApp *</label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="(11) 98765-4321"
-              required
-              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 focus:border-accent-cyan/50 transition-all"
-            />
-          </div>
+            {/* Telefone WhatsApp */}
+            <div className="space-y-2">
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">
+                WhatsApp <span className="text-accent-main">*</span>
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="(11) 98765-4321"
+                required
+                className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] py-[11px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 placeholder:text-[11px] placeholder:text-[#2a2a2a]"
+              />
+            </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-text-secondary hover:text-white hover:bg-white/10 transition-colors text-sm font-medium"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isPending || !clientId || !serviceId || !phone}
-              className="flex-1 px-4 py-3 rounded-xl bg-accent-cyan text-black font-bold text-sm hover:bg-accent-cyan/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            >
-              {isPending ? 'Adicionando...' : 'Entrar na Fila'}
-            </button>
-          </div>
-        </form>
+            {/* Actions */}
+            <div className="grid grid-cols-2 gap-[10px] pt-[18px] border-t-[0.5px] border-border-main mt-[22px]">
+              <button
+                type="button"
+                onClick={onClose}
+                className="bg-bg-sidebar border-[0.5px] border-border-main text-[#444] py-[12px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:border-[#333] hover:text-[#777]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isPending || !clientId || !serviceId || !phone}
+                className="flex items-center justify-center gap-2 bg-accent-main text-black py-[12px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_10px_20px_rgba(0,212,170,0.1)]"
+              >
+                <ListBullets size={14} weight="bold" />
+                {isPending ? 'ADICIONANDO...' : 'ADICIONAR À FILA'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

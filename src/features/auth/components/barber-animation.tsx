@@ -303,7 +303,7 @@ export function BarberAnimation() {
           opacity: isSpying ? 0.9 : 1
         }}
       >
-        <h2 className="text-4xl font-extrabold text-white font-syne tracking-tight leading-tight transition-colors duration-300">
+        <h2 className="text-4xl font-extrabold text-text-primary font-syne tracking-tight leading-tight transition-colors duration-300">
           {isSpying ? (
             <span className="text-accent-cyan">
               Opa 👀

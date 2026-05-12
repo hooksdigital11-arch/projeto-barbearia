@@ -44,7 +44,7 @@ export function ComandaItemRow({ item, index = 0 }: ComandaItemRowProps) {
           )}
         </div>
         <div className="flex flex-col">
-          <span className="font-bold text-white tracking-tight group-hover:text-accent-cyan transition-colors">
+          <span className="font-bold text-text-primary tracking-tight group-hover:text-accent-cyan transition-colors">
             {item.name}
           </span>
           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
@@ -53,7 +53,7 @@ export function ComandaItemRow({ item, index = 0 }: ComandaItemRowProps) {
         </div>
       </div>
       <div className="flex items-center gap-6">
-        <span className="font-bold text-white font-mono tabular-nums">
+        <span className="font-bold text-text-primary font-mono tabular-nums">
           R$ {(item.total_cents / 100).toFixed(2)}
         </span>
         <Button

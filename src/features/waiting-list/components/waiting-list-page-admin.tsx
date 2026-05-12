@@ -3,15 +3,13 @@
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import {
-  Queue,
+  ListBullets,
   Bell,
   CheckCircle,
-  CalendarX,
+  Calendar,
   Plus,
 } from '@phosphor-icons/react'
-import { KPICard } from '@/components/shared/kpi-card'
-import { PageTitle } from '@/components/shared/page-title'
-import { EmptyState } from '@/components/shared/empty-state'
+import { cn } from '@/lib/utils/cn'
 import { WaitingListRealtime } from './waiting-list-realtime'
 import type { WaitingListEntry, QueueStats, ServiceOption, BarberOption, ClientOption } from '../types'
 
@@ -38,54 +36,63 @@ export function WaitingListPageAdmin({
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
-    <div className="space-y-16 animate-premium-in">
+    <div className="animate-premium-in py-8 space-y-12">
       <WaitingListRealtime organizationId={organizationId} />
 
-      {/* Editorial Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
-        <div className="flex-1 relative">
-          <PageTitle 
-            title="Fila" 
-            subtitle="Gestão inteligente da lista de espera. Monitore o fluxo de entrada e otimize o tempo de resposta da equipe em tempo real." 
-            className="mb-0" 
-          />
-          <div className="absolute top-0 right-0 lg:right-auto lg:left-32 lg:top-4 flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]" />
-            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Live</span>
+      <style jsx global>{`
+        @keyframes custom-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+        .animate-custom-pulse {
+          animation: custom-pulse 1.5s infinite ease-in-out;
+        }
+      `}</style>
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <h1 className="text-[32px] font-medium text-text-primary tracking-[-0.02em] uppercase">
+              FILA<span className="text-accent-main">.</span>
+            </h1>
+            <div className="bg-[#0d2e1a] border-[0.5px] border-accent-main/20 rounded-[20px] px-[11px] py-[4px] flex items-center gap-1.5">
+              <div className="w-[6px] h-[6px] rounded-full bg-accent-main animate-custom-pulse" />
+              <span className="text-[9px] font-medium text-accent-main tracking-[0.1em] uppercase">LIVE</span>
+            </div>
           </div>
+          <p className="text-[11px] text-[#333] leading-[1.5] max-width-[480px] font-medium uppercase tracking-wide">
+            Gestão inteligente da lista de espera. Monitore o fluxo de entrada e otimize o tempo de resposta da equipe em tempo real.
+          </p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-4 px-10 py-8 bg-white text-black rounded-3xl font-black text-xs uppercase tracking-[0.2em] hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group ml-7 lg:ml-0"
+          className="flex items-center gap-2 bg-accent-main text-black px-[18px] py-[10px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 active:scale-95 shrink-0"
         >
-          <Plus size={22} weight="bold" className="group-hover:rotate-90 transition-transform duration-500" />
+          <Plus size={14} weight="bold" />
           Novo Registro
         </button>
       </div>
 
-      {/* KPI Section - Precision Data Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/5 border border-white/5 overflow-hidden">
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
         {[
-          { title: 'Na Fila', value: stats.waiting, icon: Queue, color: '#8b5cf6', desc: 'Aguardando atendimento' },
-          { title: 'Notificado', value: stats.notified, icon: Bell, color: '#3b82f6', desc: 'Avisado por mensagem' },
-          { title: 'Confirmado', value: stats.confirmed, icon: CheckCircle, color: '#10b981', desc: 'Presença confirmada' },
-          { title: 'Vagas', value: stats.openSlots, icon: CalendarX, color: '#00e5ff', desc: 'Slots disponíveis hoje' },
+          { label: 'NA FILA', value: stats.waiting, icon: ListBullets, desc: 'Aguardando atendimento' },
+          { label: 'NOTIFICADO', value: stats.notified, icon: Bell, desc: 'Avisado por mensagem' },
+          { label: 'CONFIRMADO', value: stats.confirmed, icon: CheckCircle, desc: 'Presença confirmada' },
+          { label: 'VAGAS', value: stats.openSlots, icon: Calendar, desc: 'Slots disponíveis hoje' },
         ].map((kpi, idx) => (
-          <div key={idx} className="p-10 bg-black flex flex-col justify-between h-48 group">
-            <div className="flex items-start justify-between">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-40 group-hover:opacity-100 transition-opacity">
-                {kpi.title}
-              </p>
-              <kpi.icon size={20} weight="bold" style={{ color: kpi.color }} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+          <div key={idx} className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[16px] px-[18px] flex flex-col justify-between h-[110px]">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-medium text-[#383838] tracking-[0.12em] uppercase">{kpi.label}</span>
+              <kpi.icon size={14} weight="regular" className="text-accent-main opacity-35" />
             </div>
-            <div>
-              <p className="text-5xl font-bold font-mono text-white tracking-tighter group-hover:text-accent-cyan transition-colors">
+            <div className="space-y-1">
+              <div className="text-[26px] text-text-primary font-medium leading-none">
                 {kpi.value}
-              </p>
-              <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest opacity-30 group-hover:opacity-60 transition-opacity">
-                {kpi.desc}
-              </p>
+              </div>
+              <p className="text-[8px] text-[#2a2a2a] tracking-[0.07em] font-medium uppercase">{kpi.desc}</p>
             </div>
           </div>
         ))}
@@ -93,21 +100,23 @@ export function WaitingListPageAdmin({
 
       {/* Queue List */}
       {entries.length === 0 ? (
-        <EmptyState
-          title="Fila vazia"
-          description="Nenhum cliente na fila de espera. Adicione clientes quando não houver horários disponíveis."
-          icon={<Queue size={48} weight="duotone" />}
-          action={
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-5 py-2.5 rounded-xl bg-accent-cyan/10 text-accent-cyan hover:bg-accent-cyan/20 transition-colors text-sm font-medium"
-            >
-              + Adicionar à fila
-            </button>
-          }
-        />
+        <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] p-[56px] px-[24px] flex flex-col items-center justify-center animate-in fade-in duration-500">
+          <div className="w-[60px] h-[60px] bg-[#161616] border-[0.5px] border-border-main rounded-full flex items-center justify-center mb-6">
+            <ListBullets size={24} className="text-[#2a2a2a]" />
+          </div>
+          <h3 className="text-[14px] font-medium text-text-secondary mb-2 uppercase tracking-tight">Fila vazia</h3>
+          <p className="text-[11px] text-[#2e2e2e] text-center leading-[1.6] max-w-[280px] mb-[22px] font-medium uppercase">
+            Nenhum cliente na fila de espera. Adicione clientes quando não houver horários disponíveis.
+          </p>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-[18px] py-[9px] rounded-[7px] border-[0.5px] border-border-main text-[10px] font-medium text-[#444] tracking-[0.08em] uppercase transition-all hover:border-[#333] hover:text-text-muted"
+          >
+            + Adicionar à fila
+          </button>
+        </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-2">
           {entries.map(entry => (
             <WaitingListCard key={entry.id} entry={entry} role="admin" />
           ))}

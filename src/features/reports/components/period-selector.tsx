@@ -68,7 +68,7 @@ export function PeriodSelector({ onPeriodChange }: PeriodSelectorProps) {
                 "px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all",
                 activePeriod === p.value 
                   ? "bg-accent-cyan text-black" 
-                  : "text-text-muted hover:text-white border border-white/10 hover:border-white/20"
+                  : "text-text-muted hover:text-text-primary border border-white/10 hover:border-white/20"
               )}
             >
               {p.label}
@@ -93,7 +93,7 @@ export function PeriodSelector({ onPeriodChange }: PeriodSelectorProps) {
               checked={compare} 
               onChange={(e) => setCompare(e.target.checked)} 
             />
-            <span className="text-[10px] font-black uppercase tracking-widest text-text-muted group-hover:text-white transition-colors">
+            <span className="text-[10px] font-black uppercase tracking-widest text-text-muted group-hover:text-text-primary transition-colors">
               Comparar
             </span>
           </label>
@@ -103,7 +103,7 @@ export function PeriodSelector({ onPeriodChange }: PeriodSelectorProps) {
               <span className="text-[10px] font-bold text-accent-cyan tracking-widest font-mono uppercase">
                 {new Date(customRange.start).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})} — {new Date(customRange.end).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
               </span>
-              <button onClick={() => handlePeriodSelect('today')} className="text-accent-cyan hover:text-white transition-colors">
+              <button onClick={() => handlePeriodSelect('today')} className="text-accent-cyan hover:text-text-primary transition-colors">
                 <X size={16} weight="bold" />
               </button>
             </div>

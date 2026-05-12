@@ -33,7 +33,7 @@ export default function Error({
           <span className="text-3xl">⚠️</span>
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-white font-syne">
+          <h2 className="text-2xl font-bold text-text-primary font-syne">
             Algo deu errado
           </h2>
           <p className="text-sm text-gray-400">

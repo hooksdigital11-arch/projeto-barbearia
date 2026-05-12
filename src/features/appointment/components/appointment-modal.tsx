@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useTransition, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { createAppointment, updateAppointment } from '../actions'
 import type { AppointmentWithRelations, ServiceOption, BarberOption, ClientOption } from '../types'
+import { cn } from '@/lib/utils/cn'
+import { X } from '@phosphor-icons/react'
 
 interface AppointmentModalProps {
   isOpen: boolean
@@ -111,55 +110,62 @@ export function AppointmentModal({
     })
   }
 
+  const inputClasses = "w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] py-[11px] text-[12px] font-medium text-text-muted tracking-[0.04em] outline-none transition-all focus:border-accent-main/25 focus:text-text-secondary"
+  const labelClasses = "text-[10px] font-medium text-[#444] uppercase tracking-[0.1em]"
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#141414] border-white/10 sm:max-w-lg p-0 overflow-hidden">
-        <div className="p-6 border-b border-white/5">
-          <DialogHeader>
-            <DialogTitle className="font-syne uppercase tracking-tight text-white">
-              {isEditing ? 'Editar Agendamento' : 'Novo Agendamento'}
-            </DialogTitle>
-          </DialogHeader>
+      <DialogContent className="bg-bg-surface border-[0.5px] border-border-main rounded-[12px] p-[28px] sm:max-w-[460px] overflow-hidden gap-0 [&>button]:hidden shadow-none">
+        <div className="flex items-center justify-between mb-8">
+          <DialogTitle className="text-[16px] font-medium text-text-primary tracking-[0.06em] uppercase">
+            {isEditing ? 'Editar Agendamento' : 'Novo Agendamento'}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Preencha os dados abaixo para {isEditing ? 'editar' : 'criar'} um agendamento na barbearia.
+          </DialogDescription>
+          <button 
+            onClick={onClose}
+            className="w-7 h-7 flex items-center justify-center bg-[#1a1a1a] border-[0.5px] border-[#2a2a2a] rounded-[6px] text-[#444] transition-all hover:text-text-primary hover:border-[#444]"
+          >
+            <X size={14} weight="regular" />
+          </button>
         </div>
 
-        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+        <div className="space-y-6 max-h-[65vh] overflow-y-auto pr-2 scrollbar-hide">
           {/* Cliente */}
           <div className="space-y-2">
-            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Cliente</Label>
+            <label className={labelClasses}>Cliente</label>
             {selectedClient ? (
-              <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
+              <div className="flex items-center justify-between p-3 bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px]">
                 <div>
-                  <p className="text-sm font-bold text-white">{selectedClient.full_name}</p>
-                  <p className="text-xs text-muted-foreground">{selectedClient.phone || 'Sem telefone'}</p>
+                  <p className="text-[12px] font-medium text-text-primary uppercase tracking-tight">{selectedClient.full_name}</p>
+                  <p className="text-[10px] text-[#444] font-medium uppercase mt-0.5">{selectedClient.phone || 'Sem telefone'}</p>
                 </div>
-                <button onClick={() => { setSelectedClientId(''); setClientSearch('') }} className="text-xs text-red-400 hover:text-red-300">
+                <button onClick={() => { setSelectedClientId(''); setClientSearch('') }} className="text-[10px] text-accent-main font-medium uppercase tracking-wider hover:opacity-80">
                   Trocar
                 </button>
               </div>
             ) : (
               <div className="relative">
-                <Input
-                  placeholder="Buscar por nome ou telefone..."
+                <input
+                  placeholder="BUSCAR CLIENTE..."
                   value={clientSearch}
                   onChange={e => setClientSearch(e.target.value)}
-                  className="bg-white/5 border-white/10"
+                  className={inputClasses}
                 />
                 {filteredClients.length > 0 && (
-                  <div className="absolute top-full mt-1 w-full bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto">
+                  <div className="absolute top-full mt-1 w-full bg-bg-surface border-[0.5px] border-border-main rounded-[8px] z-50 max-h-48 overflow-y-auto shadow-2xl">
                     {filteredClients.map(c => (
                       <button
                         key={c.id}
-                        className="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors"
+                        className="w-full text-left px-4 py-3 hover:bg-bg-sidebar transition-colors border-b-[0.5px] border-white/5 last:border-0"
                         onClick={() => { setSelectedClientId(c.id); setClientSearch('') }}
                       >
-                        <p className="text-sm font-medium text-white">{c.full_name}</p>
-                        <p className="text-xs text-muted-foreground">{c.phone || 'Sem telefone'}</p>
+                        <p className="text-[12px] font-medium text-text-primary uppercase">{c.full_name}</p>
+                        <p className="text-[10px] text-[#444] font-medium uppercase">{c.phone || 'Sem telefone'}</p>
                       </button>
                     ))}
                   </div>
-                )}
-                {clientSearch.length >= 2 && filteredClients.length === 0 && (
-                  <p className="text-xs text-muted-foreground mt-1 px-1">Nenhum cliente encontrado.</p>
                 )}
               </div>
             )}
@@ -168,91 +174,108 @@ export function AppointmentModal({
           {/* Barbeiro (só admin) */}
           {isAdmin && (
             <div className="space-y-2">
-              <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Barbeiro</Label>
-              <select
-                value={selectedBarberId}
-                onChange={e => setSelectedBarberId(e.target.value)}
-                className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-accent-cyan"
-              >
-                <option value="">Selecionar barbeiro...</option>
-                {barbers.map(b => (
-                  <option key={b.id} value={b.id}>{b.full_name}</option>
-                ))}
-              </select>
+              <label className={labelClasses}>Barbeiro</label>
+              <div className="relative">
+                <select
+                  value={selectedBarberId}
+                  onChange={e => setSelectedBarberId(e.target.value)}
+                  className={cn(inputClasses, "appearance-none cursor-pointer")}
+                >
+                  <option value="">Selecionar barbeiro...</option>
+                  {barbers.map(b => (
+                    <option key={b.id} value={b.id}>{b.full_name}</option>
+                  ))}
+                </select>
+                <div className="absolute right-[12px] top-1/2 -translate-y-1/2 pointer-events-none text-[#444]">
+                  <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </div>
             </div>
           )}
 
           {/* Serviço */}
           <div className="space-y-2">
-            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Serviço</Label>
-            <select
-              value={selectedServiceId}
-              onChange={e => setSelectedServiceId(e.target.value)}
-              className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-accent-cyan"
-            >
-              <option value="">Selecionar serviço...</option>
-              {services.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.name} — {s.duration_minutes}min — R$ {(s.price_cents / 100).toFixed(2)}
-                </option>
-              ))}
-            </select>
-            {selectedService && (
-              <p className="text-xs text-muted-foreground pl-1">
-                Duração: {selectedService.duration_minutes}min · Preço padrão: R$ {(selectedService.price_cents / 100).toFixed(2)}
-              </p>
-            )}
-          </div>
-
-          {/* Data/Hora */}
-          <div className="space-y-2">
-            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Data e Hora</Label>
-            <Input
-              type="datetime-local"
-              value={startTime}
-              onChange={e => setStartTime(e.target.value)}
-              className="bg-white/5 border-white/10 [color-scheme:dark]"
-            />
-          </div>
-
-          {/* Preço customizado */}
-          <div className="space-y-2">
-            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              Preço (R$) — opcional, usa padrão do serviço se vazio
-            </Label>
+            <label className={labelClasses}>Serviço</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">R$</span>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={priceOverride}
-                onChange={e => setPriceOverride(e.target.value)}
-                placeholder={selectedService ? (selectedService.price_cents / 100).toFixed(2) : '0.00'}
-                className="bg-white/5 border-white/10 pl-9"
+              <select
+                value={selectedServiceId}
+                onChange={e => setSelectedServiceId(e.target.value)}
+                className={cn(inputClasses, "appearance-none cursor-pointer")}
+              >
+                <option value="">Selecionar serviço...</option>
+                {services.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} — {s.duration_minutes}min
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-[12px] top-1/2 -translate-y-1/2 pointer-events-none text-[#444]">
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Data/Hora */}
+            <div className="space-y-2">
+              <label className={labelClasses}>Data e Hora</label>
+              <input
+                type="datetime-local"
+                value={startTime}
+                onChange={e => setStartTime(e.target.value)}
+                className={cn(inputClasses, "[color-scheme:dark]")}
               />
+            </div>
+
+            {/* Preço customizado */}
+            <div className="space-y-2">
+              <label className={labelClasses}>Preço (R$)</label>
+              <div className="relative">
+                <span className="absolute left-[14px] top-1/2 -translate-y-1/2 text-[11px] text-[#444] font-medium">R$</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={priceOverride}
+                  onChange={e => setPriceOverride(e.target.value)}
+                  placeholder={selectedService ? (selectedService.price_cents / 100).toFixed(2) : '0.00'}
+                  className={cn(inputClasses, "pl-[36px]")}
+                />
+              </div>
             </div>
           </div>
 
           {/* Notas */}
           <div className="space-y-2">
-            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Observações</Label>
+            <label className={labelClasses}>Observações</label>
             <textarea
               value={notes}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value)}
-              placeholder="Informações adicionais..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder:text-muted-foreground resize-none h-20 focus:outline-none focus:ring-1 focus:ring-accent-cyan"
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="INFORMAÇÕES ADICIONAIS..."
+              className={cn(inputClasses, "h-[80px] resize-none")}
             />
           </div>
         </div>
 
-        <div className="p-6 border-t border-white/5 flex gap-4">
-          <Button variant="ghost" className="flex-1" onClick={onClose} disabled={isPending}>
+        <div className="mt-8 pt-5 border-t-[0.5px] border-border-main flex items-center gap-4">
+          <button 
+            className="text-[11px] font-medium text-[#444] hover:text-text-muted uppercase tracking-wider transition-all" 
+            onClick={onClose} 
+            disabled={isPending}
+          >
             CANCELAR
-          </Button>
-          <Button variant="cyan" className="flex-[2] font-bold uppercase" onClick={handleSubmit} disabled={isPending}>
+          </button>
+          <button 
+            className="flex-1 bg-accent-main text-black h-[40px] rounded-[8px] text-[11px] font-medium uppercase tracking-[0.08em] transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50" 
+            onClick={handleSubmit} 
+            disabled={isPending}
+          >
             {isPending ? 'SALVANDO...' : isEditing ? 'SALVAR ALTERAÇÕES' : 'CRIAR AGENDAMENTO'}
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

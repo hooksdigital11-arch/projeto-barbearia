@@ -18,7 +18,7 @@ export function InventoryList({ items }: InventoryListProps) {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-syne text-white">Estoque</h1>
+          <h1 className="text-3xl font-bold font-syne text-text-primary">Estoque</h1>
           <p className="text-muted-foreground mt-1">Gerencie seus produtos e suprimentos</p>
         </div>
         <Button className="bg-accent-cyan hover:bg-cyan-400 text-black font-bold gap-2 rounded-2xl px-6 py-6 text-base">
@@ -30,7 +30,7 @@ export function InventoryList({ items }: InventoryListProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="p-6 rounded-[2rem] bg-white/5 border border-white/5 space-y-2">
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Total de Itens</p>
-          <p className="text-3xl font-bold text-white font-syne">{items.length}</p>
+          <p className="text-3xl font-bold text-text-primary font-syne">{items.length}</p>
         </div>
         <div className="p-6 rounded-[2rem] bg-amber-500/5 border border-amber-500/10 space-y-2">
           <p className="text-xs font-bold text-amber-400/60 uppercase tracking-widest">Estoque Baixo</p>
@@ -66,7 +66,7 @@ export function InventoryList({ items }: InventoryListProps) {
                       <Package size={20} weight="duotone" />
                     </div>
                     <div>
-                      <p className="font-bold text-white text-sm">{item.name}</p>
+                      <p className="font-bold text-text-primary text-sm">{item.name}</p>
                       {(item.quantity ?? 0) <= (item.min_quantity ?? 0) && (
                         <span className="flex items-center gap-1 text-[10px] text-amber-400 font-bold uppercase mt-0.5">
                           <Warning size={12} weight="fill" />
@@ -84,7 +84,7 @@ export function InventoryList({ items }: InventoryListProps) {
                 <td className="px-6 py-5 text-center">
                   <p className={cn(
                     "font-bold text-sm",
-                    (item.quantity ?? 0) <= (item.min_quantity ?? 0) ? "text-amber-400" : "text-white"
+                    (item.quantity ?? 0) <= (item.min_quantity ?? 0) ? "text-amber-400" : "text-text-primary"
                   )}>
                     {item.quantity ?? 0} <span className="text-[10px] text-muted-foreground font-normal uppercase ml-1">UN</span>
                   </p>
@@ -93,7 +93,7 @@ export function InventoryList({ items }: InventoryListProps) {
                   <span className="font-mono text-sm text-accent-cyan">{formatPrice(item.price_cents ?? 0)}</span>
                 </td>
                 <td className="px-6 py-5 text-right">
-                  <button className="p-2 text-muted-foreground hover:text-white transition-colors rounded-lg hover:bg-white/5">
+                  <button className="p-2 text-muted-foreground hover:text-text-primary transition-colors rounded-lg hover:bg-white/5">
                     <DotsThreeVertical size={20} />
                   </button>
                 </td>
@@ -108,7 +108,7 @@ export function InventoryList({ items }: InventoryListProps) {
               <Package size={32} weight="duotone" />
             </div>
             <div>
-              <p className="text-white font-bold">Nenhum produto cadastrado</p>
+              <p className="text-text-primary font-bold">Nenhum produto cadastrado</p>
               <p className="text-sm text-muted-foreground">Comece adicionando seu primeiro item ao estoque.</p>
             </div>
           </div>

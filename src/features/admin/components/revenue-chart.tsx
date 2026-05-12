@@ -21,7 +21,7 @@ export default function RevenueChart({ data = [] }: RevenueChartProps) {
     <div className="h-[350px] w-full p-6 rounded-3xl border border-white/5 bg-card/10 backdrop-blur-xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h3 className="text-xl font-bold font-syne text-white">Receita Semanal</h3>
+          <h3 className="text-xl font-bold font-syne text-text-primary">Receita Semanal</h3>
           <p className="text-xs text-text-secondary">Comparação com a semana anterior</p>
         </div>
       </div>

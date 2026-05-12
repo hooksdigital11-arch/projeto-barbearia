@@ -24,7 +24,7 @@ export function BarberServicesPage({ services }: BarberServicesPageProps) {
       <div className="space-y-2">
         <div className="flex items-center gap-3">
           <div className="w-2 h-8 bg-accent-cyan rounded-full shadow-[0_0_15px_rgba(0,229,255,0.5)]" />
-          <h1 className="text-4xl font-black font-syne text-white tracking-tighter uppercase leading-none">
+          <h1 className="text-4xl font-black font-syne text-text-primary tracking-tighter uppercase leading-none">
             Serviços <span className="text-accent-cyan">Disponíveis</span>
           </h1>
         </div>
@@ -37,11 +37,11 @@ export function BarberServicesPage({ services }: BarberServicesPageProps) {
       <div className="flex items-center gap-6">
         <div className="glass px-5 py-2.5 rounded-2xl border border-white/5 flex items-center gap-2">
           <Scissors size={18} weight="bold" className="text-accent-cyan" />
-          <span className="text-sm font-bold text-white">{services.length}</span>
+          <span className="text-sm font-bold text-text-primary">{services.length}</span>
           <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">serviços</span>
         </div>
         <div className="glass px-5 py-2.5 rounded-2xl border border-white/5 flex items-center gap-2">
-          <span className="text-sm font-bold text-white">{Object.keys(grouped).length}</span>
+          <span className="text-sm font-bold text-text-primary">{Object.keys(grouped).length}</span>
           <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">categorias</span>
         </div>
       </div>
@@ -53,7 +53,7 @@ export function BarberServicesPage({ services }: BarberServicesPageProps) {
           <div key={category} className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: config.color, boxShadow: `0 0 12px ${config.color}60` }} />
-              <h2 className="text-xl font-bold font-syne text-white uppercase tracking-tight">{config.label}</h2>
+              <h2 className="text-xl font-bold font-syne text-text-primary uppercase tracking-tight">{config.label}</h2>
               <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/5">
                 {items.length}
               </span>
@@ -72,7 +72,7 @@ export function BarberServicesPage({ services }: BarberServicesPageProps) {
                     <Scissors size={24} weight="duotone" style={{ color: config.color }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-bold text-white group-hover:text-accent-cyan transition-colors leading-tight">{service.name}</p>
+                    <p className="text-base font-bold text-text-primary group-hover:text-accent-cyan transition-colors leading-tight">{service.name}</p>
                     {service.description && (
                       <p className="text-xs text-text-secondary mt-1.5 line-clamp-2 opacity-60">{service.description}</p>
                     )}
@@ -98,7 +98,7 @@ export function BarberServicesPage({ services }: BarberServicesPageProps) {
           <div className="w-24 h-24 rounded-3xl bg-white/5 flex items-center justify-center text-text-secondary opacity-20">
             <Scissors size={48} weight="thin" />
           </div>
-          <p className="text-xl font-bold font-syne text-white uppercase tracking-tight">Nenhum serviço cadastrado</p>
+          <p className="text-xl font-bold font-syne text-text-primary uppercase tracking-tight">Nenhum serviço cadastrado</p>
           <p className="text-text-secondary">O administrador ainda não cadastrou serviços.</p>
         </div>
       )}

@@ -21,7 +21,7 @@ export function ClientLoyaltyTab({ stamps, stampBalance, goal }: ClientLoyaltyTa
             <Star size={16} weight="duotone" className="text-yellow-400" />
             Cartão de Fidelidade
           </h4>
-          <span className="text-sm font-bold text-white">
+          <span className="text-sm font-bold text-text-primary">
             {stampBalance}/{goal}
           </span>
         </div>
@@ -35,7 +35,7 @@ export function ClientLoyaltyTab({ stamps, stampBalance, goal }: ClientLoyaltyTa
                 'w-9 h-9 rounded-lg flex items-center justify-center border transition-all',
                 i < stampBalance
                   ? 'bg-accent-cyan/20 border-accent-cyan/40 text-accent-cyan'
-                  : 'bg-white/5 border-white/10 text-white/10'
+                  : 'bg-white/5 border-white/10 text-text-primary/10'
               )}
             >
               <CheckSquare
@@ -81,7 +81,7 @@ export function ClientLoyaltyTab({ stamps, stampBalance, goal }: ClientLoyaltyTa
                   ) : (
                     <Star size={14} weight="duotone" className="text-accent-cyan" />
                   )}
-                  <span className="text-xs text-white">{stamp.notes || (stamp.type === 'redeem' ? 'Resgate' : 'Carimbo')}</span>
+                  <span className="text-xs text-text-primary">{stamp.notes || (stamp.type === 'redeem' ? 'Resgate' : 'Carimbo')}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={cn(

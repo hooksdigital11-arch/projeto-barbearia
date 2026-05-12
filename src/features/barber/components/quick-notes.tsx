@@ -51,7 +51,7 @@ export function QuickNotes({ initialNote }: { initialNote: string }) {
         value={note}
         onChange={(e) => setNote(e.target.value)}
         placeholder="Adicione observações importantes sobre o cliente..."
-        className="w-full h-24 p-4 bg-white/5 border border-white/10 rounded-2xl text-sm text-white placeholder:text-text-secondary focus:outline-none focus:border-accent-cyan/50 focus:bg-white/10 transition-all resize-none"
+        className="w-full h-24 p-4 bg-white/5 border border-white/10 rounded-2xl text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-cyan/50 focus:bg-white/10 transition-all resize-none"
       />
     </div>
   )

@@ -1,9 +1,7 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { ArrowsDownUp, X, CircleNotch, ArrowUp, ArrowDown, FloppyDisk } from '@phosphor-icons/react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { useState, useTransition, useEffect } from 'react'
+import { ArrowsDownUp, X, CircleNotch, ArrowUp, ArrowDown, Check, CaretDown } from '@phosphor-icons/react'
 import { moveStock } from '../actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
@@ -13,6 +11,16 @@ export function StockMovementModal({ isOpen, onClose, product, onSuccess }: { is
   const [isPending, startTransition] = useTransition()
   const [direction, setDirection] = useState<'in' | 'out'>('in')
   const [quantity, setQuantity] = useState(0)
+  const [reason, setReason] = useState('')
+
+  // Reset reason when direction or product changes
+  useEffect(() => {
+    if (direction === 'in') {
+      setReason('Compra')
+    } else {
+      setReason(product?.type === 'revenda' ? 'Venda' : 'Uso')
+    }
+  }, [direction, product])
 
   if (!isOpen || !product) return null
 
@@ -31,14 +39,9 @@ export function StockMovementModal({ isOpen, onClose, product, onSuccess }: { is
     }
 
     const formData = new FormData(e.currentTarget)
-    // direction is not in the form since it's a state, we need to append it
     formData.append('direction', direction)
     formData.append('quantity', String(quantity))
-    
-    // Ensure reason is present even if select is disabled
-    if (direction === 'out') {
-      formData.set('reason', product.type === 'revenda' ? 'Venda' : 'Uso')
-    }
+    formData.set('reason', reason) // Ensure the state value is used
 
     startTransition(async () => {
       try {
@@ -48,7 +51,7 @@ export function StockMovementModal({ isOpen, onClose, product, onSuccess }: { is
           throw new Error(result.error)
         }
 
-        toast.success('Estoque atualizado com sucesso!')
+        toast.success('MOVIMENTAÇÃO REALIZADA!')
         onSuccess?.()
         onClose()
       } catch (err: any) {
@@ -59,146 +62,163 @@ export function StockMovementModal({ isOpen, onClose, product, onSuccess }: { is
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-[#141414] border border-white/10 rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between mb-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm animate-in fade-in duration-300"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-[420px] rounded-[12px] border border-border-main bg-bg-surface overflow-hidden animate-in fade-in zoom-in-95 duration-500 flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between p-[24px] pb-5">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-accent-blue/10 flex items-center justify-center text-accent-blue">
-              <ArrowsDownUp size={28} weight="duotone" />
+            <div className="w-[32px] h-[32px] flex items-center justify-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] text-text-nav shrink-0">
+              <ArrowsDownUp size={18} weight="regular" />
             </div>
-            <div>
-              <h3 className="text-2xl font-bold font-syne text-white">Movimentação</h3>
-              <p className="text-sm text-muted-foreground">{product.name}</p>
+            <div className="space-y-0.5">
+              <h2 className="text-[14px] font-medium text-text-primary uppercase tracking-tight">Movimentação</h2>
+              <p className="text-[10px] text-[#383838] font-medium uppercase tracking-wide truncate max-w-[220px]">{product.name}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-muted-foreground hover:text-white transition-colors rounded-xl hover:bg-white/5">
-            <X size={24} />
+          <button
+            onClick={onClose}
+            className="w-[26px] h-[26px] flex items-center justify-center bg-[#1a1a1a] border-[0.5px] border-[#252525] rounded-[6px] text-[#444] transition-all hover:text-text-primary"
+          >
+            <X size={12} weight="regular" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              type="button"
-              onClick={() => setDirection('in')}
-              className={cn(
-                "flex items-center justify-center gap-2 p-4 rounded-2xl border transition-all font-bold uppercase tracking-widest text-xs",
-                direction === 'in' 
-                  ? "bg-green-500/10 border-green-500/50 text-green-400" 
-                  : "bg-white/5 border-white/10 text-muted-foreground hover:text-white"
-              )}
-            >
-              <ArrowUp size={18} weight="bold" />
-              Entrada
-            </button>
-            <button
-              type="button"
-              onClick={() => setDirection('out')}
-              className={cn(
-                "flex items-center justify-center gap-2 p-4 rounded-2xl border transition-all font-bold uppercase tracking-widest text-xs",
-                direction === 'out' 
-                  ? "bg-red-500/10 border-red-500/50 text-red-400" 
-                  : "bg-white/5 border-white/10 text-muted-foreground hover:text-white"
-              )}
-            >
-              <ArrowDown size={18} weight="bold" />
-              Saída
-            </button>
-          </div>
-
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Quantidade</label>
-              <Input 
-                type="number" 
-                min={1}
-                value={quantity || ''}
-                onChange={(e) => setQuantity(Math.max(0, parseInt(e.target.value) || 0))}
-                className="bg-white/5 border-white/10 rounded-xl py-6 text-xl font-bold text-center" 
-              />
+        {/* Form Content */}
+        <div className="overflow-y-auto px-[24px] pb-[24px]">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Toggle Entrada/Saída */}
+            <div className="grid grid-cols-2 gap-[6px]">
+              <button
+                type="button"
+                onClick={() => setDirection('in')}
+                className={cn(
+                  "flex items-center justify-center gap-2 py-[11px] rounded-[8px] border-[0.5px] transition-all text-[11px] font-medium uppercase tracking-[0.08em]",
+                  direction === 'in'
+                    ? "bg-[#0d2e1a] border-[#00c07044] text-[#00c070]"
+                    : "bg-bg-sidebar border-border-main text-[#444] hover:border-[#333]"
+                )}
+              >
+                <ArrowUp size={14} weight="bold" />
+                Entrada
+              </button>
+              <button
+                type="button"
+                onClick={() => setDirection('out')}
+                className={cn(
+                  "flex items-center justify-center gap-2 py-[11px] rounded-[8px] border-[0.5px] transition-all text-[11px] font-medium uppercase tracking-[0.08em]",
+                  direction === 'out'
+                    ? "bg-[#2e1a0d] border-[#c0700044] text-[#c07000]"
+                    : "bg-bg-sidebar border-border-main text-[#444] hover:border-[#333]"
+                )}
+              >
+                <ArrowDown size={14} weight="bold" />
+                Saída
+              </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-6 p-4 rounded-2xl bg-white/5 border border-white/5">
-              <div className="text-center">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Atual</p>
-                <p className="text-xl font-bold text-white">{product.quantity ?? 0}</p>
+            {/* Preview Atual / Após */}
+            <div className="grid grid-cols-2 bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] overflow-hidden">
+              <div className="p-[12px] text-center border-r-[0.5px] border-border-main">
+                <p className="text-[8px] font-medium text-[#2a2a2a] uppercase tracking-[0.12em] mb-1">Atual</p>
+                <p className="text-[20px] font-medium text-text-primary tabular-nums">{product.quantity ?? 0}</p>
               </div>
-              <div className="text-center border-l border-white/5">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Após</p>
+              <div className="p-[12px] text-center">
+                <p className="text-[8px] font-medium text-[#2a2a2a] uppercase tracking-[0.12em] mb-1">Após</p>
                 <p className={cn(
-                  "text-xl font-bold",
-                  newQuantity < 0 ? "text-red-500" : "text-accent-cyan"
+                  "text-[20px] font-medium tabular-nums",
+                  newQuantity < 0 ? "text-red-500" : "text-text-primary"
                 )}>{newQuantity}</p>
               </div>
             </div>
 
+            {/* Quantidade */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Motivo</label>
-                {direction === 'out' && (
-                  <span className={cn(
-                    "text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider",
-                    product.type === 'revenda' 
-                      ? "bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20" 
-                      : "bg-white/10 text-muted-foreground border border-white/10"
-                  )}>
-                    {product.type === 'revenda' ? 'Venda' : 'Uso Interno'}
-                  </span>
-                )}
-              </div>
-              
-              <select 
-                name="reason" 
-                required
-                disabled={direction === 'out'}
-                value={direction === 'out' ? (product.type === 'revenda' ? 'Venda' : 'Uso') : undefined}
-                className={cn(
-                  "w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all appearance-none",
-                  direction === 'out' && "opacity-80 cursor-not-allowed"
-                )}
-              >
-                {direction === 'in' ? (
-                  <>
-                    <option value="Compra">Compra</option>
-                    <option value="Devolução">Devolução</option>
-                    <option value="Ajuste">Ajuste de Saldo</option>
-                    <option value="Doação">Doação Recebida</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="Venda">Venda</option>
-                    <option value="Uso">Uso Interno</option>
-                    <option value="Perda">Perda / Quebra</option>
-                    <option value="Vencido">Produto Vencido</option>
-                    <option value="Ajuste">Ajuste de Saldo</option>
-                  </>
-                )}
-              </select>
-              {direction === 'out' && (
-                <input type="hidden" name="reason" value={product.type === 'revenda' ? 'Venda' : 'Uso'} />
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Observação (Opcional)</label>
-              <textarea 
-                name="observation" 
-                rows={2}
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all outline-none resize-none"
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Quantidade</label>
+              <input
+                type="number"
+                min={1}
+                value={quantity || ''}
+                onChange={(e) => setQuantity(Math.max(0, parseInt(e.target.value) || 0))}
+                className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20"
+                placeholder="0"
               />
             </div>
-          </div>
 
-          <div className="pt-6 border-t border-white/5 flex gap-4">
-            <Button type="button" variant="ghost" onClick={onClose} className="flex-1 rounded-2xl py-6 text-muted-foreground hover:text-white hover:bg-white/5">
-              Cancelar
-            </Button>
-            <Button disabled={isPending} type="submit" className="flex-1 bg-accent-blue hover:bg-blue-400 text-black font-bold gap-2 rounded-2xl py-6 text-base shadow-lg shadow-blue-500/20">
-              {isPending ? <CircleNotch size={24} className="animate-spin" /> : <FloppyDisk size={24} />}
-              Confirmar
-            </Button>
-          </div>
-        </form>
+            {/* Motivo */}
+            <div className="space-y-2">
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Motivo</label>
+              <div className="relative">
+                <select 
+                  name="reason" 
+                  required
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  className="w-full appearance-none bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] pr-[30px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 uppercase cursor-pointer"
+                >
+                  {direction === 'in' ? (
+                    <>
+                      <option value="Compra">COMPRA</option>
+                      <option value="Devolução">DEVOLUÇÃO</option>
+                      <option value="Ajuste">AJUSTE DE SALDO</option>
+                      <option value="Doação">DOAÇÃO RECEBIDA</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="Venda">VENDA</option>
+                      <option value="Uso">USO INTERNO</option>
+                      <option value="Perda">PERDA / QUEBRA</option>
+                      <option value="Vencido">PRODUTO VENCIDO</option>
+                      <option value="Ajuste">AJUSTE DE SALDO</option>
+                    </>
+                  )}
+                </select>
+                <div className="absolute right-[10px] top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
+                  <CaretDown size={14} weight="regular" />
+                </div>
+              </div>
+            </div>
+
+            {/* Observação */}
+            <div className="space-y-2">
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Observação (Opcional)</label>
+              <textarea 
+                name="observation" 
+                className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 resize-none h-[60px] uppercase placeholder:text-[#222]"
+                placeholder="DETALHES ADICIONAIS..."
+              />
+            </div>
+
+            {/* Footer Actions */}
+            <div className="grid grid-cols-2 gap-[10px] pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="bg-bg-sidebar border-[0.5px] border-border-main text-[#444] py-[12px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:border-[#333] hover:text-[#777]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isPending}
+                className="flex items-center justify-center gap-2 bg-accent-main text-black py-[12px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 disabled:opacity-40"
+              >
+                {isPending ? (
+                  <CircleNotch size={14} className="animate-spin" />
+                ) : (
+                  <Check size={14} weight="bold" />
+                )}
+                CONFIRMAR
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

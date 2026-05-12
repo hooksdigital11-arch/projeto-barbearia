@@ -8,7 +8,7 @@ export default async function AnalyticsV2Page() {
   const stats = await getDashboardStats()
 
   return (
-    <Suspense fallback={<div className="p-8 text-white">Carregando métricas analíticas...</div>}>
+    <Suspense fallback={<div className="p-8 text-text-primary">Carregando métricas analíticas...</div>}>
       <AnalyticsV2Dashboard initialData={stats} organizationId={user.organization_id} />
     </Suspense>
   )

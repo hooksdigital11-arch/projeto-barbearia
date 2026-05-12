@@ -3,11 +3,9 @@
 import { useEffect, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { X, CircleNotch, FloppyDisk, User, Envelope, Phone, Briefcase } from '@phosphor-icons/react'
+import { X, CircleNotch, FloppyDisk } from '@phosphor-icons/react'
 import { updateUserSchema, type UpdateUserInput } from '../schemas'
 import { updateUser } from '../actions'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   Form,
   FormControl,
@@ -18,6 +16,7 @@ import {
 } from '@/components/ui/form'
 import { toast } from 'sonner'
 import { AdminUser } from '../types'
+import { cn } from '@/lib/utils/cn'
 
 interface EditUserModalProps {
   user: AdminUser | null
@@ -63,7 +62,7 @@ export function EditUserModal({ user, isOpen, onClose, onSuccess }: EditUserModa
         toast.success('Usuário atualizado com sucesso!')
         
         // Mapeia de volta para snake_case para o estado local do React
-        const updatedUser = {
+        const updatedUserResult = {
           ...user,
           full_name: data.fullName ?? user?.full_name,
           email: data.email ?? user?.email,
@@ -71,99 +70,99 @@ export function EditUserModal({ user, isOpen, onClose, onSuccess }: EditUserModa
           specialty: data.specialty ?? user?.specialty,
         } as AdminUser
 
-        onSuccess(updatedUser)
+        onSuccess(updatedUserResult)
         onClose()
       }
-
     })
   }
 
   if (!isOpen || !user) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
       {/* Overlay */}
       <div 
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300" 
+        className="absolute inset-0 bg-black/85 backdrop-blur-sm animate-in fade-in duration-300" 
         onClick={onClose}
       />
       
       {/* Modal Content */}
-      <div className="relative w-full max-w-xl bg-black border border-white/[0.06] rounded-[2rem] overflow-hidden animate-in zoom-in-95 fade-in duration-300">
+      <div className="relative w-full max-w-[500px] bg-bg-black border border-border-main rounded-[12px] overflow-hidden shadow-2xl animate-in zoom-in-95 fade-in duration-300">
+        
         {/* Header */}
-        <div className="px-10 py-8 border-b border-white/[0.06]">
+        <div className="px-6 py-5 border-b border-border-main/50">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter">Editar Usuário</h2>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted mt-1">Perfil do Colaborador</p>
+            <div className="space-y-0.5">
+              <h2 className="text-[16px] font-medium text-text-primary uppercase tracking-[0.02em]">Editar Usuário</h2>
+              <p className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Perfil do Colaborador</p>
             </div>
             <button 
               onClick={onClose}
-              className="w-10 h-10 flex items-center justify-center text-text-muted hover:text-white transition-all rounded-full border border-white/5 hover:border-white/10"
+              className="w-[28px] h-[28px] flex items-center justify-center text-[#444] hover:text-text-primary hover:bg-white/5 transition-all rounded-full"
             >
-              <X size={20} />
+              <X size={16} />
             </button>
           </div>
         </div>
 
-        <div className="p-10">
+        <div className="p-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              
               {/* Full Name */}
               <FormField
                 control={form.control}
                 name="fullName"
                 render={({ field }) => (
-                  <FormItem className="space-y-4">
-                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Nome Completo</FormLabel>
+                  <FormItem className="space-y-1.5">
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Nome Completo</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
-                        placeholder="Ex: Rafael Silva" 
-                        className="w-full px-8 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all"
+                        placeholder="Nome do usuário" 
+                        className="w-full px-[14px] py-[11px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all"
                       />
                     </FormControl>
-                    <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
+                    <FormMessage className="text-[9px] text-[#ef4444]" />
                   </FormItem>
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                {/* Email */}
+              {/* Email + Phone */}
+              <div className="grid grid-cols-2 gap-[10px]">
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
-                    <FormItem className="space-y-4">
-                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Email Profissional</FormLabel>
+                    <FormItem className="space-y-1.5">
+                      <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Email Profissional</FormLabel>
                       <FormControl>
                         <input 
                           {...field} 
                           type="email"
-                          placeholder="rafael@barbearia.com" 
-                          className="w-full px-8 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all font-mono"
+                          placeholder="email@exemplo.com" 
+                          className="w-full px-[14px] py-[11px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all"
                         />
                       </FormControl>
-                      <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
+                      <FormMessage className="text-[9px] text-[#ef4444]" />
                     </FormItem>
                   )}
                 />
 
-                {/* Phone */}
                 <FormField
                   control={form.control}
                   name="phone"
                   render={({ field }) => (
-                    <FormItem className="space-y-4">
-                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Telefone</FormLabel>
+                    <FormItem className="space-y-1.5">
+                      <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Telefone</FormLabel>
                       <FormControl>
                         <input 
                           {...field} 
-                          placeholder="(11) 99999-9999" 
-                          className="w-full px-8 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all font-mono"
+                          placeholder="(00) 00000-0000" 
+                          className="w-full px-[14px] py-[11px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all"
                         />
                       </FormControl>
-                      <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
+                      <FormMessage className="text-[9px] text-[#ef4444]" />
                     </FormItem>
                   )}
                 />
@@ -175,36 +174,43 @@ export function EditUserModal({ user, isOpen, onClose, onSuccess }: EditUserModa
                   control={form.control}
                   name="specialty"
                   render={({ field }) => (
-                    <FormItem className="space-y-4 animate-premium-in">
-                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Especialidade</FormLabel>
+                    <FormItem className="space-y-1.5">
+                      <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Especialidade</FormLabel>
                       <FormControl>
                         <input 
                           {...field} 
                           placeholder="Ex: Corte e Barba" 
-                          className="w-full px-8 py-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-base font-bold text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all"
+                          className="w-full px-[14px] py-[11px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] text-[12px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all"
                         />
                       </FormControl>
-                      <FormMessage className="text-[10px] font-bold font-mono text-red-400 uppercase tracking-widest" />
+                      <FormMessage className="text-[9px] text-[#ef4444]" />
                     </FormItem>
                   )}
                 />
               )}
 
-              {/* Footer Ações */}
-              <div className="flex items-center justify-end gap-10 pt-10 border-t border-white/[0.06]">
+              {/* Footer */}
+              <div className="grid grid-cols-2 gap-[10px] pt-4 border-t-[0.5px] border-border-main">
                 <button 
                   type="button" 
                   onClick={onClose}
-                  className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted hover:text-white transition-colors"
+                  className="py-[11px] rounded-[7px] bg-bg-sidebar border-[0.5px] border-border-main text-[10px] font-medium text-[#444] uppercase tracking-wider hover:bg-bg-surface transition-all"
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit" 
                   disabled={isPending}
-                  className="px-12 py-5 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.3em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_0_20px_rgba(0,229,255,0.15)]"
+                  className="flex items-center justify-center gap-2 py-[11px] rounded-[7px] bg-accent-main text-black text-[10px] font-medium uppercase tracking-wider hover:opacity-90 disabled:opacity-50 transition-all shadow-[0_0_20px_color-mix(in_srgb,var(--accent)_10%,transparent)]"
                 >
-                  {isPending ? 'Salvando...' : 'Confirmar Alterações'}
+                  {isPending ? (
+                    <CircleNotch size={14} className="animate-spin" />
+                  ) : (
+                    <>
+                      <FloppyDisk size={14} weight="bold" />
+                      Salvar
+                    </>
+                  )}
                 </button>
               </div>
             </form>

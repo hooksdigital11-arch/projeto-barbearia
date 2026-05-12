@@ -8,11 +8,10 @@ import {
   Pause,
   Play,
   Trash,
+  Eye,
 } from '@phosphor-icons/react'
 import { AdminUser, AdminUsersFilter } from '../types'
 import { UserAvatar } from './user-avatar'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils/cn'
 import { toast } from 'sonner'
 import { toggleUserStatus, deleteUser } from '../actions'
@@ -72,137 +71,148 @@ export function UsersList({ initialUsers }: UsersListProps) {
     setIsEditModalOpen(true)
   }
 
-
   return (
-    <div className="space-y-16">
-      {/* Header & Controls: Editorial & Precise */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-10">
-        <div className="relative flex-1 max-w-2xl group">
-          <MagnifyingGlass className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-accent-cyan transition-colors" size={20} />
+    <div className="space-y-12">
+      {/* Controls Container */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 items-center gap-6">
+        {/* Search Box - Larger */}
+        <div className="relative w-full lg:max-w-md">
+          <MagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#2e2e2e]" size={16} />
           <input
-            placeholder="Buscar por nome ou email..."
-            className="w-full pl-16 pr-8 py-5 bg-black border border-white/[0.06] rounded-full text-base font-medium text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 transition-all font-sans"
+            placeholder="Buscar usuário por nome ou email..."
+            className="w-full pl-10 pr-4 py-[11px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] text-[12px] text-text-primary placeholder:text-[#2e2e2e] focus:outline-none focus:border-accent-main/20 transition-all"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
-        <div className="flex flex-col md:flex-row items-center gap-8">
-          <div className="flex gap-2 p-1.5 bg-white/[0.03] border border-white/[0.06] rounded-full">
+        {/* Filter Tabs - Centered */}
+        <div className="flex justify-center">
+          <div className="flex bg-bg-black border border-border-main/50 rounded-full p-1 h-fit">
             {(['all', 'admin', 'barber', 'client'] as const).map((role) => (
               <button
                 key={role}
                 onClick={() => setRoleFilter(role)}
                 className={cn(
-                  "px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all",
+                  "px-4 py-1.5 rounded-full text-[10px] font-medium uppercase tracking-wider transition-all",
                   roleFilter === role
-                    ? "bg-accent-cyan text-black"
-                    : "text-text-muted hover:text-white hover:bg-white/5"
+                    ? "bg-bg-surface text-accent-main border border-accent-main/10"
+                    : "text-[#333] hover:text-[#666]"
                 )}
               >
-                {role === 'all' ? 'Todos' : role === 'admin' ? 'Admin' : role === 'barber' ? 'Barbeiro' : 'Cliente'}
+                {role === 'all' ? 'TODOS' : role === 'admin' ? 'ADMIN' : role === 'barber' ? 'BARBEIRO' : 'CLIENTE'}
               </button>
             ))}
           </div>
+        </div>
 
+        {/* Button - Right Aligned */}
+        <div className="flex justify-end">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-10 py-4 rounded-full bg-accent-cyan text-black font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-3 shrink-0 shadow-[0_0_20px_rgba(0,229,255,0.15)]"
+            className="flex items-center gap-2 bg-accent-main text-black px-5 py-[11px] rounded-[8px] text-[10px] font-medium uppercase tracking-[0.08em] hover:opacity-90 transition-all shrink-0"
           >
-            <Plus size={16} weight="bold" />
+            <Plus size={14} weight="bold" />
             Novo Usuário
           </button>
         </div>
       </div>
 
-      {/* Table: Zero Shadows, Pure Borders */}
-      <div className="premium-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/[0.06] bg-white/[0.01]">
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Usuário</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Cargo</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Status</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted text-right">Gestão</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-white/[0.02] transition-colors group">
-                  <td className="px-10 py-8">
-                    <div className="flex items-center gap-5">
-                      <UserAvatar name={user.full_name || ''} url={user.avatar_url} role={user.role} />
-                      <div className="flex flex-col space-y-1.5">
-                        <span className="font-bold text-white text-lg tracking-tight group-hover:text-accent-cyan transition-colors">{user.full_name}</span>
-                        <span className="text-[10px] font-bold text-text-muted font-mono tracking-tight">{user.email || 'SEM EMAIL CADASTRADO'}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-10 py-8">
-                    <span className={cn(
-                      "px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all",
-                      user.role === 'admin' ? "bg-purple-500/10 text-purple-400 border-purple-500/20" :
-                        user.role === 'barber' ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
-                          "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                    )}>
-                      {user.role === 'admin' ? 'Administrador' : user.role === 'barber' ? 'Barbeiro' : 'Cliente'}
-                    </span>
-                  </td>
-                  <td className="px-10 py-8">
-                    <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-2 h-2 rounded-full",
-                        user.status === 'active' || !user.status
-                          ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
-                          : "bg-white/10"
-                      )} />
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted font-mono">
-                        {user.status === 'active' || !user.status ? 'On-line' : 'Off-line'}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-10 py-8 text-right">
-                    <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
-                      <button
-                        onClick={() => handleEdit(user)}
-                        title="Editar"
-                        className="w-11 h-11 flex items-center justify-center text-text-muted hover:text-white transition-all rounded-full border border-white/5 hover:border-accent-cyan/40 hover:bg-accent-cyan/5"
-                      >
-                        <PencilSimple size={18} weight="bold" />
-                      </button>
-                      <button
-                        onClick={() => handleToggleStatus(user.id, user.status || 'active')}
-                        disabled={isPending}
-                        title={user.status === 'active' ? 'Desativar' : 'Ativar'}
-                        className="w-11 h-11 flex items-center justify-center text-text-muted hover:text-accent-cyan transition-all rounded-full border border-white/5 hover:border-accent-cyan/40 hover:bg-accent-cyan/5"
-                      >
-                        {user.status === 'active' ? <Pause size={18} weight="bold" /> : <Play size={18} weight="bold" />}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user.id)}
-                        disabled={isPending}
-                        title="Remover"
-                        className="w-11 h-11 flex items-center justify-center text-text-muted hover:text-red-400 transition-all rounded-full border border-white/5 hover:border-red-400/40 hover:bg-red-400/5"
-                      >
-                        <Trash size={18} weight="bold" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Modern Table Grid */}
+      <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] overflow-hidden">
+        {/* Table Header */}
+        <div className="grid grid-cols-[2.2fr_1fr_100px_80px] gap-[12px] px-5 py-3 border-b-[0.5px] border-border-main/50 items-center">
+          <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a2a2a]">Usuário</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a2a2a]">Cargo</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a2a2a]">Status</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a2a2a] text-right">Ações</span>
         </div>
 
-        {filteredUsers.length === 0 && (
-          <div className="p-40 text-center flex flex-col items-center justify-center gap-8">
-            <div className="w-1.5 h-12 bg-white/5" />
-            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-text-muted">Nenhum registro encontrado</p>
-          </div>
-        )}
+        {/* Table Rows */}
+        <div className="flex flex-col">
+          {filteredUsers.map((user, idx) => (
+            <div 
+              key={user.id} 
+              className={cn(
+                "grid grid-cols-[2.2fr_1fr_100px_80px] gap-[12px] px-5 py-3.5 items-center hover:bg-bg-surface transition-all",
+                idx !== filteredUsers.length - 1 && "border-bottom-[0.5px] border-border-main"
+              )}
+              style={{ borderBottom: idx !== filteredUsers.length - 1 ? '0.5px solid #141414' : 'none' }}
+            >
+              {/* User Info */}
+              <div className="flex items-center gap-3">
+                <UserAvatar name={user.full_name || ''} url={user.avatar_url} />
+                <div className="flex flex-col truncate">
+                  <span className="text-[13px] font-medium text-text-primary truncate uppercase">{user.full_name}</span>
+                  <span className="text-[9px] text-[#2a2a2a] truncate uppercase tracking-wider">{user.email || 'sem email'}</span>
+                </div>
+              </div>
+
+              {/* Role Badge */}
+              <div>
+                <span className={cn(
+                  "px-[10px] py-[3px] rounded-[5px] text-[9px] font-medium uppercase tracking-[0.07em] border-[0.5px]",
+                  user.role === 'admin' ? "bg-[#1a0d2e] text-[#9b7cf6] border-[#9b7cf633]" :
+                    user.role === 'barber' ? "bg-[#0d1e2e] text-[#6b9fff] border-[#6b9fff33]" :
+                      "bg-[#0d2e1a] text-[#00c070] border-[#00c07033]"
+                )}>
+                  {user.role === 'admin' ? 'Administrador' : user.role === 'barber' ? 'Barbeiro' : 'Cliente'}
+                </span>
+              </div>
+
+              {/* Status */}
+              <div className="flex items-center gap-2">
+                <div className={cn(
+                  "w-[6px] h-[6px] rounded-full",
+                  user.status === 'active' || !user.status ? "bg-accent-main" : "bg-[#2a2a2a]"
+                )} />
+                <span className={cn(
+                  "text-[10px] tracking-[0.06em] uppercase transition-colors",
+                  user.status === 'active' || !user.status ? "text-accent-main" : "text-[#444]"
+                )}>
+                  {user.status === 'active' || !user.status ? 'On-line' : 'Pausado'}
+                </span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-[10px]">
+                <button 
+                  onClick={() => handleEdit(user)}
+                  title="Editar" 
+                  className="w-[30px] h-[30px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:border-[#2a2a2a] hover:text-[#777] transition-all"
+                >
+                  <PencilSimple size={13} weight="bold" />
+                </button>
+                <button 
+                  onClick={() => handleToggleStatus(user.id, user.status || 'active')}
+                  disabled={isPending}
+                  title={user.status === 'active' ? 'Pausar' : 'Ativar'}
+                  className="w-[30px] h-[30px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:border-[#2a2a2a] hover:text-[#777] transition-all disabled:opacity-30"
+                >
+                  {user.status === 'active' ? <Pause size={13} weight="bold" /> : <Play size={13} weight="bold" />}
+                </button>
+                <button 
+                  onClick={() => handleDelete(user.id)}
+                  disabled={isPending}
+                  title="Excluir" 
+                  className="w-[30px] h-[30px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:border-[#2a2a2a] hover:text-[#ef4444] transition-all disabled:opacity-30"
+                >
+                  <Trash size={13} weight="bold" />
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {filteredUsers.length === 0 && (
+            <div className="p-20 text-center flex flex-col items-center justify-center gap-4">
+              <div className="w-px h-8 bg-[#161616]" />
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#333]">Nenhum usuário encontrado</p>
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* Modals */}
       {isModalOpen && (
         <CreateUserModal
           isOpen={isModalOpen}

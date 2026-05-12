@@ -1,10 +1,7 @@
 'use client'
 
 import { useState, useTransition, useEffect } from 'react'
-import { Package, X, CircleNotch, FloppyDisk } from '@phosphor-icons/react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { CustomSelect } from '@/components/ui/custom-select'
+import { Package, X, CircleNotch, FloppyDisk, CaretDown } from '@phosphor-icons/react'
 import { updateProduct } from '../actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
@@ -44,157 +41,225 @@ export function EditProductModal({ isOpen, onClose, product }: { isOpen: boolean
     startTransition(async () => {
       const result = await updateProduct(product.id, formData)
       if (result.success) {
-        toast.success('Produto atualizado com sucesso!')
+        toast.success('PRODUTO ATUALIZADO!')
         onClose()
       } else {
-        toast.error(result.error || 'Erro ao atualizar produto.')
+        toast.error(result.error || 'ERRO AO ATUALIZAR.')
       }
     })
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-[#141414] border border-white/10 rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-8">
-        <div className="flex items-center justify-between mb-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm animate-in fade-in duration-300"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-[500px] rounded-[12px] border border-border-main bg-bg-surface overflow-hidden animate-in fade-in zoom-in-95 duration-500 flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between p-[24px] pb-5">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-accent-blue/10 flex items-center justify-center text-accent-blue">
-              <Package size={28} weight="duotone" />
+            <div className="w-[32px] h-[32px] flex items-center justify-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] text-text-nav shrink-0">
+              <Package size={18} weight="regular" />
             </div>
-            <div>
-              <h3 className="text-2xl font-bold font-syne text-white">Editar Produto</h3>
-              <p className="text-sm text-muted-foreground">{product.name}</p>
+            <div className="space-y-0.5">
+              <h2 className="text-[14px] font-medium text-text-primary uppercase tracking-tight">Editar Produto</h2>
+              <p className="text-[10px] text-[#383838] font-medium uppercase tracking-wide truncate max-w-[280px]">{product.name}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-muted-foreground hover:text-white transition-colors rounded-xl hover:bg-white/5">
-            <X size={24} />
+          <button
+            onClick={onClose}
+            className="w-[26px] h-[26px] flex items-center justify-center bg-[#1a1a1a] border-[0.5px] border-[#252525] rounded-[6px] text-[#444] transition-all hover:text-text-primary"
+          >
+            <X size={12} weight="regular" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
-            {/* Linha 1 */}
+        {/* Form Content */}
+        <div className="overflow-y-auto px-[24px] pb-[24px]">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Nome */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Nome do Produto *</label>
-              <Input name="name" required defaultValue={product.name} className="bg-white/5 border-white/10 rounded-xl h-12" />
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Nome do Produto <span className="text-accent-main">*</span></label>
+              <input
+                name="name"
+                required
+                defaultValue={product.name}
+                className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 uppercase"
+              />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            {/* Grid QTDs */}
+            <div className="grid grid-cols-2 gap-[10px]">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Qtd Atual</label>
-                <Input name="quantity" type="number" defaultValue={product.quantity ?? 0} min={0} className="bg-white/5 border-white/10 rounded-xl h-12" />
+                <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">QTD Atual</label>
+                <input
+                  name="quantity"
+                  type="number"
+                  min={0}
+                  defaultValue={product.quantity ?? 0}
+                  className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20"
+                />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Qtd Mínima</label>
-                <Input name="min_quantity" type="number" defaultValue={product.min_quantity ?? 0} min={0} className="bg-white/5 border-white/10 rounded-xl h-12" />
+                <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">QTD Mínima</label>
+                <input
+                  name="min_quantity"
+                  type="number"
+                  min={0}
+                  defaultValue={product.min_quantity ?? 0}
+                  className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20"
+                />
               </div>
             </div>
 
-            {/* Linha 2 */}
+            {/* Tipo */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Tipo *</label>
-              <CustomSelect
-                name="type"
-                value={type}
-                onChange={setType}
-                options={[
-                  { value: 'revenda', label: 'Revenda' },
-                  { value: 'uso_interno', label: 'Uso Interno' },
-                ]}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground truncate block">Custo (R$)</label>
-                <Input name="cost_cents" type="number" step="0.01" defaultValue={product.cost_cents ? product.cost_cents / 100 : ''} className="bg-white/5 border-white/10 rounded-xl h-12" />
-              </div>
-              <div className={cn("space-y-2 transition-all duration-300", type !== 'revenda' && "opacity-20 pointer-events-none")}>
-                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent-blue truncate block">Venda (R$)</label>
-                <Input name="price_cents" type="number" step="0.01" defaultValue={product.price_cents ? product.price_cents / 100 : ''} disabled={type !== 'revenda'} className="bg-accent-blue/5 border-accent-blue/20 focus:border-accent-blue text-accent-blue rounded-xl h-12" />
-              </div>
-            </div>
-
-            {/* Linha 3 */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Categoria *</label>
-              <CustomSelect
-                name="category"
-                value={category}
-                onChange={setCategory}
-                options={[
-                  { value: 'pomada', label: 'Pomada' },
-                  { value: 'shampoo', label: 'Shampoo' },
-                  { value: 'lamina', label: 'Lâmina' },
-                  { value: 'tesoura', label: 'Tesoura' },
-                  { value: 'oleo', label: 'Óleo' },
-                  { value: 'creme', label: 'Creme' },
-                  { value: 'outros', label: 'Outro' },
-                ]}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Fornecedor</label>
-              <Input name="supplier" defaultValue={product.supplier || ''} className="bg-white/5 border-white/10 rounded-xl h-12" />
-            </div>
-
-            {/* Linha 4 - Descrição e Telefone */}
-            <div className="space-y-2 md:row-span-3">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Descrição</label>
-              <textarea 
-                name="description" 
-                rows={5}
-                placeholder="Detalhes sobre o produto..."
-                defaultValue={product.description || ''}
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all outline-none resize-none h-[124px]"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Telefone Fornecedor</label>
-              <Input 
-                name="supplier_phone" 
-                value={phone}
-                onChange={(e) => setPhone(formatPhone(e.target.value))}
-                placeholder="(00) 00000-0000" 
-                className="bg-white/5 border-white/10 rounded-xl h-12" 
-              />
-            </div>
-
-            {/* Status (Toggle) */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Status</label>
-              <div 
-                onClick={() => setIsActive(!isActive)}
-                className={cn(
-                  "w-full flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all h-12",
-                  isActive ? "bg-green-500/5 border-green-500/20" : "bg-red-500/5 border-red-500/20"
-                )}
-              >
-                <span className="text-xs font-bold uppercase tracking-widest text-white">{isActive ? 'Ativo' : 'Inativo'}</span>
-                <div className={cn(
-                  "w-8 h-4 rounded-full relative transition-colors",
-                  isActive ? "bg-green-500" : "bg-red-500"
-                )}>
-                  <div className={cn(
-                    "absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all",
-                    isActive ? "right-0.5" : "left-0.5"
-                  )} />
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Tipo <span className="text-accent-main">*</span></label>
+              <div className="relative">
+                <select
+                  name="type"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  className="w-full appearance-none bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] pr-[30px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 uppercase cursor-pointer"
+                >
+                  <option value="revenda">REVENDA</option>
+                  <option value="uso_interno">USO INTERNO</option>
+                </select>
+                <div className="absolute right-[10px] top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
+                  <CaretDown size={14} weight="regular" />
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="pt-6 border-t border-white/5 flex gap-4">
-            <Button type="button" variant="ghost" onClick={onClose} className="flex-1 rounded-2xl py-6 text-muted-foreground hover:text-white hover:bg-white/5">
-              Cancelar
-            </Button>
-            <Button disabled={isPending} type="submit" className="flex-1 bg-accent-blue hover:bg-blue-400 text-black font-bold gap-2 rounded-2xl py-6 text-base shadow-lg shadow-blue-500/20">
-              {isPending ? <CircleNotch size={24} className="animate-spin" /> : <FloppyDisk size={24} />}
-              Salvar Alterações
-            </Button>
-          </div>
-        </form>
+            {/* Grid Custos */}
+            <div className="grid grid-cols-2 gap-[10px]">
+              <div className="space-y-2">
+                <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Custo (R$)</label>
+                <input
+                  name="cost_cents"
+                  type="number"
+                  step="0.01"
+                  defaultValue={product.cost_cents ? product.cost_cents / 100 : ''}
+                  className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20"
+                />
+              </div>
+              <div className={cn("space-y-2 transition-opacity", type !== 'revenda' && "opacity-20 pointer-events-none")}>
+                <label className="text-[9px] font-medium text-accent-main uppercase tracking-[0.12em]">Venda (R$)</label>
+                <input
+                  name="price_cents"
+                  type="number"
+                  step="0.01"
+                  defaultValue={product.price_cents ? product.price_cents / 100 : ''}
+                  className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20"
+                />
+              </div>
+            </div>
+
+            {/* Categoria */}
+            <div className="space-y-2">
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Categoria <span className="text-accent-main">*</span></label>
+              <div className="relative">
+                <select
+                  name="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full appearance-none bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] pr-[30px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 uppercase cursor-pointer"
+                >
+                  <option value="pomada">POMADA</option>
+                  <option value="shampoo">SHAMPOO</option>
+                  <option value="lamina">LÂMINA</option>
+                  <option value="tesoura">TESOURA</option>
+                  <option value="oleo">ÓLEO</option>
+                  <option value="creme">CREME</option>
+                  <option value="outros">OUTRO</option>
+                </select>
+                <div className="absolute right-[10px] top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
+                  <CaretDown size={14} weight="regular" />
+                </div>
+              </div>
+            </div>
+
+            {/* Fornecedor */}
+            <div className="space-y-2">
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Fornecedor</label>
+              <input
+                name="supplier"
+                defaultValue={product.supplier || ''}
+                className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 uppercase"
+              />
+            </div>
+
+            {/* Grid Descrição e Info Direita */}
+            <div className="grid grid-cols-2 gap-[10px]">
+              <div className="space-y-2">
+                <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Descrição</label>
+                <textarea
+                  name="description"
+                  defaultValue={product.description || ''}
+                  rows={4}
+                  className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 resize-none h-[118px] uppercase placeholder:text-[#2a2a2a]"
+                />
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Telefone Fornecedor</label>
+                  <input
+                    name="supplier_phone"
+                    value={phone}
+                    onChange={(e) => setPhone(formatPhone(e.target.value))}
+                    placeholder="(00) 00000-0000"
+                    className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] px-[13px] py-[10px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Status</label>
+                  <div 
+                    onClick={() => setIsActive(!isActive)}
+                    className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] h-[38px] px-[13px] flex items-center justify-between cursor-pointer transition-all hover:border-[#333]"
+                  >
+                    <span className="text-[11px] font-medium text-text-secondary uppercase tracking-[0.07em]">Ativo</span>
+                    <div className={cn(
+                      "w-[36px] h-[20px] rounded-[10px] relative transition-all duration-300",
+                      isActive ? "bg-accent-main" : "bg-[#1e1e1e]"
+                    )}>
+                      <div className={cn(
+                        "absolute top-[3px] w-[14px] h-[14px] bg-[#000] rounded-full transition-all duration-300",
+                        isActive ? "right-[3px]" : "left-[3px]"
+                      )} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="grid grid-cols-2 gap-[10px] pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="bg-bg-sidebar border-[0.5px] border-border-main text-[#444] py-[12px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:border-[#333] hover:text-[#777]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isPending}
+                className="flex items-center justify-center gap-2 bg-accent-main text-black py-[12px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 disabled:opacity-40"
+              >
+                {isPending ? (
+                  <CircleNotch size={14} className="animate-spin" />
+                ) : (
+                  <FloppyDisk size={14} weight="bold" />
+                )}
+                SALVAR ALTERAÇÕES
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

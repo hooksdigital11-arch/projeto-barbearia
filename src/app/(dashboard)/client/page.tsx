@@ -6,7 +6,7 @@ import { requireClient } from '@/lib/auth/require-auth'
 export default async function ClientPage() {
   await requireClient()
   return (
-    <Suspense fallback={<div className="p-8 text-white">Carregando seu espaço...</div>}>
+    <Suspense fallback={<div className="p-8 text-text-primary">Carregando seu espaço...</div>}>
       <ClientDashboard />
     </Suspense>
   )

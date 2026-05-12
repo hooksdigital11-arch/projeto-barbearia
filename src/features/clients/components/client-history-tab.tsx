@@ -1,5 +1,7 @@
+'use client'
+
 import { cn } from '@/lib/utils/cn'
-import { Calendar, Clock, User, CurrencyDollar } from '@phosphor-icons/react/dist/ssr'
+import { Calendar, Clock, User, CurrencyDollar } from '@phosphor-icons/react'
 import type { AppointmentRecord } from '../types'
 
 interface ClientHistoryTabProps {
@@ -44,59 +46,63 @@ function getBarberColor(name: string): string {
 export function ClientHistoryTab({ appointments, showFinancials }: ClientHistoryTabProps) {
   if (appointments.length === 0) {
     return (
-      <div className="text-center py-12">
-        <Calendar size={40} weight="duotone" className="mx-auto text-text-secondary mb-3" />
-        <p className="text-text-secondary text-sm">Nenhum agendamento anterior encontrado</p>
+      <div className="flex flex-col items-center justify-center py-16 border-[0.5px] border-dashed border-border-main rounded-[10px] bg-bg-sidebar">
+        <Calendar size={32} weight="regular" className="text-[#2a2a2a] mb-4" />
+        <p className="text-[11px] font-medium text-[#333] uppercase tracking-wider">Nenhum agendamento anterior</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-[4px]">
       {appointments.map(apt => (
         <div
           key={apt.id}
-          className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] transition-colors"
+          className="grid grid-cols-[90px_1fr_auto] gap-[16px] py-[13px] px-[18px] items-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] group hover:bg-bg-surface hover:border-[#222] transition-all"
         >
-          {/* Date */}
-          <div className="flex-shrink-0 w-14 text-center">
-            <p className="text-sm font-bold text-white">{formatDate(apt.start_time)}</p>
-            <p className="text-xs text-text-secondary">{formatTime(apt.start_time)}</p>
+          {/* Column 1: Date/Time */}
+          <div className="flex flex-col">
+            <span className="text-[12px] font-medium text-text-secondary tracking-tight">
+              {formatDate(apt.start_time)}
+            </span>
+            <span className="text-[10px] text-[#333] font-medium">
+              {formatTime(apt.start_time)}
+            </span>
           </div>
 
-          {/* Divider */}
-          <div className="w-px h-10 bg-white/10 flex-shrink-0" />
-
-          {/* Service */}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">
-              {apt.service?.name || 'Serviço'}
-            </p>
+          {/* Column 2: Info */}
+          <div className="flex flex-col min-w-0">
+            <span className="text-[12px] font-medium text-text-secondary truncate uppercase tracking-[0.02em]">
+              {apt.service?.name || 'SERVIÇO'}
+            </span>
             {apt.barber && (
-              <p className="text-xs text-text-secondary flex items-center gap-1.5 mt-0.5">
-                <span
-                  className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: getBarberColor(apt.barber.full_name) }}
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <div 
+                  className="w-[5px] h-[5px] rounded-full opacity-50" 
+                  style={{ backgroundcolor: 'var(--accent, #00d4aa)' }}
                 />
-                {apt.barber.full_name}
-              </p>
+                <span className="text-[10px] text-[#333] font-medium uppercase truncate">
+                  {apt.barber.full_name}
+                </span>
+              </div>
             )}
           </div>
 
-          {/* Duration */}
-          <div className="flex items-center gap-1 text-text-secondary flex-shrink-0">
-            <Clock size={12} weight="duotone" />
-            <span className="text-xs">{apt.service?.duration_minutes || '--'}min</span>
-          </div>
-
-          {/* Price */}
-          {showFinancials && apt.price_cents !== null && (
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <span className="text-sm font-bold text-accent-cyan">
-                {formatCurrency(apt.price_cents)}
+          {/* Column 3: Metrics */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-1.5 text-[#2e2e2e] shrink-0">
+              <Clock size={12} weight="regular" />
+              <span className="text-[10px] font-medium">
+                {apt.service?.duration_minutes || '--'}MIN
               </span>
             </div>
-          )}
+            
+            <div className="min-w-[70px] text-right">
+              <span className="text-[13px] font-medium text-text-secondary tracking-tight">
+                {showFinancials && apt.price_cents !== null ? formatCurrency(apt.price_cents) : '---'}
+              </span>
+            </div>
+          </div>
         </div>
       ))}
     </div>

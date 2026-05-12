@@ -47,9 +47,9 @@ export function AddProductModal({ isOpen, onClose, clientId, appointmentId, onAd
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#141414] border-white/10 max-w-xl">
+      <DialogContent className="bg-bg-surface border-white/10 max-w-xl">
         <DialogHeader>
-          <DialogTitle className="font-syne uppercase tracking-tight text-white">Adicionar Produto</DialogTitle>
+          <DialogTitle className="font-syne uppercase tracking-tight text-text-primary">Adicionar Produto</DialogTitle>
         </DialogHeader>
         <div className="space-y-3 mt-4 max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10">
           {products.map(product => (
@@ -58,7 +58,7 @@ export function AddProductModal({ isOpen, onClose, clientId, appointmentId, onAd
               className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 hover:border-white/20 transition-all gap-4 group"
             >
               <div>
-                <p className="font-bold text-white uppercase text-sm tracking-wide">{product.name}</p>
+                <p className="font-bold text-text-primary uppercase text-sm tracking-wide">{product.name}</p>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   Estoque: <span className={product.quantity <= 5 ? 'text-error font-bold' : 'text-success'}>{product.quantity} unid.</span>
                 </p>
@@ -72,7 +72,7 @@ export function AddProductModal({ isOpen, onClose, clientId, appointmentId, onAd
                     max={product.quantity} 
                     value={quantities[product.id] || 1}
                     onChange={(e) => setQuantities({ ...quantities, [product.id]: parseInt(e.target.value) || 1 })}
-                    className="w-16 h-8 bg-transparent border-0 focus-visible:ring-0 text-center text-white"
+                    className="w-16 h-8 bg-transparent border-0 focus-visible:ring-0 text-center text-text-primary"
                   />
                 </div>
                 <Button 

@@ -42,14 +42,14 @@ export function RedeemModal({ isOpen, onClose, clientId, config }: RedeemModalPr
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-[#141414] border border-white/10 rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-center">
+      <div className="bg-bg-surface border border-white/10 rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-center">
         {!redeemed ? (
           <>
             {/* Pre-redeem */}
             <div className="w-20 h-20 rounded-3xl bg-green-500/10 flex items-center justify-center mx-auto mb-6">
               <Gift size={40} weight="duotone" className="text-green-400" />
             </div>
-            <h3 className="text-2xl font-bold font-syne text-white mb-2">Resgatar Recompensa</h3>
+            <h3 className="text-2xl font-bold font-syne text-text-primary mb-2">Resgatar Recompensa</h3>
             <p className="text-muted-foreground mb-6">
               Você atingiu a meta! Tem direito a:
             </p>
@@ -60,13 +60,13 @@ export function RedeemModal({ isOpen, onClose, clientId, config }: RedeemModalPr
               Após o resgate, seus carimbos serão zerados e um novo ciclo começará. Apresente o código ao barbeiro no dia do atendimento.
             </p>
             <div className="flex gap-3">
-              <Button variant="ghost" onClick={handleClose} className="flex-1 rounded-2xl py-6 text-muted-foreground hover:text-white">
+              <Button variant="ghost" onClick={handleClose} className="flex-1 rounded-2xl py-6 text-muted-foreground hover:text-text-primary">
                 Cancelar
               </Button>
               <Button
                 disabled={isPending}
                 onClick={handleRedeem}
-                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold gap-2 rounded-2xl py-6 text-base shadow-lg shadow-green-500/20"
+                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-text-primary font-bold gap-2 rounded-2xl py-6 text-base shadow-lg shadow-green-500/20"
               >
                 {isPending ? <CircleNotch size={24} className="animate-spin" /> : <Gift size={24} />}
                 Confirmar Resgate
@@ -79,7 +79,7 @@ export function RedeemModal({ isOpen, onClose, clientId, config }: RedeemModalPr
             <div className="w-20 h-20 rounded-3xl bg-green-500/10 flex items-center justify-center mx-auto mb-6 animate-bounce">
               <Sparkle size={40} weight="duotone" className="text-green-400" />
             </div>
-            <h3 className="text-2xl font-bold font-syne text-white mb-2">🎉 Parabéns!</h3>
+            <h3 className="text-2xl font-bold font-syne text-text-primary mb-2">🎉 Parabéns!</h3>
             <p className="text-muted-foreground mb-6">
               Resgate confirmado com sucesso!
             </p>

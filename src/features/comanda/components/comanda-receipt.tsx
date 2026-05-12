@@ -28,13 +28,13 @@ export function ComandaReceipt({
   }
 
   return (
-    <Card className="bg-[#141414] border-white/10 overflow-hidden">
+    <Card className="bg-bg-surface border-white/10 overflow-hidden">
       <CardContent className="p-0">
         <div className="bg-success/10 p-6 flex flex-col items-center justify-center text-center border-b border-white/5">
           <div className="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center mb-3">
             <Check className="w-6 h-6 text-success" />
           </div>
-          <h2 className="text-xl font-bold text-white uppercase tracking-wider">PAGAMENTO CONFIRMADO!</h2>
+          <h2 className="text-xl font-bold text-text-primary uppercase tracking-wider">PAGAMENTO CONFIRMADO!</h2>
         </div>
 
         <div className="p-8 space-y-6 font-mono text-sm uppercase">

@@ -11,6 +11,7 @@ import {
   ShareNetwork, 
   CloudArrowDown, 
   UserCircle, 
+  Palette, 
   Warning 
 } from '@phosphor-icons/react'
 import { PageTitle } from '@/components/shared/page-title'
@@ -23,6 +24,7 @@ const sections = [
   { label: 'Integrações', href: '/admin/settings/integrations', icon: ShareNetwork },
   { label: 'Backup', href: '/admin/settings/backup', icon: CloudArrowDown },
   { label: 'Perfil', href: '/admin/settings/profile', icon: UserCircle },
+  { label: 'Aparência', href: '/admin/settings/appearance', icon: Palette },
   { label: 'Zona de Perigo', href: '/admin/settings/danger', icon: Warning, danger: true },
 ]
 
@@ -37,8 +39,8 @@ export function SettingsLayout({ children }: { children: React.ReactNode }) {
       />
 
       <div className="flex flex-col lg:flex-row gap-12 min-h-[600px]">
-        {/* Sidebar Navigation: Minimalist & Border-Driven */}
-        <aside className="w-full lg:w-72 flex flex-col gap-0 sticky top-8">
+        {/* Sidebar Navigation: Floating & Pill-Style */}
+        <aside className="w-full lg:w-64 flex flex-col gap-2 sticky top-8 shrink-0">
           {sections.map((item) => {
             const isActive = pathname === item.href
             return (
@@ -46,18 +48,29 @@ export function SettingsLayout({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-5 px-8 py-4 text-[10px] font-black uppercase tracking-[0.3em] transition-all border-l-2",
+                  "flex items-center gap-4 px-5 py-3 text-[11px] font-medium uppercase tracking-[0.06em] transition-all rounded-[10px] relative group",
                   isActive 
                     ? (item.danger 
-                        ? "border-red-500 text-white bg-red-500/5" 
-                        : "border-accent-cyan text-white bg-accent-cyan/5") 
-                    : "border-transparent text-text-muted hover:text-white hover:bg-white/[0.02]",
+                        ? "bg-[#1a0d0d] text-[#c04040]" 
+                        : "bg-bg-surface text-text-primary") 
+                    : "text-[#333] hover:text-text-nav hover:bg-white/[0.02]",
                 )}
               >
+                {/* Active Indicator Bar */}
+                {isActive && (
+                  <div 
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-[60%] rounded-full"
+                    style={{ background: item.danger ? '#c04040' : 'var(--accent, #00d4aa)' }}
+                  />
+                )}
+
                 <item.icon 
                   size={18} 
                   weight={isActive ? "bold" : "regular"} 
-                  className={cn(isActive && !item.danger && "text-accent-cyan")}
+                  className={cn(
+                    "transition-colors",
+                    isActive ? (item.danger ? "text-[#c04040]" : "text-text-primary") : "text-[#2a2a2a]"
+                  )}
                 />
                 {item.label}
               </Link>

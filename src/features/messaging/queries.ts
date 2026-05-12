@@ -181,6 +181,10 @@ export const getMessageTemplates = cache(async (): Promise<MessageTemplate[]> =>
     .order('created_at', { ascending: true })
 
   if (error) {
+    // Se a tabela não existir, apenas retornamos vazio sem logar erro crítico
+    if (error.message.includes('message_templates') && error.message.includes('not find')) {
+      return []
+    }
     console.error('[GET_TEMPLATES]', error.message)
     return []
   }

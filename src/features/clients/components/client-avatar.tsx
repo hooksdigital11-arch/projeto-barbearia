@@ -42,7 +42,7 @@ export function ClientAvatar({ name, size = 'md', className }: ClientAvatarProps
   return (
     <div
       className={cn(
-        'rounded-full flex items-center justify-center font-bold text-white flex-shrink-0 select-none',
+        'rounded-full flex items-center justify-center font-bold text-text-primary flex-shrink-0 select-none',
         sizes[size],
         className
       )}

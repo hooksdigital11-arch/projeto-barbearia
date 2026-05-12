@@ -1,10 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { X, CircleNotch, FloppyDisk, UserCircle } from '@phosphor-icons/react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { CustomSelect } from '@/components/ui/custom-select'
+import { X, CircleNotch, FloppyDisk, UserCircle, CaretDown } from '@phosphor-icons/react'
 import { updateBarber } from '../actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
@@ -40,112 +37,165 @@ export function EditBarberModal({ isOpen, onClose, member, canChangeStatus }: Ed
     startTransition(async () => {
       const result = await updateBarber(member.id, formData)
       if (result.success) {
-        toast.success('Barbeiro atualizado com sucesso!')
+        toast.success('BARBEIRO ATUALIZADO!')
         onClose()
       } else {
-        toast.error(result.error || 'Erro ao atualizar.')
+        toast.error(result.error || 'ERRO AO ATUALIZAR.')
       }
     })
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-[#141414] border border-white/10 rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-8">
-        <div className="flex items-center justify-between mb-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm animate-in fade-in duration-300"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-md rounded-[12px] border border-border-main bg-bg-surface overflow-hidden animate-in fade-in zoom-in-95 duration-500 flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-[28px] pb-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-accent-cyan/10 flex items-center justify-center text-accent-cyan">
-              <UserCircle size={28} weight="duotone" />
+            <div className="w-[34px] h-[34px] flex items-center justify-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] text-text-nav shrink-0">
+              <UserCircle size={18} weight="regular" />
             </div>
-            <div>
-              <h3 className="text-2xl font-bold font-syne text-white">Editar Perfil</h3>
-              <p className="text-sm text-muted-foreground">{member.full_name}</p>
+            <div className="space-y-0.5">
+              <h2 className="text-[14px] font-medium text-text-primary uppercase tracking-tight">Editar Perfil</h2>
+              <p className="text-[10px] text-[#383838] font-medium uppercase tracking-wide">{member.full_name}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-muted-foreground hover:text-white transition-colors rounded-xl hover:bg-white/5">
-            <X size={24} />
+          <button
+            onClick={onClose}
+            className="w-[28px] h-[28px] flex items-center justify-center bg-[#1a1a1a] border-[0.5px] border-[#252525] rounded-[6px] text-[#444] transition-all hover:text-text-primary"
+          >
+            <X size={13} weight="regular" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Nome Completo *</label>
-            <Input name="full_name" required defaultValue={member.full_name || ''} className="bg-white/5 border-white/10 rounded-xl h-12" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+        {/* Form Content */}
+        <div className="overflow-y-auto px-[28px] pb-[28px]">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Nome */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Telefone</label>
-              <Input
-                name="phone"
-                value={phone}
-                onChange={(e) => setPhone(formatPhone(e.target.value))}
-                placeholder="(00) 00000-0000"
-                className="bg-white/5 border-white/10 rounded-xl h-12"
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Nome Completo <span className="text-accent-main">*</span></label>
+              <input
+                name="full_name"
+                required
+                defaultValue={member.full_name || ''}
+                className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] py-[11px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 uppercase"
               />
             </div>
+
+            {/* Grid Telefone + Especialidade */}
+            <div className="grid grid-cols-2 gap-[10px]">
+              <div className="space-y-2">
+                <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Telefone</label>
+                <input
+                  name="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(formatPhone(e.target.value))}
+                  placeholder="(00) 00000-0000"
+                  className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] py-[11px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Especialidade <span className="text-accent-main">*</span></label>
+                <div className="relative">
+                  <select
+                    name="specialty"
+                    value={specialty}
+                    onChange={(e) => setSpecialty(e.target.value)}
+                    className="w-full appearance-none bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] pr-[32px] py-[11px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 uppercase cursor-pointer"
+                  >
+                    <option value="corte">CORTE</option>
+                    <option value="barba">BARBA</option>
+                    <option value="corte_barba">CORTE + BARBA</option>
+                    <option value="outros">OUTROS</option>
+                  </select>
+                  <div className="absolute right-[11px] top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
+                    <CaretDown size={14} weight="regular" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Avatar URL */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Especialidade *</label>
-              <CustomSelect
-                name="specialty"
-                value={specialty}
-                onChange={setSpecialty}
-                options={[
-                  { value: 'corte', label: 'Corte' },
-                  { value: 'barba', label: 'Barba' },
-                  { value: 'corte_barba', label: 'Corte + Barba' },
-                  { value: 'outros', label: 'Outros' },
-                ]}
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">URL do Avatar</label>
+              <input
+                name="avatar_url"
+                defaultValue={member.avatar_url || ''}
+                placeholder="https://..."
+                className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] py-[11px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20"
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">URL do Avatar</label>
-            <Input name="avatar_url" defaultValue={member.avatar_url || ''} placeholder="https://..." className="bg-white/5 border-white/10 rounded-xl h-12" />
-          </div>
+            {/* Status (Admin Only) */}
+            {canChangeStatus && (
+              <div className="space-y-2">
+                <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Status</label>
+                <div className="relative">
+                  <select
+                    name="status"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full appearance-none bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[14px] pr-[32px] py-[11px] text-[12px] font-medium text-text-secondary outline-none transition-all focus:border-accent-main/20 uppercase cursor-pointer"
+                  >
+                    <option value="active">● ATIVO</option>
+                    <option value="inactive">● INATIVO</option>
+                  </select>
+                  <div className="absolute right-[11px] top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
+                    <CaretDown size={14} weight="regular" />
+                  </div>
+                </div>
+              </div>
+            )}
 
-          {canChangeStatus && (
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Status</label>
-              <CustomSelect
-                name="status"
-                value={status}
-                onChange={setStatus}
-                options={[
-                  { value: 'active', label: '● Ativo' },
-                  { value: 'inactive', label: '● Inativo' },
-                ]}
-              />
+            {/* Info Fixa */}
+            <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[14px] px-[16px]">
+              <p className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.12em] mb-[10px]">Informações fixas</p>
+              <div className="space-y-1">
+                <div className="flex justify-between py-[5px] border-b border-border-main">
+                  <span className="text-[10px] font-medium text-[#333] uppercase">EMAIL</span>
+                  <span className="text-[10px] font-medium text-[#666] uppercase">{member.email || '—'}</span>
+                </div>
+                <div className="flex justify-between py-[5px] border-b border-border-main">
+                  <span className="text-[10px] font-medium text-[#333] uppercase">CARGO</span>
+                  <span className="text-[10px] font-medium text-[#666] uppercase">{member.role}</span>
+                </div>
+                <div className="flex justify-between py-[5px]">
+                  <span className="text-[10px] font-medium text-[#333] uppercase">MEMBRO DESDE</span>
+                  <span className="text-[10px] font-medium text-[#666] uppercase">{new Date(member.created_at).toLocaleDateString('pt-BR')}</span>
+                </div>
+              </div>
             </div>
-          )}
 
-          {/* Info não-editável */}
-          <div className="bg-white/5 border border-white/5 rounded-2xl p-4 space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3">Informações fixas</p>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Email</span>
-              <span className="text-white">{member.email || '—'}</span>
+            {/* Footer Actions */}
+            <div className="grid grid-cols-2 gap-[10px] pt-[16px] border-t-[0.5px] border-border-main mt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="bg-bg-sidebar border-[0.5px] border-border-main text-[#444] py-[12px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:border-[#333] hover:text-[#777]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isPending}
+                className="flex items-center justify-center gap-2 bg-accent-main text-black py-[12px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 disabled:opacity-40"
+              >
+                {isPending ? (
+                  <CircleNotch size={14} className="animate-spin" />
+                ) : (
+                  <FloppyDisk size={14} weight="bold" />
+                )}
+                SALVAR
+              </button>
             </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Cargo</span>
-              <span className="text-white capitalize">{member.role}</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Membro desde</span>
-              <span className="text-white">{new Date(member.created_at).toLocaleDateString('pt-BR')}</span>
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-white/5 flex gap-4">
-            <Button type="button" variant="ghost" onClick={onClose} className="flex-1 rounded-2xl py-6 text-muted-foreground hover:text-white hover:bg-white/5">
-              Cancelar
-            </Button>
-            <Button disabled={isPending} type="submit" className="flex-1 bg-accent-cyan hover:bg-cyan-400 text-black font-bold gap-2 rounded-2xl py-6 text-base shadow-lg shadow-cyan-500/20">
-              {isPending ? <CircleNotch size={24} className="animate-spin" /> : <FloppyDisk size={24} />}
-              Salvar
-            </Button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   )

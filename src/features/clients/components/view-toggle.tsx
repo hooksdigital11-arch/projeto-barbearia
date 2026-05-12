@@ -17,7 +17,7 @@ export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
           'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
           view === 'cards'
             ? 'bg-accent-cyan/10 text-accent-cyan'
-            : 'text-text-secondary hover:text-white'
+            : 'text-text-secondary hover:text-text-primary'
         )}
       >
         <SquaresFour size={14} weight={view === 'cards' ? 'fill' : 'duotone'} />
@@ -29,7 +29,7 @@ export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
           'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
           view === 'table'
             ? 'bg-accent-cyan/10 text-accent-cyan'
-            : 'text-text-secondary hover:text-white'
+            : 'text-text-secondary hover:text-text-primary'
         )}
       >
         <List size={14} weight={view === 'table' ? 'fill' : 'duotone'} />

@@ -5,8 +5,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
 import { recordMessage, duplicateTemplate } from '../actions'
 import type { ClientForMessage, MessageTemplate } from '../types'
-import { X, Plus, DotsThreeVertical, PencilSimple, Copy, Trash, Lock } from '@phosphor-icons/react/dist/ssr'
-import { Input } from '@/components/ui/input'
+import { X, Plus, DotsThreeVertical, PencilSimple, Copy, Trash, Lock, PaperPlaneRight, MagnifyingGlass, CircleNotch } from '@phosphor-icons/react'
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -98,7 +97,7 @@ export function TemplateModal({ isOpen, onClose, clients, templates, orgName, on
       const res = await recordMessage(fd)
       if (res.error) toast.error(res.error)
       else {
-        toast.success('Template enviado e registrado!')
+        toast.success('TEMPLATE ENVIADO!')
         onClose()
       }
     })
@@ -109,7 +108,7 @@ export function TemplateModal({ isOpen, onClose, clients, templates, orgName, on
       const res = await duplicateTemplate(t.id)
       if (res.error) toast.error(res.error)
       else {
-        toast.success('Template duplicado!')
+        toast.success('DUPLICADO!')
         onRefresh()
       }
     })
@@ -119,67 +118,80 @@ export function TemplateModal({ isOpen, onClose, clients, templates, orgName, on
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/90" onClick={onClose} />
-        <div className="relative bg-[#0a0a0a] border border-white/5 rounded-[20px] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-          
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <div 
+          className="absolute inset-0 bg-black/75 backdrop-blur-sm animate-in fade-in duration-300"
+          onClick={onClose}
+        />
+
+        {/* Modal */}
+        <div className="relative w-full max-w-[480px] rounded-[12px] border border-border-main bg-bg-surface overflow-hidden animate-in fade-in zoom-in-95 duration-500 flex flex-col max-h-[90vh]">
           {/* Header */}
-          <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between shrink-0">
-            <div>
-              <h2 className="font-syne font-bold text-2xl text-white uppercase tracking-tight">Enviar Template</h2>
-              <p className="text-[10px] font-dm-mono text-muted-foreground uppercase tracking-[0.2em] mt-1">Selecione cliente e mensagem</p>
+          <div className="flex items-center justify-between p-[24px] pb-5 border-b-[0.5px] border-border-main">
+            <div className="flex items-center gap-4">
+              <div className="w-[32px] h-[32px] flex items-center justify-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] text-accent-main shrink-0">
+                <PaperPlaneRight size={18} weight="regular" />
+              </div>
+              <div className="space-y-0.5">
+                <h2 className="text-[14px] font-medium text-text-primary uppercase tracking-tight">Enviar Template</h2>
+                <p className="text-[9px] text-[#383838] font-medium uppercase tracking-[0.08em]">Selecione cliente e mensagem</p>
+              </div>
             </div>
-            <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-muted-foreground hover:text-white transition-colors">
-              <X size={20} />
+            <button
+              onClick={onClose}
+              className="w-[26px] h-[26px] flex items-center justify-center bg-[#1a1a1a] border-[0.5px] border-[#252525] rounded-[6px] text-[#444] transition-all hover:text-text-primary"
+            >
+              <X size={12} weight="regular" />
             </button>
           </div>
 
-          <div className="p-8 overflow-y-auto space-y-8 scrollbar-hide">
-            {/* Cliente Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="font-dm-mono text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Cliente</label>
-              </div>
-
+          {/* Form Content */}
+          <div className="overflow-y-auto px-[24px] py-[24px] space-y-6 custom-scrollbar">
+            {/* Cliente */}
+            <div className="space-y-2">
+              <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Cliente</label>
+              
               {selectedClient ? (
-                <div className="flex items-center justify-between p-4 bg-[#111] border border-white/5 rounded-2xl">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-accent-cyan/10 flex items-center justify-center text-accent-cyan font-bold">
+                <div className="flex items-center justify-between p-3 px-4 bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-[32px] h-[32px] rounded-[8px] bg-[#1a1a2e] flex items-center justify-center text-[#8b7cf6] text-[11px] font-medium uppercase">
                       {selectedClient.full_name.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-base font-bold text-white">{selectedClient.full_name}</p>
-                      <p className="font-dm-mono text-xs text-muted-foreground">{selectedClient.phone || 'Sem telefone'}</p>
+                      <p className="text-[11px] font-medium text-text-secondary uppercase">{selectedClient.full_name}</p>
+                      <p className="text-[9px] text-[#2a2a2a] uppercase tracking-wider">{selectedClient.phone || 'Sem telefone'}</p>
                     </div>
                   </div>
                   <button 
                     onClick={() => setSelectedClientId('')} 
-                    className="px-4 py-2 rounded-full border border-white/10 text-xs font-bold text-white hover:bg-white/5 transition-colors"
+                    className="text-[9px] font-medium text-[#444] uppercase tracking-[0.08em] hover:text-text-primary transition-colors"
                   >
                     Trocar
                   </button>
                 </div>
               ) : (
                 <div className="relative">
-                  <Input
-                    placeholder="Buscar cliente pelo nome ou telefone..."
+                  <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#2e2e2e]" />
+                  <input
+                    placeholder="BUSCAR CLIENTE..."
                     value={clientSearch}
                     onChange={e => setClientSearch(e.target.value)}
-                    className="bg-[#111] border-white/5 h-14 rounded-2xl px-6 font-dm-sans placeholder:text-muted-foreground/30"
+                    className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] py-[10px] pl-9 pr-3 text-[11px] text-text-secondary placeholder:text-[#2e2e2e] outline-none transition-all focus:border-accent-main/20 uppercase"
                   />
                   {filteredClients.length > 0 && (
-                    <div className="absolute top-full mt-2 w-full bg-[#111] border border-white/10 rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto border-t-0 overflow-hidden">
+                    <div className="absolute top-full mt-1 w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] shadow-2xl z-[110] max-h-48 overflow-y-auto overflow-hidden custom-scrollbar">
                       {filteredClients.map(c => (
                         <button
                           key={c.id}
-                          className="w-full text-left px-6 py-4 hover:bg-white/5 flex items-center justify-between group transition-colors"
+                          className="w-full text-left px-4 py-3 hover:bg-bg-surface flex items-center justify-between group transition-colors border-b-[0.5px] border-border-main/50 last:border-0"
                           onClick={() => { setSelectedClientId(c.id); setClientSearch('') }}
                         >
                           <div>
-                            <p className="text-sm font-bold text-white group-hover:text-accent-cyan transition-colors">{c.full_name}</p>
-                            <p className="font-dm-mono text-xs text-muted-foreground mt-0.5">{c.phone || 'Sem telefone'}</p>
+                            <p className="text-[11px] font-medium text-text-secondary group-hover:text-accent-main transition-colors uppercase">{c.full_name}</p>
+                            <p className="text-[9px] text-[#2a2a2a] mt-0.5 uppercase tracking-wide">{c.phone || 'Sem telefone'}</p>
                           </div>
-                          <Plus size={16} className="text-muted-foreground group-hover:text-white" />
+                          <Plus size={14} className="text-[#1a1a1a] group-hover:text-text-primary" />
                         </button>
                       ))}
                     </div>
@@ -188,75 +200,77 @@ export function TemplateModal({ isOpen, onClose, clients, templates, orgName, on
               )}
             </div>
 
-            {/* Template Section */}
-            <div className="space-y-4">
+            {/* Template */}
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="font-dm-mono text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Template</label>
+                <label className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.12em]">Template</label>
                 <button 
                   onClick={() => setEditorState({ isOpen: true, mode: 'create', template: null })}
-                  className="flex items-center gap-2 text-[10px] font-bold text-accent-cyan uppercase tracking-widest hover:opacity-80 transition-opacity"
+                  className="flex items-center gap-1.5 text-[9px] font-medium text-accent-main uppercase tracking-[0.12em] hover:opacity-80 transition-opacity"
                 >
-                  <Plus size={14} weight="bold" />
+                  <Plus size={12} weight="bold" />
                   Novo Template
                 </button>
               </div>
 
-              <div className="grid gap-3">
+              <div className="space-y-2">
                 {templates.map(t => (
                   <div
                     key={t.id}
                     className={cn(
-                      'relative group rounded-2xl border transition-all duration-300',
+                      'relative group rounded-[7px] border-[0.5px] transition-all duration-300',
                       selectedTemplateId === t.id
-                        ? 'border-accent-cyan bg-accent-cyan/5'
-                        : 'border-white/5 bg-[#111] hover:border-white/10'
+                        ? 'border-accent-main/20 bg-[#0d2e1a]/10'
+                        : 'border-border-main bg-bg-sidebar hover:border-[#333]'
                     )}
                   >
                     <button
                       onClick={() => setSelectedTemplateId(t.id)}
-                      className="w-full p-5 text-left pr-14"
+                      className="w-full p-3 px-4 text-left pr-12"
                     >
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-white">{t.name}</p>
-                        {t.is_system && <Lock size={12} weight="fill" className="text-muted-foreground/50" />}
+                        <p className={cn(
+                          "text-[11px] font-medium uppercase tracking-tight",
+                          selectedTemplateId === t.id ? "text-accent-main" : "text-text-secondary"
+                        )}>{t.name}</p>
+                        {t.is_system && <Lock size={10} weight="fill" className="text-[#2a2a2a]" />}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed opacity-70">{t.description}</p>
+                      <p className="text-[9px] text-[#333] mt-1 uppercase tracking-wide line-clamp-1">{t.description}</p>
                     </button>
 
-                    {/* Actions Dropdown */}
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/5 text-muted-foreground hover:text-white transition-colors">
-                            <DotsThreeVertical size={24} weight="bold" />
+                          <button className="w-8 h-8 rounded-[6px] flex items-center justify-center hover:bg-bg-surface text-[#222] hover:text-text-nav transition-colors">
+                            <DotsThreeVertical size={20} weight="bold" />
                           </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 bg-[#1a1a1a] border-white/5 rounded-xl shadow-2xl p-2">
+                        <DropdownMenuContent align="end" className="w-40 bg-bg-surface border-border-main rounded-[8px] shadow-2xl p-1.5">
                           <DropdownMenuItem 
                             onClick={() => setEditorState({ isOpen: true, mode: 'edit', template: t })}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white hover:bg-white/5 cursor-pointer"
+                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] text-[10px] text-text-secondary hover:bg-[#1a1a1a] cursor-pointer uppercase font-medium tracking-wide"
                           >
-                            <PencilSimple size={18} />
+                            <PencilSimple size={14} />
                             Editar
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => handleDuplicate(t)}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white hover:bg-white/5 cursor-pointer"
+                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] text-[10px] text-text-secondary hover:bg-[#1a1a1a] cursor-pointer uppercase font-medium tracking-wide"
                           >
-                            <Copy size={18} />
+                            <Copy size={14} />
                             Duplicar
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-white/5 my-1" />
+                          <DropdownMenuSeparator className="bg-[#1e1e1e] my-1" />
                           <DropdownMenuItem 
                             disabled={t.is_system}
                             onClick={() => setDeleteState({ isOpen: true, template: t })}
                             className={cn(
-                              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer",
-                              t.is_system ? "opacity-30 grayscale" : "text-red-400 hover:bg-red-500/10"
+                              "flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] text-[10px] cursor-pointer uppercase font-medium tracking-wide",
+                              t.is_system ? "opacity-20 grayscale cursor-not-allowed" : "text-red-900 hover:bg-red-900/10"
                             )}
                           >
-                            <Trash size={18} />
-                            {t.is_system ? 'Bloqueado' : 'Deletar'}
+                            <Trash size={14} />
+                            Deletar
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -268,33 +282,39 @@ export function TemplateModal({ isOpen, onClose, clients, templates, orgName, on
 
             {/* Preview Section */}
             {preview && (
-              <div className="space-y-4 pt-4 animate-in fade-in slide-in-from-bottom-2">
-                <label className="font-dm-mono text-[10px] font-bold text-accent-cyan uppercase tracking-widest">Preview Final</label>
-                <div className="p-6 rounded-2xl bg-[#111] border border-white/5 space-y-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-[#25D366] shadow-[0_0_8px_#25D366]" />
-                    <span className="text-[10px] font-dm-mono text-[#25D366] uppercase tracking-widest">Simulação WhatsApp</span>
+              <div className="space-y-2 pt-2 animate-in fade-in slide-in-from-bottom-2">
+                <label className="text-[9px] font-medium text-accent-main uppercase tracking-[0.12em]">Preview Final</label>
+                <div className="p-4 rounded-[7px] bg-bg-sidebar border-[0.5px] border-border-main relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-[2px] bg-[#25D366]/20" />
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#25D366]" />
+                    <span className="text-[8px] font-medium text-[#25D366] uppercase tracking-widest">WhatsApp Simulator</span>
                   </div>
-                  <p className="text-sm text-white leading-relaxed whitespace-pre-wrap">{preview}</p>
+                  <p className="text-[11px] text-text-secondary leading-relaxed whitespace-pre-wrap uppercase tracking-tight">{preview}</p>
                 </div>
               </div>
             )}
           </div>
 
           {/* Footer */}
-          <div className="px-8 py-6 border-t border-white/5 flex gap-4 bg-[#0a0a0a] shrink-0">
+          <div className="px-[24px] py-[20px] border-t-[0.5px] border-border-main flex gap-[10px] bg-bg-surface">
             <button
               onClick={onClose}
-              className="flex-1 py-4 rounded-full border border-white/10 text-white text-sm font-bold hover:bg-white/5 transition-colors"
+              className="flex-1 py-[12px] rounded-[7px] border-[0.5px] border-border-main bg-bg-sidebar text-[#444] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:border-[#333] hover:text-[#777]"
             >
               Cancelar
             </button>
             <button
               onClick={handleSend}
               disabled={isPending || !selectedClient || !template}
-              className="flex-[2] py-4 rounded-full bg-accent-cyan text-black text-sm font-bold hover:bg-accent-cyan/90 transition-all disabled:opacity-30 shadow-[0_0_20px_rgba(0,229,255,0.15)] active:scale-[0.98]"
+              className="flex-[1.5] py-[12px] rounded-[7px] bg-accent-main text-black text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 disabled:opacity-20 flex items-center justify-center gap-2"
             >
-              {isPending ? 'ENVIANDO...' : 'ENVIAR VIA WHATSAPP'}
+              {isPending ? (
+                <CircleNotch size={14} className="animate-spin" />
+              ) : (
+                <PaperPlaneRight size={14} weight="bold" />
+              )}
+              ENVIAR
             </button>
           </div>
         </div>
@@ -319,4 +339,3 @@ export function TemplateModal({ isOpen, onClose, clients, templates, orgName, on
     </>
   )
 }
-

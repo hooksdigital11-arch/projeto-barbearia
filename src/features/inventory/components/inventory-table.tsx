@@ -1,6 +1,6 @@
 'use client'
 
-import { Package, PencilSimple, ArrowsDownUp, Trash, Warning, MinusCircle } from '@phosphor-icons/react'
+import { Package, PencilSimple, ArrowsDownUp, Trash, WarningCircle } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 import type { InventoryItem } from '../types'
 
@@ -25,173 +25,116 @@ export function InventoryTable({
   }
 
   return (
-    <div className="bg-bg-secondary/50 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-white/[0.03] border-b border-white/5">
-              <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary/60">Produto</th>
-              <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary/60">Tipo</th>
-              <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary/60 text-center">Estoque</th>
-              {showCost && <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary/60">Custo</th>}
-              <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary/60">Preço Venda</th>
-              <th className="hidden md:table-cell px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary/60 text-center">Qtd Vendida</th>
-              <th className="hidden md:table-cell px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary/60 text-right">Faturamento</th>
-              <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary/60 text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {items.map((item, index) => {
-              const isLowStock = item.quantity <= (item.min_quantity ?? 5)
-              const isOut = item.quantity === 0
-              const isRevenda = item.type === 'revenda'
-              
-              // Dados de venda REAIS do Map
-              const sale = salesData.get(item.id)
-              const qtdVendida = sale?.qtdVendida ?? 0
-              const faturamento = sale?.faturamento ?? 0
+    <div className="space-y-[4px]">
+      {/* Header (optional if using grid cards, but requested as table grid) */}
+      <div className="grid grid-cols-[2fr_100px_70px_90px_90px_70px_110px_70px] gap-[12px] px-[18px] py-1">
+        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">PRODUTO</span>
+        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838] text-center">TIPO</span>
+        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838] text-center">ESTOQUE</span>
+        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838] text-right">CUSTO</span>
+        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838] text-right">PREÇO VENDA</span>
+        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838] text-center">QTD VENDIDA</span>
+        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838] text-right">FATURAMENTO</span>
+        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838] text-right">AÇÕES</span>
+      </div>
 
-              return (
-                <tr 
-                  key={item.id} 
-                  style={{ animationDelay: `${index * 50}ms` }}
-                  className={cn(
-                    "hover:bg-white/[0.03] transition-all duration-300 group animate-in slide-in-from-bottom-2 fade-in",
-                    isOut ? "bg-red-500/[0.02]" : 
-                    isLowStock ? "bg-amber-500/[0.02]" : ""
-                  )}
-                >
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-4">
-                      <div className={cn(
-                        "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 shadow-lg",
-                        isOut ? "bg-red-500/20 text-red-400 shadow-red-500/10" :
-                        isLowStock ? "bg-amber-500/20 text-amber-400 shadow-amber-500/10" : "bg-accent-blue/10 text-accent-blue shadow-accent-blue/10"
-                      )}>
-                        <Package size={22} weight="duotone" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-white text-sm tracking-tight group-hover:text-accent-cyan transition-colors">{item.name}</p>
-                        <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{item.category}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className={cn(
-                      "text-[10px] px-3 py-1 rounded-xl font-black uppercase tracking-widest border transition-all",
-                      isRevenda 
-                        ? "bg-green-500/10 text-green-400 border-green-500/20 group-hover:bg-green-500/20" 
-                        : "bg-blue-500/10 text-blue-400 border-blue-500/20 group-hover:bg-blue-500/20"
-                    )}>
-                      {isRevenda ? 'Revenda' : 'Uso Interno'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5 text-center">
-                    <div className="flex flex-col items-center">
-                      <div className={cn(
-                        "px-3 py-1 rounded-xl font-bold text-sm flex items-center gap-2",
-                        isOut ? "bg-red-500/10 text-red-400" : 
-                        isLowStock ? "bg-amber-500/10 text-amber-400" : "text-white"
-                      )}>
-                        {item.quantity}
-                        {isOut ? <MinusCircle size={16} weight="fill" className="animate-pulse" /> : 
-                         isLowStock ? <Warning size={16} weight="fill" className="animate-bounce" /> : null}
-                      </div>
-                    </div>
-                  </td>
-                  {showCost && (
-                    <td className="px-6 py-5">
-                      <span className="font-mono text-sm text-muted-foreground/80">{formatPrice(item.cost_cents)}</span>
-                    </td>
-                  )}
-                  <td className="px-6 py-5">
-                    <span className={cn(
-                      "font-mono text-sm font-bold",
-                      isRevenda ? "text-accent-cyan" : "text-muted-foreground/60"
-                    )}>
-                      {isRevenda ? formatPrice(item.price_cents) : '—'}
-                    </span>
-                  </td>
-                  
-                  <td className="hidden md:table-cell px-6 py-5 text-center">
-                    {isRevenda ? (
-                      isLoading ? (
-                        <div className="w-8 h-4 bg-white/5 animate-pulse rounded mx-auto" />
-                      ) : (
-                        <span className={cn(
-                          "text-sm font-black",
-                          qtdVendida === 0 ? "text-white/10" : "text-white"
-                        )}>
-                          {qtdVendida === 0 ? '—' : qtdVendida}
-                        </span>
-                      )
-                    ) : (
-                      <span className="text-white/5">—</span>
-                    )}
-                  </td>
-                  <td className="hidden md:table-cell px-6 py-5 text-right">
-                    {isRevenda ? (
-                      isLoading ? (
-                        <div className="w-20 h-4 bg-white/5 animate-pulse rounded ml-auto" />
-                      ) : (
-                        <span className={cn(
-                          "text-sm font-black font-mono",
-                          faturamento === 0 ? "text-white/10" : "text-accent-cyan"
-                        )}>
-                          {faturamento === 0 ? '—' : formatPrice(faturamento)}
-                        </span>
-                      )
-                    ) : (
-                      <span className="text-white/5">—</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-5 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {canManage && (
-                        <button 
-                          onClick={() => onEdit(item)}
-                          className="p-3 text-muted-foreground hover:text-accent-cyan transition-all rounded-2xl hover:bg-accent-cyan/10 active:scale-90"
-                          title="Editar"
-                        >
-                          <PencilSimple size={20} weight="duotone" />
-                        </button>
-                      )}
-                      <button 
-                        onClick={() => onMove(item)}
-                        className="p-3 text-muted-foreground hover:text-accent-blue transition-all rounded-2xl hover:bg-accent-blue/10 active:scale-90"
-                        title="Movimentar"
-                      >
-                        <ArrowsDownUp size={20} weight="duotone" />
-                      </button>
-                      {canManage && (
-                        <button 
-                          onClick={() => onDelete(item)}
-                          className="p-3 text-muted-foreground hover:text-red-400 transition-all rounded-2xl hover:bg-red-500/10 active:scale-90"
-                          title="Deletar"
-                        >
-                          <Trash size={20} weight="duotone" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-        
-        {items.length === 0 ? (
-          <div className="p-20 text-center space-y-4">
-            <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center mx-auto text-muted-foreground/20">
-              <Package size={32} weight="duotone" />
+      {items.map((item) => {
+        const isLowStock = item.quantity <= (item.min_quantity ?? 5)
+        const isOut = item.quantity === 0
+        const isRevenda = item.type === 'revenda'
+        const sale = salesData.get(item.id)
+        const qtdVendida = sale?.qtdVendida ?? 0
+        const faturamento = sale?.faturamento ?? 0
+
+        return (
+          <div 
+            key={item.id} 
+            className="grid grid-cols-[2fr_100px_70px_90px_90px_70px_110px_70px] gap-[12px] items-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] py-[13px] px-[18px] group hover:bg-bg-surface transition-all"
+          >
+            {/* Produto */}
+            <div className="flex items-center gap-3 truncate">
+              <div className="w-[32px] h-[32px] rounded-[7px] bg-bg-surface border-[0.5px] border-border-main flex items-center justify-center text-[#444] shrink-0">
+                <Package size={16} weight="regular" />
+              </div>
+              <div className="truncate">
+                <p className="text-[12px] font-medium text-text-secondary uppercase tracking-tight truncate">{item.name}</p>
+                <span className="text-[9px] text-[#2e2e2e] font-medium uppercase tracking-[0.06em]">{item.category}</span>
+              </div>
             </div>
-            <div>
-              <p className="text-white font-bold">Nenhum produto encontrado</p>
-              <p className="text-sm text-muted-foreground">Tente ajustar seus filtros ou busca.</p>
+
+            {/* Tipo */}
+            <div className="flex justify-center">
+              {isRevenda ? (
+                <span className="text-[9px] px-[9px] py-[3px] rounded-[5px] bg-[#0d2e1a] text-[#00c070] border-[0.5px] border-[#00c07033] font-medium uppercase">REVENDA</span>
+              ) : (
+                <span className="text-[9px] px-[9px] py-[3px] rounded-[5px] bg-bg-surface text-[#333] font-medium uppercase">USO INTERNO</span>
+              )}
+            </div>
+
+            {/* Estoque */}
+            <div className="text-center">
+              <span className={cn(
+                "text-[11px] font-medium tabular-nums",
+                isOut ? "text-red-500" : isLowStock ? "text-amber-500" : "text-[#444]"
+              )}>
+                {item.quantity}
+              </span>
+            </div>
+
+            {/* Custo */}
+            <div className="text-right">
+              <span className="text-[11px] font-medium text-[#333] tabular-nums">
+                {showCost ? formatPrice(item.cost_cents).replace('R$', '').trim() : '—'}
+              </span>
+            </div>
+
+            {/* Preço Venda */}
+            <div className="text-right">
+              <span className="text-[11px] font-medium text-[#444] tabular-nums">
+                {isRevenda ? formatPrice(item.price_cents).replace('R$', '').trim() : '—'}
+              </span>
+            </div>
+
+            {/* Qtd Vendida */}
+            <div className="text-center">
+              <span className="text-[11px] font-medium text-[#333] tabular-nums">
+                {isRevenda ? qtdVendida : '—'}
+              </span>
+            </div>
+
+            {/* Faturamento */}
+            <div className="text-right">
+              <span className="text-[11px] font-medium text-accent-main tabular-nums">
+                {isRevenda ? formatPrice(faturamento).replace('R$', '').trim() : '—'}
+              </span>
+            </div>
+
+            {/* Ações */}
+            <div className="flex items-center gap-[10px] justify-end">
+              {canManage && (
+                <button onClick={() => onEdit(item)} className="text-[#2e2e2e] hover:text-[#666] transition-all" title="Editar">
+                  <PencilSimple size={14} />
+                </button>
+              )}
+              <button onClick={() => onMove(item)} className="text-[#2e2e2e] hover:text-[#666] transition-all" title="Movimentar">
+                <ArrowsDownUp size={14} />
+              </button>
+              {canManage && (
+                <button onClick={() => onDelete(item)} className="text-[#2e2e2e] hover:text-[#666] transition-all" title="Deletar">
+                  <Trash size={14} />
+                </button>
+              )}
             </div>
           </div>
-        ) : null}
-      </div>
+        )
+      })}
+
+      {items.length === 0 && (
+        <div className="bg-bg-sidebar border-[0.5px] border-dashed border-border-main rounded-[10px] p-[60px] text-center">
+          <Package size={32} weight="regular" className="text-[#1e1e1e] mx-auto mb-4" />
+          <p className="text-[10px] font-medium text-[#222] tracking-[0.1em] uppercase">Nenhum produto encontrado</p>
+        </div>
+      )}
     </div>
   )
 }

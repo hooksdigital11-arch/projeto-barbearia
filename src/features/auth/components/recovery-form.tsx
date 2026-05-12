@@ -64,7 +64,7 @@ export function RecoveryForm() {
             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
             Voltar ao login
           </Link>
-          <h1 className="text-4xl font-bold font-syne text-white tracking-tight">
+          <h1 className="text-4xl font-bold font-syne text-text-primary tracking-tight">
             Recuperar Acesso
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -78,7 +78,7 @@ export function RecoveryForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white text-sm font-medium">Email de Cadastro</FormLabel>
+              <FormLabel className="text-text-primary text-sm font-medium">Email de Cadastro</FormLabel>
               <FormControl>
                 <div className="relative group">
                   <Input
@@ -86,7 +86,7 @@ export function RecoveryForm() {
                     type="email"
                     placeholder="seu@email.com"
                     disabled={isPending}
-                    className="pl-11 h-12 bg-card/50 border-cyan-500/20 text-white placeholder:text-muted-foreground/40 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300"
+                    className="pl-11 h-12 bg-card/50 border-cyan-500/20 text-text-primary placeholder:text-muted-foreground/40 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300"
                   />
                   <EnvelopeSimple
                     size={22}

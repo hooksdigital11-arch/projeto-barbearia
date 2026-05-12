@@ -15,7 +15,7 @@ export default function Error({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] p-6 text-center">
-      <h2 className="text-2xl font-bold text-white mb-4">Algo deu errado!</h2>
+      <h2 className="text-2xl font-bold text-text-primary mb-4">Algo deu errado!</h2>
       <p className="text-muted-foreground mb-6 max-w-md">
         {error.message || "Ocorreu um erro ao carregar a página de mensageria."}
       </p>

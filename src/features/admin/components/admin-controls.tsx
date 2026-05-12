@@ -40,7 +40,7 @@ export function AdminControls() {
         <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="w-2 h-10 bg-accent-cyan rounded-full shadow-[0_0_20px_rgba(0,229,255,0.6)]" />
-            <h1 className="text-5xl font-black font-syne text-white tracking-tighter leading-none">
+            <h1 className="text-5xl font-black font-syne text-text-primary tracking-tighter leading-none">
               Gestão da Unidade
             </h1>
           </div>
@@ -80,7 +80,7 @@ export function AdminControls() {
                 "px-6 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95",
                 activePeriod === period.value
                   ? "bg-white text-black shadow-[0_8px_15px_rgba(255,255,255,0.15)] scale-100" 
-                  : "text-text-secondary hover:text-white hover:bg-white/5"
+                  : "text-text-secondary hover:text-text-primary hover:bg-white/5"
               )}
             >
               {period.label}

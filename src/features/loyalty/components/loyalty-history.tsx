@@ -18,7 +18,7 @@ export function LoyaltyHistory({ history, showMax = 20 }: LoyaltyHistoryProps) {
         <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4 text-muted-foreground/30">
           <Stamp size={24} weight="duotone" />
         </div>
-        <p className="text-white font-bold">Nenhum registro ainda</p>
+        <p className="text-text-primary font-bold">Nenhum registro ainda</p>
         <p className="text-sm text-muted-foreground">Seu histórico de fidelidade aparecerá aqui.</p>
       </div>
     )
@@ -51,7 +51,7 @@ export function LoyaltyHistory({ history, showMax = 20 }: LoyaltyHistoryProps) {
                 {isRedeem ? <Gift size={16} weight="fill" /> : item.amount < 0 ? <ArrowDown size={16} weight="bold" /> : <Stamp size={16} weight="fill" />}
               </div>
               <div>
-                <p className="text-sm text-white font-medium">
+                <p className="text-sm text-text-primary font-medium">
                   {isRedeem ? '🎁 Resgate' : item.amount < 0 ? `${item.amount} carimbo` : `+${item.amount} carimbo${item.amount > 1 ? 's' : ''}`}
                 </p>
                 {item.notes && (

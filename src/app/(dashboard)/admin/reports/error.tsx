@@ -26,13 +26,13 @@ export default function ReportsError({
         <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-6">
           <Warning size={32} weight="duotone" />
         </div>
-        <h3 className="text-xl font-syne font-bold text-white mb-2">Ops! Algo deu errado.</h3>
+        <h3 className="text-xl font-syne font-bold text-text-primary mb-2">Ops! Algo deu errado.</h3>
         <p className="text-text-secondary text-center max-w-md mb-8">
           {error.message || 'Ocorreu um erro inesperado ao tentar processar os relatórios.'}
         </p>
         <button
           onClick={reset}
-          className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-colors active:scale-95"
+          className="px-6 py-3 bg-white/5 hover:bg-white/10 text-text-primary font-bold rounded-xl transition-colors active:scale-95"
         >
           Tentar novamente
         </button>

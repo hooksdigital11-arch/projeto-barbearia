@@ -20,7 +20,7 @@ export default function GlobalError({
 
   return (
     <html>
-      <body className="bg-[#0a0a0a] text-white flex flex-col items-center justify-center min-h-screen p-6 text-center">
+      <body className="bg-bg-black text-text-primary flex flex-col items-center justify-center min-h-screen p-6 text-center">
         <div className="max-w-md space-y-6">
           <div className="w-20 h-20 mx-auto rounded-3xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
             <span className="text-4xl">🚫</span>

@@ -1,8 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { UsersThree, Gift, Stamp, ChartBar } from '@phosphor-icons/react'
-import { PageTitle } from '@/components/shared/page-title'
+import { Users, Gift, Trophy, ChartBar } from '@phosphor-icons/react'
 import type { LoyaltyConfig, ClientLoyalty, LoyaltyStats } from '../types'
 
 const LoyaltyConfigPanel = dynamic(() => import('./loyalty-config-panel').then(m => m.LoyaltyConfigPanel), { ssr: false })
@@ -15,75 +14,39 @@ interface LoyaltyPageAdminProps {
 }
 
 export function LoyaltyPageAdmin({ config, clients, stats }: LoyaltyPageAdminProps) {
-  const unit = config.mode === 'stamps' ? 'carimbos' : 'pontos'
-
-  const kpis = [
-    {
-      label: 'Clientes com Programa',
-      value: stats.totalClients,
-      icon: UsersThree,
-      color: 'text-accent-cyan',
-      bgColor: 'bg-accent-cyan/10 border-accent-cyan/20',
-    },
-    {
-      label: 'Prontos p/ Resgatar',
-      value: stats.readyToRedeem,
-      icon: Gift,
-      color: 'text-green-400',
-      bgColor: 'bg-green-500/10 border-green-500/20',
-    },
-    {
-      label: 'Resgates Esse Mês',
-      value: stats.monthRedeems,
-      icon: Stamp,
-      color: 'text-amber-400',
-      bgColor: 'bg-amber-500/10 border-amber-500/20',
-    },
-    {
-      label: 'Progresso Médio',
-      value: `${stats.avgProgress}/${stats.goal}`,
-      icon: ChartBar,
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-500/10 border-blue-500/20',
-    },
-  ]
-
   return (
-    <div className="space-y-16 animate-premium-in">
-      {/* Editorial Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
-        <PageTitle 
-          title="Fidelidade" 
-          subtitle="Gestão estratégica de retenção. Configure regras de fidelização para transformar clientes em defensores leais da sua marca." 
-          className="mb-0" 
-        />
+    <div className="animate-premium-in py-8 space-y-12">
+      {/* Header */}
+      <div className="space-y-2">
+        <h1 className="text-[32px] font-medium text-text-primary tracking-[-0.02em] uppercase">
+          FIDELIDADE<span className="text-accent-main">.</span>
+        </h1>
+        <p className="text-[11px] text-[#333] leading-[1.5] max-w-[480px] font-medium uppercase tracking-wide">
+          Gestão estratégica de retenção. Configure regras de fidelização para transformar clientes em defensores leais da sua marca.
+        </p>
       </div>
 
       {/* Config Panel */}
       <LoyaltyConfigPanel config={config} />
 
-      {/* KPI Section - Precision Data Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/5 border border-white/5 overflow-hidden">
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
         {[
-          { label: 'Clientes no Programa', value: stats.totalClients, icon: UsersThree, color: '#00e5ff', desc: 'Total de participações' },
-          { label: 'Prontos p/ Resgatar', value: stats.readyToRedeem, icon: Gift, color: '#10b981', desc: 'Meta atingida' },
-          { label: 'Resgates do Mês', value: stats.monthRedeems, icon: Stamp, color: '#8b5cf6', desc: 'Benefícios concedidos' },
-          { label: 'Progresso Médio', value: `${stats.avgProgress}/${stats.goal}`, icon: ChartBar, color: '#3b82f6', desc: 'Média de engajamento' },
+          { label: 'CLIENTES NO PROGRAMA', value: stats.totalClients, icon: Users, desc: 'Total de participações' },
+          { label: 'PRONTOS P/ RESGATAR', value: stats.readyToRedeem, icon: Gift, desc: 'Meta atingida' },
+          { label: 'RESGATES DO MÊS', value: stats.monthRedeems, icon: Trophy, desc: 'Benefícios concedidos' },
+          { label: 'PROGRESSO MÉDIO', value: `${stats.avgProgress}/${stats.goal}`, icon: ChartBar, desc: 'Média de engajamento' },
         ].map((kpi, idx) => (
-          <div key={idx} className="p-10 bg-black flex flex-col justify-between h-48 group">
-            <div className="flex items-start justify-between">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-40 group-hover:opacity-100 transition-opacity">
-                {kpi.label}
-              </p>
-              <kpi.icon size={20} weight="bold" style={{ color: kpi.color }} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+          <div key={idx} className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[16px] px-[18px] flex flex-col justify-between h-[110px]">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-medium text-[#383838] tracking-[0.12em] uppercase">{kpi.label}</span>
+              <kpi.icon size={14} weight="regular" className="text-accent-main opacity-35" />
             </div>
-            <div>
-              <p className="text-5xl font-bold font-mono text-white tracking-tighter group-hover:text-accent-cyan transition-colors">
+            <div className="space-y-1">
+              <div className="text-[24px] text-text-primary font-medium leading-none">
                 {kpi.value}
-              </p>
-              <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest opacity-30 group-hover:opacity-60 transition-opacity">
-                {kpi.desc}
-              </p>
+              </div>
+              <p className="text-[8px] text-[#2a2a2a] tracking-[0.07em] font-medium uppercase">{kpi.desc}</p>
             </div>
           </div>
         ))}

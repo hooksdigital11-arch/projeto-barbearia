@@ -50,7 +50,7 @@ export function ComandaPageBarber({
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
-            <h1 className="text-5xl md:text-7xl font-black font-syne text-white tracking-tighter leading-none uppercase">
+            <h1 className="text-5xl md:text-7xl font-black font-syne text-text-primary tracking-tighter leading-none uppercase">
               Atendimento<span className="text-accent-cyan">.</span>
             </h1>
           </div>
@@ -90,7 +90,7 @@ export function ComandaPageBarber({
               </div>
 
               <div className="space-y-1 mb-8">
-                <h3 className="text-2xl font-bold text-white tracking-tight group-hover:text-accent-cyan transition-colors truncate">
+                <h3 className="text-2xl font-bold text-text-primary tracking-tight group-hover:text-accent-cyan transition-colors truncate">
                   {appt.client?.full_name}
                 </h3>
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -104,7 +104,7 @@ export function ComandaPageBarber({
               <div className="pt-6 border-t border-white/5 flex items-center justify-between">
                 <div className="space-y-1">
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Serviço</p>
-                  <p className="text-sm font-bold text-white group-hover:translate-x-1 transition-transform duration-500 truncate max-w-[150px]">
+                  <p className="text-sm font-bold text-text-primary group-hover:translate-x-1 transition-transform duration-500 truncate max-w-[150px]">
                     {appt.service?.name}
                   </p>
                 </div>
@@ -131,7 +131,7 @@ export function ComandaPageBarber({
           <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-6">
             <AlertCircle className="h-8 w-8 text-muted-foreground opacity-20" />
           </div>
-          <h3 className="text-xl font-bold text-white uppercase tracking-tight">Nenhum atendimento agendado</h3>
+          <h3 className="text-xl font-bold text-text-primary uppercase tracking-tight">Nenhum atendimento agendado</h3>
           <p className="text-muted-foreground max-w-xs mx-auto mt-2 text-sm">
             Seus clientes agendados aparecerão aqui para abertura de comanda.
           </p>

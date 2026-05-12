@@ -39,7 +39,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-syne text-white tracking-tighter leading-none uppercase">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-syne text-text-primary tracking-tighter leading-none uppercase">
               Workspace<span className="text-accent-cyan">.</span>
             </h1>
           </div>
@@ -57,7 +57,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
           <div>
             <p className="text-[10px] font-black text-text-secondary uppercase tracking-[0.3em]">Status Operacional</p>
             <div className="flex items-center gap-3">
-              <h2 className="text-3xl font-bold text-white tracking-tight">{data.status}</h2>
+              <h2 className="text-3xl font-bold text-text-primary tracking-tight">{data.status}</h2>
               <button className="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-full text-accent-cyan transition-colors">
                 <Clock size={18} weight="bold" />
               </button>
@@ -70,20 +70,20 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
             <Clock size={24} weight="duotone" className="text-accent-cyan" />
             <div>
               <p className="text-xs text-text-secondary">Turno de Hoje</p>
-              <p className="text-sm font-bold text-white">{data.shift}</p>
+              <p className="text-sm font-bold text-text-primary">{data.shift}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <ChartBar size={24} weight="duotone" className="text-accent-cyan" />
             <div>
               <p className="text-xs text-text-secondary">Receita Dia</p>
-              <p className="text-sm font-bold text-white">R$ {data.stats.revenueDay}</p>
+              <p className="text-sm font-bold text-text-primary">R$ {data.stats.revenueDay}</p>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-text-secondary hover:text-white transition-all" title="Pausa Café">
+          <button className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-text-secondary hover:text-text-primary transition-all" title="Pausa Café">
             <Coffee size={20} weight="duotone" />
           </button>
           <button className="px-6 py-2 bg-white text-black font-bold rounded-xl hover:bg-white/90 transition-all active:scale-95">
@@ -115,14 +115,14 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
                     {data.currentClient.name[0]}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-3xl font-bold text-white font-syne tracking-tight">{data.currentClient.name}</h3>
+                    <h3 className="text-3xl font-bold text-text-primary font-syne tracking-tight">{data.currentClient.name}</h3>
                     <p className="text-text-secondary font-medium">{data.currentClient.todayService}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl hover:bg-emerald-500 hover:text-white transition-all">
+                    <button className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl hover:bg-emerald-500 hover:text-text-primary transition-all">
                         <Phone size={20} weight="duotone" />
                     </button>
-                    <button className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all" title="No-show">
+                    <button className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-text-primary transition-all" title="No-show">
                         <UserMinus size={20} weight="duotone" />
                     </button>
                   </div>
@@ -131,11 +131,11 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-8 border-y border-white/5 py-8">
                   <div>
                     <p className="text-xs text-text-secondary uppercase font-bold tracking-widest">Frequência</p>
-                    <p className="text-xl font-bold text-white mt-1">{data.currentClient.visits} visitas</p>
+                    <p className="text-xl font-bold text-text-primary mt-1">{data.currentClient.visits} visitas</p>
                   </div>
                   <div>
                     <p className="text-xs text-text-secondary uppercase font-bold tracking-widest">Avaliação</p>
-                    <p className="text-xl font-bold text-white mt-1">{data.currentClient.rating} ⭐</p>
+                    <p className="text-xl font-bold text-text-primary mt-1">{data.currentClient.rating} ⭐</p>
                   </div>
                   <div className="col-span-2 md:col-span-1">
                     <p className="text-xs text-text-secondary uppercase font-bold tracking-widest">Total Gasto</p>
@@ -150,7 +150,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
                   <button className="flex-1 min-w-[150px] py-4 bg-accent-cyan text-black font-extrabold rounded-2xl hover:brightness-110 transition-all shadow-lg shadow-accent-cyan/20">
                     Finalizar e Próximo
                   </button>
-                  <button className="px-6 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 transition-all">
+                  <button className="px-6 py-4 bg-white/5 border border-white/10 text-text-primary font-bold rounded-2xl hover:bg-white/10 transition-all">
                     Comanda Digital
                   </button>
                 </div>
@@ -162,7 +162,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
                 <User size={40} weight="duotone" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-xl font-bold text-white">Nenhum atendimento ativo</h3>
+                <h3 className="text-xl font-bold text-text-primary">Nenhum atendimento ativo</h3>
                 <p className="text-sm text-text-secondary">Chame o próximo cliente da fila ou agenda para começar.</p>
               </div>
             </div>
@@ -171,8 +171,8 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
           {/* Timeline do Dia */}
           <div className="p-6 rounded-3xl border border-white/5 bg-card/10 backdrop-blur-xl">
             <div className="flex items-center justify-between mb-8">
-               <h3 className="text-xl font-bold font-syne text-white">Agenda do Período</h3>
-               <button className="text-xs font-bold text-text-secondary hover:text-white">Ver calendário completo</button>
+               <h3 className="text-xl font-bold font-syne text-text-primary">Agenda do Período</h3>
+               <button className="text-xs font-bold text-text-secondary hover:text-text-primary">Ver calendário completo</button>
             </div>
             <div className="space-y-4">
               {data.appointments.map((apt: any) => (
@@ -187,7 +187,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
                     <div className="w-16 font-mono text-sm text-text-secondary text-center">{apt.time}</div>
                     <div className="w-1 h-8 rounded-full bg-white/5" />
                     <div>
-                      <p className="font-bold text-white">{apt.client}</p>
+                      <p className="font-bold text-text-primary">{apt.client}</p>
                       <p className="text-xs text-text-secondary">{apt.service} • {apt.duration}</p>
                     </div>
                   </div>
@@ -216,7 +216,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
         <div className="space-y-8">
           <div className="p-6 rounded-3xl border border-white/5 bg-card/10 backdrop-blur-xl h-fit">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-bold font-syne text-white flex items-center gap-2">
+              <h3 className="text-xl font-bold font-syne text-text-primary flex items-center gap-2">
                 <ListNumbers size={24} weight="duotone" className="text-accent-cyan" />
                 Fila de Espera
               </h3>
@@ -236,7 +236,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
                         {index + 1}
                       </div>
                       <div>
-                        <p className="font-bold text-white group-hover:text-accent-cyan transition-colors">{client.name}</p>
+                        <p className="font-bold text-text-primary group-hover:text-accent-cyan transition-colors">{client.name}</p>
                         <p className="text-xs text-text-secondary">{client.service}</p>
                       </div>
                     </div>
@@ -261,7 +261,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
               )}
             </div>
             
-            <button className="w-full mt-6 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 transition-all text-xs">
+            <button className="w-full mt-6 py-4 bg-white/5 border border-white/10 text-text-primary font-bold rounded-2xl hover:bg-white/10 transition-all text-xs">
                Adicionar Cliente Manualmente
             </button>
           </div>

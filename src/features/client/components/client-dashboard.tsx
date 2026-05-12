@@ -27,12 +27,12 @@ export async function ClientDashboard() {
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-syne text-white tracking-tighter leading-none uppercase">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-syne text-text-primary tracking-tighter leading-none uppercase">
               Bem-vindo<span className="text-accent-cyan">.</span>
             </h1>
           </div>
           <p className="text-text-secondary text-lg font-medium max-w-md ml-7 border-l border-white/10 pl-6">
-            Olá, <span className="text-white font-bold">{data.profile.name}</span>. Seu barbeiro preferido, <span className="text-accent-cyan font-bold">{data.profile.preferredBarber}</span>, está disponível hoje para transformar seu visual.
+            Olá, <span className="text-text-primary font-bold">{data.profile.name}</span>. Seu barbeiro preferido, <span className="text-accent-cyan font-bold">{data.profile.preferredBarber}</span>, está disponível hoje para transformar seu visual.
           </p>
         </div>
         
@@ -55,7 +55,7 @@ export async function ClientDashboard() {
              <div className="relative z-10 space-y-8">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <h3 className="text-2xl font-bold text-white font-syne">Cartão Fidelidade</h3>
+                    <h3 className="text-2xl font-bold text-text-primary font-syne">Cartão Fidelidade</h3>
                     <p className="text-sm text-text-secondary">Complete 10 selos e ganhe um corte grátis!</p>
                   </div>
                   <div className="px-4 py-2 bg-accent-cyan/10 border border-accent-cyan/20 rounded-2xl text-accent-cyan font-bold">
@@ -71,7 +71,7 @@ export async function ClientDashboard() {
                         "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 border-2",
                         i < data.profile.loyaltyStamps 
                           ? "bg-accent-cyan text-black border-accent-cyan shadow-[0_0_15px_rgba(0,229,255,0.4)] scale-110" 
-                          : "bg-white/5 text-white/10 border-white/5"
+                          : "bg-white/5 text-text-primary/10 border-white/5"
                       )}
                     >
                       <Scissors size={24} weight={i < data.profile.loyaltyStamps ? "bold" : "thin"} />
@@ -102,7 +102,7 @@ export async function ClientDashboard() {
           {/* Seção Agendamentos Próximos */}
           <div className="space-y-6">
              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold font-syne text-white flex items-center gap-2">
+                <h3 className="text-xl font-bold font-syne text-text-primary flex items-center gap-2">
                   <Calendar size={24} weight="duotone" className="text-accent-cyan" />
                   Seus Agendamentos
                 </h3>
@@ -119,16 +119,16 @@ export async function ClientDashboard() {
                           </div>
                           <div>
                             <p className="text-sm font-bold text-accent-cyan">{apt.date}</p>
-                            <h4 className="text-xl font-bold text-white mt-1">{apt.service}</h4>
+                            <h4 className="text-xl font-bold text-text-primary mt-1">{apt.service}</h4>
                             <p className="text-xs text-text-secondary mt-1">com {apt.barber} • {apt.time}</p>
                           </div>
                         </div>
                         
                         <div className="flex items-center gap-3">
-                           <button className="px-6 py-3 bg-white/5 border border-white/10 text-white text-sm font-bold rounded-xl hover:bg-white/10 transition-all">
+                           <button className="px-6 py-3 bg-white/5 border border-white/10 text-text-primary text-sm font-bold rounded-xl hover:bg-white/10 transition-all">
                               Remarcar
                            </button>
-                           <button className="px-6 py-3 bg-red-500/10 text-red-500 text-sm font-bold rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                           <button className="px-6 py-3 bg-red-500/10 text-red-500 text-sm font-bold rounded-xl hover:bg-red-500 hover:text-text-primary transition-all">
                               Cancelar
                            </button>
                         </div>
@@ -154,7 +154,7 @@ export async function ClientDashboard() {
         <div className="space-y-8">
           {/* Última Visita / Atalhos */}
           <div className="p-6 rounded-3xl border border-white/5 bg-card/10 space-y-6">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
               <ClockCounterClockwise size={24} weight="duotone" className="text-accent-cyan" />
               Histórico & Atalhos
             </h3>
@@ -164,7 +164,7 @@ export async function ClientDashboard() {
                 <p className="text-xs text-text-secondary uppercase font-bold tracking-tighter">Última Visita</p>
                 <div className="flex items-center gap-3">
                   <CheckCircle size={20} weight="fill" className="text-emerald-500" />
-                  <span className="text-sm font-medium text-white">Corte + Barba (12 Abr)</span>
+                  <span className="text-sm font-medium text-text-primary">Corte + Barba (12 Abr)</span>
                 </div>
                 <button className="w-full py-3 bg-accent-cyan/10 text-accent-cyan text-xs font-bold rounded-xl hover:bg-accent-cyan hover:text-black transition-all">
                   Repetir este serviço
@@ -177,7 +177,7 @@ export async function ClientDashboard() {
                     <div key={coupon.id} className="flex items-center justify-between group/cp cursor-pointer">
                        <div className="flex items-center gap-2">
                           <Ticket size={20} weight="duotone" className="text-yellow-500" />
-                          <span className="text-sm font-bold text-white group-hover/cp:text-yellow-500 transition-colors">{coupon.code}</span>
+                          <span className="text-sm font-bold text-text-primary group-hover/cp:text-yellow-500 transition-colors">{coupon.code}</span>
                        </div>
                        <span className="text-xs font-bold text-emerald-500">-{coupon.discount}</span>
                     </div>

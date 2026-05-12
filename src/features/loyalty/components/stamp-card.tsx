@@ -35,7 +35,7 @@ export function StampCard({ balance, config }: StampCardProps) {
           <p className="text-green-400 text-sm font-bold text-center">🎉 Meta atingida! Resgate disponível!</p>
         ) : (
           <p className="text-muted-foreground text-sm text-center">
-            Faltam <span className="text-white font-bold">{goal - balance}</span> pontos para: <span className="text-accent-cyan font-bold">&quot;{config.reward_description}&quot;</span>
+            Faltam <span className="text-text-primary font-bold">{goal - balance}</span> pontos para: <span className="text-accent-cyan font-bold">&quot;{config.reward_description}&quot;</span>
           </p>
         )}
       </div>
@@ -66,7 +66,7 @@ export function StampCard({ balance, config }: StampCardProps) {
                   <path d="M9 12l2 2 4-4" stroke="black" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               ) : (
-                <span className="text-[10px] text-white/20 font-bold">{i + 1}</span>
+                <span className="text-[10px] text-text-primary/20 font-bold">{i + 1}</span>
               )}
             </div>
           )
@@ -74,12 +74,12 @@ export function StampCard({ balance, config }: StampCardProps) {
       </div>
 
       <div className="text-center space-y-1">
-        <p className="text-white font-bold text-lg">{balance} / {goal} carimbos</p>
+        <p className="text-text-primary font-bold text-lg">{balance} / {goal} carimbos</p>
         {isReady ? (
           <p className="text-green-400 text-sm font-bold">🎉 Meta atingida! Resgate disponível!</p>
         ) : (
           <p className="text-muted-foreground text-sm">
-            Faltam <span className="text-white font-bold">{goal - balance}</span> para: <span className="text-accent-cyan font-bold">&quot;{config.reward_description}&quot;</span>
+            Faltam <span className="text-text-primary font-bold">{goal - balance}</span> para: <span className="text-accent-cyan font-bold">&quot;{config.reward_description}&quot;</span>
           </p>
         )}
       </div>

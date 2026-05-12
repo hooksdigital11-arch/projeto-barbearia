@@ -20,6 +20,7 @@ import { requireUser } from "@/lib/auth/require-auth"
 import { getOrganization } from "@/features/organization/queries"
 import { LogoutButton } from "@/components/shared/logout-button"
 import { RealtimeListener } from "@/components/shared/realtime-listener"
+import { ThemeProvider } from "@/components/shared/theme-provider"
 
 const navItems = [
   { label: "Home", href: "/", iconName: "SquaresFour" as const },
@@ -64,6 +65,7 @@ export default async function DashboardLayout({
       else if (item.label === 'Estoque') href = profile.role === 'admin' ? '/admin/inventory' : '/barber/inventory'
       else if (item.label === 'Equipe') href = profile.role === 'admin' ? '/admin/team' : '/barber/team'
       else if (item.label === 'Clientes') href = profile.role === 'admin' ? '/admin/clients' : '/barber/clients'
+      else if (item.label === 'Comanda') href = profile.role === 'admin' ? '/admin/comanda' : '/barber/comanda'
       else if (item.label === 'Fila') href = profile.role === 'admin' ? '/admin/waiting-list' : profile.role === 'barber' ? '/barber/waiting-list' : '/client/waiting-list'
       else if (item.label === 'Fidelidade') href = profile.role === 'admin' ? '/admin/loyalty' : profile.role === 'barber' ? '/barber/loyalty' : '/client/loyalty'
       else if (item.label === 'Mensageria') href = profile.role === 'admin' ? '/admin/messaging' : profile.role === 'barber' ? '/barber/messaging' : '/client/messaging'
@@ -74,40 +76,42 @@ export default async function DashboardLayout({
     })
 
   return (
-    <div className="flex min-h-screen bg-black relative overflow-hidden">
+    <div className="flex min-h-screen bg-bg-black relative overflow-hidden selection:bg-accent-main/30">
+      <ThemeProvider />
       <RealtimeListener organizationId={profile.organization_id} />
 
-      <aside className="hidden md:flex w-72 flex-col fixed inset-y-0 z-50 bg-black border-r border-white/[0.05]">
+      <aside className="hidden md:flex w-[200px] flex-col fixed inset-y-0 z-50 bg-bg-sidebar border-r-[0.5px] border-border-main">
         <div className="flex flex-col h-full overflow-hidden">
-          <div className="p-12">
+          <div className="p-8">
             <Link 
               href={profile.role === 'admin' ? '/admin' : profile.role === 'barber' ? '/barber' : '/client'} 
-              className="flex flex-col gap-4 hover:opacity-80 transition-all active:scale-95"
+              className="flex flex-col gap-3 hover:opacity-80 transition-all"
             >
-              <div className="w-12 h-12 rounded-[12px] overflow-hidden flex items-center justify-center bg-white/[0.03] border border-white/5">
+              <div className="w-10 h-10 rounded-minimal overflow-hidden flex items-center justify-center bg-white/[0.02] border-[0.5px] border-border-main">
                 {orgLogo ? (
-                  <Image src={orgLogo} alt={orgName} width={48} height={48} className="object-cover" />
+                  <Image src={orgLogo} alt={orgName} width={40} height={40} className="object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-accent-cyan" />
+                  <div className="w-full h-full bg-accent-main" />
                 )}
               </div>
               <div className="flex flex-col">
-                <span className="font-syne font-bold text-xl tracking-tight text-white truncate leading-tight uppercase">{orgName}</span>
-                <span className="label-muted mt-1 opacity-40 text-[10px] tracking-[0.2em] uppercase">Precision Systems</span>
+                <span className="font-syne font-medium text-lg tracking-[-0.02em] text-text-primary truncate leading-tight uppercase">{orgName}</span>
+                <span className="text-[9px] tracking-[0.12em] uppercase text-text-secondary mt-1">Precision</span>
               </div>
             </Link>
           </div>
           
           <DashboardNav items={filteredNavItems} />
 
-          <div className="p-12 mt-auto border-t border-white/5 space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-white text-xs uppercase">
+          {/* Redesigned Sidebar Footer */}
+          <div className="mt-auto border-t-[0.5px] border-border-main p-[16px] px-[18px]">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-[28px] h-[28px] rounded-[7px] bg-[#1a1a1a] flex items-center justify-center text-text-secondary font-medium text-[11px] uppercase shrink-0">
                 {profile.full_name?.[0] || 'U'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold truncate text-white leading-tight uppercase tracking-tight">{profile.full_name}</p>
-                <p className="label-muted truncate opacity-40 mt-1">{profile.role}</p>
+                <p className="text-[11px] font-medium truncate text-text-secondary leading-none uppercase tracking-tight">{profile.full_name}</p>
+                <p className="text-[9px] truncate text-[#333] mt-1 uppercase tracking-[0.06em]">{profile.role}</p>
               </div>
             </div>
             <LogoutButton />
@@ -115,25 +119,25 @@ export default async function DashboardLayout({
         </div>
       </aside>
 
-      <div className="flex-1 md:ml-72 flex flex-col relative z-10 min-h-screen bg-black">
-        <header className="md:hidden h-20 border-b border-white/5 flex items-center justify-between px-6 bg-black sticky top-0 z-50">
+      <div className="flex-1 md:ml-[200px] flex flex-col relative z-10 min-h-screen bg-bg-black">
+        <header className="md:hidden h-16 border-b-[0.5px] border-border-main flex items-center justify-between px-6 bg-bg-sidebar sticky top-0 z-50">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white/5 border border-white/10">
+            <div className="w-8 h-8 rounded-minimal overflow-hidden flex items-center justify-center bg-white/[0.02] border-[0.5px] border-border-main">
               {orgLogo ? (
                 <Image src={orgLogo} alt={orgName} width={32} height={32} className="object-cover" />
               ) : (
-                <div className="w-full h-full bg-accent-cyan" />
+                <div className="w-full h-full bg-accent-main" />
               )}
             </div>
-            <span className="font-syne font-bold truncate max-w-[150px] text-white text-md uppercase tracking-tight">{orgName}</span>
+            <span className="font-syne font-medium truncate max-w-[150px] text-text-primary text-sm uppercase tracking-tight">{orgName}</span>
           </div>
-          <button className="w-10 h-10 flex items-center justify-center text-accent-cyan">
-             <SquaresFour size={24} weight="bold" />
+          <button className="w-10 h-10 flex items-center justify-center text-accent-main">
+             <SquaresFour size={20} weight="regular" />
           </button>
         </header>
         
-        <main className="flex-1 p-8 md:p-16 lg:p-24 overflow-x-hidden">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 p-8 md:p-12 lg:p-16 overflow-x-hidden">
+          <div className="max-w-6xl mx-auto">
             {children}
           </div>
         </main>

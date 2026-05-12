@@ -1,0 +1,390 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); background: #0a0a0a; border-radius: 12px; padding: 28px 30px; }
+
+.top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+.page-title { font-size: 30px; font-weight: 500; color: #fff; letter-spacing: -0.02em; }
+.page-title span { color: #00d4aa; }
+.page-sub { font-size: 11px; color: #333; margin-top: 5px; }
+
+.filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
+.filter-tabs { display: flex; gap: 1px; background: #0f0f0f; border: 0.5px solid #1a1a1a; border-radius: 7px; padding: 3px; }
+.tab { padding: 5px 14px; font-size: 10px; letter-spacing: 0.07em; color: #3d3d3d; border-radius: 5px; cursor: pointer; }
+.tab.active { background: #1c1c1c; color: #ccc; }
+.btn-personalize { display: flex; align-items: center; gap: 6px; background: #00d4aa; color: #000; font-size: 10px; font-weight: 500; letter-spacing: 0.08em; padding: 7px 14px; border-radius: 7px; border: none; cursor: pointer; margin-left: auto; }
+.btn-personalize i { font-size: 13px; }
+
+.section { margin-bottom: 32px; }
+.section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; color: #383838; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.section-title::after { content: ''; flex: 1; height: 0.5px; background: #161616; }
+
+.metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.metrics-row-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px; }
+.metric { background: #0f0f0f; border: 0.5px solid #1a1a1a; border-radius: 9px; padding: 14px 16px; }
+.metric-label { font-size: 9px; letter-spacing: 0.1em; color: #383838; margin-bottom: 8px; }
+.metric-value { font-size: 22px; font-weight: 500; color: #fff; line-height: 1; }
+.metric-value.sm { font-size: 17px; }
+.metric-value sup { font-size: 10px; color: #555; font-weight: 400; vertical-align: super; margin-right: 1px; }
+.metric-sub { font-size: 9px; color: #00d4aa; margin-top: 5px; letter-spacing: 0.04em; }
+.metric-sub.dim { color: #2a2a2a; }
+
+.chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.chart-grid-3 { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.chart-box { background: #0f0f0f; border: 0.5px solid #1a1a1a; border-radius: 9px; padding: 16px 18px; }
+.chart-label { font-size: 9px; letter-spacing: 0.1em; color: #2a2a2a; margin-bottom: 12px; }
+.chart-value-big { font-size: 28px; font-weight: 500; color: #fff; letter-spacing: -0.02em; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #444; }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+.donut-wrap { display: flex; align-items: center; justify-content: center; padding: 8px 0; }
+.line-wrap { position: relative; width: 100%; }
+
+.product-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid #141414; }
+.product-row:last-child { border-bottom: none; }
+.product-name { font-size: 11px; color: #888; }
+.product-val { font-size: 12px; font-weight: 500; color: #bbb; }
+
+.member-card { background: #0f0f0f; border: 0.5px solid #1a1a1a; border-radius: 9px; padding: 16px; }
+.m-top { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.m-avatar { width: 36px; height: 36px; border-radius: 8px; background: #5c35a0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #fff; flex-shrink: 0; }
+.m-name { font-size: 13px; font-weight: 500; color: #ccc; }
+.m-rating { font-size: 10px; color: #d4aa00; margin-top: 2px; }
+.m-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.m-stat { background: #141414; border-radius: 6px; padding: 8px 10px; }
+.m-stat-label { font-size: 8px; letter-spacing: 0.1em; color: #2e2e2e; margin-bottom: 4px; }
+.m-stat-val { font-size: 14px; font-weight: 500; color: #bbb; }
+.m-stat-val sup { font-size: 9px; color: #555; }
+.badge-active { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; color: #00d4aa; letter-spacing: 0.06em; margin-top: 10px; }
+.badge-active::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: #00d4aa; }
+
+.client-row { display: grid; grid-template-columns: 1.6fr 1fr 60px 80px 80px; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 0.5px solid #141414; }
+.client-row:last-child { border-bottom: none; }
+.client-col { font-size: 10px; color: #555; }
+.client-col.name { color: #888; font-weight: 500; }
+.client-col.green { color: #00d4aa; font-weight: 500; }
+.client-col.right { text-align: right; }
+.col-hdr { display: grid; grid-template-columns: 1.6fr 1fr 60px 80px 80px; gap: 10px; padding: 0 0 8px; border-bottom: 0.5px solid #1a1a1a; margin-bottom: 2px; }
+.col-h { font-size: 8px; letter-spacing: 0.1em; color: #2a2a2a; }
+.col-h.right { text-align: right; }
+</style>
+
+<div class="top">
+  <div>
+    <div class="page-title">INSIGHTS<span>.</span></div>
+    <div class="page-sub">Inteligência operacional completa. Dados em tempo real para decisões precisas.</div>
+  </div>
+</div>
+
+<div class="filter-row">
+  <div class="filter-tabs">
+    <div class="tab">HOJE</div>
+    <div class="tab active">SEMANA</div>
+    <div class="tab">MÊS</div>
+    <div class="tab">ANO</div>
+  </div>
+  <button class="btn-personalize"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>PERSONALIZAR</button>
+</div>
+
+<div class="section">
+  <div class="section-title">RECEITA</div>
+  <div class="metrics-row">
+    <div class="metric">
+      <div class="metric-label">FATURAMENTO TOTAL</div>
+      <div class="metric-value"><sup>R$</sup>620</div>
+      <div class="metric-sub">+12% vs semana anterior</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">TICKET MÉDIO</div>
+      <div class="metric-value sm"><sup>R$</sup>155,00</div>
+      <div class="metric-sub">4 atendimentos</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">RESGATES FIDELIDADE</div>
+      <div class="metric-value">4</div>
+      <div class="metric-sub dim">134 resgates total</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">PENDENTE</div>
+      <div class="metric-value sm"><sup>R$</sup>0,00</div>
+      <div class="metric-sub dim">Em aberto</div>
+    </div>
+  </div>
+
+  <div class="chart-grid-2">
+    <div class="chart-box">
+      <div class="chart-label">FATURAMENTO POR DIA</div>
+      <div class="legend" style="margin-bottom:10px; margin-top:0;">
+        <div class="legend-item"><div class="legend-dot" style="background:#00d4aa;"></div>Esta semana</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#1e1e1e; border:0.5px solid #333;"></div>Semana anterior</div>
+      </div>
+      <div style="position:relative;width:100%;height:140px;"><canvas id="chartReceita" role="img" aria-label="Faturamento por dia da semana">Seg 80, Ter 0, Qua 0, Qui 0, Sex 80, Sáb 80, Dom 80.</canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-label">DISTRIBUIÇÃO POR SERVIÇO</div>
+      <div style="position:relative;width:100%;height:140px;display:flex;align-items:center;justify-content:center;gap:20px;">
+        <div style="position:relative;width:120px;height:120px;flex-shrink:0;"><canvas id="chartServico" role="img" aria-label="Distribuição por serviço">Corte+Barba 75%, Corte 25%.</canvas></div>
+        <div class="legend" style="flex-direction:column; gap:8px;">
+          <div class="legend-item"><div class="legend-dot" style="background:#00d4aa;"></div>Corte+Barba 75%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#5c35a0;"></div>Corte 25%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-box">
+    <div class="chart-label">TOP PRODUTOS DE REVENDA</div>
+    <div class="product-row"><span class="product-name">Pomada Efeito Matte</span><span class="product-val" style="color:#00d4aa;">R$ 330,00</span></div>
+    <div class="product-row"><span class="product-name">Shampoo Antiqueda</span><span class="product-val" style="color:#555;">R$ 0,00</span></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">AGENDA</div>
+  <div class="metrics-row-5">
+    <div class="metric"><div class="metric-label">TOTAL</div><div class="metric-value">4</div></div>
+    <div class="metric"><div class="metric-label">CONFIRMADOS</div><div class="metric-value">4</div></div>
+    <div class="metric"><div class="metric-label">CANCELADOS</div><div class="metric-value">0</div></div>
+    <div class="metric"><div class="metric-label">NO SHOW</div><div class="metric-value">0</div></div>
+    <div class="metric"><div class="metric-label">CONCLUSÃO</div><div class="metric-value" style="color:#00d4aa;">100%</div></div>
+  </div>
+
+  <div class="chart-grid-2">
+    <div class="chart-box">
+      <div class="chart-label">TAXA DE CONCLUSÃO</div>
+      <div style="display:flex;align-items:center;justify-content:center;padding:8px 0;gap:20px;">
+        <div style="position:relative;width:110px;height:110px;flex-shrink:0;"><canvas id="chartConclusao" role="img" aria-label="Taxa de conclusão 100%">100% concluídos.</canvas></div>
+        <div>
+          <div style="font-size:28px;font-weight:500;color:#fff;letter-spacing:-0.02em;">100%</div>
+          <div style="font-size:10px;color:#333;margin-top:4px;">4 de 4 atendimentos</div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-label">VOLUME POR HORÁRIO</div>
+      <div style="position:relative;width:100%;height:120px;"><canvas id="chartHorario" role="img" aria-label="Volume de agendamentos por horário">19h 1, 20h 2, 22h 1.</canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">CLIENTES</div>
+  <div class="metrics-row">
+    <div class="metric"><div class="metric-label">TOTAL</div><div class="metric-value">1</div></div>
+    <div class="metric"><div class="metric-label">ATIVOS</div><div class="metric-value">1</div></div>
+    <div class="metric"><div class="metric-label">NOVOS</div><div class="metric-value">1</div></div>
+    <div class="metric"><div class="metric-label">RETENÇÃO</div><div class="metric-value" style="color:#00d4aa;">100%</div></div>
+  </div>
+
+  <div class="chart-grid-2">
+    <div class="chart-box">
+      <div class="chart-label">NOVOS CLIENTES — SEMANA</div>
+      <div style="position:relative;width:100%;height:120px;"><canvas id="chartClientes" role="img" aria-label="Novos clientes por dia">Seg 0, Ter 0, Qua 0, Qui 0, Sex 1, Sáb 0, Dom 0.</canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-label">RETENÇÃO DE CLIENTES</div>
+      <div style="display:flex;align-items:center;justify-content:center;padding:8px 0;gap:20px;">
+        <div style="position:relative;width:110px;height:110px;flex-shrink:0;"><canvas id="chartRetencao" role="img" aria-label="Retenção 100%">100% de retenção.</canvas></div>
+        <div>
+          <div style="font-size:28px;font-weight:500;color:#fff;letter-spacing:-0.02em;">100%</div>
+          <div style="font-size:10px;color:#333;margin-top:4px;">Clientes retidos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-box">
+    <div class="chart-label">RANKING DE CLIENTES</div>
+    <div class="col-hdr">
+      <div class="col-h">CLIENTE</div>
+      <div class="col-h">STATUS</div>
+      <div class="col-h">VISITAS</div>
+      <div class="col-h right">FATURAMENTO</div>
+      <div class="col-h right">ÚLTIMA VISITA</div>
+    </div>
+    <div class="client-row">
+      <div class="client-col name">Davi Ramos Machado</div>
+      <div class="client-col" style="color:#00d4aa;">ATIVO</div>
+      <div class="client-col">4</div>
+      <div class="client-col green right">R$ 290,00</div>
+      <div class="client-col right" style="color:#555;">07/05/26</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">EQUIPE</div>
+  <div class="chart-grid-3">
+    <div class="member-card">
+      <div class="m-top">
+        <div class="m-avatar">JV</div>
+        <div>
+          <div class="m-name">João Vitor</div>
+          <div class="m-rating">★ ★ ★ ★ ★ 5.0</div>
+        </div>
+      </div>
+      <div class="m-stats">
+        <div class="m-stat"><div class="m-stat-label">ATENDIMENTOS</div><div class="m-stat-val">4</div></div>
+        <div class="m-stat"><div class="m-stat-label">FATURAMENTO</div><div class="m-stat-val"><sup>R$</sup>290</div></div>
+      </div>
+      <div class="badge-active">ATIVO</div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-label">ATENDIMENTOS POR DIA</div>
+      <div style="position:relative;width:100%;height:110px;"><canvas id="chartEquipe" role="img" aria-label="Atendimentos por barbeiro por dia">João Vitor: Sex 1, Sáb 1, Dom 2.</canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-label">FATURAMENTO POR BARBEIRO</div>
+      <div style="position:relative;width:100%;height:110px;"><canvas id="chartEquipeFat" role="img" aria-label="Faturamento por barbeiro">João Vitor R$ 290.</canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">FIDELIDADE</div>
+  <div class="metrics-row">
+    <div class="metric"><div class="metric-label">NO PROGRAMA</div><div class="metric-value">0</div></div>
+    <div class="metric"><div class="metric-label">PRONTOS RESGATAR</div><div class="metric-value">0</div></div>
+    <div class="metric"><div class="metric-label">RESGATES MÊS</div><div class="metric-value">0</div></div>
+    <div class="metric"><div class="metric-label">PROGRESSO MÉDIO</div><div class="metric-value">0/10</div></div>
+  </div>
+  <div class="chart-box">
+    <div class="chart-label">ENGAJAMENTO DO PROGRAMA</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:24px;padding:12px 0;">
+      <div style="position:relative;width:100px;height:100px;flex-shrink:0;"><canvas id="chartFidelidade" role="img" aria-label="Engajamento fidelidade 0%">0% de engajamento.</canvas></div>
+      <div>
+        <div style="font-size:26px;font-weight:500;color:#fff;">0%</div>
+        <div style="font-size:10px;color:#333;margin-top:4px;">Clientes engajados</div>
+        <div style="font-size:9px;color:#2a2a2a;margin-top:8px;max-width:160px;line-height:1.5;">Nenhum cliente atingiu a meta de carimbos ainda.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const C = '#00d4aa';
+const C2 = '#5c35a0';
+const GRID = '#1a1a1a';
+const TICK = '#333';
+const baseOpts = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false }, tooltip: {
+    backgroundColor: '#141414', borderColor: '#2a2a2a', borderWidth: 0.5,
+    titleColor: '#888', bodyColor: '#ccc', padding: 8,
+    callbacks: { label: ctx => ' ' + ctx.parsed.y }
+  }},
+  scales: {
+    x: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 } } },
+    y: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 } }, beginAtZero: true }
+  }
+};
+
+new Chart(document.getElementById('chartReceita'), {
+  type: 'bar',
+  data: {
+    labels: ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
+    datasets: [
+      { label: 'Esta semana', data: [80,0,0,0,80,80,80], backgroundColor: C + '99', borderColor: C, borderWidth: 1, borderRadius: 4 },
+      { label: 'Anterior', data: [60,60,0,40,0,0,0], backgroundColor: '#2a2a2a', borderColor: '#333', borderWidth: 1, borderRadius: 4 }
+    ]
+  },
+  options: { ...baseOpts, responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#141414', borderColor: '#2a2a2a', borderWidth: 0.5, titleColor: '#888', bodyColor: '#ccc', padding: 8 } }
+  }
+});
+
+new Chart(document.getElementById('chartServico'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Corte+Barba','Corte'],
+    datasets: [{ data: [75, 25], backgroundColor: [C, C2], borderColor: '#111', borderWidth: 2, hoverOffset: 4 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '70%',
+    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#141414', borderColor: '#2a2a2a', borderWidth: 0.5, titleColor: '#888', bodyColor: '#ccc', padding: 8,
+      callbacks: { label: ctx => ' ' + ctx.label + ' ' + ctx.parsed + '%' }
+    }}
+  }
+});
+
+new Chart(document.getElementById('chartConclusao'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Concluídos','Restante'],
+    datasets: [{ data: [100, 0], backgroundColor: [C, '#1a1a1a'], borderColor: '#111', borderWidth: 2 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '72%',
+    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+  }
+});
+
+new Chart(document.getElementById('chartHorario'), {
+  type: 'bar',
+  data: {
+    labels: ['18h','19h','20h','21h','22h','23h'],
+    datasets: [{ data: [0,1,2,0,1,0], backgroundColor: C + '88', borderColor: C, borderWidth: 1, borderRadius: 4 }]
+  },
+  options: { ...baseOpts, responsive: true, maintainAspectRatio: false,
+    scales: { x: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 } } }, y: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 }, stepSize: 1 }, beginAtZero: true, max: 3 } }
+  }
+});
+
+new Chart(document.getElementById('chartClientes'), {
+  type: 'line',
+  data: {
+    labels: ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
+    datasets: [{ data: [0,0,0,0,1,0,0], borderColor: C, backgroundColor: C + '18', tension: 0.4, fill: true, pointBackgroundColor: C, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2 }]
+  },
+  options: { ...baseOpts, responsive: true, maintainAspectRatio: false }
+});
+
+new Chart(document.getElementById('chartRetencao'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Retidos','Perdidos'],
+    datasets: [{ data: [100, 0], backgroundColor: [C2, '#1a1a1a'], borderColor: '#111', borderWidth: 2 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '72%',
+    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+  }
+});
+
+new Chart(document.getElementById('chartEquipe'), {
+  type: 'bar',
+  data: {
+    labels: ['Sex','Sáb','Dom'],
+    datasets: [{ label: 'João Vitor', data: [1,1,2], backgroundColor: C2 + 'aa', borderColor: C2, borderWidth: 1, borderRadius: 4 }]
+  },
+  options: { ...baseOpts, responsive: true, maintainAspectRatio: false,
+    scales: { x: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 } } }, y: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 }, stepSize: 1 }, beginAtZero: true } }
+  }
+});
+
+new Chart(document.getElementById('chartEquipeFat'), {
+  type: 'bar',
+  data: {
+    labels: ['João Vitor'],
+    datasets: [{ data: [290], backgroundColor: C + '99', borderColor: C, borderWidth: 1, borderRadius: 4 }]
+  },
+  options: { ...baseOpts, responsive: true, maintainAspectRatio: false,
+    indexAxis: 'y',
+    scales: {
+      x: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 }, callback: v => 'R$' + v } },
+      y: { grid: { display: false }, ticks: { color: TICK, font: { size: 10 } } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chartFidelidade'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Engajados','Total'],
+    datasets: [{ data: [0, 100], backgroundColor: ['#d4aa00', '#1a1a1a'], borderColor: '#111', borderWidth: 2 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '72%',
+    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+  }
+});
+</script>

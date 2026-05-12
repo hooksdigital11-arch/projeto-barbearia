@@ -1,171 +1,137 @@
 'use client'
 
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  Legend,
-  Cell
-} from 'recharts'
+import { useEffect, useRef, useState } from 'react'
 import type { TeamReport } from '../types'
-import { Star, Medal, Crown } from '@phosphor-icons/react/dist/ssr'
-import { ClientOnly } from '@/components/shared/client-only'
 import { cn } from '@/lib/utils/cn'
-
-const TEAM_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899']
+import { useThemeColors } from '@/lib/hooks/use-theme-colors'
 
 interface TeamSectionProps {
   data: TeamReport
 }
 
-export function TeamSection({ data }: TeamSectionProps) {
-  const { barbers, revenueComparison, weeklyEvolution, serviceDistribution } = data
+const GRID = '#1a1a1a'
+const TICK = '#333'
 
-  const getRankIcon = (index: number) => {
-    if (index === 0) return <Crown size={20} weight="duotone" className="text-yellow-400" />
-    if (index === 1) return <Medal size={20} weight="duotone" className="text-gray-300" />
-    if (index === 2) return <Medal size={20} weight="duotone" className="text-amber-600" />
-    return <span className="text-text-secondary font-bold">#{index + 1}</span>
+const baseOpts = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#141414',
+      borderColor: '#2a2a2a',
+      borderWidth: 0.5,
+      titleColor: '#888',
+      bodyColor: '#ccc',
+      padding: 8
+    }
+  },
+  scales: {
+    x: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 } } },
+    y: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 } }, beginAtZero: true }
   }
+}
+
+export function TeamSection({ data }: TeamSectionProps) {
+  const { barbers, weeklyEvolution, revenueComparison } = data
+  const atendimentosChartRef = useRef<HTMLCanvasElement>(null)
+  const faturamentoChartRef = useRef<HTMLCanvasElement>(null)
+  const [isLoaded, setIsLoaded] = useState(false)
+  const { accent: C, secondary: C2 } = useThemeColors()
+
+  useEffect(() => {
+    const checkChart = () => {
+      if (window.Chart) setIsLoaded(true)
+      else setTimeout(checkChart, 100)
+    }
+    checkChart()
+  }, [])
+
+  useEffect(() => {
+    if (!isLoaded || !atendimentosChartRef.current || !faturamentoChartRef.current) return
+
+    const Chart = window.Chart
+    
+    const atendimentosChart = new Chart(atendimentosChartRef.current, {
+      type: 'bar',
+      data: {
+        labels: ['Sex','Sáb','Dom'],
+        datasets: [{ label: 'João Vitor', data: [1,1,2], backgroundColor: C2 + 'aa', borderColor: C2, borderWidth: 1, borderRadius: 4 }]
+      },
+      options: {
+        ...baseOpts,
+        scales: {
+          x: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 } } },
+          y: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 }, stepSize: 1 }, beginAtZero: true }
+        }
+      }
+    })
+
+    const faturamentoChart = new Chart(faturamentoChartRef.current, {
+      type: 'bar',
+      data: {
+        labels: revenueComparison.map(r => r.name),
+        datasets: [{ data: revenueComparison.map(r => r.revenue), backgroundColor: C + '99', borderColor: C, borderWidth: 1, borderRadius: 4 }]
+      },
+      options: {
+        ...baseOpts,
+        indexAxis: 'y',
+        scales: {
+          x: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 }, callback: (v: any) => 'R$' + v } },
+          y: { grid: { display: false }, ticks: { color: TICK, font: { size: 10 } } }
+        }
+      }
+    })
+
+    return () => {
+      atendimentosChart.destroy()
+      faturamentoChart.destroy()
+    }
+  }, [isLoaded, weeklyEvolution, revenueComparison, C, C2])
 
   return (
-    <section className="space-y-10">
-      <div className="border-l-2 border-accent-cyan pl-8 py-2">
-        <h2 className="text-4xl md:text-5xl font-syne font-black text-white uppercase tracking-tighter leading-none">
-          Equipe
-        </h2>
-        <p className="label-muted mt-2">
-          Performance & Distribuição de Talentos
-        </p>
-      </div>
-
-      {/* Barber Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {barbers.map((barber) => (
-          <div key={barber.id} className="premium-card p-10 group">
-            <div className="flex items-center gap-6 mb-12">
-              <div className="w-16 h-16 rounded-full bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-white font-bold text-2xl uppercase shrink-0 group-hover:border-accent-cyan/30 transition-colors">
-                {barber.name.charAt(0)}
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold font-syne text-white tracking-tight leading-none mb-2">{barber.name}</h3>
-                <div className="flex items-center gap-2">
-                  <Star size={16} weight="fill" className="text-accent-cyan" />
-                  <span className="text-base font-bold font-mono text-white leading-none">{barber.rating.toFixed(1)}</span>
-                </div>
-              </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5">
+      {barbers.map((barber) => (
+        <div key={barber.id} className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-4">
+          <div className="flex items-center gap-2.5 mb-3.5">
+            <div className="w-9 h-9 rounded-[8px] bg-[#5c35a0] flex items-center justify-center text-[13px] font-medium text-text-primary shrink-0">
+              {barber.name.split(' ').map(n => n[0]).join('')}
             </div>
-
-            <div className="grid grid-cols-2 gap-8">
-              <div className="space-y-2">
-                <p className="label-muted">Atendimentos</p>
-                <p className="text-3xl font-bold text-white font-mono">{barber.appointments}</p>
-              </div>
-              <div className="space-y-2">
-                <p className="label-muted">Receita</p>
-                <p className="text-3xl font-bold text-accent-cyan font-mono tracking-tighter">
-                  <span className="text-xs align-top mr-1">R$</span>
-                  {barber.revenue.toLocaleString('pt-BR')}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <p className="label-muted">Taxa de Conclusão</p>
-                <p className="text-base font-bold text-white font-mono">{barber.completionRate}%</p>
-              </div>
-              <div className="space-y-2">
-                <p className="label-muted">Cancelamentos</p>
-                <p className="text-base font-bold text-red-400 font-mono">{barber.cancellations}</p>
-              </div>
+            <div>
+              <div className="text-[13px] font-medium text-text-secondary leading-tight">{barber.name}</div>
+              <div className="text-[10px] text-[#d4aa00] mt-0.5">★ ★ ★ ★ ★ 5.0</div>
             </div>
           </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Revenue Comparison */}
-        <div className="premium-card p-10">
-          <span className="label-muted mb-12 block">Comparativo de Receita</span>
-          <div className="h-[300px]">
-            <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={revenueComparison} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="0" stroke="#ffffff05" vertical={false} />
-                  <XAxis dataKey="name" stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} />
-                  <YAxis stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} tickFormatter={(v) => `R$${v}`} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0d0d0d', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px' }}
-                    cursor={{ fill: 'rgba(255,255,255,0.02)' }}
-                  />
-                  <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </ClientOnly>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-bg-surface rounded-[6px] p-[8px_10px]">
+              <div className="text-[8px] tracking-[0.1em] text-[#2e2e2e] mb-1 uppercase">Atendimentos</div>
+              <div className="text-[14px] font-medium text-text-secondary">{barber.appointments}</div>
+            </div>
+            <div className="bg-bg-surface rounded-[6px] p-[8px_10px]">
+              <div className="text-[8px] tracking-[0.1em] text-[#2e2e2e] mb-1 uppercase">Faturamento</div>
+              <div className="text-[14px] font-medium text-text-secondary uppercase"><sup className="text-[9px] text-text-nav align-super mr-0.5">R$</sup>{barber.revenue.toLocaleString()}</div>
+            </div>
+          </div>
+          <div className="inline-flex items-center gap-1 text-[9px] text-accent-main tracking-[0.06em] mt-2.5">
+            <div className="w-1 h-1 rounded-full bg-accent-main" />
+            ATIVO
           </div>
         </div>
+      ))}
 
-        {/* Weekly Evolution */}
-        <div className="premium-card p-10">
-          <span className="label-muted mb-12 block">Evolução de Atendimentos</span>
-          <div className="h-[300px]">
-            <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={weeklyEvolution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="0" stroke="#ffffff05" vertical={false} />
-                  <XAxis dataKey="week" stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} />
-                  <YAxis stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0d0d0d', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px' }}
-                  />
-                  {barbers.map((b, i) => (
-                    <Line 
-                      key={b.id}
-                      type="monotone" 
-                      dataKey={b.name} 
-                      stroke={TEAM_COLORS[i % TEAM_COLORS.length]} 
-                      strokeWidth={3} 
-                      dot={false}
-                    />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
-            </ClientOnly>
-          </div>
+      <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[16px_18px]">
+        <div className="text-[9px] tracking-[0.1em] text-[#2a2a2a] mb-3 uppercase">Atendimentos por Dia</div>
+        <div className="relative w-full h-[110px]">
+          <canvas ref={atendimentosChartRef} />
         </div>
       </div>
 
-      <div className="premium-card p-10">
-        <span className="label-muted mb-12 block">Distribuição de Serviços</span>
-        <div className="h-[400px]">
-          <ClientOnly fallback={<div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={serviceDistribution}>
-                <CartesianGrid strokeDasharray="0" stroke="#ffffff05" vertical={false} />
-                <XAxis dataKey="barberName" stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} />
-                <YAxis stroke="#ffffff10" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#666', fontFamily: 'DM Mono' }} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#0d0d0d', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px' }}
-                />
-                {(() => {
-                  const serviceNames = new Set<string>()
-                  serviceDistribution.forEach(d => {
-                    Object.keys(d).filter(k => k !== 'barberName').forEach(k => serviceNames.add(k))
-                  })
-                  const svcColors = ['#00e5ff', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899']
-                  return Array.from(serviceNames).map((name, i) => (
-                    <Bar key={name} dataKey={name} stackId="a" fill={svcColors[i % svcColors.length]} radius={0} />
-                  ))
-                })()}
-              </BarChart>
-            </ResponsiveContainer>
-          </ClientOnly>
+      <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[16px_18px]">
+        <div className="text-[9px] tracking-[0.1em] text-[#2a2a2a] mb-3 uppercase">Faturamento por Barbeiro</div>
+        <div className="relative w-full h-[110px]">
+          <canvas ref={faturamentoChartRef} />
         </div>
       </div>
-    </section>
+    </div>
   )
 }

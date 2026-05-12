@@ -14,7 +14,7 @@ export default function Loading() {
         ))}
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-[320px,1fr] gap-0 rounded-2xl border border-white/5 bg-[#141414] overflow-hidden h-[500px]">
+      <div className="grid grid-cols-1 md:grid-cols-[320px,1fr] gap-0 rounded-2xl border border-white/5 bg-bg-surface overflow-hidden h-[500px]">
         <div className="border-r border-white/5 bg-white/2 animate-pulse" />
         <div className="bg-white/1 animate-pulse" />
       </div>

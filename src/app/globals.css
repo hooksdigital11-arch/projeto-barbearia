@@ -4,62 +4,59 @@
 @theme {
   --font-syne: "Syne", sans-serif;
   --font-mono: "DM Mono", monospace;
-  --font-sans: "DM Sans", sans-serif;
+  --font-sans: "Inter", sans-serif;
 
-  /* Premium Palette */
-  --color-bg-black: #000000;
-  --color-bg-surface: #0a0a0a;
-  --color-bg-panel: #111111;
-  --color-bg-hover: #1a1a1a;
+  /* Minimalist Dark Palette */
+  --color-bg-black: #0a0a0a;
+  --color-bg-surface: #111111;
+  --color-bg-sidebar: #0f0f0f;
+  --color-surface-secondary: #161616;
+  --color-nav-hover: #161616;
+  --color-border-main: #1e1e1e;
   
-  --color-accent-cyan: #00e5ff;
-  --color-accent-blue: #3b82f6;
-  --color-accent-amber: #f59e0b;
-  --color-accent-emerald: #10b981;
+  --color-accent-main: #00d4aa;
   
   --color-text-primary: #ffffff;
-  --color-text-secondary: #a0a0a0;
-  --color-text-muted: #666666;
+  --color-text-secondary: #444444;
+  --color-text-muted: #333333;
+  --color-text-nav: #555555;
 
-  --radius-premium: 16px;
-  --radius-pill: 999px;
+  --radius-minimal: 10px;
 }
 
 :root {
-  --background: #000000;
+  --background: #0a0a0a;
   --foreground: #ffffff;
   
-  --bg-primary: #000000;
-  --bg-secondary: #0a0a0a;
-  --accent-cyan: #00e5ff;
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-
-  --border-premium: rgba(255, 255, 255, 0.06);
+  --accent-main: #00d4aa;
+  --accent: #00d4aa;
+  --secondary: #5c35a0;
+  --border-main: #1e1e1e;
+  --surface-main: #111111;
 }
 
 @layer base {
   * {
-    @apply border-white/5;
+    @apply border-border-main/50;
   }
   
   body {
-    @apply bg-bg-black text-text-primary selection:bg-accent-cyan/30 font-sans;
+    @apply bg-bg-black text-text-primary selection:bg-accent-main/30 font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-syne font-bold tracking-tight text-white;
+    @apply font-syne font-medium tracking-tight text-white;
   }
 
-  /* Editorial Typography Scale */
+  /* Typography Scale */
   .heading-hero {
-    @apply font-syne font-black text-6xl md:text-7xl lg:text-9xl tracking-[-0.04em] uppercase leading-[0.85];
+    @apply font-syne font-medium text-6xl md:text-7xl lg:text-9xl tracking-[-0.04em] uppercase leading-[0.85];
   }
   
   .heading-section {
-    @apply font-syne font-bold text-4xl md:text-5xl tracking-tight uppercase;
+    @apply font-syne font-medium text-4xl md:text-5xl tracking-[-0.02em] uppercase;
   }
 
   input, select, textarea {
@@ -68,35 +65,35 @@
 }
 
 @layer components {
-  /* Premium Containers */
+  /* Minimalist Containers */
   .premium-card {
-    @apply bg-[#111111] border border-white/[0.06] rounded-[16px] transition-all duration-500 overflow-hidden;
+    @apply bg-bg-surface border-[0.5px] border-border-main rounded-minimal transition-all duration-300 overflow-hidden;
   }
   
   .premium-card-hover {
-    @apply hover:bg-[#1a1a1a] hover:border-white/[0.12];
+    @apply hover:bg-[#141414] hover:border-[#2a2a2a];
   }
 
   /* Interactive Elements */
   .btn-pill-primary {
-    @apply bg-accent-cyan text-black font-bold px-8 py-4 rounded-full transition-all duration-300 active:scale-95 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-accent-main text-black font-medium px-8 py-4 rounded-minimal transition-all duration-300 active:scale-95 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-pill-secondary {
-    @apply border border-accent-cyan text-accent-cyan font-bold px-8 py-4 rounded-full transition-all duration-300 active:scale-95 hover:bg-accent-cyan/10 disabled:opacity-50;
+    @apply border-[0.5px] border-accent-main text-accent-main font-medium px-8 py-4 rounded-minimal transition-all duration-300 active:scale-95 hover:bg-accent-main/10 disabled:opacity-50;
   }
 
   /* Data Display */
   .mono-data {
-    @apply font-mono text-white tracking-tighter;
+    @apply font-mono text-white tracking-tighter font-medium;
   }
 
   .label-muted {
-    @apply text-[10px] font-bold text-text-muted uppercase tracking-[0.25em];
+    @apply text-[10px] font-medium text-text-secondary uppercase tracking-[0.1em];
   }
 
   .glass-glow {
-    @apply absolute pointer-events-none opacity-20 blur-[120px];
+    @apply hidden;
   }
 }
 

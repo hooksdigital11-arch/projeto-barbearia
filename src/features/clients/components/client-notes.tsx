@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { PencilSimple, NoteBlank, FloppyDisk } from '@phosphor-icons/react'
+import { PencilSimple, NoteBlank, Check } from '@phosphor-icons/react'
 import { updateClientNotes } from '../actions'
+import { cn } from '@/lib/utils/cn'
 
 interface ClientNotesProps {
   clientId: string
@@ -36,68 +37,68 @@ export function ClientNotes({ clientId, notes, updatedAt }: ClientNotesProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-text-secondary flex items-center gap-2">
-          <NoteBlank size={16} weight="duotone" />
+        <h4 className="text-[11px] font-medium text-[#383838] uppercase tracking-[0.06em] flex items-center gap-2">
+          <NoteBlank size={14} weight="regular" />
           Observações do barbeiro
         </h4>
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 text-text-secondary hover:text-white hover:bg-white/10 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[7px] text-[10px] font-medium bg-bg-sidebar border-[0.5px] border-border-main text-text-muted hover:text-text-secondary transition-all uppercase tracking-[0.04em]"
           >
-            <PencilSimple size={12} weight="bold" />
+            <PencilSimple size={12} weight="regular" />
             Editar
           </button>
         )}
       </div>
 
       {isEditing ? (
-        <div className="space-y-3">
+        <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-300">
           <textarea
             value={value}
             onChange={(e) => setValue(e.target.value)}
             maxLength={2000}
             rows={6}
             placeholder="Preferências, alergias, observações importantes..."
-            className="w-full px-4 py-3 rounded-xl border border-accent-cyan/30 bg-white/5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 transition-all resize-none"
+            className="w-full px-4 py-3 rounded-[10px] border-[0.5px] border-border-main bg-bg-sidebar text-text-secondary text-[12px] placeholder:text-[#2a2a2a] focus:outline-none focus:border-accent-main/20 transition-all resize-none line-height-[1.6] uppercase"
             autoFocus
           />
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-text-secondary">
+          <div className="flex items-center justify-between pt-2 border-t-[0.5px] border-border-main">
+            <span className="text-[9px] font-medium text-[#2e2e2e] tracking-widest uppercase">
               {value.length}/2000
             </span>
             <div className="flex gap-2">
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 rounded-lg text-xs font-medium bg-white/5 text-text-secondary hover:text-white transition-colors"
+                className="px-4 py-2 rounded-[7px] text-[10px] font-medium bg-bg-sidebar border-[0.5px] border-border-main text-[#444] hover:text-[#777] transition-all uppercase tracking-[0.08em]"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSave}
                 disabled={isPending}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-accent-cyan text-black hover:bg-accent-cyan/90 disabled:opacity-40 transition-all"
+                className="flex items-center gap-2 px-5 py-2 rounded-[7px] text-[10px] font-medium bg-accent-main text-black hover:opacity-90 disabled:opacity-40 transition-all uppercase tracking-[0.08em]"
               >
-                <FloppyDisk size={12} weight="bold" />
+                <Check size={14} weight="bold" />
                 {isPending ? 'Salvando...' : 'Salvar'}
               </button>
             </div>
           </div>
         </div>
       ) : (
-        <div className="p-5 rounded-xl bg-white/[0.03] border border-white/5 min-h-[120px]">
+        <div className="p-5 rounded-[10px] bg-bg-sidebar border-[0.5px] border-border-main min-h-[120px]">
           {notes ? (
-            <p className="text-sm text-white whitespace-pre-wrap leading-relaxed">{notes}</p>
+            <p className="text-[12px] text-text-secondary whitespace-pre-wrap leading-relaxed uppercase">{notes}</p>
           ) : (
-            <p className="text-sm text-text-secondary/50 italic">
-              Nenhuma observação registrada. Clique em &quot;Editar&quot; para adicionar.
+            <p className="text-[11px] text-[#2a2a2a] italic uppercase tracking-wider">
+              Nenhuma observação registrada.
             </p>
           )}
         </div>
       )}
 
       {updatedAt && (
-        <p className="text-[10px] text-text-secondary/50">
+        <p className="text-[9px] text-[#222] font-medium uppercase tracking-[0.05em]">
           Última atualização: {new Date(updatedAt).toLocaleDateString('pt-BR', {
             day: '2-digit',
             month: '2-digit',

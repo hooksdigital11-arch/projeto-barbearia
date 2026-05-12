@@ -81,79 +81,68 @@ export function AdminHome({ userName }: AdminHomeProps) {
   const firstName = userName?.split(' ')[0] || 'Admin'
   const now = new Date()
   const hour = now.getHours()
-  const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
+  const greeting = hour < 12 ? 'BOM DIA' : hour < 18 ? 'BOA TARDE' : 'BOA NOITE'
 
   return (
-    <div className="space-y-32 py-12 animate-premium-in">
-      {/* Editorial Header - Balanced with precision */}
-      <div className="space-y-8">
-        <div className="space-y-4">
-          <p className="label-muted opacity-40">{greeting}, {firstName}</p>
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black font-syne text-white tracking-tighter leading-none uppercase">
-            Comando<span className="text-accent-cyan">.</span>
-          </h1>
-        </div>
-        <p className="text-text-secondary text-xl font-medium leading-relaxed max-w-4xl tracking-tight">
-          Gerencie cada operação com precisão espacial. Sua barbearia, sob controle absoluto.
-        </p>
+    <div className="space-y-16 py-8">
+      {/* Minimalist Header */}
+      <div className="space-y-2">
+        <p className="text-[10px] tracking-[0.12em] text-text-secondary uppercase font-medium">{greeting}, {firstName}</p>
+        <h1 className="text-4xl font-medium font-syne text-text-primary tracking-[-0.02em] uppercase">
+          Dashboard<span className="text-accent-main">.</span>
+        </h1>
       </div>
 
-      {/* KPI Section - Precision Data at the top */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/5 border border-white/5 overflow-hidden">
+      {/* KPI Section - Precision Data */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[12px]">
         {[
-          { label: 'Faturamento Hoje', value: '4.280', unit: 'R$' },
-          { label: 'Taxa de Ocupação', value: '94', unit: '%' },
-          { label: 'Novos Clientes', value: '12', unit: '' },
+          { label: 'FATURAMENTO HOJE', value: '4.280', unit: 'R$' },
+          { label: 'TAXA DE OCUPAÇÃO', value: '94', unit: '%' },
+          { label: 'NOVOS CLIENTES', value: '12', unit: '' },
         ].map((kpi, idx) => (
-          <div key={idx} className="p-12 bg-black flex flex-col justify-between h-48 group">
-            <p className="label-muted opacity-40 group-hover:opacity-100 transition-opacity">{kpi.label}</p>
-            <div className="flex items-baseline gap-2">
-              {kpi.unit === 'R$' && <span className="text-xl font-mono text-text-muted">{kpi.unit}</span>}
-              <span className="text-6xl font-bold font-mono text-white tracking-tighter group-hover:text-accent-cyan transition-colors">
+          <div key={idx} className="bg-bg-surface border-[0.5px] border-border-main rounded-[10px] p-[20px] px-[22px] flex flex-col justify-between h-[120px]">
+            <p className="text-[10px] tracking-[0.1em] text-[#444] font-medium uppercase">{kpi.label}</p>
+            <div className="flex items-baseline gap-1">
+              {kpi.unit === 'R$' && <span className="text-[13px] text-text-nav font-medium">{kpi.unit}</span>}
+              <span className="text-[28px] font-medium text-text-primary tracking-tight">
                 {kpi.value}
               </span>
-              {kpi.unit !== 'R$' && kpi.unit !== '' && <span className="text-xl font-mono text-text-muted">{kpi.unit}</span>}
+              {kpi.unit !== 'R$' && kpi.unit !== '' && <span className="text-[13px] text-text-nav font-medium">{kpi.unit}</span>}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Module Grid - Clean edges, no negative margins */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5 border border-white/5 overflow-hidden">
-        {modules.map((mod, index) => (
-          <Link
-            key={mod.href}
-            href={mod.href}
-            className={cn(
-              "group relative flex flex-col justify-between p-12 bg-black h-80",
-              "hover:bg-[#0a0a0a] transition-all duration-500 active:scale-[0.99] outline-none"
-            )}
-          >
-            <div className="space-y-12">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 flex items-center justify-center text-accent-cyan opacity-40 group-hover:opacity-100 transition-opacity duration-500">
-                  <mod.icon size={32} weight="bold" />
+      {/* Module Grid - Exactly 3 columns */}
+      <div className="space-y-6">
+        <p className="text-[10px] tracking-[0.12em] text-[#444] font-medium uppercase">Módulos do Sistema</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-[10px]">
+          {modules.map((mod) => (
+            <Link
+              key={mod.href}
+              href={mod.href}
+              className={cn(
+                "group flex flex-col gap-4 p-6 bg-bg-surface border-[0.5px] border-border-main rounded-[10px] transition-all",
+                "hover:bg-bg-surface hover:border-[#2a2a2a]"
+              )}
+            >
+              <div className="flex items-start justify-between">
+                <div className="text-accent-main">
+                  <mod.icon size={18} weight="regular" />
                 </div>
-                <ArrowRight 
-                  size={24} 
-                  weight="bold" 
-                  className="text-white opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500" 
-                />
               </div>
 
-              <div className="space-y-4">
-                <h3 className="text-3xl font-bold font-syne text-white tracking-tight uppercase leading-none">
+              <div className="space-y-1">
+                <h3 className="text-[12px] font-medium text-[#cccccc] tracking-tight">
                   {mod.label}
                 </h3>
-                <p className="text-sm text-text-muted font-medium tracking-tight uppercase leading-relaxed opacity-60 group-hover:opacity-100 transition-opacity">
+                <p className="text-[10px] text-[#333333] font-medium tracking-tight">
                   {mod.description}
                 </p>
               </div>
-            </div>
-            
-            <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-accent-cyan group-hover:w-full transition-all duration-700" />
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   )
