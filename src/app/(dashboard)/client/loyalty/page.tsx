@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { UserCircle } from '@phosphor-icons/react/dist/ssr'
 import { getLoyaltyConfig, getClientStamps } from '@/features/loyalty/queries'
 import { LoyaltyPageClient } from '@/features/loyalty/components/loyalty-page-client'
 import { requireUser } from '@/lib/auth/require-auth'
@@ -28,15 +29,19 @@ async function LoyaltyContent() {
 
   if (!client) {
     return (
-      <div className="space-y-8 animate-in fade-in duration-700">
-        <div>
-          <h1 className="text-4xl font-bold font-syne text-text-primary tracking-tight">Minha Fidelidade</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Acompanhe seus carimbos e resgate suas recompensas.</p>
+      <div className="space-y-0 animate-in fade-in duration-700">
+        <div className="mb-[20px]">
+          <h1 className="text-[28px] font-medium text-[#fff] tracking-[-0.01em] uppercase leading-none">Minha Fidelidade</h1>
+          <p className="text-[11px] text-[#333] mt-[5px] uppercase tracking-wider font-medium">Acompanhe seus carimbos e resgate suas recompensas.</p>
         </div>
-        <div className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-16 text-center space-y-4">
-          <p className="text-text-primary font-bold text-lg">Perfil de cliente não encontrado</p>
-          <p className="text-sm text-muted-foreground">
-            Seu perfil ainda não está vinculado a um registro de cliente. Entre em contato com a barbearia.
+        
+        <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] p-[48px_24px] flex flex-col items-center justify-center text-center">
+          <div className="w-[56px] h-[56px] rounded-full bg-[#141414] border border-[#1e1e1e] flex items-center justify-center mb-[20px]">
+            <UserCircle size={24} className="text-[#2a2a2a]" />
+          </div>
+          <h2 className="text-[14px] font-medium text-[#555] uppercase tracking-wider mb-[8px]">Perfil de cliente não encontrado</h2>
+          <p className="text-[11px] text-[#2e2e2e] leading-[1.6] max-w-[340px] uppercase tracking-wide">
+            Seu perfil ainda não está vinculado a um registro de cliente. Entre em contato com a barbearia para ativar seu programa de fidelidade.
           </p>
         </div>
       </div>

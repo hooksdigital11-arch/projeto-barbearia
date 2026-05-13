@@ -1,19 +1,106 @@
 'use client'
 
-import { CloudArrowDown, FileCsv, Users, Calendar, Receipt, Database, ArrowRight, WarningCircle } from '@phosphor-icons/react'
+import { CloudArrowDown, FileCsv, Users, Calendar, Receipt, Database, ArrowRight, WarningCircle, CircleNotch } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
+import { useState } from 'react'
+import { fetchInsightsData } from '@/features/analytics/actions'
+import { downloadInsightsPDF } from '@/lib/insights-pdf'
+import html2pdf from 'html2pdf.js'
 
 export function BackupSettings() {
-  const handleExport = (type: string) => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: `Gerando arquivo ${type.toUpperCase()}...`,
-        success: `Exportação de ${type} iniciada!`,
-        error: 'Erro ao exportar dados.',
+  const [isExporting, setIsExporting] = useState<string | null>(null)
+
+  const handleExport = async (type: string) => {
+    if (type === 'Todos os Dados') {
+      try {
+        setIsExporting(type)
+        toast.loading(`Gerando arquivo ${type.toUpperCase()}...`, { id: 'export-toast' })
+        
+        const rawData = await fetchInsightsData()
+        
+        const data = {
+          barbearia: rawData.barbearia,
+          periodo: `Backup Geral — \${rawData.dataGeracao}`,
+          dataGeracao: rawData.dataGeracao,
+          receita: {
+            faturamentoTotal: rawData.receita.faturamentoTotal,
+            variacaoSemana: rawData.receita.variacaoSemana,
+            ticketMedio: rawData.receita.ticketMedio,
+            totalAtendimentos: rawData.receita.totalAtendimentos,
+            pagamentosPendentes: rawData.receita.pagamentosPendentes,
+            valorPresente: rawData.receita.valorPresente || 0,
+            topServicos: rawData.receita.topServicos.map(s => ({
+              nome: s.nome,
+              categoria: s.categoria,
+              faturamento: s.faturamento,
+              participacao: s.participacao || 'Mix',
+              destaque: s.destaque
+            }))
+          },
+          agenda: {
+            total: rawData.agenda.total,
+            confirmados: rawData.agenda.confirmados,
+            cancelados: rawData.agenda.cancelados,
+            noShow: rawData.agenda.noShow,
+            taxaConclusao: rawData.agenda.taxaConclusao,
+            porDia: [
+              { dia: 'Segunda-feira', agendamentos: 0, concluidos: 0 },
+              { dia: 'Terça-feira', agendamentos: 0, concluidos: 0 },
+              { dia: 'Quarta-feira', agendamentos: 0, concluidos: 0 },
+              { dia: 'Quinta-feira', agendamentos: 0, concluidos: 0 },
+              { dia: 'Sexta-feira', agendamentos: 0, concluidos: 0 },
+              { dia: 'Sábado', agendamentos: 0, concluidos: 0 },
+              { dia: 'Domingo', agendamentos: 0, concluidos: 0 },
+            ]
+          },
+          clientes: {
+            total: rawData.clientes.total,
+            ativos: rawData.clientes.ativos,
+            novos: rawData.clientes.novos,
+            taxaRetencao: rawData.clientes.taxaRetencao,
+            satisfacao: rawData.clientes.satisfacao,
+            lista: rawData.clientes.lista.map(c => ({
+              nome: c.full_name,
+              status: 'ATIVO',
+              faturamento: 0,
+              observacao: 'Backup realizado'
+            }))
+          },
+          equipe: rawData.equipe.map(e => ({
+            nome: e.nome,
+            avaliacao: e.avaliacao,
+            agendamentos: e.agendamentos,
+            faturamento: e.faturamento,
+            status: e.status
+          })),
+          fidelidade: {
+            inscritos: rawData.fidelidade.inscritos,
+            pontosResgatados: rawData.fidelidade.resgatesMes,
+            presentesMes: 0,
+            progressaoMedia: rawData.fidelidade.progressaoMedia,
+            clientesBonificados: rawData.fidelidade.engajamento
+          }
+        }
+
+        await downloadInsightsPDF(data)
+        toast.success(`Exportação de \${type} concluída!`, { id: 'export-toast' })
+      } catch (error) {
+        console.error('Erro ao exportar PDF:', error)
+        toast.error('Erro ao exportar dados.', { id: 'export-toast' })
+      } finally {
+        setIsExporting(null)
       }
-    )
+    } else {
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+        {
+          loading: `Gerando arquivo ${type.toUpperCase()}...`,
+          success: `Exportação de ${type} iniciada!`,
+          error: 'Erro ao exportar dados.',
+        }
+      )
+    }
   }
 
   return (
@@ -44,13 +131,18 @@ export function BackupSettings() {
               <button
                 key={item.label}
                 onClick={() => handleExport(item.label)}
-                className="flex items-center justify-between p-[12px_14px] bg-bg-surface border-[0.5px] border-border-main rounded-[8px] hover:bg-bg-surface hover:border-[#222] transition-all group"
+                disabled={isExporting !== null}
+                className="flex items-center justify-between p-[12px_14px] bg-bg-surface border-[0.5px] border-border-main rounded-[8px] hover:bg-bg-surface hover:border-[#222] transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-3">
                   <item.icon size={14} className="text-[#2e2e2e] group-hover:text-text-secondary transition-colors" />
                   <span className="text-[11px] text-text-muted group-hover:text-text-secondary uppercase tracking-[0.04em] transition-colors">{item.label}</span>
                 </div>
-                <ArrowRight size={14} className="text-[#2a2a2a] group-hover:text-accent-main transition-all group-hover:translate-x-0.5" />
+                {isExporting === item.label ? (
+                  <CircleNotch size={14} className="text-[#2a2a2a] animate-spin" />
+                ) : (
+                  <ArrowRight size={14} className="text-[#2a2a2a] group-hover:text-accent-main transition-all group-hover:translate-x-0.5" />
+                )}
               </button>
             ))}
           </div>

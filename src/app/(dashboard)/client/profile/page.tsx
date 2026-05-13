@@ -1,5 +1,7 @@
 import { requireClient } from '@/lib/auth/require-auth'
-import { User, Mail, Phone, Calendar } from 'lucide-react'
+import { Envelope, Phone, Calendar } from '@phosphor-icons/react/dist/ssr'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 export const metadata = {
   title: 'Meu Perfil | Cliente',
@@ -10,47 +12,53 @@ export default async function ClientProfileRoute() {
   const user = await requireClient()
 
   return (
-    <div className="flex-1 p-4 md:p-8 pt-6 space-y-8">
-      <div>
-        <p className="text-xs font-bold text-accent-cyan uppercase tracking-[0.2em] mb-2">CONTA</p>
-        <h1 className="text-3xl font-bold font-syne text-text-primary uppercase tracking-tight">Meu Perfil</h1>
-        <p className="text-muted-foreground mt-2 text-sm">
-          Visualize seus dados pessoais.
-        </p>
+    <div className="space-y-0 animate-in fade-in duration-700">
+      <div className="mb-[20px]">
+        <p className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.14em] mb-[6px]">CONTA</p>
+        <h1 className="text-[28px] font-medium text-[#fff] tracking-[-0.01em] uppercase leading-none">Meu Perfil</h1>
+        <p className="text-[11px] text-[#333] mt-[5px] uppercase tracking-wider font-medium">Visualize seus dados pessoais.</p>
       </div>
 
-      <div className="bg-bg-surface rounded-2xl border border-white/5 p-6 max-w-2xl space-y-6">
-        <div className="flex items-center gap-4 border-b border-white/5 pb-6">
-          <div className="w-16 h-16 rounded-full bg-accent-cyan/10 flex items-center justify-center text-accent-cyan font-bold text-2xl uppercase">
+      <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] overflow-hidden max-w-[560px]">
+        {/* Hero do Card */}
+        <div className="bg-[#0d0d0d] border-bottom border-[#161616] p-[20px_22px] flex items-center gap-[14px]">
+          <div className="w-[44px] h-[44px] rounded-[10px] bg-[#1a1a2e] text-[#8b7cf6] flex items-center justify-center font-medium text-[16px] border border-[#2a2a3e] shrink-0">
             {user.full_name?.charAt(0) || 'C'}
           </div>
           <div>
-            <h2 className="text-xl font-bold text-text-primary font-syne">{user.full_name}</h2>
-            <p className="text-sm text-muted-foreground">Cliente desde {new Date(user.created_at || Date.now()).getFullYear()}</p>
+            <h2 className="text-[16px] font-medium text-[#fff] uppercase tracking-tight leading-none">{user.full_name}</h2>
+            <p className="text-[10px] text-[#383838] mt-[3px] uppercase tracking-wider">Cliente desde {new Date(user.created_at || Date.now()).getFullYear()}</p>
           </div>
         </div>
 
-        <div className="grid gap-6">
-          <div className="space-y-1">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-              <Mail className="w-3 h-3" /> Email
-            </p>
-            <p className="text-text-primary font-medium">{user.email || 'Não informado'}</p>
-          </div>
-          
-          <div className="space-y-1">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-              <Phone className="w-3 h-3" /> Telefone
-            </p>
-            <p className="text-text-primary font-medium">{user.phone || 'Não informado'}</p>
+        {/* Corpo do Card */}
+        <div className="flex flex-col">
+          {/* Item: Email */}
+          <div className="p-[16px_22px] border-b border-[#141414]">
+            <div className="flex items-center gap-[6px] mb-[6px]">
+              <Envelope size={12} className="text-[#2a2a2a]" weight="bold" />
+              <p className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.1em]">Email</p>
+            </div>
+            <p className="text-[12px] text-[#888] font-medium">{user.email || 'Não informado'}</p>
           </div>
 
-          <div className="space-y-1">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-              <Calendar className="w-3 h-3" /> Conta criada em
-            </p>
-            <p className="text-text-primary font-medium">
-              {new Date(user.created_at || Date.now()).toLocaleDateString('pt-BR')}
+          {/* Item: Telefone */}
+          <div className="p-[16px_22px] border-b border-[#141414]">
+            <div className="flex items-center gap-[6px] mb-[6px]">
+              <Phone size={12} className="text-[#2a2a2a]" weight="bold" />
+              <p className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.1em]">Telefone</p>
+            </div>
+            <p className="text-[12px] text-[#888] font-medium">{user.phone || 'Não informado'}</p>
+          </div>
+
+          {/* Item: Data de Criação */}
+          <div className="p-[16px_22px]">
+            <div className="flex items-center gap-[6px] mb-[6px]">
+              <Calendar size={12} className="text-[#2a2a2a]" weight="bold" />
+              <p className="text-[9px] font-medium text-[#383838] uppercase tracking-[0.1em]">Conta criada em</p>
+            </div>
+            <p className="text-[12px] text-[#888] font-medium">
+              {format(new Date(user.created_at || Date.now()), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
             </p>
           </div>
         </div>

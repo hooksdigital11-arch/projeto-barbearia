@@ -33,123 +33,128 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
   const selected = services.find(s => s.id === selectedId)
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-0 animate-in fade-in duration-700">
       {/* Header */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-8 bg-accent-cyan rounded-full shadow-[0_0_15px_rgba(0,229,255,0.5)]" />
-          <h1 className="text-4xl font-black font-syne text-text-primary tracking-tighter uppercase leading-none">
-            Escolha seu <span className="text-accent-cyan">Serviço</span>
-          </h1>
-        </div>
-        <p className="text-text-secondary text-lg font-medium">
+      <div className="mb-[20px]">
+        <h1 className="text-[32px] font-medium text-[#fff] tracking-[-0.02em] uppercase leading-none">
+          Escolha seu Serviço
+        </h1>
+        <p className="text-[11px] text-[#333] mt-[5px] uppercase tracking-wider font-medium">
           Selecione o serviço desejado para agendar seu horário.
         </p>
       </div>
 
       {/* Search */}
-      <div className="relative group/search">
-        <MagnifyingGlass size={20} weight="bold" className="absolute left-5 top-1/2 -translate-y-1/2 text-text-secondary group-focus-within/search:text-accent-cyan transition-colors" />
+      <div className="flex items-center gap-[10px] bg-[#0f0f0f] border border-[#1a1a1a] rounded-[8px] p-[11px_16px] mb-[18px]">
+        <MagnifyingGlass size={14} className="text-[#2e2e2e]" weight="bold" />
         <input
           placeholder="Buscar serviço por nome..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="glass-input w-full pl-14 h-14 text-base font-medium"
+          className="bg-transparent border-none outline-none text-[#888] text-[12px] w-full placeholder:text-[#2a2a2a] uppercase tracking-tight"
         />
       </div>
 
-      {/* Category Pills */}
-      <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+      {/* Category Tabs */}
+      <div className="flex items-center gap-[6px] mb-[24px] overflow-x-auto scrollbar-hide">
         <button
           onClick={() => setCategoryFilter('')}
           className={cn(
-            "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shrink-0",
-            !categoryFilter ? "bg-white text-black shadow-lg" : "bg-white/5 text-text-secondary border border-white/5 hover:text-text-primary"
+            "p-[7px_18px] text-[10px] font-medium uppercase tracking-[0.08em] rounded-[20px] border transition-all shrink-0",
+            !categoryFilter 
+              ? "bg-[#1c1c1c] text-[#fff] border-[#2a2a2a]" 
+              : "bg-[#0d0d0d] border-[#1e1e1e] text-[#444] hover:text-[#888]"
           )}
         >
           Todos
         </button>
-        {categories.map(cat => {
-          const config = CATEGORY_CONFIG[cat as ServiceCategory]
-          return (
-            <button
-              key={cat}
-              onClick={() => setCategoryFilter(categoryFilter === cat ? '' : cat!)}
-              className={cn(
-                "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shrink-0",
-                categoryFilter === cat
-                  ? "bg-white text-black shadow-lg"
-                  : "bg-white/5 text-text-secondary border border-white/5 hover:text-text-primary"
-              )}
-            >
-              {config?.label || cat}
-            </button>
-          )
-        })}
+        {categories.map(cat => (
+          <button
+            key={cat}
+            onClick={() => setCategoryFilter(categoryFilter === cat ? '' : cat!)}
+            className={cn(
+              "p-[7px_18px] text-[10px] font-medium uppercase tracking-[0.08em] rounded-[20px] border transition-all shrink-0",
+              categoryFilter === cat
+                ? "bg-[#1c1c1c] text-[#fff] border-[#2a2a2a]"
+                : "bg-[#0d0d0d] border-[#1e1e1e] text-[#444] hover:text-[#888]"
+            )}
+          >
+            {cat}
+          </button>
+        ))}
       </div>
 
       {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[10px]">
         {filtered.map(service => {
           const isSelected = selectedId === service.id
-          const config = CATEGORY_CONFIG[(service.category as ServiceCategory) || 'outros']
+          const catKey = (service.category || 'outros').toUpperCase()
+          const colors: Record<string, string> = {
+            BARBA: '#d4aa00',
+            COMBO: '#00d4aa',
+            CORTE: '#6b9fff',
+            OUTROS: '#9b7cf6'
+          }
+          const bgColors: Record<string, string> = {
+            BARBA: '#2e1a00',
+            COMBO: '#0d2e1a',
+            CORTE: '#0d1a2e',
+            OUTROS: '#1a0d2e'
+          }
+          const color = colors[catKey] || colors.OUTROS
+          const bgColor = bgColors[catKey] || bgColors.OUTROS
+
           return (
             <button
               key={service.id}
               onClick={() => setSelectedId(isSelected ? null : service.id)}
               className={cn(
-                "glass-card p-8 text-left relative overflow-hidden transition-all duration-500 group active:scale-[0.98]",
+                "bg-[#0f0f0f] border rounded-[10px] p-[18px_18px_16px] text-left relative overflow-hidden transition-all group flex flex-col justify-between",
                 isSelected
-                  ? "border-accent-cyan/50 shadow-[0_0_30px_rgba(0,229,255,0.15)] scale-[1.02]"
-                  : "hover:border-white/20 hover:scale-[1.01]"
+                  ? "border-[#00d4aa] ring-1 ring-[#00d4aa]/20"
+                  : "border-[#1a1a1a] hover:bg-[#111] hover:border-[#222]"
               )}
             >
-              {/* Selection indicator */}
-              {isSelected && (
-                <div className="absolute top-4 right-4 animate-in zoom-in-50 duration-300">
-                  <div className="w-8 h-8 rounded-xl bg-accent-cyan flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                    <CheckCircle size={20} weight="fill" className="text-black" />
-                  </div>
-                </div>
-              )}
-
-              {/* Category accent line */}
-              <div
-                className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                style={{ backgroundColor: config.color }}
-              />
-
-              <div className="flex items-start gap-5">
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 shadow-inner border group-hover:scale-110 transition-transform duration-500"
-                  style={{ backgroundColor: `${config.color}15`, borderColor: `${config.color}30` }}
-                >
-                  <Scissors size={28} weight="duotone" style={{ color: config.color }} />
-                </div>
-                <div className="flex-1 min-w-0 pr-8">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border"
-                      style={{ backgroundColor: `${config.color}10`, borderColor: `${config.color}20`, color: config.color }}
-                    >
-                      {config.label}
-                    </span>
-                  </div>
-                  <p className="text-xl font-bold text-text-primary mt-2 group-hover:text-accent-cyan transition-colors leading-tight">{service.name}</p>
-                  {service.description && (
-                    <p className="text-xs text-text-secondary mt-2 line-clamp-2 opacity-60">{service.description}</p>
+              <div>
+                <div className="flex items-center justify-between mb-[10px]">
+                  <span 
+                    className="text-[9px] font-medium uppercase tracking-[0.08em] p-[2px_0]"
+                    style={{ color }}
+                  >
+                    {service.category || 'Outros'}
+                  </span>
+                  {isSelected && (
+                    <CheckCircle size={14} weight="fill" className="text-[#00d4aa]" />
                   )}
+                </div>
+
+                <div className="flex items-start gap-[14px]">
+                  <div
+                    className="w-[44px] h-[44px] rounded-[10px] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                    style={{ backgroundColor: bgColor }}
+                  >
+                    <Scissors size={18} weight="fill" className="text-[#fff]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[15px] font-medium text-[#fff] leading-tight uppercase tracking-tight truncate">{service.name}</p>
+                    {service.description && (
+                      <p className="text-[10px] text-[#2e2e2e] mt-[3px] leading-tight uppercase tracking-tight line-clamp-1">{service.description}</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mt-6 pt-6 border-t border-white/5">
-                <div className="flex items-center gap-1.5 text-text-secondary">
-                  <Clock size={16} weight="bold" />
-                  <span className="text-sm font-bold">{service.duration_minutes} min</span>
+              <div className="flex items-center justify-between mt-[14px] pt-[12px] border-t border-[#141414]">
+                <div className="flex items-center gap-[4px]">
+                  <Clock size={12} className="text-[#2a2a2a]" weight="bold" />
+                  <span className="text-[10px] text-[#444] uppercase tracking-wide">{service.duration_minutes}min</span>
                 </div>
-                <span className="text-2xl font-black text-accent-cyan font-mono tracking-tighter">
-                  {formatPrice(service.price_cents)}
-                </span>
+                <div className="flex items-baseline gap-[2px]">
+                  <span className="text-[11px] text-[#555] font-medium uppercase">R$</span>
+                  <span className="text-[17px] font-medium text-[#fff] tracking-tight">
+                    {(service.price_cents / 100).toFixed(0)}
+                  </span>
+                </div>
               </div>
             </button>
           )
@@ -157,29 +162,29 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
       </div>
 
       {filtered.length === 0 && (
-        <div className="glass-card p-32 text-center flex flex-col items-center gap-6">
-          <div className="w-24 h-24 rounded-3xl bg-white/5 flex items-center justify-center text-text-secondary opacity-20">
+        <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] p-32 text-center flex flex-col items-center gap-6">
+          <div className="w-24 h-24 rounded-3xl bg-[#141414] flex items-center justify-center text-[#2a2a2a]">
             <Scissors size={48} weight="thin" />
           </div>
-          <p className="text-xl font-bold font-syne text-text-primary uppercase tracking-tight">Nenhum serviço encontrado</p>
-          <p className="text-text-secondary">Tente outro termo de busca.</p>
+          <p className="text-[14px] font-medium text-[#333] uppercase tracking-widest">Nenhum serviço encontrado</p>
         </div>
       )}
 
       {/* Floating CTA */}
       {selected && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 fade-in duration-500">
-          <div className="glass-card p-4 pr-5 flex items-center gap-5 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] border-accent-cyan/20">
+          <div className="bg-[#0f0f0f] border border-[#00d4aa]/30 p-4 pr-5 rounded-[12px] flex items-center gap-6 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)]">
             <div className="flex flex-col min-w-0">
-              <span className="text-[10px] font-black uppercase tracking-widest text-text-secondary">Selecionado</span>
-              <span className="text-base font-bold text-text-primary truncate max-w-[200px]">{selected.name}</span>
-              <span className="text-sm font-mono text-accent-cyan font-bold">{formatPrice(selected.price_cents)} • {selected.duration_minutes}min</span>
+              <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#333]">Selecionado</span>
+              <span className="text-[13px] font-medium text-[#fff] uppercase truncate max-w-[200px]">{selected.name}</span>
+              <span className="text-[11px] font-medium text-[#00d4aa] uppercase mt-0.5">R$ {(selected.price_cents / 100).toFixed(0)} • {selected.duration_minutes}min</span>
             </div>
-            <Button asChild variant="cyan" size="lg" className="shrink-0 shadow-cyan-500/30">
-              <Link href={`/client/appointments?service=${selected.id}`}>
-                Agendar Agora
-              </Link>
-            </Button>
+            <Link 
+              href={`/client/appointments?service=${selected.id}`}
+              className="bg-[#fff] text-[#000] px-6 py-3 rounded-[8px] text-[11px] font-medium uppercase tracking-[0.08em] hover:bg-[#e8e8e8] transition-all"
+            >
+              Agendar Agora
+            </Link>
           </div>
         </div>
       )}

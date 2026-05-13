@@ -1,4 +1,4 @@
-import { Scissors, Clock, CurrencyDollar } from '@phosphor-icons/react/dist/ssr'
+import { Scissors, Clock } from '@phosphor-icons/react/dist/ssr'
 import { cn } from '@/lib/utils/cn'
 import { CATEGORY_CONFIG } from '../types'
 import type { Service, ServiceCategory } from '../types'
@@ -19,71 +19,91 @@ export function BarberServicesPage({ services }: BarberServicesPageProps) {
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100)
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-10 animate-in fade-in duration-700">
       {/* Header */}
       <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-8 bg-accent-cyan rounded-full shadow-[0_0_15px_rgba(0,229,255,0.5)]" />
-          <h1 className="text-4xl font-black font-syne text-text-primary tracking-tighter uppercase leading-none">
-            Serviços <span className="text-accent-cyan">Disponíveis</span>
-          </h1>
-        </div>
-        <p className="text-text-secondary text-lg font-medium">
+        <h1 className="text-[28px] font-medium text-[#fff] tracking-[-0.01em] uppercase leading-none">
+          Serviços Disponíveis
+        </h1>
+        <p className="text-[11px] text-[#333] mt-[5px] uppercase tracking-wider">
           Consulte o cardápio completo de serviços e valores atualizados.
         </p>
       </div>
 
-      {/* Stats Row */}
-      <div className="flex items-center gap-6">
-        <div className="glass px-5 py-2.5 rounded-2xl border border-white/5 flex items-center gap-2">
-          <Scissors size={18} weight="bold" className="text-accent-cyan" />
-          <span className="text-sm font-bold text-text-primary">{services.length}</span>
-          <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">serviços</span>
+      {/* Pills de resumo */}
+      <div className="flex items-center gap-[8px] mb-[24px]">
+        <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[7px] p-[6px_14px] flex items-center gap-[7px]">
+          <Scissors size={13} className="text-[#444]" weight="bold" />
+          <span className="text-[13px] font-medium text-[#fff]">{services.length}</span>
+          <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em]">Serviços</span>
         </div>
-        <div className="glass px-5 py-2.5 rounded-2xl border border-white/5 flex items-center gap-2">
-          <span className="text-sm font-bold text-text-primary">{Object.keys(grouped).length}</span>
-          <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">categorias</span>
+        <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[7px] p-[6px_14px] flex items-center gap-[7px]">
+          <span className="text-[13px] font-medium text-[#fff]">{Object.keys(grouped).length}</span>
+          <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em]">Categorias</span>
         </div>
       </div>
 
       {/* Services by Category */}
       {Object.entries(grouped).map(([category, items]) => {
-        const config = CATEGORY_CONFIG[category as ServiceCategory] || CATEGORY_CONFIG.outros
+        const catKey = category.toUpperCase()
+        const colors: Record<string, string> = {
+          BARBA: '#d4aa00',
+          COMBO: '#00d4aa',
+          CORTE: '#6b9fff',
+          OUTROS: '#9b7cf6'
+        }
+        const bgColors: Record<string, string> = {
+          BARBA: '#2e1a00',
+          COMBO: '#0d2e1a',
+          CORTE: '#0d1a2e',
+          OUTROS: '#1a0d2e'
+        }
+        const color = colors[catKey] || colors.OUTROS
+        const bgColor = bgColors[catKey] || bgColors.OUTROS
+        
+        const isOutrosWithTwo = catKey === 'OUTROS' && items.length === 2
+
         return (
-          <div key={category} className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: config.color, boxShadow: `0 0 12px ${config.color}60` }} />
-              <h2 className="text-xl font-bold font-syne text-text-primary uppercase tracking-tight">{config.label}</h2>
-              <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/5">
+          <div key={category} className="space-y-5 mb-[20px]">
+            <div className="flex items-center">
+              <div className="w-[3px] h-[16px] rounded-[2px]" style={{ backgroundColor: color }} />
+              <h2 className="text-[12px] font-medium text-[#bbb] uppercase tracking-[0.1em] ml-3">{category}</h2>
+              <span className="text-[9px] font-medium text-[#444] bg-[#1a1a1a] rounded-[4px] p-[2px_8px] ml-[8px] uppercase tracking-wider">
                 {items.length}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className={cn(
+              "grid gap-x-[10px] gap-y-[6px]",
+              isOutrosWithTwo ? "grid-cols-2" : "grid-cols-1"
+            )}>
               {items.map(service => (
                 <div
                   key={service.id}
-                  className="glass-card p-6 flex items-start gap-5 group hover:scale-[1.01] transition-all duration-500"
+                  className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[9px] p-[14px_16px] flex items-start gap-[14px] group hover:bg-[#111] hover:border-[#222] transition-all"
                 >
                   <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg border group-hover:scale-110 transition-transform duration-500"
-                    style={{ backgroundColor: `${config.color}15`, borderColor: `${config.color}30` }}
+                    className="w-[38px] h-[38px] rounded-[9px] flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: bgColor }}
                   >
-                    <Scissors size={24} weight="duotone" style={{ color: config.color }} />
+                    <Scissors size={16} weight="fill" className="text-[#fff]" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-bold text-text-primary group-hover:text-accent-cyan transition-colors leading-tight">{service.name}</p>
+                    <p className="text-[12px] font-medium text-[#ccc] leading-tight uppercase tracking-tight">{service.name}</p>
                     {service.description && (
-                      <p className="text-xs text-text-secondary mt-1.5 line-clamp-2 opacity-60">{service.description}</p>
+                      <p className="text-[10px] text-[#2e2e2e] mt-[2px] mb-[8px] leading-tight uppercase tracking-tight">{service.description}</p>
                     )}
-                    <div className="flex items-center gap-4 mt-4">
-                      <div className="flex items-center gap-1.5 text-text-secondary">
-                        <Clock size={14} weight="bold" />
-                        <span className="text-xs font-bold">{service.duration_minutes}min</span>
+                    <div className="flex items-center">
+                      <div className="flex items-center gap-[4px] mr-[14px]">
+                        <Clock size={11} className="text-[#2a2a2a]" weight="bold" />
+                        <span className="text-[10px] text-[#444] uppercase tracking-[0.04em]">{service.duration_minutes}min</span>
                       </div>
-                      <span className="text-base font-black text-accent-cyan font-mono tracking-tight">
-                        {formatPrice(service.price_cents)}
-                      </span>
+                      <div className="flex items-baseline gap-[2px]">
+                        <span className="text-[10px] text-[#555] font-medium uppercase">R$</span>
+                        <span className="text-[14px] font-medium text-[#fff] tracking-tight">
+                          {(service.price_cents / 100).toFixed(0)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -94,12 +114,11 @@ export function BarberServicesPage({ services }: BarberServicesPageProps) {
       })}
 
       {services.length === 0 && (
-        <div className="glass-card p-32 text-center flex flex-col items-center gap-6">
-          <div className="w-24 h-24 rounded-3xl bg-white/5 flex items-center justify-center text-text-secondary opacity-20">
+        <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] p-32 text-center flex flex-col items-center gap-6">
+          <div className="w-24 h-24 rounded-3xl bg-[#141414] flex items-center justify-center text-[#2a2a2a]">
             <Scissors size={48} weight="thin" />
           </div>
-          <p className="text-xl font-bold font-syne text-text-primary uppercase tracking-tight">Nenhum serviço cadastrado</p>
-          <p className="text-text-secondary">O administrador ainda não cadastrou serviços.</p>
+          <p className="text-[14px] font-medium text-[#333] uppercase tracking-widest">Nenhum serviço cadastrado</p>
         </div>
       )}
     </div>

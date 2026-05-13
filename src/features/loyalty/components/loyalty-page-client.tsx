@@ -28,9 +28,9 @@ export function LoyaltyPageClient({ config, balance, history, clientId }: Loyalt
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold font-syne text-text-primary tracking-tight">Minha Fidelidade</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Acompanhe seus carimbos e resgate suas recompensas.</p>
+      <div className="mb-[20px]">
+        <h1 className="text-[28px] font-medium text-[#fff] tracking-[-0.01em] uppercase leading-none">Minha Fidelidade</h1>
+        <p className="text-[11px] text-[#333] mt-[5px] uppercase tracking-wider font-medium">Acompanhe seus carimbos e resgate suas recompensas.</p>
       </div>
 
       {/* Stamp Card */}

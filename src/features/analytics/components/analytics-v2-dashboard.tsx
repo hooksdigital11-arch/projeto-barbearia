@@ -9,6 +9,7 @@ import {
   Clock,
   Warning
 } from '@phosphor-icons/react'
+import { DownloadInsightsButton } from './download-insights-button'
 
 export function AnalyticsV2Dashboard({ initialData, organizationId }: { initialData: any, organizationId: string }) {
   // Ativa a sincronização em tempo real (Bônus de UX)
@@ -26,7 +27,10 @@ export function AnalyticsV2Dashboard({ initialData, organizationId }: { initialD
         <h1 className="text-4xl font-black font-syne text-text-primary tracking-tighter">
           Dashboard <span className="text-accent-cyan">Analítico V2</span>
         </h1>
-        <p className="text-text-secondary font-medium">Dados agregados em tempo real via PostgreSQL Triggers.</p>
+        <div className="flex items-center justify-between">
+          <p className="text-text-secondary font-medium">Dados agregados em tempo real via PostgreSQL Triggers.</p>
+          <DownloadInsightsButton />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

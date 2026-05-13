@@ -52,7 +52,7 @@ export default async function DashboardLayout({
   const filteredNavItems = navItems
     .filter((item) => {
       if (profile.role === 'admin') return item.label !== 'Perfil'
-      if (profile.role === 'barber') return ['Home', 'Agendamentos', 'Serviços', 'Clientes', 'Comanda', 'Fila', 'Fidelidade', 'Equipe', 'Estoque', 'Mensageria'].includes(item.label)
+      if (profile.role === 'barber') return ['Home', 'Agendamentos', 'Serviços'].includes(item.label)
       if (profile.role === 'client') return ['Home', 'Agendamentos', 'Serviços', 'Fila', 'Fidelidade', 'Perfil'].includes(item.label)
       return false
     })
@@ -95,26 +95,73 @@ export default async function DashboardLayout({
                 )}
               </div>
               <div className="flex flex-col">
-                <span className="font-syne font-medium text-lg tracking-[-0.02em] text-text-primary truncate leading-tight uppercase">{orgName}</span>
-                <span className="text-[9px] tracking-[0.12em] uppercase text-text-secondary mt-1">Precision</span>
+                {profile.role === 'barber' ? (
+                  <>
+                    <span className="text-[12px] font-medium tracking-[0.1em] text-[#fff] uppercase leading-tight truncate">
+                      {profile.full_name}
+                    </span>
+                    <span className="text-[9px] tracking-[0.12em] uppercase text-[#2e2e2e] mt-0.5">
+                      PRECISION SYSTEMS
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-syne font-medium text-lg tracking-[-0.02em] text-text-primary truncate leading-tight uppercase">
+                      {orgName}
+                    </span>
+                    <span className="text-[9px] tracking-[0.12em] uppercase text-text-secondary mt-1">
+                      Precision
+                    </span>
+                  </>
+                )}
               </div>
             </Link>
           </div>
           
           <DashboardNav items={filteredNavItems} />
 
-          {/* Redesigned Sidebar Footer */}
+          {/* Sidebar Footer */}
           <div className="mt-auto border-t-[0.5px] border-border-main p-[16px] px-[18px]">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-[28px] h-[28px] rounded-[7px] bg-[#1a1a1a] flex items-center justify-center text-text-secondary font-medium text-[11px] uppercase shrink-0">
-                {profile.full_name?.[0] || 'U'}
+            {profile.role === 'barber' ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-[28px] h-[28px] rounded-[7px] bg-[#1a1a1a] flex items-center justify-center text-[#bbb] font-medium text-[11px] uppercase shrink-0">
+                    {profile.full_name?.[0] || 'U'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-medium truncate text-[#bbb] leading-none uppercase">{profile.full_name}</p>
+                    <p className="text-[9px] truncate text-[#333] mt-1 uppercase tracking-[0.06em]">BARBER</p>
+                  </div>
+                </div>
+                <LogoutButton />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-medium truncate text-text-secondary leading-none uppercase tracking-tight">{profile.full_name}</p>
-                <p className="text-[9px] truncate text-[#333] mt-1 uppercase tracking-[0.06em]">{profile.role}</p>
+            ) : profile.role === 'client' ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-[28px] h-[28px] rounded-[7px] bg-[#1a1a1a] flex items-center justify-center text-[#bbb] font-medium text-[11px] uppercase shrink-0">
+                    {profile.full_name?.[0] || 'U'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-medium truncate text-[#bbb] leading-none uppercase">{profile.full_name}</p>
+                    <p className="text-[9px] truncate text-[#333] mt-1 uppercase tracking-[0.06em]">CLIENT</p>
+                  </div>
+                </div>
+                <LogoutButton />
               </div>
-            </div>
-            <LogoutButton />
+            ) : (
+              <>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-[28px] h-[28px] rounded-[7px] bg-[#1a1a1a] flex items-center justify-center text-text-secondary font-medium text-[11px] uppercase shrink-0">
+                    {profile.full_name?.[0] || 'U'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-medium truncate text-text-secondary leading-none uppercase tracking-tight">{profile.full_name}</p>
+                    <p className="text-[9px] truncate text-[#333] mt-1 uppercase tracking-[0.06em]">{profile.role}</p>
+                  </div>
+                </div>
+                <LogoutButton />
+              </>
+            )}
           </div>
         </div>
       </aside>

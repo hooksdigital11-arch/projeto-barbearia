@@ -6,7 +6,7 @@ import { STATUS_CONFIG } from '../types'
 import { AppointmentModal } from './appointment-modal'
 import { QuickStatusButton, CancelButton, StatusBadge } from './appointment-status'
 import { Button } from '@/components/ui/button'
-import { Plus, Clock, User, Scissors, ChevronRight, Calendar } from 'lucide-react'
+import { Plus, Clock, User, Scissors, ChevronRight, Calendar, CalendarX } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 interface BarberAppointmentsPageProps {
@@ -38,24 +38,23 @@ export function BarberAppointmentsPage({
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <p className="text-xs font-bold text-accent-cyan uppercase tracking-[0.2em] mb-2">AGENDA DO DIA</p>
-          <h1 className="text-3xl font-bold font-syne text-text-primary uppercase tracking-tight leading-none">
+          <p className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.14em] mb-[6px]">AGENDA DO DIA</p>
+          <h1 className="text-[28px] font-medium text-[#fff] tracking-[-0.01em] uppercase leading-none">
             Meus Agendamentos
           </h1>
-          <p className="text-muted-foreground mt-2 text-sm">
+          <p className="text-[11px] text-[#333] mt-1 font-medium uppercase tracking-wider">
             {appointments.length} agendamento{appointments.length !== 1 ? 's' : ''} hoje
           </p>
         </div>
-        <Button
-          variant="cyan"
-          className="h-11 px-6 font-bold uppercase tracking-wider gap-2 shrink-0"
+        <button
+          className="bg-[#00d4aa] text-[#000] text-[10px] font-medium tracking-[0.1em] p-[10px_18px] rounded-[8px] flex items-center gap-2 hover:brightness-110 transition-all uppercase shrink-0"
           onClick={() => { setEditingAppointment(null); setIsModalOpen(true) }}
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           Agendar Cliente
-        </Button>
+        </button>
       </div>
 
       {/* Em andamento highlight */}
@@ -100,19 +99,21 @@ export function BarberAppointmentsPage({
       )}
 
       {/* Timeline do dia */}
-      <div className="space-y-4">
+      <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] overflow-hidden min-h-[360px] flex flex-col">
         {upcoming.length === 0 && past.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-white/5 rounded-3xl text-muted-foreground">
-            <Calendar className="w-10 h-10 opacity-20 mb-4" />
-            <p className="font-medium text-text-primary">Nenhum agendamento hoje</p>
-            <p className="text-sm opacity-60 mt-1">Clique em "Agendar Cliente" para criar um.</p>
+          <div className="flex-1 flex flex-col items-center justify-center p-8 gap-3">
+            <CalendarX className="w-8 h-8 text-[#1e1e1e]" />
+            <div className="text-center space-y-1">
+              <p className="text-[14px] font-medium text-[#333] uppercase tracking-wider">Nenhum agendamento hoje</p>
+              <p className="text-[11px] text-[#222] uppercase tracking-widest">Clique em "Agendar Cliente" para criar um.</p>
+            </div>
           </div>
         ) : (
-          <>
+          <div className="p-4 space-y-4">
             {upcoming.length > 0 && (
               <div className="space-y-3">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
-                  Próximos — {upcoming.length}
+                <p className="text-[10px] font-medium text-[#333] uppercase tracking-[0.1em] px-1">
+                  PRÓXIMOS AGENDAMENTOS — {upcoming.length}
                 </p>
                 {upcoming.map(appt => (
                   <AppointmentCard
@@ -125,8 +126,8 @@ export function BarberAppointmentsPage({
             )}
             {past.length > 0 && (
               <div className="space-y-3">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1 mt-6">
-                  Anteriores — {past.length}
+                <p className="text-[10px] font-medium text-[#333] uppercase tracking-[0.1em] px-1 mt-6">
+                  HISTÓRICO DO DIA — {past.length}
                 </p>
                 {past.map(appt => (
                   <AppointmentCard
@@ -138,7 +139,7 @@ export function BarberAppointmentsPage({
                 ))}
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 
