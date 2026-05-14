@@ -5,11 +5,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default async function AdminInventoryPage() {
   return (
-    <main className="p-6 md:p-10 max-w-7xl mx-auto w-full">
-      <Suspense fallback={<InventorySkeleton />}>
-        <InventoryContent />
-      </Suspense>
-    </main>
+    <Suspense fallback={<InventorySkeleton />}>
+      <InventoryContent />
+    </Suspense>
   )
 }
 

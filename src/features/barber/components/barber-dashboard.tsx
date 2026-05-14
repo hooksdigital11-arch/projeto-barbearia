@@ -60,9 +60,9 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
       </div>
 
       {/* Barra de Status Operacional */}
-      <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] p-[16px_20px] flex items-center gap-0">
+      <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] p-[16px_20px] flex flex-col md:flex-row md:items-center gap-4 md:gap-0">
         {/* Zona 1 — Status */}
-        <div className="flex items-center gap-4 pr-10 border-r border-[#1a1a1a]">
+        <div className="flex items-center gap-4 md:pr-10 md:border-r border-[#1a1a1a]">
           <div className="relative flex items-center justify-center">
             <div className="w-[10px] h-[10px] rounded-full bg-[#00d4aa] relative z-10" />
             <div className="absolute w-[10px] h-[10px] rounded-full bg-[#00d4aa22] animate-pulse-ring" />
@@ -74,7 +74,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
         </div>
 
         {/* Zona 2 — Metas */}
-        <div className="flex-1 px-10 flex items-center gap-12 border-r border-[#1a1a1a]">
+        <div className="md:flex-1 md:px-10 flex items-center gap-6 md:gap-12 md:border-r border-[#1a1a1a]">
           <div className="flex items-center gap-3">
             <Clock size={16} className="text-[#2a2a2a]" weight="bold" />
             <div>
@@ -92,7 +92,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
         </div>
 
         {/* Zona 3 — Botão Finalizar Turno */}
-        <div className="pl-10">
+        <div className="md:pl-10">
           <button className="bg-[#fff] text-[#000] text-[11px] font-medium tracking-[0.06em] p-[10px_20px] rounded-[8px] flex items-center gap-2 hover:bg-[#e8e8e8] transition-all uppercase">
             <Stop size={14} weight="fill" />
             Finalizar Turno
@@ -101,7 +101,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
       </div>
 
       {/* Grid Principal */}
-      <div className="grid grid-cols-[1fr_280px] gap-[14px]">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-[14px]">
         {/* Coluna Esquerda: Atendimento Ativo */}
         <div className="space-y-[14px]">
           {data.currentClient ? (

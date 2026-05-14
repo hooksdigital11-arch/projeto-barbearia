@@ -154,14 +154,14 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
           </p>
         </div>
 
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           {userRole === 'admin' && (
             <button
               onClick={() => setShowCost(!showCost)}
               className={cn(
-                "px-[18px] py-[9px] rounded-[8px] border-[0.5px] text-[9px] font-medium uppercase tracking-[0.1em] transition-all flex flex-col items-center justify-center text-center",
-                showCost 
-                  ? "bg-[#1c1c1c] text-text-secondary border-[#2a2a2a]" 
+                "px-[14px] py-[9px] rounded-[8px] border-[0.5px] text-[9px] font-medium uppercase tracking-[0.1em] transition-all flex flex-col items-center justify-center text-center",
+                showCost
+                  ? "bg-[#1c1c1c] text-text-secondary border-[#2a2a2a]"
                   : "bg-bg-sidebar text-text-nav border-border-main hover:text-[#777]"
               )}
             >
@@ -169,11 +169,11 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
               <span className="leading-tight">CUSTOS</span>
             </button>
           )}
-          
+
           {userRole === 'admin' && (
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-2 px-[18px] py-[10px] bg-accent-main text-black rounded-[8px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 active:scale-95"
+              className="flex items-center gap-2 px-[16px] py-[10px] bg-accent-main text-black rounded-[8px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 active:scale-95"
             >
               <Plus size={14} weight="bold" />
               NOVO ITEM
@@ -256,37 +256,64 @@ function InactiveTable({
         </span>
       </div>
       {items.map((item) => (
-        <div 
-          key={item.id} 
-          className="grid grid-cols-[2fr_100px_70px_1fr_100px] gap-[12px] items-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] py-[13px] px-[18px] opacity-40 hover:opacity-100 transition-all"
+        <div
+          key={item.id}
+          className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] opacity-40 hover:opacity-100 transition-all"
         >
-          <div>
-            <p className="text-[12px] font-medium text-text-secondary uppercase tracking-tight line-through">{item.name}</p>
-            <span className="text-[9px] text-[#2e2e2e] font-medium uppercase tracking-wider">{item.category}</span>
-          </div>
-          <div className="text-center">
-            <span className="text-[9px] px-2 py-0.5 rounded-[4px] bg-bg-surface text-[#333] font-medium uppercase tracking-wider">
-              {item.type === 'revenda' ? 'Revenda' : 'Uso Interno'}
-            </span>
-          </div>
-          <div className="text-center">
-            <span className="text-[11px] font-medium text-[#444]">{item.quantity}</span>
-          </div>
-          <div>
-            <span className="text-[11px] font-medium text-[#333] uppercase">{item.supplier || '—'}</span>
-          </div>
-          {canManage && (
-            <div className="flex justify-end">
+          {/* Mobile layout */}
+          <div className="md:hidden p-[14px] flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[12px] font-medium text-text-secondary uppercase tracking-tight line-through truncate">{item.name}</p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-[9px] text-[#2e2e2e] font-medium uppercase tracking-wider">{item.category}</span>
+                <span className="text-[9px] px-2 py-0.5 rounded-[4px] bg-bg-surface text-[#333] font-medium uppercase">
+                  {item.type === 'revenda' ? 'Revenda' : 'Interno'}
+                </span>
+                <span className="text-[11px] font-medium text-[#444]">{item.quantity}</span>
+              </div>
+            </div>
+            {canManage && (
               <button
                 disabled={isPending}
                 onClick={() => onReactivate(item)}
-                className="flex items-center gap-1.5 px-[12px] py-[6px] bg-bg-sidebar border border-border-main rounded-[6px] text-[9px] font-medium text-[#444] tracking-[0.07em] uppercase hover:text-[#666] hover:border-[#333] transition-all disabled:opacity-20"
+                className="flex items-center gap-1.5 px-[10px] py-[6px] bg-bg-sidebar border border-border-main rounded-[6px] text-[9px] font-medium text-[#444] tracking-[0.07em] uppercase hover:text-[#666] hover:border-[#333] transition-all disabled:opacity-20 shrink-0"
               >
                 <ArrowCounterClockwise size={12} weight="bold" />
                 Reativar
               </button>
+            )}
+          </div>
+
+          {/* Desktop layout */}
+          <div className="hidden md:grid grid-cols-[2fr_100px_70px_1fr_100px] gap-[12px] items-center py-[13px] px-[18px]">
+            <div>
+              <p className="text-[12px] font-medium text-text-secondary uppercase tracking-tight line-through">{item.name}</p>
+              <span className="text-[9px] text-[#2e2e2e] font-medium uppercase tracking-wider">{item.category}</span>
             </div>
-          )}
+            <div className="text-center">
+              <span className="text-[9px] px-2 py-0.5 rounded-[4px] bg-bg-surface text-[#333] font-medium uppercase tracking-wider">
+                {item.type === 'revenda' ? 'Revenda' : 'Uso Interno'}
+              </span>
+            </div>
+            <div className="text-center">
+              <span className="text-[11px] font-medium text-[#444]">{item.quantity}</span>
+            </div>
+            <div>
+              <span className="text-[11px] font-medium text-[#333] uppercase">{item.supplier || '—'}</span>
+            </div>
+            {canManage && (
+              <div className="flex justify-end">
+                <button
+                  disabled={isPending}
+                  onClick={() => onReactivate(item)}
+                  className="flex items-center gap-1.5 px-[12px] py-[6px] bg-bg-sidebar border border-border-main rounded-[6px] text-[9px] font-medium text-[#444] tracking-[0.07em] uppercase hover:text-[#666] hover:border-[#333] transition-all disabled:opacity-20"
+                >
+                  <ArrowCounterClockwise size={12} weight="bold" />
+                  Reativar
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       ))}
     </div>

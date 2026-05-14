@@ -130,13 +130,13 @@ export function ComandaPageAdmin({
       {/* Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[3px] w-fit">
+        <div className="flex items-center gap-1 bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[3px] w-fit shrink-0">
           {PERIODS.map(({ id, label }) => (
             <button
               key={id}
               onClick={() => changePeriod(id)}
               className={cn(
-                'px-8 py-2 rounded-[6px] text-[10px] font-medium uppercase tracking-[0.05em] transition-all duration-300',
+                'px-4 md:px-8 py-2 rounded-[6px] text-[10px] font-medium uppercase tracking-[0.05em] transition-all duration-300',
                 period === id
                   ? 'bg-[#1c1c1c] text-text-secondary'
                   : 'text-[#333] hover:text-text-nav'
@@ -148,15 +148,15 @@ export function ComandaPageAdmin({
         </div>
 
         {/* Search + Filter */}
-        <div className="flex items-center gap-2">
-          <div className="relative group bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] flex items-center px-[14px] min-w-[240px]">
+        <div className="flex items-center gap-2 flex-1 md:max-w-[320px]">
+          <div className="relative group bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] flex items-center px-[14px] flex-1 min-w-0">
             <MagnifyingGlass size={14} className="text-[#2e2e2e] shrink-0" />
             <input
               type="text"
               placeholder="BUSCAR CLIENTE OU BARBEIRO..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-transparent border-none outline-none py-[9px] pl-[10px] text-[11px] text-text-secondary placeholder:text-[#2e2e2e] w-full font-medium"
+              className="bg-transparent border-none outline-none py-[9px] pl-[10px] text-[11px] text-text-secondary placeholder:text-[#2e2e2e] w-full font-medium min-w-0"
             />
           </div>
 
@@ -186,7 +186,7 @@ export function ComandaPageAdmin({
                     >
                       <option value="">TODOS OS BARBEIROS</option>
                       {uniqueBarbers.map(b => (
-                        <option key={b.id} value={b.id}>{b.name.toUpperCase()}</option>
+                        <option key={b.id} value={b.id}>{b.name?.toUpperCase()}</option>
                       ))}
                     </select>
                   </div>
@@ -240,8 +240,8 @@ export function ComandaPageAdmin({
 
       {/* Table Section */}
       <div className="space-y-4">
-        {/* Table Header */}
-        <div className="grid grid-cols-[1.8fr_1.4fr_70px_100px_110px_90px] gap-[14px] px-[18px] pb-[10px] border-b border-border-main">
+        {/* Table Header — desktop only */}
+        <div className="hidden md:grid grid-cols-[1.8fr_1.4fr_70px_100px_110px_90px] gap-[14px] px-[18px] pb-[10px] border-b border-border-main">
           {['CLIENTE', 'BARBEIRO', 'ITENS', 'TOTAL', 'PAGAMENTO', 'STATUS'].map((label, idx) => (
             <span
               key={label}

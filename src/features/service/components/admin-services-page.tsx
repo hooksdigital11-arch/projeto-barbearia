@@ -188,8 +188,8 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
 
       {/* Services List */}
       <div className="min-h-[400px] space-y-6">
-        {/* Column Header */}
-        <div className="grid grid-cols-[2fr_64px_110px_70px_88px] gap-3 px-[18px] pb-2 border-b-[0.5px] border-border-main">
+        {/* Column Header — desktop only */}
+        <div className="hidden md:grid grid-cols-[2fr_64px_110px_70px_88px] gap-3 px-[18px] pb-2 border-b-[0.5px] border-border-main">
           <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em]">SERVIÇO</span>
           <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em] text-right">DURAÇÃO</span>
           <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em] text-right">PREÇO</span>
@@ -203,13 +203,62 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
           </div>
         ) : (
           <div className="space-y-[4px]">
-            {filtered.map(service => {
-              return (
-                <div 
-                  key={service.id} 
-                  className="grid grid-cols-[2fr_64px_110px_70px_88px] gap-3 py-[14px] px-[18px] items-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] group hover:bg-bg-surface hover:border-[#222] transition-all"
-                >
-                  {/* Name & Desc */}
+            {filtered.map(service => (
+              <div
+                key={service.id}
+                className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] group hover:bg-bg-surface hover:border-[#222] transition-all"
+              >
+                {/* Mobile card layout */}
+                <div className="md:hidden p-[14px] flex flex-col gap-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-[2px] h-[30px] bg-accent-main opacity-35 rounded-[2px] shrink-0" />
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[12px] font-medium text-text-secondary uppercase tracking-[0.05em] truncate">
+                          {service.name}
+                        </span>
+                        <span className="text-[9px] text-[#2e2e2e] font-medium uppercase truncate">
+                          {service.description || 'SEM DESCRIÇÃO'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div className={cn(
+                        "w-[5px] h-[5px] rounded-full",
+                        service.is_active ? "bg-accent-main" : "bg-red-500 opacity-40"
+                      )} />
+                      <span className={cn(
+                        "text-[9px] font-medium uppercase tracking-[0.08em]",
+                        service.is_active ? "text-accent-main" : "text-[#333]"
+                      )}>
+                        {service.is_active ? 'ATIVO' : 'PAUSADO'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pl-[14px]">
+                    <div className="flex items-center gap-3 text-[11px] font-medium text-[#444]">
+                      <span>{service.duration_minutes} MIN</span>
+                      <span className="text-text-secondary">R$ {(service.price_cents / 100).toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => handleToggleActive(service)} className="text-[#2e2e2e] hover:text-[#666] transition-colors" title={service.is_active ? "Pausar" : "Ativar"}>
+                        {service.is_active ? <Pause size={14} weight="regular" /> : <Play size={14} weight="regular" />}
+                      </button>
+                      <button onClick={() => handleDuplicate(service)} className="text-[#2e2e2e] hover:text-[#666] transition-colors" title="Duplicar">
+                        <Copy size={14} weight="regular" />
+                      </button>
+                      <button onClick={() => handleEdit(service)} className="text-[#2e2e2e] hover:text-[#666] transition-colors" title="Editar">
+                        <PencilSimple size={14} weight="regular" />
+                      </button>
+                      <button onClick={() => handleDelete(service.id)} className="text-[#2e2e2e] hover:text-red-900 transition-colors" title="Excluir">
+                        <Trash size={14} weight="regular" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Desktop table row */}
+                <div className="hidden md:grid grid-cols-[2fr_64px_110px_70px_88px] gap-3 py-[14px] px-[18px] items-center">
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="w-[2px] h-[30px] bg-accent-main opacity-35 rounded-[2px] shrink-0" />
                     <div className="flex flex-col min-w-0">
@@ -222,7 +271,6 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                     </div>
                   </div>
 
-                  {/* Duration */}
                   <div className="flex items-baseline justify-end gap-1">
                     <span className="text-[17px] font-medium text-text-primary tracking-tight leading-none">
                       {service.duration_minutes}
@@ -230,7 +278,6 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                     <span className="text-[8px] text-[#333] font-medium uppercase">MIN</span>
                   </div>
 
-                  {/* Price */}
                   <div className="flex items-baseline justify-end gap-1">
                     <span className="text-[9px] text-[#444] font-medium uppercase">R$</span>
                     <span className="text-[14px] font-medium text-text-secondary tracking-tight">
@@ -238,7 +285,6 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                     </span>
                   </div>
 
-                  {/* Status */}
                   <div className="flex items-center justify-center gap-2">
                     <div className={cn(
                       "w-[5px] h-[5px] rounded-full",
@@ -252,13 +298,8 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                     </span>
                   </div>
 
-                  {/* Actions */}
                   <div className="flex items-center justify-end gap-[12px]">
-                    <button
-                      onClick={() => handleToggleActive(service)}
-                      className="text-[#2e2e2e] hover:text-[#666] transition-colors"
-                      title={service.is_active ? "Pausar" : "Ativar"}
-                    >
+                    <button onClick={() => handleToggleActive(service)} className="text-[#2e2e2e] hover:text-[#666] transition-colors" title={service.is_active ? "Pausar" : "Ativar"}>
                       {service.is_active ? <Pause size={14} weight="regular" /> : <Play size={14} weight="regular" />}
                     </button>
                     <button onClick={() => handleDuplicate(service)} className="text-[#2e2e2e] hover:text-[#666] transition-colors" title="Duplicar">
@@ -272,8 +313,8 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                     </button>
                   </div>
                 </div>
-              )
-            })}
+              </div>
+            ))}
           </div>
         )}
       </div>

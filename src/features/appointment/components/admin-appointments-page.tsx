@@ -167,54 +167,90 @@ export function AdminAppointmentsPage({
               const canEdit = !['completed', 'cancelled', 'no_show'].includes(appt.status)
 
               return (
-                <div 
-                  key={appt.id} 
-                  className="bg-bg-surface border-[0.5px] border-border-main rounded-[10px] p-[16px] px-[20px] flex items-center gap-6 group hover:border-[#2a2a2a] transition-all"
+                <div
+                  key={appt.id}
+                  className="bg-bg-surface border-[0.5px] border-border-main rounded-[10px] p-[14px] px-[16px] md:px-[20px] group hover:border-[#2a2a2a] transition-all"
                 >
-                  {/* Time */}
-                  <div className="flex flex-col min-w-[70px]">
-                    <span className="text-[20px] font-medium text-text-primary tracking-tight leading-none">
-                      {startDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    <span className="text-[9px] text-[#444] font-medium uppercase tracking-wider mt-1">
-                      {startDt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-                    </span>
-                  </div>
-
-                  {/* Separator */}
-                  <div className="w-[1px] h-[36px] bg-accent-main opacity-40" />
-
-                  {/* Info */}
-                  <div className="flex-1 flex flex-col min-w-0">
-                    <span className="text-[14px] font-medium text-text-primary uppercase tracking-tight truncate">
-                      {appt.client.full_name}
-                    </span>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-medium text-[#444] uppercase tracking-wider">
-                        {appt.service.name}
-                      </span>
-                      <span className="text-[9px] text-[#333] font-medium uppercase">
-                        {appt.duration_minutes} MIN
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Actions & Status */}
-                  <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all">
-                      <QuickStatusButton status={appt.status} appointmentId={appt.id} />
-                      {canEdit && (
-                        <button
-                          onClick={() => { setEditingAppointment(appt); setIsModalOpen(true) }}
-                          className="text-[#444] hover:text-text-primary transition-colors"
-                          title="Editar"
-                        >
-                          <ArrowRight size={16} weight="regular" />
-                        </button>
-                      )}
-                    </div>
-                    <div className="min-w-[100px] flex justify-end">
+                  {/* Mobile layout */}
+                  <div className="flex md:hidden flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-[18px] font-medium text-text-primary tracking-tight leading-none">
+                          {startDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        <span className="text-[9px] text-[#444] font-medium uppercase tracking-wider">
+                          {startDt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                        </span>
+                      </div>
                       <StatusBadge status={appt.status} appointmentId={appt.id} />
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[13px] font-medium text-text-primary uppercase tracking-tight truncate">
+                          {appt.client.full_name}
+                        </span>
+                        <span className="text-[10px] font-medium text-[#444] uppercase tracking-wider truncate">
+                          {appt.service.name} · {appt.duration_minutes} MIN
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <QuickStatusButton status={appt.status} appointmentId={appt.id} />
+                        {canEdit && (
+                          <button
+                            onClick={() => { setEditingAppointment(appt); setIsModalOpen(true) }}
+                            className="text-[#444] hover:text-text-primary transition-colors"
+                            title="Editar"
+                          >
+                            <ArrowRight size={16} weight="regular" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Desktop layout */}
+                  <div className="hidden md:flex items-center gap-6">
+                    <div className="flex flex-col min-w-[70px]">
+                      <span className="text-[20px] font-medium text-text-primary tracking-tight leading-none">
+                        {startDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      <span className="text-[9px] text-[#444] font-medium uppercase tracking-wider mt-1">
+                        {startDt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                      </span>
+                    </div>
+
+                    <div className="w-[1px] h-[36px] bg-accent-main opacity-40" />
+
+                    <div className="flex-1 flex flex-col min-w-0">
+                      <span className="text-[14px] font-medium text-text-primary uppercase tracking-tight truncate">
+                        {appt.client.full_name}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-medium text-[#444] uppercase tracking-wider">
+                          {appt.service.name}
+                        </span>
+                        <span className="text-[9px] text-[#333] font-medium uppercase">
+                          {appt.duration_minutes} MIN
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all">
+                        <QuickStatusButton status={appt.status} appointmentId={appt.id} />
+                        {canEdit && (
+                          <button
+                            onClick={() => { setEditingAppointment(appt); setIsModalOpen(true) }}
+                            className="text-[#444] hover:text-text-primary transition-colors"
+                            title="Editar"
+                          >
+                            <ArrowRight size={16} weight="regular" />
+                          </button>
+                        )}
+                      </div>
+                      <div className="min-w-[100px] flex justify-end">
+                        <StatusBadge status={appt.status} appointmentId={appt.id} />
+                      </div>
                     </div>
                   </div>
                 </div>

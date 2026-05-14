@@ -8,11 +8,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default async function ClientLoyaltyPage() {
   return (
-    <main className="p-6 md:p-10 max-w-7xl mx-auto w-full">
-      <Suspense fallback={<LoyaltySkeleton />}>
-        <LoyaltyContent />
-      </Suspense>
-    </main>
+    <Suspense fallback={<LoyaltySkeleton />}>
+      <LoyaltyContent />
+    </Suspense>
   )
 }
 

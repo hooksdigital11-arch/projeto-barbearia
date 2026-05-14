@@ -94,7 +94,7 @@ export function AdminHome({ userName }: AdminHomeProps) {
       </div>
 
       {/* KPI Section - Precision Data */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-[12px]">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-[12px]">
         {[
           { label: 'FATURAMENTO HOJE', value: '4.280', unit: 'R$' },
           { label: 'TAXA DE OCUPAÇÃO', value: '94', unit: '%' },
@@ -104,7 +104,7 @@ export function AdminHome({ userName }: AdminHomeProps) {
             <p className="text-[10px] tracking-[0.1em] text-[#444] font-medium uppercase">{kpi.label}</p>
             <div className="flex items-baseline gap-1">
               {kpi.unit === 'R$' && <span className="text-[13px] text-text-nav font-medium">{kpi.unit}</span>}
-              <span className="text-[28px] font-medium text-text-primary tracking-tight">
+              <span className="text-xl md:text-[28px] font-medium text-text-primary tracking-tight">
                 {kpi.value}
               </span>
               {kpi.unit !== 'R$' && kpi.unit !== '' && <span className="text-[13px] text-text-nav font-medium">{kpi.unit}</span>}

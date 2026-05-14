@@ -30,14 +30,12 @@ export default async function AdminComandaPage({
   const barbers = barbersResponse.data || []
 
   return (
-    <div className="flex-1 p-4 md:p-8 pt-6">
-      <Suspense fallback={<div className="animate-pulse h-[400px] bg-muted/50 rounded-lg"></div>}>
-        <ComandaPageAdmin 
-          stats={stats} 
-          history={history}
-          initialPeriod={(params.period as 'today' | 'week' | 'month') || 'today'}
-        />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div className="animate-pulse h-[400px] bg-muted/50 rounded-lg" />}>
+      <ComandaPageAdmin
+        stats={stats}
+        history={history}
+        initialPeriod={(params.period as 'today' | 'week' | 'month') || 'today'}
+      />
+    </Suspense>
   )
 }

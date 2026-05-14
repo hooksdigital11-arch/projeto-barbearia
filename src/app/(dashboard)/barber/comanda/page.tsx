@@ -26,11 +26,9 @@ export default async function BarberComandaPage() {
     .order('start_time', { ascending: true })
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <ComandaPageBarber 
-        appointments={appointments || []} 
-        barber={user as any} 
-      />
-    </div>
+    <ComandaPageBarber
+      appointments={appointments || []}
+      barber={user as any}
+    />
   )
 }

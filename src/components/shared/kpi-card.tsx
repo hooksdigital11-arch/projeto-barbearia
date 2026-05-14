@@ -1,5 +1,4 @@
 import { ReactNode } from 'react'
-import { ArrowUp, ArrowDown } from '@phosphor-icons/react/dist/ssr'
 import { cn } from '@/lib/utils/cn'
 
 interface KPICardProps {
@@ -48,7 +47,7 @@ export function KPICard({
           <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#444] group-hover:text-text-secondary transition-colors">
             {title}
           </p>
-          <h3 className="text-[28px] font-medium tracking-tight text-white tabular-nums">
+          <h3 className="text-xl md:text-[28px] font-medium tracking-tight text-white tabular-nums">
             {value}
           </h3>
           {subtitle && (

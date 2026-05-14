@@ -21,17 +21,15 @@ export default async function BarberMessagingRoute() {
   ])
 
   return (
-    <div className="flex-1 p-4 md:p-8 pt-6">
-      <Suspense fallback={<div className="animate-pulse h-[400px] bg-white/5 rounded-2xl" />}>
-        <MessagingPage
-          conversations={conversations}
-          stats={stats}
-          clients={clients}
-          templates={templates}
-          orgName={org?.name || 'Barbearia'}
-          isAdmin={false}
-        />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div className="animate-pulse h-[400px] bg-white/5 rounded-2xl" />}>
+      <MessagingPage
+        conversations={conversations}
+        stats={stats}
+        clients={clients}
+        templates={templates}
+        orgName={org?.name || 'Barbearia'}
+        isAdmin={false}
+      />
+    </Suspense>
   )
 }

@@ -12,11 +12,9 @@ import { WaitingListPageAdmin } from '@/features/waiting-list/components/waiting
 
 export default async function AdminWaitingListPage() {
   return (
-    <main className="p-6 md:p-10 max-w-7xl mx-auto w-full">
-      <Suspense fallback={<WaitingListSkeleton />}>
-        <Content />
-      </Suspense>
-    </main>
+    <Suspense fallback={<WaitingListSkeleton />}>
+      <Content />
+    </Suspense>
   )
 }
 

@@ -11,11 +11,9 @@ import { WaitingListPageClient } from '@/features/waiting-list/components/waitin
 
 export default async function ClientWaitingListPage() {
   return (
-    <main className="p-6 md:p-10 max-w-7xl mx-auto w-full">
-      <Suspense fallback={<WaitingListSkeleton />}>
-        <Content />
-      </Suspense>
-    </main>
+    <Suspense fallback={<WaitingListSkeleton />}>
+      <Content />
+    </Suspense>
   )
 }
 

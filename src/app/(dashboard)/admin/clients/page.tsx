@@ -6,11 +6,9 @@ import { ClientsPage } from '@/features/clients/components/clients-page'
 
 export default async function AdminClientsPage() {
   return (
-    <main className="p-6 md:p-10 max-w-7xl mx-auto w-full">
-      <Suspense fallback={<ClientsSkeleton />}>
-        <Content />
-      </Suspense>
-    </main>
+    <Suspense fallback={<ClientsSkeleton />}>
+      <Content />
+    </Suspense>
   )
 }
 

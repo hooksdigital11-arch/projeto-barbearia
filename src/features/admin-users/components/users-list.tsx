@@ -120,8 +120,8 @@ export function UsersList({ initialUsers }: UsersListProps) {
 
       {/* Modern Table Grid */}
       <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] overflow-hidden">
-        {/* Table Header */}
-        <div className="grid grid-cols-[2.2fr_1fr_100px_80px] gap-[12px] px-5 py-3 border-b-[0.5px] border-border-main/50 items-center">
+        {/* Table Header — desktop only */}
+        <div className="hidden md:grid grid-cols-[2.2fr_1fr_100px_80px] gap-[12px] px-5 py-3 border-b-[0.5px] border-border-main/50 items-center">
           <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a2a2a]">Usuário</span>
           <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a2a2a]">Cargo</span>
           <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a2a2a]">Status</span>
@@ -131,74 +131,83 @@ export function UsersList({ initialUsers }: UsersListProps) {
         {/* Table Rows */}
         <div className="flex flex-col">
           {filteredUsers.map((user, idx) => (
-            <div 
-              key={user.id} 
-              className={cn(
-                "grid grid-cols-[2.2fr_1fr_100px_80px] gap-[12px] px-5 py-3.5 items-center hover:bg-bg-surface transition-all",
-                idx !== filteredUsers.length - 1 && "border-bottom-[0.5px] border-border-main"
-              )}
+            <div
+              key={user.id}
               style={{ borderBottom: idx !== filteredUsers.length - 1 ? '0.5px solid #141414' : 'none' }}
             >
-              {/* User Info */}
-              <div className="flex items-center gap-3">
-                <UserAvatar name={user.full_name || ''} url={user.avatar_url} />
-                <div className="flex flex-col truncate">
-                  <span className="text-[13px] font-medium text-text-primary truncate uppercase">{user.full_name}</span>
-                  <span className="text-[9px] text-[#2a2a2a] truncate uppercase tracking-wider">{user.email || 'sem email'}</span>
+              {/* Mobile card */}
+              <div className="md:hidden px-4 py-3 flex items-center justify-between gap-3 hover:bg-bg-surface transition-all">
+                <div className="flex items-center gap-3 min-w-0">
+                  <UserAvatar name={user.full_name || ''} url={user.avatar_url} />
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[12px] font-medium text-text-primary truncate uppercase">{user.full_name}</span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className={cn(
+                        "px-[8px] py-[2px] rounded-[4px] text-[8px] font-medium uppercase tracking-[0.07em] border-[0.5px]",
+                        user.role === 'admin' ? "bg-[#1a0d2e] text-[#9b7cf6] border-[#9b7cf633]" :
+                          user.role === 'barber' ? "bg-[#0d1e2e] text-[#6b9fff] border-[#6b9fff33]" :
+                            "bg-[#0d2e1a] text-[#00c070] border-[#00c07033]"
+                      )}>
+                        {user.role === 'admin' ? 'Admin' : user.role === 'barber' ? 'Barbeiro' : 'Cliente'}
+                      </span>
+                      <div className={cn("w-[5px] h-[5px] rounded-full", user.status === 'active' || !user.status ? "bg-accent-main" : "bg-[#2a2a2a]")} />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button onClick={() => handleEdit(user)} title="Editar" className="w-[28px] h-[28px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:text-[#777] transition-all">
+                    <PencilSimple size={12} weight="bold" />
+                  </button>
+                  <button onClick={() => handleToggleStatus(user.id, user.status || 'active')} disabled={isPending} title={user.status === 'active' ? 'Pausar' : 'Ativar'} className="w-[28px] h-[28px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:text-[#777] transition-all disabled:opacity-30">
+                    {user.status === 'active' ? <Pause size={12} weight="bold" /> : <Play size={12} weight="bold" />}
+                  </button>
+                  <button onClick={() => handleDelete(user.id)} disabled={isPending} title="Excluir" className="w-[28px] h-[28px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:text-[#ef4444] transition-all disabled:opacity-30">
+                    <Trash size={12} weight="bold" />
+                  </button>
                 </div>
               </div>
 
-              {/* Role Badge */}
-              <div>
-                <span className={cn(
-                  "px-[10px] py-[3px] rounded-[5px] text-[9px] font-medium uppercase tracking-[0.07em] border-[0.5px]",
-                  user.role === 'admin' ? "bg-[#1a0d2e] text-[#9b7cf6] border-[#9b7cf633]" :
-                    user.role === 'barber' ? "bg-[#0d1e2e] text-[#6b9fff] border-[#6b9fff33]" :
-                      "bg-[#0d2e1a] text-[#00c070] border-[#00c07033]"
-                )}>
-                  {user.role === 'admin' ? 'Administrador' : user.role === 'barber' ? 'Barbeiro' : 'Cliente'}
-                </span>
-              </div>
+              {/* Desktop row */}
+              <div className={cn(
+                "hidden md:grid grid-cols-[2.2fr_1fr_100px_80px] gap-[12px] px-5 py-3.5 items-center hover:bg-bg-surface transition-all"
+              )}>
+                <div className="flex items-center gap-3">
+                  <UserAvatar name={user.full_name || ''} url={user.avatar_url} />
+                  <div className="flex flex-col truncate">
+                    <span className="text-[13px] font-medium text-text-primary truncate uppercase">{user.full_name}</span>
+                    <span className="text-[9px] text-[#2a2a2a] truncate uppercase tracking-wider">{user.email || 'sem email'}</span>
+                  </div>
+                </div>
 
-              {/* Status */}
-              <div className="flex items-center gap-2">
-                <div className={cn(
-                  "w-[6px] h-[6px] rounded-full",
-                  user.status === 'active' || !user.status ? "bg-accent-main" : "bg-[#2a2a2a]"
-                )} />
-                <span className={cn(
-                  "text-[10px] tracking-[0.06em] uppercase transition-colors",
-                  user.status === 'active' || !user.status ? "text-accent-main" : "text-[#444]"
-                )}>
-                  {user.status === 'active' || !user.status ? 'On-line' : 'Pausado'}
-                </span>
-              </div>
+                <div>
+                  <span className={cn(
+                    "px-[10px] py-[3px] rounded-[5px] text-[9px] font-medium uppercase tracking-[0.07em] border-[0.5px]",
+                    user.role === 'admin' ? "bg-[#1a0d2e] text-[#9b7cf6] border-[#9b7cf633]" :
+                      user.role === 'barber' ? "bg-[#0d1e2e] text-[#6b9fff] border-[#6b9fff33]" :
+                        "bg-[#0d2e1a] text-[#00c070] border-[#00c07033]"
+                  )}>
+                    {user.role === 'admin' ? 'Administrador' : user.role === 'barber' ? 'Barbeiro' : 'Cliente'}
+                  </span>
+                </div>
 
-              {/* Actions */}
-              <div className="flex items-center justify-end gap-[10px]">
-                <button 
-                  onClick={() => handleEdit(user)}
-                  title="Editar" 
-                  className="w-[30px] h-[30px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:border-[#2a2a2a] hover:text-[#777] transition-all"
-                >
-                  <PencilSimple size={13} weight="bold" />
-                </button>
-                <button 
-                  onClick={() => handleToggleStatus(user.id, user.status || 'active')}
-                  disabled={isPending}
-                  title={user.status === 'active' ? 'Pausar' : 'Ativar'}
-                  className="w-[30px] h-[30px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:border-[#2a2a2a] hover:text-[#777] transition-all disabled:opacity-30"
-                >
-                  {user.status === 'active' ? <Pause size={13} weight="bold" /> : <Play size={13} weight="bold" />}
-                </button>
-                <button 
-                  onClick={() => handleDelete(user.id)}
-                  disabled={isPending}
-                  title="Excluir" 
-                  className="w-[30px] h-[30px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:border-[#2a2a2a] hover:text-[#ef4444] transition-all disabled:opacity-30"
-                >
-                  <Trash size={13} weight="bold" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <div className={cn("w-[6px] h-[6px] rounded-full", user.status === 'active' || !user.status ? "bg-accent-main" : "bg-[#2a2a2a]")} />
+                  <span className={cn("text-[10px] tracking-[0.06em] uppercase transition-colors", user.status === 'active' || !user.status ? "text-accent-main" : "text-[#444]")}>
+                    {user.status === 'active' || !user.status ? 'On-line' : 'Pausado'}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-end gap-[10px]">
+                  <button onClick={() => handleEdit(user)} title="Editar" className="w-[30px] h-[30px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:border-[#2a2a2a] hover:text-[#777] transition-all">
+                    <PencilSimple size={13} weight="bold" />
+                  </button>
+                  <button onClick={() => handleToggleStatus(user.id, user.status || 'active')} disabled={isPending} title={user.status === 'active' ? 'Pausar' : 'Ativar'} className="w-[30px] h-[30px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:border-[#2a2a2a] hover:text-[#777] transition-all disabled:opacity-30">
+                    {user.status === 'active' ? <Pause size={13} weight="bold" /> : <Play size={13} weight="bold" />}
+                  </button>
+                  <button onClick={() => handleDelete(user.id)} disabled={isPending} title="Excluir" className="w-[30px] h-[30px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:border-[#2a2a2a] hover:text-[#ef4444] transition-all disabled:opacity-30">
+                    <Trash size={13} weight="bold" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}

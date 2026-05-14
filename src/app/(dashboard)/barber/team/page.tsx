@@ -6,11 +6,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default async function BarberTeamPage() {
   return (
-    <main className="p-6 md:p-10 max-w-7xl mx-auto w-full">
-      <Suspense fallback={<TeamSkeleton />}>
-        <TeamContent />
-      </Suspense>
-    </main>
+    <Suspense fallback={<TeamSkeleton />}>
+      <TeamContent />
+    </Suspense>
   )
 }
 

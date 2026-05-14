@@ -44,7 +44,7 @@ export async function ClientDashboard() {
         </button>
       </div>
 
-      <div className="grid grid-cols-[1fr_280px] gap-[18px]">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-[18px]">
         {/* Coluna Esquerda */}
         <div className="space-y-[14px]">
           {/* Cartão de Fidelidade */}
@@ -59,20 +59,20 @@ export async function ClientDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-9 gap-[6px] mt-[16px]">
+            <div className="grid grid-cols-9 gap-[3px] sm:gap-[6px] mt-[16px]">
               {[...Array(9)].map((_, i) => {
                 const isFilled = i < data.profile.loyaltyStamps
                 return (
-                  <div 
+                  <div
                     key={i}
                     className={cn(
-                      "w-[38px] h-[38px] rounded-[9px] flex items-center justify-center border transition-all",
-                      isFilled 
-                        ? "bg-[#0d2e1a] border-[#00d4aa33] text-[#00d4aa]" 
+                      "aspect-square rounded-[8px] flex items-center justify-center border transition-all",
+                      isFilled
+                        ? "bg-[#0d2e1a] border-[#00d4aa33] text-[#00d4aa]"
                         : "bg-[#141414] border-[#1e1e1e] text-[#2a2a2a]"
                     )}
                   >
-                    <Scissors size={16} weight={isFilled ? "fill" : "regular"} />
+                    <Scissors size={14} weight={isFilled ? "fill" : "regular"} />
                   </div>
                 )
               })}

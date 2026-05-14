@@ -50,7 +50,7 @@ export function ComandaPageBarber({
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
-            <h1 className="text-5xl md:text-7xl font-black font-syne text-text-primary tracking-tighter leading-none uppercase">
+            <h1 className="text-[28px] sm:text-5xl md:text-7xl font-black font-syne text-text-primary tracking-tighter leading-none uppercase">
               Atendimento<span className="text-accent-cyan">.</span>
             </h1>
           </div>

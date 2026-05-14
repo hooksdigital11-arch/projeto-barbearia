@@ -80,7 +80,7 @@ export function SettingsLayout({ children }: { children: React.ReactNode }) {
 
         {/* Main Content Area */}
         <main className="flex-1 max-w-4xl">
-          <div className="premium-card p-10">
+          <div className="premium-card p-4 sm:p-6 lg:p-10">
             {children}
           </div>
         </main>

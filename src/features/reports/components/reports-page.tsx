@@ -222,17 +222,17 @@ export function ReportsPage({
           </p>
         </div>
 
-        <div className="flex items-center gap-4 ml-auto md:ml-0">
+        <div className="flex flex-wrap items-center gap-2 md:gap-4">
           {/* Pill Filters */}
-          <div className="flex bg-bg-sidebar border border-border-main/50 rounded-full p-1">
+          <div className="flex bg-bg-sidebar border border-border-main/50 rounded-full p-1 shrink-0">
             {(['today', 'week', 'month', 'year'] as ReportPeriod[]).map((p) => (
               <button
                 key={p}
                 onClick={() => handlePeriodChange(p)}
                 className={cn(
-                  "px-4 py-1.5 rounded-full text-[10px] font-medium uppercase tracking-wider transition-all",
-                  activePeriod === p 
-                    ? "bg-bg-surface text-accent-main border border-accent-main/10" 
+                  "px-3 md:px-4 py-1.5 rounded-full text-[10px] font-medium uppercase tracking-wider transition-all",
+                  activePeriod === p
+                    ? "bg-bg-surface text-accent-main border border-accent-main/10"
                     : "text-[#333] hover:text-[#666]"
                 )}
               >

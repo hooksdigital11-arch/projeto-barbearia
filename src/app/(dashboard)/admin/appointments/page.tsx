@@ -33,17 +33,15 @@ export default async function AdminAppointmentsRoute({
   ])
 
   return (
-    <div className="flex-1 p-4 md:p-8 pt-6">
-      <Suspense fallback={<div className="animate-pulse h-[400px] bg-white/5 rounded-2xl" />}>
-        <AdminAppointmentsPage
-          appointments={appointments}
-          stats={stats}
-          services={services}
-          barbers={barbers}
-          clients={clients}
-          initialPeriod={period}
-        />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div className="animate-pulse h-[400px] bg-white/5 rounded-2xl" />}>
+      <AdminAppointmentsPage
+        appointments={appointments}
+        stats={stats}
+        services={services}
+        barbers={barbers}
+        clients={clients}
+        initialPeriod={period}
+      />
+    </Suspense>
   )
 }

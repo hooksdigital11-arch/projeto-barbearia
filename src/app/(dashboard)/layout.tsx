@@ -1,21 +1,7 @@
-import { cn } from "@/lib/utils/cn"
 import Link from "next/link"
 import Image from "next/image"
-import { 
-  SquaresFour, 
-  Calendar, 
-  Users, 
-  Receipt, 
-  Queue, 
-  Star, 
-  UserCircle, 
-  Package, 
-  ChatTeardropText, 
-  ChartPieSlice, 
-  Gear,
-  Scissors 
-} from "@phosphor-icons/react/dist/ssr"
 import { DashboardNav } from "./dashboard-nav"
+import { MobileSidebar } from "./mobile-sidebar"
 import { requireUser } from "@/lib/auth/require-auth"
 import { getOrganization } from "@/features/organization/queries"
 import { LogoutButton } from "@/components/shared/logout-button"
@@ -49,6 +35,8 @@ export default async function DashboardLayout({
   const orgName = organization?.name || "BarberSaaS"
   const orgLogo = organization?.logo_url
 
+  const homeHref = profile.role === 'admin' ? '/admin' : profile.role === 'barber' ? '/barber' : '/client'
+
   const filteredNavItems = navItems
     .filter((item) => {
       if (profile.role === 'admin') return item.label !== 'Perfil'
@@ -59,7 +47,7 @@ export default async function DashboardLayout({
     .map((item) => {
       let href = item.href
       if (item.label === 'Configurações' && profile.role === 'admin') href = '/admin/settings/general'
-      else if (item.label === 'Home') href = profile.role === 'admin' ? '/admin' : profile.role === 'barber' ? '/barber' : '/client'
+      else if (item.label === 'Home') href = homeHref
       else if (item.label === 'Agendamentos') href = profile.role === 'admin' ? '/admin/appointments' : profile.role === 'barber' ? '/barber/appointments' : '/client/appointments'
       else if (item.label === 'Serviços') href = profile.role === 'admin' ? '/admin/services' : profile.role === 'barber' ? '/barber/services' : '/client/services'
       else if (item.label === 'Estoque') href = profile.role === 'admin' ? '/admin/inventory' : '/barber/inventory'
@@ -71,7 +59,7 @@ export default async function DashboardLayout({
       else if (item.label === 'Mensageria') href = profile.role === 'admin' ? '/admin/messaging' : profile.role === 'barber' ? '/barber/messaging' : '/client/messaging'
       else if (item.label === 'Relatórios') href = '/admin/reports'
       else if (item.label === 'Usuários') href = '/admin/users'
-      
+
       return { ...item, href }
     })
 
@@ -80,11 +68,12 @@ export default async function DashboardLayout({
       <ThemeProvider />
       <RealtimeListener organizationId={profile.organization_id} />
 
+      {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-[200px] flex-col fixed inset-y-0 z-50 bg-bg-sidebar border-r-[0.5px] border-border-main">
         <div className="flex flex-col h-full overflow-hidden">
           <div className="p-8">
-            <Link 
-              href={profile.role === 'admin' ? '/admin' : profile.role === 'barber' ? '/barber' : '/client'} 
+            <Link
+              href={homeHref}
               className="flex flex-col gap-3 hover:opacity-80 transition-all"
             >
               <div className="w-10 h-10 rounded-minimal overflow-hidden flex items-center justify-center bg-white/[0.02] border-[0.5px] border-border-main">
@@ -117,7 +106,7 @@ export default async function DashboardLayout({
               </div>
             </Link>
           </div>
-          
+
           <DashboardNav items={filteredNavItems} />
 
           {/* Sidebar Footer */}
@@ -166,8 +155,9 @@ export default async function DashboardLayout({
         </div>
       </aside>
 
-      <div className="flex-1 md:ml-[200px] flex flex-col relative z-10 min-h-screen bg-bg-black">
-        <header className="md:hidden h-16 border-b-[0.5px] border-border-main flex items-center justify-between px-6 bg-bg-sidebar sticky top-0 z-50">
+      <div className="flex-1 min-w-0 overflow-x-hidden md:ml-[200px] flex flex-col relative z-10 min-h-screen bg-bg-black">
+        {/* Mobile Header */}
+        <header className="md:hidden h-16 border-b-[0.5px] border-border-main flex items-center justify-between px-4 bg-bg-sidebar sticky top-0 z-50">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-minimal overflow-hidden flex items-center justify-center bg-white/[0.02] border-[0.5px] border-border-main">
               {orgLogo ? (
@@ -178,12 +168,18 @@ export default async function DashboardLayout({
             </div>
             <span className="font-syne font-medium truncate max-w-[150px] text-text-primary text-sm uppercase tracking-tight">{orgName}</span>
           </div>
-          <button className="w-10 h-10 flex items-center justify-center text-accent-main">
-             <SquaresFour size={20} weight="regular" />
-          </button>
+          <MobileSidebar
+            items={filteredNavItems}
+            orgName={orgName}
+            orgLogo={orgLogo}
+            userInitial={profile.full_name?.[0] || 'U'}
+            userName={profile.full_name || ''}
+            userRole={profile.role}
+            homeHref={homeHref}
+          />
         </header>
-        
-        <main className="flex-1 p-8 md:p-12 lg:p-16 overflow-x-hidden">
+
+        <main className="flex-1 p-4 sm:p-6 md:p-8 lg:p-12 overflow-x-hidden">
           <div className="max-w-6xl mx-auto">
             {children}
           </div>

@@ -22,16 +22,14 @@ export default async function AdminMessagingRoute() {
     ])
 
     return (
-      <div className="flex-1 p-4 md:p-8 pt-6">
-        <MessagingPage
-          conversations={conversations}
-          stats={stats}
-          clients={clients}
-          templates={templates}
-          orgName={org?.name || 'Barbearia'}
-          isAdmin
-        />
-      </div>
+      <MessagingPage
+        conversations={conversations}
+        stats={stats}
+        clients={clients}
+        templates={templates}
+        orgName={org?.name || 'Barbearia'}
+        isAdmin
+      />
     )
   } catch (err) {
     throw err

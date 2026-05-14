@@ -15,11 +15,9 @@ export default async function BarberClientProfilePage({ params }: PageProps) {
   const { id } = await params
 
   return (
-    <main className="p-6 md:p-10 max-w-7xl mx-auto w-full">
-      <Suspense fallback={<ProfileSkeleton />}>
-        <Content clientId={id} />
-      </Suspense>
-    </main>
+    <Suspense fallback={<ProfileSkeleton />}>
+      <Content clientId={id} />
+    </Suspense>
   )
 }
 
