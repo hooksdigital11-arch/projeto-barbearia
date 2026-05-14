@@ -4,14 +4,15 @@ import { AuthScene } from '@/features/auth/components/auth-scene'
 /**
  * AuthLayout
  * Immersive full-screen centered layout with circuit-board background.
- * Features an interactive desk lamp (desktop) that toggles form visibility.
+ * Features an interactive desk lamp (desktop) that toggles form visibility
+ * and plays a barbershop monster video when lights are off.
  */
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen w-full bg-[#030303] flex items-center justify-center overflow-hidden font-sans relative">
+    <div className="min-h-screen w-full bg-[#030303] overflow-hidden font-sans relative">
 
-      {/* === CIRCUIT BOARD BACKGROUND === */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* === CIRCUIT BOARD BACKGROUND (static, always visible) === */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         {/* Subtle grid pattern */}
         <div
           className="absolute inset-0 opacity-[0.03]"

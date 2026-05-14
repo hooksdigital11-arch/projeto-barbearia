@@ -5,7 +5,7 @@ import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils/cn'
-import { FadersHorizontal, CircleNotch, CaretDown } from '@phosphor-icons/react'
+import { FadersHorizontal, CircleNotch, CaretDown, FilePdf } from '@phosphor-icons/react'
 import type { 
   RevenueReport, 
   AppointmentReport, 
@@ -106,6 +106,103 @@ export function ReportsPage({
     })
   }
 
+  const montarDados = () => {
+    const periodLabels: Record<ReportPeriod, string> = {
+      today: 'Hoje',
+      week: 'Esta Semana',
+      month: 'Este Mês',
+      year: 'Este Ano',
+      custom: 'Período Personalizado'
+    }
+
+    return {
+      barbearia: {
+        nome: 'Barbearia Admin', // TODO: conectar dado real
+        barbeiro: 'Administrador' // TODO: conectar dado real
+      },
+      periodo: periodLabels[activePeriod] || 'Período',
+      dataGeracao: new Date().toLocaleDateString('pt-BR'),
+
+      // ── RECEITA ──────────────────────────────────────────────
+      receita: {
+        faturamentoTotal: revenue.kpis.totalRevenue,
+        variacaoSemana: `${revenue.kpis.totalRevenueChange > 0 ? '+' : ''}${revenue.kpis.totalRevenueChange}%`,
+        ticketMedio: revenue.kpis.averageTicket,
+        totalAtendimentos: revenue.kpis.totalComandas,
+        pagamentosPendentes: 0, // TODO: conectar dado real
+        valorPresente: 0, // TODO: conectar dado real
+
+        topServicos: revenue.topServices.map((s, i) => ({
+          nome: s.name,
+          categoria: 'Serviço', // TODO: conectar dado real
+          faturamento: s.totalRevenue,
+          participacao: revenue.kpis.totalRevenue ? `${((s.totalRevenue / revenue.kpis.totalRevenue) * 100).toFixed(1)}% do mix` : '0%',
+          destaque: i === 0
+        }))
+      },
+
+      // ── AGENDA ───────────────────────────────────────────────
+      agenda: {
+        total: appointments.kpis.total,
+        confirmados: appointments.kpis.completed,
+        cancelados: appointments.kpis.cancelled,
+        noShow: appointments.kpis.noShow,
+        taxaConclusao: appointments.kpis.completionRate,
+
+        porDia: [
+          { dia: 'Domingo', agendamentos: 0, concluidos: 0 },
+          { dia: 'Segunda-feira', agendamentos: 0, concluidos: 0 },
+          { dia: 'Terça-feira', agendamentos: 0, concluidos: 0 },
+          { dia: 'Quarta-feira', agendamentos: 0, concluidos: 0 },
+          { dia: 'Quinta-feira', agendamentos: 0, concluidos: 0 },
+          { dia: 'Sexta-feira', agendamentos: 0, concluidos: 0 },
+          { dia: 'Sábado', agendamentos: 0, concluidos: 0 }
+        ].map(d => {
+          const apiMatch = appointments.dayOfWeekDistribution.find(apiD => apiD.day.startsWith(d.dia.substring(0, 3)))
+          return {
+            dia: d.dia,
+            agendamentos: apiMatch ? apiMatch.count : 0,
+            concluidos: 0 // TODO: conectar dado real
+          }
+        })
+      },
+
+      // ── CLIENTES ─────────────────────────────────────────────
+      clientes: {
+        total: clients.kpis.totalActive,
+        ativos: clients.kpis.totalActive,
+        novos: clients.kpis.newClients,
+        taxaRetencao: clients.kpis.retentionRate,
+        satisfacao: 100, // TODO: conectar dado real
+
+        lista: clients.topClients.map(c => ({
+          nome: c.name,
+          status: 'ATIVO' as const,
+          faturamento: c.totalSpent,
+          observacao: `Última visita: ${new Date(c.lastVisit).toLocaleDateString('pt-BR')}`
+        }))
+      },
+
+      // ── EQUIPE ───────────────────────────────────────────────
+      equipe: team.barbers.map(b => ({
+        nome: b.name,
+        avaliacao: b.rating,
+        agendamentos: b.appointments,
+        faturamento: b.revenue,
+        status: 'ATIVO' as const
+      })),
+
+      // ── FIDELIDADE ───────────────────────────────────────────
+      fidelidade: {
+        inscritos: loyalty.kpis.activeMembers,
+        pontosResgatados: loyalty.kpis.redemptions,
+        presentesMes: loyalty.kpis.stampsDistributed,
+        progressaoMedia: '0/10', // TODO: conectar dado real
+        clientesBonificados: loyalty.kpis.activeMembers > 0 ? (loyalty.kpis.readyToRedeem / loyalty.kpis.activeMembers) * 100 : 0
+      }
+    }
+  }
+
   return (
     <div className="relative min-h-screen pb-32 space-y-12">
       <Script 
@@ -143,6 +240,21 @@ export function ReportsPage({
               </button>
             ))}
           </div>
+
+          <button 
+            onClick={async () => {
+              try {
+                const { downloadInsightsPDF } = await import('@/lib/insights-pdf')
+                await downloadInsightsPDF(montarDados())
+              } catch (err) {
+                console.error("Error generating PDF:", err)
+              }
+            }}
+            className="flex items-center gap-2 bg-transparent border border-border-main text-text-primary px-5 py-2.5 rounded-[8px] text-[10px] font-semibold uppercase tracking-[0.1em] hover:bg-white/5 transition-all shrink-0"
+          >
+            <FilePdf size={15} weight="bold" />
+            Exportar
+          </button>
 
           <button 
             onClick={() => setShowCustomModal(true)}

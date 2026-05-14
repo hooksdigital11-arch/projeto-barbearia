@@ -1,58 +1,112 @@
-// insights-pdf.js
+// ============================================================
+// insightsPDF.js
+// Cole este arquivo no seu projeto e importe onde precisar.
+// Dependência: npm install html2pdf.js
+// ============================================================
+
+import html2pdf from 'html2pdf.js';
+
+// ─────────────────────────────────────────────────────────────
+// PONTO DE ENTRADA — chame esta função no onClick do botão
+// ─────────────────────────────────────────────────────────────
+//
+// Exemplo de uso:
+//   import { downloadInsightsPDF } from './insightsPDF';
+//   <button onClick={() => downloadInsightsPDF(seuObjetoDeDados)}>
+//     Baixar PDF
+//   </button>
+//
+// O parâmetro `data` deve seguir a interface InsightsData abaixo.
+// ─────────────────────────────────────────────────────────────
 
 export async function downloadInsightsPDF(data) {
   const html = buildHTML(data);
-  const filename = `insights_${(data.barbearia?.barbeiro ?? 'relatorio').replace(/\s+/g, '_')}.pdf`;
 
-  // Render in an isolated iframe so the page's Tailwind CSS cannot interfere
-  const iframe = document.createElement('iframe');
-  iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;height:1200px;border:none;opacity:0;pointer-events:none';
-  document.body.appendChild(iframe);
-
-  iframe.contentDocument.open();
-  iframe.contentDocument.write(html);
-  iframe.contentDocument.close();
-
-  // Give layout + fonts time to settle
-  await new Promise(r => setTimeout(r, 400));
-
-  try {
-    const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-      import('html2canvas'),
-      import('jspdf'),
-    ]);
-
-    const canvas = await html2canvas(iframe.contentDocument.documentElement, {
-      scale:           2,
-      useCORS:         true,
-      backgroundColor: '#0d0d0d',
-      logging:         false,
-      width:           794,
-      windowWidth:     794,
-    });
-
-    const pdf   = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-    const pdfW  = pdf.internal.pageSize.getWidth();
-    const pdfH  = pdf.internal.pageSize.getHeight();
-    const imgH  = (canvas.height / canvas.width) * pdfW;
-    const img   = canvas.toDataURL('image/jpeg', 0.97);
-
-    pdf.addImage(img, 'JPEG', 0, 0, pdfW, imgH);
-
-    let remaining = imgH - pdfH;
-    let offset    = -pdfH;
-    while (remaining > 0) {
-      pdf.addPage();
-      pdf.addImage(img, 'JPEG', 0, offset, pdfW, imgH);
-      offset    -= pdfH;
-      remaining -= pdfH;
-    }
-
-    pdf.save(filename);
-  } finally {
-    document.body.removeChild(iframe);
-  }
+  await html2pdf()
+    .set({
+      margin:   0,
+      filename: `insights_${(data.barbearia?.barbeiro ?? 'relatorio').replace(/\s+/g, '_')}.pdf`,
+      image:    { type: 'jpeg', quality: 1 },
+      html2canvas: {
+        scale:           2,
+        useCORS:         true,
+        backgroundColor: '#0a0a0a',
+        logging:         false,
+        removeContainer: true
+      },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    })
+    .from(html)
+    .save();
 }
+
+// ─────────────────────────────────────────────────────────────
+// INTERFACE DE DADOS (TypeScript — apague se usar JS puro)
+// ─────────────────────────────────────────────────────────────
+//
+// interface InsightsData {
+//   barbearia: { nome: string; barbeiro: string; }
+//   periodo:   string            // ex: "Semana 12/05/2026"
+//   dataGeracao: string          // ex: "12/05/2026"
+//   receita: {
+//     faturamentoTotal:    number   // ex: 670
+//     variacaoSemana:      string   // ex: "+100%" | "-5%"
+//     ticketMedio:         number   // ex: 134
+//     totalAtendimentos:   number   // ex: 5
+//     pagamentosPendentes: number   // ex: 4
+//     valorPresente:       number   // ex: 0
+//     topServicos: Array<{
+//       nome:         string
+//       categoria:    string
+//       faturamento:  number | null  // null = sem valor individual
+//       participacao: string         // ex: "Top Receita" | "~60% do mix"
+//       destaque:     boolean        // true = aparece na nota de destaque
+//     }>
+//   }
+//   agenda: {
+//     total:         number
+//     confirmados:   number
+//     cancelados:    number
+//     noShow:        number
+//     taxaConclusao: number   // 0–100
+//     porDia: Array<{
+//       dia:           string  // ex: "Segunda-feira"
+//       agendamentos:  number
+//       concluidos:    number
+//     }>
+//   }
+//   clientes: {
+//     total:        number
+//     ativos:       number
+//     novos:        number
+//     taxaRetencao: number   // 0–100
+//     satisfacao:   number   // 0–100
+//     lista: Array<{
+//       nome:        string
+//       status:      'ATIVO' | 'INATIVO'
+//       faturamento: number
+//       observacao:  string
+//     }>
+//   }
+//   equipe: Array<{
+//     nome:          string
+//     avaliacao:     number   // 0–5
+//     agendamentos:  number
+//     faturamento:   number
+//     status:        'ATIVO' | 'INATIVO'
+//   }>
+//   fidelidade: {
+//     inscritos:           number
+//     pontosResgatados:    number
+//     presentesMes:        number
+//     progressaoMedia:     string   // ex: "0/10"
+//     clientesBonificados: number   // percentual 0–100
+//   }
+// }
+
+// ─────────────────────────────────────────────────────────────
+// FUNÇÕES AUXILIARES (internas)
+// ─────────────────────────────────────────────────────────────
 
 function moeda(v) {
   const n = Number(v) || 0;
@@ -76,22 +130,26 @@ function tagServico(participacao) {
   return 'tag-gray';
 }
 
+// ─────────────────────────────────────────────────────────────
+// GERADOR DE LINHAS DE TABELA
+// ─────────────────────────────────────────────────────────────
+
 function rowsServicos(lista) {
   if (!lista || lista.length === 0) {
-    return '<tr><td colspan="4" style="color:#555;text-align:center">Sem dados</td></tr>';
+    return '<tr><td colspan="4" style="color:#a3a3a3;text-align:center">Sem dados</td></tr>';
   }
   return lista.map(s => `
     <tr>
       <td><strong style="color:#fff">${s.nome ?? '—'}</strong></td>
       <td>${s.categoria ?? '—'}</td>
-      <td>${s.faturamento != null ? `<strong style="color:#00e5a0">R$ ${moeda(s.faturamento)}</strong>` : '—'}</td>
+      <td>${s.faturamento != null ? `<strong style="color:#00e5ff">R$ ${moeda(s.faturamento)}</strong>` : '—'}</td>
       <td><span class="tag ${tagServico(s.participacao)}">${s.participacao ?? '—'}</span></td>
     </tr>`).join('');
 }
 
 function rowsAgenda(lista) {
   if (!lista || lista.length === 0) {
-    return '<tr><td colspan="4" style="color:#555;text-align:center">Sem dados</td></tr>';
+    return '<tr><td colspan="4" style="color:#a3a3a3;text-align:center">Sem dados</td></tr>';
   }
   return lista.map(d => {
     const ok = Number(d.concluidos) > 0;
@@ -108,36 +166,41 @@ function rowsAgenda(lista) {
 
 function rowsClientes(lista, satisfacao) {
   if (!lista || lista.length === 0) {
-    return '<tr><td colspan="5" style="color:#555;text-align:center">Sem dados</td></tr>';
+    return '<tr><td colspan="5" style="color:#a3a3a3;text-align:center">Sem dados</td></tr>';
   }
   return lista.map(c => `
     <tr>
       <td><strong style="color:#fff">${c.nome ?? '—'}</strong></td>
       <td><span class="tag ${c.status === 'ATIVO' ? 'tag-green' : 'tag-gray'}">${c.status === 'ATIVO' ? 'Ativo' : 'Inativo'}</span></td>
       <td>R$ ${moeda(c.faturamento)}</td>
-      <td><span style="color:#00e5a0">${pct(satisfacao)}</span></td>
+      <td><span style="color:#00e5ff">${pct(satisfacao)}</span></td>
       <td>${c.observacao ?? '—'}</td>
     </tr>`).join('');
 }
 
 function rowsEquipe(lista) {
   if (!lista || lista.length === 0) {
-    return '<tr><td colspan="5" style="color:#555;text-align:center">Sem dados</td></tr>';
+    return '<tr><td colspan="5" style="color:#a3a3a3;text-align:center">Sem dados</td></tr>';
   }
   return lista.map(b => `
     <tr>
       <td><strong style="color:#fff">${b.nome ?? '—'}</strong></td>
       <td>
         <span style="color:#f59e0b;font-size:11px">${estrelas(b.avaliacao)}</span>
-        <span style="color:#555;font-size:8px;margin-left:4px">${(Number(b.avaliacao) || 0).toFixed(1)}</span>
+        <span style="color:#a3a3a3;font-size:8px;margin-left:4px">${(Number(b.avaliacao) || 0).toFixed(1)}</span>
       </td>
       <td>${b.agendamentos ?? 0}</td>
-      <td><strong style="color:#00e5a0">R$ ${moeda(b.faturamento)}</strong></td>
+      <td><strong style="color:#00e5ff">R$ ${moeda(b.faturamento)}</strong></td>
       <td><span class="tag ${b.status === 'ATIVO' ? 'tag-green' : 'tag-gray'}">${b.status === 'ATIVO' ? 'Ativo' : 'Inativo'}</span></td>
     </tr>`).join('');
 }
 
+// ─────────────────────────────────────────────────────────────
+// CONSTRUTOR DO HTML COMPLETO
+// ─────────────────────────────────────────────────────────────
+
 function buildHTML(data) {
+  // Atalhos seguros para cada seção
   const barbearia  = data.barbearia  ?? {};
   const receita    = data.receita    ?? {};
   const agenda     = data.agenda     ?? {};
@@ -145,6 +208,7 @@ function buildHTML(data) {
   const equipe     = data.equipe     ?? [];
   const fidelidade = data.fidelidade ?? {};
 
+  // Lógicas condicionais calculadas antes do template
   const varNegativa       = String(receita.variacaoSemana ?? '').startsWith('-');
   const temPendentes      = Number(receita.pagamentosPendentes) > 0;
   const temCancelados     = Number(agenda.cancelados) > 0;
@@ -164,15 +228,21 @@ function buildHTML(data) {
 <head>
 <meta charset="UTF-8">
 <style>
-/* ── RESET ── */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+/* ── ANTI-TAILWIND CRASH ── */
+*, *::before, *::after { 
+  margin: 0; padding: 0; box-sizing: border-box; 
+  border-color: rgba(0,0,0,0);
+  outline-color: rgba(0,0,0,0);
+  text-decoration-color: rgba(0,0,0,0);
+  background-color: transparent;
+}
 
 /* ── PÁGINA ── */
 @page { size: A4; margin: 0; }
 
 html, body {
   width: 210mm;
-  background-color: #0d0d0d !important;
+  background-color: #0a0a0a !important;
   color: #ffffff !important;
   font-family: Helvetica, Arial, sans-serif;
   font-size: 10px;
@@ -184,8 +254,7 @@ html, body {
   width: 210mm;
   min-height: 297mm;
   padding: 10mm 12mm;
-  background-color: #0d0d0d !important;
-  color: #ffffff !important;
+  background-color: #0a0a0a !important;
 }
 
 /* ── HEADER ── */
@@ -193,89 +262,89 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  border-bottom: 1.5px solid #00e5a0;
+  border-bottom: 1.5px solid #00e5ff !important;
   padding-bottom: 8px;
   margin-bottom: 14px;
 }
-.brand  { font-size: 8px; font-weight: 700; letter-spacing: 3px; color: #00e5a0; text-transform: uppercase; }
-.hname  { font-size: 14px; font-weight: 700; color: #fff; margin-top: 2px; }
-.hsub   { font-size: 8px; color: #555; margin-top: 2px; }
-.htitle { font-size: 30px; font-weight: 700; color: #fff; line-height: 1; text-align: right; }
-.htitle span { color: #00e5a0; }
-.hdate  { font-size: 7.5px; color: #555; text-align: right; margin-top: 3px; }
+.brand  { font-size: 8px; font-weight: 700; letter-spacing: 3px; color: #00e5ff !important; text-transform: uppercase; }
+.hname  { font-size: 14px; font-weight: 700; color: #ffffff !important; margin-top: 2px; }
+.hsub   { font-size: 8px; color: #a3a3a3 !important; margin-top: 2px; }
+.htitle { font-size: 30px; font-weight: 700; color: #ffffff !important; line-height: 1; text-align: right; }
+.htitle span { color: #00e5ff !important; }
+.hdate  { font-size: 7.5px; color: #a3a3a3 !important; text-align: right; margin-top: 3px; }
 
 /* ── TÍTULO DE SEÇÃO ── */
 .sec {
   font-size: 8px;
   font-weight: 700;
   letter-spacing: 2.5px;
-  color: #00e5a0;
+  color: #00e5ff !important;
   text-transform: uppercase;
   margin-top: 16px;
   margin-bottom: 7px;
   padding-left: 8px;
-  border-left: 2.5px solid #00e5a0;
+  border-left: 2.5px solid #00e5ff !important;
 }
 
 /* ── CARDS ── */
 .cards { display: flex; gap: 6px; margin-bottom: 8px; }
 .card  {
   flex: 1;
-  background-color: #161616 !important;
-  border: 1px solid #242424;
+  background-color: #141414 !important;
+  border: 1px solid #1f1f1f !important;
   border-radius: 6px;
   padding: 9px 9px 7px;
 }
-.clabel { font-size: 6.5px; font-weight: 700; letter-spacing: 1px; color: #555; text-transform: uppercase; margin-bottom: 5px; }
-.cval   { font-size: 19px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 3px; }
-.csub   { font-size: 7px; font-weight: 500; color: #00e5a0; }
-.csub.g { color: #00e5a0; }
-.csub.w { color: #f59e0b; }
-.csub.d { color: #555; }
-.cval.g { color: #00e5a0; }
-.cval.w { color: #f59e0b; }
-.cval.d { color: #444; }
+.clabel { font-size: 6.5px; font-weight: 700; letter-spacing: 1px; color: #a3a3a3 !important; text-transform: uppercase; margin-bottom: 5px; }
+.cval   { font-size: 19px; font-weight: 700; color: #ffffff !important; line-height: 1; margin-bottom: 3px; }
+.csub   { font-size: 7px; font-weight: 500; color: #00e5ff !important; }
+.csub.g { color: #00e5ff !important; }
+.csub.w { color: #f59e0b !important; }
+.csub.d { color: #a3a3a3 !important; }
+.cval.g { color: #00e5ff !important; }
+.cval.w { color: #f59e0b !important; }
+.cval.d { color: #a3a3a3 !important; }
 
 /* ── KPI BOXES (agenda) ── */
 .kpis { display: flex; gap: 6px; margin-bottom: 8px; }
 .kpi  {
   flex: 1;
   background-color: #0f1f18 !important;
-  border: 1px solid #00e5a025;
+  border: 1px solid rgba(0, 229, 255, 0.15) !important;
   border-radius: 6px;
   padding: 8px 6px;
   text-align: center;
 }
-.klabel { font-size: 6.5px; color: #555; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
-.kval   { font-size: 15px; font-weight: 700; color: #00e5a0; }
-.kval.d { color: #555; }
-.kval.w { color: #f59e0b; }
-.ksub   { font-size: 7px; color: #444; margin-top: 2px; }
+.klabel { font-size: 6.5px; color: #a3a3a3 !important; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.kval   { font-size: 15px; font-weight: 700; color: #00e5ff !important; }
+.kval.d { color: #a3a3a3 !important; }
+.kval.w { color: #f59e0b !important; }
+.ksub   { font-size: 7px; color: #a3a3a3 !important; margin-top: 2px; }
 
 /* ── TABELAS ── */
 .twrap {
-  background-color: #161616 !important;
-  border: 1px solid #242424;
+  background-color: #141414 !important;
+  border: 1px solid #1f1f1f !important;
   border-radius: 6px;
   overflow: hidden;
   margin-bottom: 6px;
 }
 table           { width: 100%; border-collapse: collapse; }
-thead tr        { background-color: #1e1e1e !important; }
+thead tr        { background-color: #1f1f1f !important; }
 thead th        {
   font-size: 7px;
   font-weight: 700;
   letter-spacing: 1px;
-  color: #00e5a0;
+  color: #00e5ff !important;
   text-transform: uppercase;
   padding: 7px 9px;
   text-align: left;
-  border-bottom: 1px solid #2a2a2a;
+  border-bottom: 1px solid #2a2a2a !important;
 }
-tbody tr                  { border-bottom: 1px solid #1e1e1e; }
-tbody tr:last-child        { border-bottom: none; }
-tbody tr:nth-child(even)   { background-color: #191919 !important; }
-tbody td                  { font-size: 9px; color: #c0c0c0; padding: 7px 9px; vertical-align: middle; }
+tbody tr                  { border-bottom: 1px solid #1f1f1f !important; }
+tbody tr:last-child        { border-bottom: none !important; }
+tbody tr:nth-child(even)   { background-color: #1a1a1a !important; }
+tbody td                  { font-size: 9px; color: #c0c0c0 !important; padding: 7px 9px; vertical-align: middle; }
 
 /* ── TAGS ── */
 .tag {
@@ -287,10 +356,10 @@ tbody td                  { font-size: 9px; color: #c0c0c0; padding: 7px 9px; ve
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
-.tag-green  { background: #00e5a018; color: #00e5a0; border: 1px solid #00e5a035; }
-.tag-gray   { background: #33333335; color: #777;    border: 1px solid #44444435; }
-.tag-warn   { background: #f59e0b18; color: #f59e0b; border: 1px solid #f59e0b35; }
-.tag-purple { background: #9d5cff18; color: #9d5cff; border: 1px solid #9d5cff35; }
+.tag-green  { background-color: rgba(0, 229, 255, 0.1) !important; color: #00e5ff !important; border: 1px solid rgba(0, 229, 255, 0.2) !important; }
+.tag-gray   { background-color: rgba(51, 51, 51, 0.2) !important; color: #777 !important;    border: 1px solid rgba(68, 68, 68, 0.2) !important; }
+.tag-warn   { background-color: rgba(245, 158, 11, 0.1) !important; color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.2) !important; }
+.tag-purple { background-color: rgba(157, 92, 255, 0.1) !important; color: #9d5cff !important; border: 1px solid rgba(157, 92, 255, 0.2) !important; }
 
 /* ── NOTAS ── */
 .note {
@@ -299,26 +368,26 @@ tbody td                  { font-size: 9px; color: #c0c0c0; padding: 7px 9px; ve
   font-size: 7.5px;
   margin-bottom: 6px;
   background-color: #0f1f18 !important;
-  border: 1px solid #00e5a025;
-  color: #00e5a0;
+  border: 1px solid rgba(0, 229, 255, 0.15) !important;
+  color: #00e5ff !important;
 }
-.note strong { color: #fff; font-weight: 700; }
-.note.warn   { background-color: #1a1000 !important; border-color: #f59e0b25; color: #f59e0b; }
+.note strong { color: #ffffff !important; font-weight: 700; }
+.note.warn   { background-color: #1a1000 !important; border-color: rgba(245, 158, 11, 0.15) !important; color: #f59e0b !important; }
 
 /* ── FOOTER ── */
 .footer {
   margin-top: 18px;
-  border-top: 1px solid #1e1e1e;
+  border-top: 1px solid #1f1f1f !important;
   padding-top: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.fl, .fr { font-size: 7.5px; color: #333; }
+.fl, .fr { font-size: 7.5px; color: #a3a3a3 !important; }
 .dot {
   display: inline-block;
   width: 4px; height: 4px;
-  background: #00e5a0;
+  background-color: #00e5ff !important;
   border-radius: 50%;
   margin-right: 5px;
   vertical-align: middle;

@@ -1,33 +1,113 @@
 'use client'
 
-import { useState, useCallback, type ReactNode } from 'react'
+import { useState, useCallback, useRef, useEffect, type ReactNode } from 'react'
 import { DeskLamp } from './desk-lamp'
 
 /**
  * AuthScene Component
  * Client wrapper that manages the desk lamp on/off state.
- * Controls the login card visibility and background ambiance.
- * Desktop only: lamp toggles login form visibility.
- * Mobile: always visible (no lamp).
+ * Controls the login card visibility, barbershop monster video, and background ambiance.
+ * Desktop only: lamp toggles login form visibility and plays the monster video.
+ * Mobile: always visible (no lamp, no video).
  */
 export function AuthScene({ children }: { children: ReactNode }) {
   const [isLampOn, setIsLampOn] = useState(true)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const toggleLamp = useCallback(() => {
     setIsLampOn(prev => !prev)
   }, [])
 
+  // Control video playback based on lamp state
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    if (!isLampOn) {
+      // Lamp OFF → play the monster video
+      video.currentTime = 0
+      video.play().catch(() => {
+        // Autoplay may be blocked — silent fallback
+      })
+    } else {
+      // Lamp ON → pause and reset
+      video.pause()
+      video.currentTime = 0
+    }
+  }, [isLampOn])
+
   return (
-    <>
-      {/* Background ambiance shift */}
+    <div className="relative flex items-center justify-center w-full min-h-screen">
+
+      {/* === BACKGROUND AMBIANCE SHIFT === */}
       <div
-        className="absolute inset-0 transition-colors duration-700 ease-out pointer-events-none z-0"
+        className="fixed inset-0 transition-all duration-700 ease-out pointer-events-none z-0"
         style={{
-          backgroundColor: isLampOn ? 'transparent' : 'rgba(0,0,0,0.4)',
+          backgroundColor: isLampOn ? 'transparent' : 'rgba(0,0,0,0.5)',
         }}
       />
 
-      {/* Login card — animated visibility */}
+      {/* === CIRCUIT LINES DIM OVERLAY (lamp off) === */}
+      <div
+        className="fixed inset-0 pointer-events-none transition-opacity duration-700 ease-out z-[5]"
+        style={{
+          background: 'radial-gradient(circle at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 100%)',
+          opacity: isLampOn ? 0 : 1,
+        }}
+      />
+
+      {/* === BARBERSHOP MONSTER VIDEO — shows when lamp is OFF === */}
+      <div
+        className="fixed inset-0 z-[8] hidden lg:flex items-center justify-center pointer-events-none transition-all duration-700 ease-out"
+        style={{
+          opacity: isLampOn ? 0 : 1,
+          transform: isLampOn ? 'scale(0.85)' : 'scale(1)',
+        }}
+      >
+        <div className="relative w-full max-w-[300px] mx-auto">
+          {/* Video container with vignette mask — 9:16 portrait */}
+          <div
+            className="relative rounded-3xl overflow-hidden max-h-[70vh]"
+            style={{
+              aspectRatio: '9 / 16',
+              maskImage: 'radial-gradient(ellipse 90% 90% at center, black 40%, transparent 100%)',
+              WebkitMaskImage: 'radial-gradient(ellipse 90% 90% at center, black 40%, transparent 100%)',
+            }}
+          >
+            <video
+              ref={videoRef}
+              src="/barbershop-monster.mp4"
+              muted
+              loop
+              playsInline
+              preload="auto"
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{
+                filter: 'brightness(0.65) contrast(1.15) saturate(0.85)',
+              }}
+            />
+          </div>
+
+          {/* Ambient glow behind video */}
+          <div
+            className="absolute -inset-16 rounded-full pointer-events-none -z-10 transition-opacity duration-1000"
+            style={{
+              background: 'radial-gradient(circle, rgba(0,212,170,0.05) 0%, transparent 60%)',
+              opacity: isLampOn ? 0 : 1,
+            }}
+          />
+
+          {/* Subtle help text below video */}
+          <p
+            className="text-center text-[11px] text-white/30 font-medium mt-8 tracking-[0.15em] uppercase transition-opacity duration-700 delay-300"
+            style={{ opacity: isLampOn ? 0 : 0.7 }}
+          >
+            Clique no abajur para acender a luz
+          </p>
+        </div>
+      </div>
+
+      {/* === LOGIN CARD — animated visibility === */}
       <div
         className="relative z-10 w-full max-w-[460px] mx-4 transition-all duration-700 ease-out"
         style={{
@@ -54,19 +134,10 @@ export function AuthScene({ children }: { children: ReactNode }) {
         <div className="absolute -inset-4 bg-gradient-to-b from-accent-main/5 to-transparent rounded-3xl blur-2xl pointer-events-none -z-10" />
       </div>
 
-      {/* Circuit lines dim overlay when lamp is off */}
-      <div
-        className="absolute inset-0 pointer-events-none transition-opacity duration-700 ease-out z-[5]"
-        style={{
-          background: 'radial-gradient(circle at center, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%)',
-          opacity: isLampOn ? 0 : 1,
-        }}
-      />
-
-      {/* Desk Lamp — desktop only */}
+      {/* === DESK LAMP — desktop only === */}
       <DeskLamp isOn={isLampOn} onToggle={toggleLamp} />
 
-      {/* Lamp light wash on the scene when ON */}
+      {/* Lamp warm light wash when ON */}
       <div
         className="hidden lg:block fixed bottom-0 right-0 w-[500px] h-[400px] pointer-events-none transition-opacity duration-700 ease-out z-[1]"
         style={{
@@ -74,6 +145,6 @@ export function AuthScene({ children }: { children: ReactNode }) {
           opacity: isLampOn ? 1 : 0,
         }}
       />
-    </>
+    </div>
   )
 }
