@@ -64,11 +64,14 @@ export function AdminAppointmentsPage({
 
   const deferredSearch = useDeferredValue(searchTerm)
 
-  const filtered = appointments.filter(a =>
-    a.client.full_name.toLowerCase().includes(deferredSearch.toLowerCase()) ||
-    a.barber.full_name.toLowerCase().includes(deferredSearch.toLowerCase()) ||
-    a.service.name.toLowerCase().includes(deferredSearch.toLowerCase())
-  )
+  const filtered = appointments.filter(a => {
+    const q = deferredSearch.toLowerCase()
+    return (
+      a.client?.full_name?.toLowerCase().includes(q) ||
+      a.barber?.full_name?.toLowerCase().includes(q) ||
+      a.service?.name?.toLowerCase().includes(q)
+    )
+  })
 
   const PERIODS: { id: Period; label: string }[] = [
     { id: 'today', label: 'HOJE' },

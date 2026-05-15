@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Palette, Moon, MoonStars, Sun, Circle, FloppyDisk, CircleNotch, ArrowCounterClockwise, CheckCircle, WarningCircle } from '@phosphor-icons/react'
+import { Palette, Moon, MoonStars, Circle, FloppyDisk, CircleNotch, ArrowCounterClockwise, CheckCircle, WarningCircle } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 import { toast } from 'sonner'
 

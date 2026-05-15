@@ -4,6 +4,8 @@ import { requireAdmin } from '@/lib/auth/require-auth'
 import { getAllServices, getServiceStats } from '@/features/service/queries'
 import { AdminServicesPage } from '@/features/service/components/admin-services-page'
 
+export const revalidate = 300
+
 export const metadata = {
   title: 'Serviços | Admin',
   description: 'Gerencie o catálogo completo de serviços da sua barbearia.',

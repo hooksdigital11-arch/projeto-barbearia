@@ -1,5 +1,6 @@
 'use server'
 
+import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireUser } from '@/lib/auth/require-auth'
@@ -70,6 +71,7 @@ export async function createClientAction(formData: FormData) {
  * Atualizar cliente existente
  */
 export async function updateClientAction(clientId: string, formData: FormData) {
+  if (!z.string().uuid().safeParse(clientId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
 
@@ -111,6 +113,7 @@ export async function updateClientAction(clientId: string, formData: FormData) {
  * Atualizar notas do barbeiro
  */
 export async function updateClientNotes(clientId: string, notes: string) {
+  if (!z.string().uuid().safeParse(clientId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
 
@@ -136,6 +139,7 @@ export async function updateClientNotes(clientId: string, notes: string) {
  * Soft delete — muda status para 'inactive'
  */
 export async function deleteClientAction(clientId: string) {
+  if (!z.string().uuid().safeParse(clientId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (user.role !== 'admin') return { error: 'Apenas admin pode remover clientes' }
 
@@ -158,6 +162,7 @@ export async function deleteClientAction(clientId: string) {
  * Bloquear cliente (admin only)
  */
 export async function blockClientAction(clientId: string) {
+  if (!z.string().uuid().safeParse(clientId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (user.role !== 'admin') return { error: 'Apenas admin pode bloquear clientes' }
 
@@ -180,6 +185,7 @@ export async function blockClientAction(clientId: string) {
  * Reativar cliente (admin only)
  */
 export async function reactivateClientAction(clientId: string) {
+  if (!z.string().uuid().safeParse(clientId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (user.role !== 'admin') return { error: 'Apenas admin pode reativar clientes' }
 

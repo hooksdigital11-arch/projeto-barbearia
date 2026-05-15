@@ -1,10 +1,12 @@
 'use server'
 
+import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireUser } from '@/lib/auth/require-auth'
 import { sendMessageSchema, broadcastSchema, templateSchema } from './schemas'
 import { getClientsForMessaging } from './queries'
+import { enviarMensagem, isEvolutionConfigured } from '@/lib/evolution'
 
 const REVALIDATE = ['/admin/messaging', '/barber/messaging']
 function revalidateAll() {
@@ -12,8 +14,77 @@ function revalidateAll() {
 }
 
 /**
- * Registra uma mensagem enviada no banco.
- * O envio real via WhatsApp acontece no cliente via window.open.
+ * Envia mensagem via Evolution API e registra no banco.
+ */
+export async function sendMessageAction(formData: FormData) {
+  const user = await requireUser()
+  if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
+
+  const parsed = sendMessageSchema.safeParse({
+    client_id: formData.get('client_id'),
+    content: formData.get('content'),
+    template_used: formData.get('template_used') || null,
+  })
+
+  if (!parsed.success) {
+    return { error: 'Dados inválidos', issues: parsed.error.flatten() }
+  }
+
+  const { data: client } = await supabaseAdmin
+    .from('clients')
+    .select('phone')
+    .eq('id', parsed.data.client_id)
+    .eq('organization_id', user.organization_id)
+    .single()
+
+  if (!client) return { error: 'Cliente não encontrado' }
+  if (!client.phone) return { error: 'Cliente sem telefone cadastrado' }
+
+  if (!isEvolutionConfigured()) {
+    return { error: 'Evolution API não configurada. Verifique as variáveis de ambiente.' }
+  }
+
+  let status: 'sent' | 'failed' = 'sent'
+  let errorMsg: string | null = null
+
+  try {
+    await enviarMensagem(client.phone, parsed.data.content)
+  } catch (e) {
+    status = 'failed'
+    errorMsg = e instanceof Error ? e.message : 'Erro desconhecido'
+  }
+
+  const { error: dbError } = await supabaseAdmin
+    .from('messages')
+    .insert({
+      organization_id: user.organization_id,
+      client_id: parsed.data.client_id,
+      channel: 'whatsapp',
+      direction: 'sent',
+      content: parsed.data.content,
+      template_used: parsed.data.template_used ?? null,
+      status,
+      error_message: errorMsg,
+      sent_by: user.id,
+    })
+
+  if (dbError) {
+    console.error('[SEND_MESSAGE_ACTION]', dbError.message)
+    return { error: 'Erro ao salvar mensagem' }
+  }
+
+  revalidateAll()
+
+  if (status === 'failed') {
+    return { error: errorMsg ?? 'Falha ao enviar mensagem via WhatsApp' }
+  }
+
+  return { success: true }
+}
+
+/**
+ * @deprecated Use sendMessageAction para envio real via Evolution API.
+ * Mantido para compatibilidade com fluxos que não precisam de envio automático.
  */
 export async function recordMessage(formData: FormData) {
   const user = await requireUser()
@@ -52,8 +123,7 @@ export async function recordMessage(formData: FormData) {
 }
 
 /**
- * Registra múltiplas mensagens de um disparo em massa (broadcast).
- * O envio real de cada link WhatsApp é feito no cliente.
+ * Disparo em massa: registra no banco e envia via Evolution API.
  */
 export async function recordBroadcast(formData: FormData) {
   const user = await requireUser()
@@ -93,8 +163,23 @@ export async function recordBroadcast(formData: FormData) {
     return { error: 'Erro ao registrar disparo' }
   }
 
+  // Enviar via Evolution API para cada cliente com telefone
+  let sentCount = 0
+  if (isEvolutionConfigured()) {
+    for (const client of clients) {
+      if (!client.phone) continue
+      const msg = parsed.data.content.replace(/\{nome\}/g, client.full_name)
+      try {
+        await enviarMensagem(client.phone, msg)
+        sentCount++
+      } catch (e) {
+        console.error('[BROADCAST_EVOLUTION]', client.id, e)
+      }
+    }
+  }
+
   revalidateAll()
-  return { success: true, count: clients.length, clients }
+  return { success: true, count: clients.length, sentCount, clients }
 }
 
 /**
@@ -183,6 +268,7 @@ export async function updateTemplate(formData: FormData) {
  * Duplica um template de mensagem.
  */
 export async function duplicateTemplate(templateId: string) {
+  if (!z.string().uuid().safeParse(templateId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (user.role !== 'admin') return { error: 'Sem permissão' }
 
@@ -223,6 +309,7 @@ export async function duplicateTemplate(templateId: string) {
  * Deleta um template de mensagem.
  */
 export async function deleteTemplate(templateId: string) {
+  if (!z.string().uuid().safeParse(templateId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (user.role !== 'admin') return { error: 'Sem permissão' }
 

@@ -4,36 +4,18 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
 import { recordBroadcast } from '../actions'
-import type { ClientForMessage, MessageTemplate } from '../types'
+import type { MessageTemplate } from '../types'
 import { BROADCAST_GROUPS, type BroadcastGroup } from '../types'
 import { X, Lightning, Eye, PaperPlaneRight, CheckCircle, CircleNotch } from '@phosphor-icons/react'
 
 interface BroadcastModalProps {
   isOpen: boolean
   onClose: () => void
-  orgName: string
+  orgName?: string
   templates: MessageTemplate[]
 }
 
-function applyTemplateVars(content: string, client: ClientForMessage, orgName: string): string {
-  return content
-    .replace(/\{nome\}/g, client.full_name)
-    .replace(/\{nome_barbearia\}/g, orgName)
-    .replace(/\{data\}/g, new Date().toLocaleDateString('pt-BR'))
-    .replace(/\{horario\}/g, new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
-    .replace(/\{servico\}/g, 'serviço')
-    .replace(/\{barbeiro\}/g, 'seu barbeiro')
-    .replace(/\{valor\}/g, 'R$ 0,00')
-    .replace(/\{link_agendamento\}/g, 'barbearia.com')
-}
-
-function sendWhatsApp(phone: string, message: string) {
-  const clean = phone.replace(/\D/g, '')
-  const url = `https://wa.me/55${clean}?text=${encodeURIComponent(message)}`
-  window.open(url, '_blank')
-}
-
-export function BroadcastModal({ isOpen, onClose, orgName, templates }: BroadcastModalProps) {
+export function BroadcastModal({ isOpen, onClose, templates }: BroadcastModalProps) {
   const [selectedGroup, setSelectedGroup] = useState<BroadcastGroup | ''>('')
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [step, setStep] = useState<'config' | 'preview' | 'sending'>('config')
@@ -65,21 +47,9 @@ export function BroadcastModal({ isOpen, onClose, orgName, templates }: Broadcas
         return
       }
 
-      const clients = (res.clients || []) as ClientForMessage[]
-
-      let count = 0
-      for (const client of clients) {
-        if (client.phone) {
-          const msg = applyTemplateVars(template.content, client, orgName)
-          sendWhatsApp(client.phone, msg)
-          count++
-          await new Promise(r => setTimeout(r, 600))
-        }
-      }
-
-      setSentCount(count)
+      setSentCount(res.sentCount ?? res.count ?? 0)
       setStep('sending')
-      toast.success('DISPAROS INICIADOS!')
+      toast.success('DISPAROS ENVIADOS!')
     })
   }
 
@@ -172,7 +142,7 @@ export function BroadcastModal({ isOpen, onClose, orgName, templates }: Broadcas
               <div className="p-3 px-4 rounded-[7px] bg-[#2e1a0d]/10 border-[0.5px] border-[#c0700022] flex gap-3">
                 <Lightning size={14} weight="fill" className="text-[#c07000] shrink-0" />
                 <p className="text-[9px] text-[#c07000] uppercase tracking-wide leading-relaxed opacity-60">
-                  O sistema abrirá o WhatsApp Web para cada cliente. Recomendamos manter a janela visível para evitar bloqueios.
+                  As mensagens serão enviadas automaticamente via Evolution API. A variável {'{nome}'} será substituída pelo nome de cada cliente.
                 </p>
               </div>
 

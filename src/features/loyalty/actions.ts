@@ -1,5 +1,6 @@
 'use server'
 
+import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireUser } from '@/lib/auth/require-auth'
@@ -45,6 +46,7 @@ export async function updateLoyaltyConfig(formData: FormData) {
 
 /** Admin/Barbeiro: adicionar carimbo manualmente */
 export async function addStamp(clientId: string, formData: FormData) {
+  if (!z.string().uuid().safeParse(clientId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
 
@@ -78,6 +80,7 @@ export async function addStamp(clientId: string, formData: FormData) {
 
 /** Admin: remover carimbo manualmente */
 export async function removeStamp(clientId: string) {
+  if (!z.string().uuid().safeParse(clientId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (user.role !== 'admin') return { error: 'Sem permissão' }
 
@@ -102,6 +105,7 @@ export async function removeStamp(clientId: string) {
 
 /** Cliente: resgatar benefício */
 export async function redeemReward(clientId: string) {
+  if (!z.string().uuid().safeParse(clientId).success) return { error: 'ID inválido' }
   const user = await requireUser()
 
   // Buscar saldo — usa admin para bypassar RLS

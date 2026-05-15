@@ -1,4 +1,5 @@
 'use server'
+import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requireUser } from '@/lib/auth/require-auth'
@@ -56,6 +57,7 @@ export async function addComandaItem(formData: FormData) {
 
 // Remover item
 export async function removeComandaItem(itemId: string) {
+  if (!z.string().uuid().safeParse(itemId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
   const supabase = await createClient()

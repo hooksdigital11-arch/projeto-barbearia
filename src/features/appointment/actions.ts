@@ -10,6 +10,34 @@ import {
   createClientAppointmentSchema,
 } from './schemas'
 import { checkTimeConflict } from './queries'
+import { enviarMensagem, isEvolutionConfigured } from '@/lib/evolution'
+
+async function notificarAgendamento(
+  clientId: string,
+  barberId: string,
+  startTime: string,
+  tipo: 'confirmacao' | 'cancelamento'
+) {
+  if (!isEvolutionConfigured()) return
+  try {
+    const [{ data: client }, { data: barber }] = await Promise.all([
+      supabaseAdmin.from('clients').select('full_name, phone').eq('id', clientId).single(),
+      supabaseAdmin.from('profiles').select('full_name').eq('id', barberId).single(),
+    ])
+    if (!client?.phone) return
+    const dt = new Date(startTime)
+    const data = dt.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+    const hora = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })
+    const nome = client.full_name
+    const barbeiro = barber?.full_name ?? 'seu barbeiro'
+    const msg = tipo === 'confirmacao'
+      ? `Olá, ${nome}! ✂️ Seu agendamento foi confirmado para ${data} às ${hora} com ${barbeiro}. Até lá!`
+      : `Olá, ${nome}! Seu agendamento de ${data} às ${hora} foi cancelado. Entre em contato para remarcar.`
+    await enviarMensagem(client.phone, msg)
+  } catch (e) {
+    console.error('[NOTIFICAR_AGENDAMENTO]', tipo, e)
+  }
+}
 
 const REVALIDATE_PATHS = [
   '/admin/appointments',
@@ -91,6 +119,9 @@ export async function createAppointment(formData: FormData) {
     console.error('[CREATE_APPOINTMENT]', error.message)
     return { error: 'Erro ao criar agendamento' }
   }
+
+  // Notificação de confirmação (fire-and-forget)
+  notificarAgendamento(client_id, barber_id, start_time, 'confirmacao')
 
   revalidateAll()
   return { success: true, id: data.id }
@@ -289,6 +320,16 @@ export async function cancelAppointment(appointmentId: string) {
     return { error: 'Erro ao cancelar' }
   }
 
+  // Notificação de cancelamento (fire-and-forget)
+  ;(async () => {
+    const { data: appt } = await supabaseAdmin
+      .from('appointments')
+      .select('client_id, barber_id, start_time')
+      .eq('id', appointmentId)
+      .single()
+    if (appt) await notificarAgendamento(appt.client_id, appt.barber_id, appt.start_time, 'cancelamento')
+  })().catch(() => undefined)
+
   revalidateAll()
   return { success: true }
 }
@@ -330,6 +371,11 @@ export async function createClientAppointment(formData: FormData) {
   if (!service) return { error: 'Serviço não encontrado' }
 
   const startDt = new Date(start_time)
+
+  if (startDt <= new Date()) {
+    return { error: 'Não é possível agendar em data/hora passada' }
+  }
+
   const endDt = new Date(startDt.getTime() + service.duration_minutes * 60 * 1000)
 
   const hasConflict = await checkTimeConflict(barber_id, startDt.toISOString(), endDt.toISOString())
@@ -353,6 +399,9 @@ export async function createClientAppointment(formData: FormData) {
     .single()
 
   if (error) return { error: 'Erro ao criar agendamento' }
+
+  // Notificação de confirmação (fire-and-forget)
+  notificarAgendamento(clientRow.id, barber_id, startDt.toISOString(), 'confirmacao')
 
   revalidatePath('/client/appointments')
   return { success: true, data }

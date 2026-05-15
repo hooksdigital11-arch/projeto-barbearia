@@ -31,8 +31,6 @@ export function RealtimeListener({ organizationId, tables = ['appointments', 'co
           filter: `organization_id=eq.${organizationId}`
         },
         (payload) => {
-          console.log(`Realtime update on ${table}:`, payload)
-          
           // Refetch server components to update the UI
           clearTimeout(debounceTimer)
           debounceTimer = setTimeout(() => {
@@ -42,11 +40,7 @@ export function RealtimeListener({ organizationId, tables = ['appointments', 'co
       )
     })
 
-    channel.subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
-        console.log('Realtime listener ativado para:', tables)
-      }
-    })
+    channel.subscribe()
 
     return () => {
       supabase.removeChannel(channel)

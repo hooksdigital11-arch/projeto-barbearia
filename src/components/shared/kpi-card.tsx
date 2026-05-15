@@ -27,7 +27,7 @@ export function KPICard({
     )}>
       <div className="relative z-10 flex flex-col h-full justify-between">
         <div className="flex items-start justify-between">
-          <div className="text-[#444] group-hover:text-accent-main transition-colors">
+          <div className="text-text-secondary group-hover:text-accent-main transition-colors">
             {icon}
           </div>
           
@@ -44,14 +44,14 @@ export function KPICard({
         </div>
 
         <div className="space-y-1 mt-4">
-          <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#444] group-hover:text-text-secondary transition-colors">
+          <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-text-secondary group-hover:text-text-secondary transition-colors">
             {title}
           </p>
-          <h3 className="text-xl md:text-[28px] font-medium tracking-tight text-white tabular-nums">
+          <h3 className="text-xl md:text-[28px] font-medium tracking-tight text-text-primary tabular-nums">
             {value}
           </h3>
           {subtitle && (
-            <p className="text-[10px] font-medium uppercase tracking-wider text-[#333]">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
               {subtitle}
             </p>
           )}

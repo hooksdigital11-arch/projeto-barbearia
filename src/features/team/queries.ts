@@ -13,7 +13,7 @@ export const getTeam = cache(async (): Promise<TeamMember[]> => {
 
   const { data, error } = await supabaseAdmin
     .from('profiles')
-    .select('*')
+    .select('id, organization_id, full_name, email, phone, role, status, specialty, avatar_url, created_at')
     .eq('organization_id', user.organization_id)
     .in('role', ['barber', 'admin'])
     .order('full_name', { ascending: true })
@@ -38,7 +38,7 @@ export const getTeamWithStats = cache(async (): Promise<TeamMemberWithStats[]> =
   // Buscar barbeiros
   const { data: barbers, error: barbersError } = await supabaseAdmin
     .from('profiles')
-    .select('*')
+    .select('id, organization_id, full_name, email, phone, role, status, specialty, avatar_url, created_at')
     .eq('organization_id', user.organization_id)
     .in('role', ['barber', 'admin'])
     .order('full_name', { ascending: true })

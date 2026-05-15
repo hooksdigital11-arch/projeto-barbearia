@@ -86,10 +86,10 @@ export default async function DashboardLayout({
               <div className="flex flex-col">
                 {profile.role === 'barber' ? (
                   <>
-                    <span className="text-[12px] font-medium tracking-[0.1em] text-[#fff] uppercase leading-tight truncate">
+                    <span className="text-[12px] font-medium tracking-[0.1em] text-text-primary uppercase leading-tight truncate">
                       {profile.full_name}
                     </span>
-                    <span className="text-[9px] tracking-[0.12em] uppercase text-[#2e2e2e] mt-0.5">
+                    <span className="text-[9px] tracking-[0.12em] uppercase text-text-muted mt-0.5">
                       PRECISION SYSTEMS
                     </span>
                   </>
@@ -114,12 +114,12 @@ export default async function DashboardLayout({
             {profile.role === 'barber' ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-[28px] h-[28px] rounded-[7px] bg-[#1a1a1a] flex items-center justify-center text-[#bbb] font-medium text-[11px] uppercase shrink-0">
+                  <div className="w-[28px] h-[28px] rounded-[7px] bg-surface-secondary flex items-center justify-center text-text-secondary font-medium text-[11px] uppercase shrink-0">
                     {profile.full_name?.[0] || 'U'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium truncate text-[#bbb] leading-none uppercase">{profile.full_name}</p>
-                    <p className="text-[9px] truncate text-[#333] mt-1 uppercase tracking-[0.06em]">BARBER</p>
+                    <p className="text-[11px] font-medium truncate text-text-secondary leading-none uppercase">{profile.full_name}</p>
+                    <p className="text-[9px] truncate text-text-muted mt-1 uppercase tracking-[0.06em]">BARBER</p>
                   </div>
                 </div>
                 <LogoutButton />
@@ -127,12 +127,12 @@ export default async function DashboardLayout({
             ) : profile.role === 'client' ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-[28px] h-[28px] rounded-[7px] bg-[#1a1a1a] flex items-center justify-center text-[#bbb] font-medium text-[11px] uppercase shrink-0">
+                  <div className="w-[28px] h-[28px] rounded-[7px] bg-surface-secondary flex items-center justify-center text-text-secondary font-medium text-[11px] uppercase shrink-0">
                     {profile.full_name?.[0] || 'U'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium truncate text-[#bbb] leading-none uppercase">{profile.full_name}</p>
-                    <p className="text-[9px] truncate text-[#333] mt-1 uppercase tracking-[0.06em]">CLIENT</p>
+                    <p className="text-[11px] font-medium truncate text-text-secondary leading-none uppercase">{profile.full_name}</p>
+                    <p className="text-[9px] truncate text-text-muted mt-1 uppercase tracking-[0.06em]">CLIENT</p>
                   </div>
                 </div>
                 <LogoutButton />
@@ -140,12 +140,12 @@ export default async function DashboardLayout({
             ) : (
               <>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-[28px] h-[28px] rounded-[7px] bg-[#1a1a1a] flex items-center justify-center text-text-secondary font-medium text-[11px] uppercase shrink-0">
+                  <div className="w-[28px] h-[28px] rounded-[7px] bg-surface-secondary flex items-center justify-center text-text-secondary font-medium text-[11px] uppercase shrink-0">
                     {profile.full_name?.[0] || 'U'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] font-medium truncate text-text-secondary leading-none uppercase tracking-tight">{profile.full_name}</p>
-                    <p className="text-[9px] truncate text-[#333] mt-1 uppercase tracking-[0.06em]">{profile.role}</p>
+                    <p className="text-[9px] truncate text-text-muted mt-1 uppercase tracking-[0.06em]">{profile.role}</p>
                   </div>
                 </div>
                 <LogoutButton />

@@ -29,16 +29,16 @@ async function LoyaltyContent() {
     return (
       <div className="space-y-0 animate-in fade-in duration-700">
         <div className="mb-[20px]">
-          <h1 className="text-[28px] font-medium text-[#fff] tracking-[-0.01em] uppercase leading-none">Minha Fidelidade</h1>
-          <p className="text-[11px] text-[#333] mt-[5px] uppercase tracking-wider font-medium">Acompanhe seus carimbos e resgate suas recompensas.</p>
+          <h1 className="text-[28px] font-medium text-text-primary tracking-[-0.01em] uppercase leading-none">Minha Fidelidade</h1>
+          <p className="text-[11px] text-text-muted mt-[5px] uppercase tracking-wider font-medium">Acompanhe seus carimbos e resgate suas recompensas.</p>
         </div>
-        
-        <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] p-[48px_24px] flex flex-col items-center justify-center text-center">
-          <div className="w-[56px] h-[56px] rounded-full bg-[#141414] border border-[#1e1e1e] flex items-center justify-center mb-[20px]">
-            <UserCircle size={24} className="text-[#2a2a2a]" />
+
+        <div className="bg-bg-sidebar border border-border-main rounded-[10px] p-[48px_24px] flex flex-col items-center justify-center text-center">
+          <div className="w-[56px] h-[56px] rounded-full bg-bg-surface border border-border-main flex items-center justify-center mb-[20px]">
+            <UserCircle size={24} className="text-text-muted" />
           </div>
-          <h2 className="text-[14px] font-medium text-[#555] uppercase tracking-wider mb-[8px]">Perfil de cliente não encontrado</h2>
-          <p className="text-[11px] text-[#2e2e2e] leading-[1.6] max-w-[340px] uppercase tracking-wide">
+          <h2 className="text-[14px] font-medium text-text-nav uppercase tracking-wider mb-[8px]">Perfil de cliente não encontrado</h2>
+          <p className="text-[11px] text-text-muted leading-[1.6] max-w-[340px] uppercase tracking-wide">
             Seu perfil ainda não está vinculado a um registro de cliente. Entre em contato com a barbearia para ativar seu programa de fidelidade.
           </p>
         </div>

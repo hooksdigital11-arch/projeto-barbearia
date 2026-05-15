@@ -10,7 +10,7 @@ export const getInventory = cache(async (activeOnly = true): Promise<InventoryIt
   
   let query = supabaseAdmin
     .from('inventory')
-    .select('*')
+    .select('id, organization_id, name, description, category, type, quantity, min_quantity, cost_cents, price_cents, supplier, supplier_phone, active, created_at, updated_at')
     .eq('organization_id', user.organization_id)
     .order('name', { ascending: true })
 

@@ -68,6 +68,9 @@ export function MobileSidebar({
 
       {/* Drawer */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu de navegação"
         className={cn(
           'fixed inset-y-0 left-0 z-[70] w-[280px] bg-bg-sidebar border-r-[0.5px] border-border-main flex flex-col transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -89,7 +92,7 @@ export function MobileSidebar({
           </Link>
           <button
             onClick={() => setIsOpen(false)}
-            className="w-8 h-8 flex items-center justify-center text-[#444] hover:text-text-primary transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
             aria-label="Fechar menu"
           >
             <X size={18} weight="regular" />
@@ -104,12 +107,12 @@ export function MobileSidebar({
         {/* Footer */}
         <div className="border-t-[0.5px] border-border-main p-4">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-[28px] h-[28px] rounded-[7px] bg-[#1a1a1a] flex items-center justify-center text-[#bbb] font-medium text-[11px] uppercase shrink-0">
+            <div className="w-[28px] h-[28px] rounded-[7px] bg-surface-secondary flex items-center justify-center text-text-secondary font-medium text-[11px] uppercase shrink-0">
               {userInitial}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-medium truncate text-[#bbb] leading-none uppercase">{userName}</p>
-              <p className="text-[9px] truncate text-[#333] mt-1 uppercase tracking-[0.06em]">{userRole}</p>
+              <p className="text-[11px] font-medium truncate text-text-secondary leading-none uppercase">{userName}</p>
+              <p className="text-[9px] truncate text-text-muted mt-1 uppercase tracking-[0.06em]">{userRole}</p>
             </div>
           </div>
           <LogoutButton />

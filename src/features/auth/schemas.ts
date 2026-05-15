@@ -47,6 +47,17 @@ export const recoverySchema = z.object({
   email: z.string().email('Email inválido').max(255),
 })
 
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(8, 'Mínimo de 8 caracteres'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'As senhas não conferem',
+    path: ['confirmPassword'],
+  })
+
 export type LoginInput = z.infer<typeof loginSchema>
 export type SignupInput = z.infer<typeof signupSchema>
 export type RecoveryInput = z.infer<typeof recoverySchema>
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>

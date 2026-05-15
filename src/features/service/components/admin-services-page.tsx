@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Plus, PencilSimple, Trash, Copy, Scissors, Play, Pause, X } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 import { toast } from 'sonner'
@@ -23,6 +24,7 @@ interface AdminServicesPageProps {
 }
 
 export function AdminServicesPage({ services: initialServices, stats }: AdminServicesPageProps) {
+  const router = useRouter()
   const [services, setServices] = useState(initialServices)
   const [isPending, startTransition] = useTransition()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -70,7 +72,7 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
       const result = await duplicateService(service.id)
       if (result.success) {
         toast.success('Serviço duplicado! Ele começa como inativo.')
-        window.location.reload()
+        router.refresh()
       } else {
         toast.error(result.error)
       }
@@ -108,7 +110,7 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
       if (result.success) {
         toast.success(editingService?.id ? 'Serviço atualizado!' : 'Serviço criado!')
         setIsModalOpen(false)
-        window.location.reload()
+        router.refresh()
       } else {
         toast.error(result.error || 'Erro ao salvar serviço')
       }

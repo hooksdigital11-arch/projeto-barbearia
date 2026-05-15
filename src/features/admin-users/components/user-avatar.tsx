@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { User } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 
@@ -43,7 +44,7 @@ export function UserAvatar({ name, url, role, className }: UserAvatarProps) {
   if (url) {
     return (
       <div className={cn("relative w-[34px] h-[34px] rounded-full overflow-hidden border border-white/10 shrink-0", className)}>
-        <img src={url} alt={name} className="w-full h-full object-cover" />
+        <Image src={url} alt={name} fill className="object-cover" />
       </div>
     )
   }

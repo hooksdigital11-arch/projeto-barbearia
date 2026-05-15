@@ -1,5 +1,6 @@
 'use server'
 
+import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { requireAdmin } from '@/lib/auth/require-auth'
 import { supabaseAdmin } from '@/lib/supabase/admin'
@@ -46,6 +47,7 @@ export async function createService(input: CreateServiceInput) {
  */
 export async function updateService(id: string, input: CreateServiceInput) {
   try {
+    if (!z.string().uuid().safeParse(id).success) return { error: 'ID inválido' }
     const admin = await requireAdmin()
     const parsed = createServiceSchema.safeParse(input)
 
@@ -82,6 +84,7 @@ export async function updateService(id: string, input: CreateServiceInput) {
  */
 export async function toggleServiceStatus(id: string, isActive: boolean) {
   try {
+    if (!z.string().uuid().safeParse(id).success) return { error: 'ID inválido' }
     const admin = await requireAdmin()
 
     const { error } = await supabaseAdmin
@@ -106,6 +109,7 @@ export async function toggleServiceStatus(id: string, isActive: boolean) {
  */
 export async function deleteService(id: string) {
   try {
+    if (!z.string().uuid().safeParse(id).success) return { error: 'ID inválido' }
     const admin = await requireAdmin()
 
     const { error } = await supabaseAdmin
@@ -130,6 +134,7 @@ export async function deleteService(id: string) {
  */
 export async function duplicateService(id: string) {
   try {
+    if (!z.string().uuid().safeParse(id).success) return { error: 'ID inválido' }
     const admin = await requireAdmin()
 
     // Busca serviço original

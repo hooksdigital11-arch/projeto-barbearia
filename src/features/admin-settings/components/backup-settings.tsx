@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils/cn'
 import { useState } from 'react'
 import { fetchInsightsData } from '@/features/analytics/actions'
 import { downloadInsightsPDF } from '@/lib/insights-pdf'
-import html2pdf from 'html2pdf.js'
 
 export function BackupSettings() {
   const [isExporting, setIsExporting] = useState<string | null>(null)

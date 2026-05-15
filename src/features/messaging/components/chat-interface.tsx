@@ -3,7 +3,7 @@
 import { useState, useTransition, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
-import { recordMessage } from '../actions'
+import { sendMessageAction } from '../actions'
 import type { Message, MessageConversation, ClientForMessage } from '../types'
 import { 
   PaperPlaneRight, 
@@ -120,12 +120,6 @@ export function ChatPanel({ messages, clientId, clientName, clientPhone, orgName
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  function sendWhatsApp(phone: string, message: string) {
-    const clean = phone.replace(/\D/g, '')
-    const url = `https://wa.me/55${clean}?text=${encodeURIComponent(message)}`
-    window.open(url, '_blank')
-  }
-
   const handleSend = () => {
     if (!text.trim()) return
     if (!clientPhone) {
@@ -135,15 +129,14 @@ export function ChatPanel({ messages, clientId, clientName, clientPhone, orgName
 
     const content = text.trim()
     startTransition(async () => {
-      sendWhatsApp(clientPhone, content)
       const fd = new FormData()
       fd.append('client_id', clientId)
       fd.append('content', content)
-      const res = await recordMessage(fd)
+      const res = await sendMessageAction(fd)
       if (res.error) toast.error(res.error)
       else {
         setText('')
-        toast.success('REGISTRADA!')
+        toast.success('ENVIADA!')
       }
     })
   }

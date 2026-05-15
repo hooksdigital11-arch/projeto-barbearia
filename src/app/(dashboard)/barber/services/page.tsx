@@ -4,6 +4,8 @@ import { requireBarber } from '@/lib/auth/require-auth'
 import { getActiveServices } from '@/features/service/queries'
 import { BarberServicesPage } from '@/features/service/components/barber-services-page'
 
+export const revalidate = 300
+
 export const metadata = {
   title: 'Serviços | Barbeiro',
   description: 'Consulte o catálogo de serviços disponíveis.',

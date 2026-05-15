@@ -1,5 +1,6 @@
 'use server'
 
+import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireUser } from '@/lib/auth/require-auth'
@@ -96,6 +97,7 @@ export async function notifyClient(waitingListId: string): Promise<{
   success?: boolean
   whatsappData?: WhatsAppData
 }> {
+  if (!z.string().uuid().safeParse(waitingListId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (!['admin', 'barber'].includes(user.role)) {
     return { error: 'Sem permissão' }
@@ -148,6 +150,7 @@ export async function notifyClient(waitingListId: string): Promise<{
  * Cliente confirma vaga
  */
 export async function confirmQueueSpot(waitingListId: string) {
+  if (!z.string().uuid().safeParse(waitingListId).success) return { error: 'ID inválido' }
   const user = await requireUser()
 
   // Buscar entrada
@@ -193,6 +196,7 @@ export async function confirmQueueSpot(waitingListId: string) {
  * Sair da fila (cliente) ou remover (admin/barbeiro)
  */
 export async function leaveQueue(waitingListId: string) {
+  if (!z.string().uuid().safeParse(waitingListId).success) return { error: 'ID inválido' }
   const user = await requireUser()
 
   const { error } = await supabaseAdmin
@@ -217,6 +221,7 @@ export async function leaveQueue(waitingListId: string) {
  * Expirar vaga e avançar pro próximo (admin/barbeiro)
  */
 export async function expireAndSkip(waitingListId: string) {
+  if (!z.string().uuid().safeParse(waitingListId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (!['admin', 'barber'].includes(user.role)) {
     return { error: 'Sem permissão' }

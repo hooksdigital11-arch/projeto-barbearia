@@ -1,5 +1,6 @@
 'use server'
 
+import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth/require-auth'
@@ -84,6 +85,7 @@ export async function createUser(input: CreateUserInput) {
  */
 export async function updateUser(id: string, input: UpdateUserInput) {
   try {
+    if (!z.string().uuid().safeParse(id).success) return { error: 'ID inválido' }
     const admin = await requireAdmin()
     
     const parsed = updateUserSchema.safeParse({ ...input, id })
@@ -130,6 +132,7 @@ export async function updateUser(id: string, input: UpdateUserInput) {
  */
 export async function toggleUserStatus(id: string, currentStatus: string) {
   try {
+    if (!z.string().uuid().safeParse(id).success) return { error: 'ID inválido' }
     const admin = await requireAdmin()
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
 
@@ -153,6 +156,7 @@ export async function toggleUserStatus(id: string, currentStatus: string) {
  */
 export async function deleteUser(id: string) {
   try {
+    if (!z.string().uuid().safeParse(id).success) return { error: 'ID inválido' }
     const admin = await requireAdmin()
     
     // Prevenção: não permitir que o admin se delete (opcional, mas recomendado)

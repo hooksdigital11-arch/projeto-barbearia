@@ -93,6 +93,7 @@ export function ClientProfileComponent({
   }
 
   function handleBlock() {
+    if (!confirm(`Bloquear ${client.full_name}? O cliente não poderá fazer novos agendamentos.`)) return
     startTransition(async () => {
       const result = await blockClientAction(client.id)
       if (result.error) toast.error(result.error)

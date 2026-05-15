@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { loginSchema, signupSchema, recoverySchema } from './schemas'
+import { loginSchema, signupSchema, recoverySchema, resetPasswordSchema } from './schemas'
 import type { AuthResponse } from './types'
 
 /**
@@ -139,7 +139,7 @@ export async function requestPasswordReset(formData: FormData): Promise<AuthResp
 
   const supabase = await createClient()
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/reset-password`,
   })
 
   if (error) {
@@ -150,6 +150,33 @@ export async function requestPasswordReset(formData: FormData): Promise<AuthResp
     success: true,
     message: 'Link de recuperação enviado! Verifique seu email.',
   }
+}
+
+/**
+ * Server Action: Confirm Password Reset
+ * Called from /reset-password page after user lands there via email link
+ */
+export async function confirmPasswordReset(formData: FormData): Promise<AuthResponse> {
+  const parsed = resetPasswordSchema.safeParse({
+    password: formData.get('password'),
+    confirmPassword: formData.get('confirmPassword'),
+  })
+
+  if (!parsed.success) {
+    return {
+      error: 'Dados inválidos',
+      issues: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+    }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password })
+
+  if (error) {
+    return { error: 'Erro ao redefinir senha. O link pode ter expirado.' }
+  }
+
+  return { success: true, message: 'Senha redefinida com sucesso!' }
 }
 
 /**

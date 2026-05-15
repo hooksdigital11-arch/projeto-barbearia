@@ -1,12 +1,13 @@
 'use server'
 
+import { z } from 'zod'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { requireAdmin } from '@/lib/auth/require-auth'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { 
-  generalSettingsSchema, 
-  businessHoursSchema, 
-  serviceSchema, 
+import {
+  generalSettingsSchema,
+  businessHoursSchema,
+  serviceSchema,
   notificationPreferencesSchema,
   adminProfileSchema
 } from './schemas'
@@ -20,14 +21,22 @@ import type {
 
 import { createClient } from '@/lib/supabase/server'
 
+const updatePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Senha atual obrigatória'),
+  newPassword: z.string().min(8, 'Mínimo de 8 caracteres'),
+})
+
 /**
  * 1. Atualiza Configurações Gerais
  */
 export async function updatePassword(currentPassword: string, newPassword: string) {
   try {
+    const parsed = updatePasswordSchema.safeParse({ currentPassword, newPassword })
+    if (!parsed.success) return { error: parsed.error.errors[0]?.message ?? 'Dados inválidos' }
+
     const admin = await requireAdmin()
     const supabase = await createClient()
-    
+
     // Verifica a senha atual tentando fazer login
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: admin.email || '',
@@ -57,7 +66,6 @@ export async function updatePassword(currentPassword: string, newPassword: strin
  * 1. Atualiza Configurações Gerais
  */
 export async function updateGeneralSettings(input: GeneralSettingsInput) {
-  console.log('Update General Settings started:', input)
   try {
     const admin = await requireAdmin()
     const parsed = generalSettingsSchema.safeParse(input)
@@ -149,6 +157,7 @@ export async function createService(input: ServiceInput) {
 
 export async function updateService(id: string, input: ServiceInput) {
   try {
+    if (!z.string().uuid().safeParse(id).success) return { error: 'ID inválido' }
     const admin = await requireAdmin()
     const parsed = serviceSchema.safeParse(input)
     if (!parsed.success) return { error: 'Dados inválidos' }
@@ -178,6 +187,7 @@ export async function updateService(id: string, input: ServiceInput) {
 
 export async function toggleServiceStatus(id: string, isActive: boolean) {
   try {
+    if (!z.string().uuid().safeParse(id).success) return { error: 'ID inválido' }
     const admin = await requireAdmin()
     const { error } = await supabaseAdmin
       .from('services')
@@ -197,6 +207,7 @@ export async function toggleServiceStatus(id: string, isActive: boolean) {
 
 export async function deleteService(id: string) {
   try {
+    if (!z.string().uuid().safeParse(id).success) return { error: 'ID inválido' }
     const admin = await requireAdmin()
     const { error } = await supabaseAdmin
       .from('services')
@@ -220,9 +231,12 @@ export async function deleteService(id: string) {
 export async function updateNotifications(input: NotificationPreferencesInput) {
   try {
     const admin = await requireAdmin()
+    const parsed = notificationPreferencesSchema.safeParse(input)
+    if (!parsed.success) return { error: 'Preferências inválidas' }
+
     const { error } = await supabaseAdmin
       .from('profiles')
-      .update({ notification_preferences: input } as any)
+      .update({ notification_preferences: parsed.data } as any)
       .eq('id', admin.id)
 
     if (error) return { error: error.message }
@@ -300,11 +314,21 @@ export async function activateOrganization() {
 /**
  * 9. Upload de Logo (Storage)
  */
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024 // 5MB
+
 export async function uploadLogo(formData: FormData) {
   try {
     const admin = await requireAdmin()
     const file = formData.get('file') as File
     if (!file) return { error: 'Nenhum arquivo enviado' }
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return { error: 'Formato inválido. Use JPG, PNG, WebP ou GIF.' }
+    }
+    if (file.size > MAX_LOGO_SIZE_BYTES) {
+      return { error: 'Arquivo muito grande. Máximo 5MB.' }
+    }
 
     const fileExt = file.name.split('.').pop()
     const fileName = `${admin.organization_id}/logo-${Date.now()}.${fileExt}`

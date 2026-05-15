@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Plus, PencilSimple, Trash, Play, Pause, X, CircleNotch } from '@phosphor-icons/react'
 import { deleteService, createService, updateService, toggleServiceStatus } from '../actions'
 import { toast } from 'sonner'
@@ -8,6 +9,7 @@ import { cn } from '@/lib/utils/cn'
 import type { Service } from '../types'
 
 export function ServicesSettings({ initialData }: { initialData: Service[] }) {
+  const router = useRouter()
   const [services, setServices] = useState(initialData)
   const [isPending, startTransition] = useTransition()
   
@@ -81,7 +83,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
       if (result.success) {
         toast.success(editingService?.id ? 'Serviço atualizado!' : 'Serviço criado!')
         setIsModalOpen(false)
-        window.location.reload() 
+        router.refresh()
       } else {
         toast.error(result.error || 'Erro ao salvar serviço')
       }

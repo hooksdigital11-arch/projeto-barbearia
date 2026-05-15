@@ -101,7 +101,7 @@ export function AdminHome({ userName }: AdminHomeProps) {
           { label: 'NOVOS CLIENTES', value: '12', unit: '' },
         ].map((kpi, idx) => (
           <div key={idx} className="bg-bg-surface border-[0.5px] border-border-main rounded-[10px] p-[20px] px-[22px] flex flex-col justify-between h-[120px]">
-            <p className="text-[10px] tracking-[0.1em] text-[#444] font-medium uppercase">{kpi.label}</p>
+            <p className="text-[10px] tracking-[0.1em] text-text-secondary font-medium uppercase">{kpi.label}</p>
             <div className="flex items-baseline gap-1">
               {kpi.unit === 'R$' && <span className="text-[13px] text-text-nav font-medium">{kpi.unit}</span>}
               <span className="text-xl md:text-[28px] font-medium text-text-primary tracking-tight">
@@ -115,16 +115,13 @@ export function AdminHome({ userName }: AdminHomeProps) {
 
       {/* Module Grid - Exactly 3 columns */}
       <div className="space-y-6">
-        <p className="text-[10px] tracking-[0.12em] text-[#444] font-medium uppercase">Módulos do Sistema</p>
+        <p className="text-[10px] tracking-[0.12em] text-text-secondary font-medium uppercase">Módulos do Sistema</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[10px]">
           {modules.map((mod) => (
             <Link
               key={mod.href}
               href={mod.href}
-              className={cn(
-                "group flex flex-col gap-4 p-6 bg-bg-surface border-[0.5px] border-border-main rounded-[10px] transition-all",
-                "hover:bg-bg-surface hover:border-[#2a2a2a]"
-              )}
+              className="group flex flex-col gap-4 p-6 premium-card premium-card-hover transition-all"
             >
               <div className="flex items-start justify-between">
                 <div className="text-accent-main">
@@ -133,10 +130,10 @@ export function AdminHome({ userName }: AdminHomeProps) {
               </div>
 
               <div className="space-y-1">
-                <h3 className="text-[12px] font-medium text-[#cccccc] tracking-tight">
+                <h3 className="text-[12px] font-medium text-text-primary tracking-tight">
                   {mod.label}
                 </h3>
-                <p className="text-[10px] text-[#333333] font-medium tracking-tight">
+                <p className="text-[10px] text-text-muted font-medium tracking-tight">
                   {mod.description}
                 </p>
               </div>
