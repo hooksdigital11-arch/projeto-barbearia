@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { UserCircle } from '@phosphor-icons/react/dist/ssr'
 import { getLoyaltyConfig, getClientStamps } from '@/features/loyalty/queries'
 import { LoyaltyPageClient } from '@/features/loyalty/components/loyalty-page-client'
-import { requireUser } from '@/lib/auth/require-auth'
+import { requireClient } from '@/lib/auth/require-auth'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -15,7 +15,7 @@ export default async function ClientLoyaltyPage() {
 }
 
 async function LoyaltyContent() {
-  const user = await requireUser()
+  const user = await requireClient()
 
   // Buscar o client_id vinculado ao profile do usuário logado
   const { data: client } = await supabaseAdmin

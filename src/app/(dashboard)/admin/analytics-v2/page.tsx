@@ -1,10 +1,10 @@
 import { Suspense } from 'react'
 import { getDashboardStats } from '@/features/analytics/queries'
-import { requireUser } from '@/lib/auth/require-auth'
+import { requireAdmin } from '@/lib/auth/require-auth'
 import { AnalyticsV2Dashboard } from '@/features/analytics/components/analytics-v2-dashboard'
 
 export default async function AnalyticsV2Page() {
-  const user = await requireUser()
+  const user = await requireAdmin()
   const stats = await getDashboardStats()
 
   return (

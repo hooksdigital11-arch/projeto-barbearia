@@ -11,8 +11,8 @@ function getMemberColor(name: string): string {
     'João': '#5c35a0',
     'Test': '#7c4a8a'
   }
-  const firstName = name.split(' ')[0]
-  return nameMap[firstName] || '#1a1400'
+  const firstName = name.split(' ')[0] ?? ''
+  return nameMap[firstName] ?? '#1a1400'
 }
 
 function formatCurrency(cents: number): string {

@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { requireUser } from '@/lib/auth/require-auth'
+import { requireClient } from '@/lib/auth/require-auth'
 import {
   getClientQueuePosition,
   getClientIdForProfile,
@@ -18,7 +18,7 @@ export default async function ClientWaitingListPage() {
 }
 
 async function Content() {
-  const user = await requireUser()
+  const user = await requireClient()
 
   const [clientId, services, barbers] = await Promise.all([
     getClientIdForProfile(),

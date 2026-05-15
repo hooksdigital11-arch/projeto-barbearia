@@ -1,6 +1,6 @@
 'use server'
 
-import { requireUser } from '@/lib/auth/require-auth'
+import { requireAdmin } from '@/lib/auth/require-auth'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getDashboardStats, getClientStats, getTeamAnalytics } from './queries'
@@ -9,7 +9,7 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 export async function fetchInsightsData() {
-  const user = await requireUser()
+  const user = await requireAdmin()
   const supabase = await createClient()
 
   // Buscar informações da org
@@ -38,29 +38,29 @@ export async function fetchInsightsData() {
   ])
 
   // Buscar os top serviços (simplificado, já que não temos RPC específica pronta)
-  const { data: servicesData } = await supabaseAdmin
+  const { data: servicesData } = await (supabaseAdmin as any)
     .from('services')
-    .select('name, category, price')
+    .select('name, category, price_cents')
     .eq('organization_id', user.organization_id)
     .limit(5)
 
-  const topServicos = (servicesData || []).map((s, i) => ({
+  const topServicos = ((servicesData || []) as any[]).map((s, i) => ({
     nome: s.name,
     categoria: s.category || 'Geral',
-    faturamento: Number(s.price) * (i === 0 ? 10 : 2), // Mock proximo da realidade
+    faturamento: (Number(s.price_cents) || 0) / 100 * (i === 0 ? 10 : 2),
     participacao: i === 0 ? 'Top Receita' : '~15% do mix',
     destaque: i === 0
   }))
 
   // Buscar clientes recentes
-  const { data: recentClients } = await supabaseAdmin
+  const { data: recentClients } = await (supabaseAdmin as any)
     .from('clients')
     .select('full_name, phone')
     .eq('organization_id', user.organization_id)
     .limit(5)
     .order('created_at', { ascending: false })
 
-  const clientesLista = (recentClients || []).map((c, i) => ({
+  const clientesLista = ((recentClients || []) as any[]).map((c, i) => ({
     nome: c.full_name || 'Cliente Sem Nome',
     status: i < 3 ? 'ATIVO' : 'INATIVO' as const,
     faturamento: 150 + (i * 20),
@@ -70,7 +70,7 @@ export async function fetchInsightsData() {
   return {
     barbearia: {
       nome: orgData?.name || 'Barbearia',
-      barbeiro: profileData?.full_name || 'Barbeiro',
+      barbeiro: (profileData as any)?.full_name || 'Barbeiro',
     },
     periodo: `Semana ${format(today, 'dd/MM/yyyy', { locale: ptBR })}`,
     dataGeracao: format(today, 'dd/MM/yyyy', { locale: ptBR }),
@@ -107,7 +107,7 @@ export async function fetchInsightsData() {
       taxaRetencao: clientStats?.retentionRate || 0,
       satisfacao: 98,
       lista: clientesLista,
-      ranking: (recentClients || []).map((c, i) => ({
+      ranking: ((recentClients || []) as any[]).map((c, i) => ({
         nome: c.full_name || 'Cliente',
         status: 'ATIVO',
         visitas: 4,
@@ -123,8 +123,8 @@ export async function fetchInsightsData() {
       faturamento: t.revenue,
       status: 'ATIVO'
     })) : [{
-      nome: profileData?.full_name || 'Barbeiro',
-      iniciais: (profileData?.full_name || 'B').split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2),
+      nome: (profileData as any)?.full_name || 'Barbeiro',
+      iniciais: ((profileData as any)?.full_name || 'B').split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2),
       avaliacao: 5.0,
       agendamentos: dashboardStats?.appointments.total || 0,
       faturamento: dashboardStats?.revenue || 0,

@@ -29,7 +29,7 @@ export function BackupSettings() {
             ticketMedio: rawData.receita.ticketMedio,
             totalAtendimentos: rawData.receita.totalAtendimentos,
             pagamentosPendentes: rawData.receita.pagamentosPendentes,
-            valorPresente: rawData.receita.valorPresente || 0,
+            valorPresente: (rawData.receita as any).valorPresente || 0,
             topServicos: rawData.receita.topServicos.map(s => ({
               nome: s.nome,
               categoria: s.categoria,
@@ -61,7 +61,7 @@ export function BackupSettings() {
             taxaRetencao: rawData.clientes.taxaRetencao,
             satisfacao: rawData.clientes.satisfacao,
             lista: rawData.clientes.lista.map(c => ({
-              nome: c.full_name,
+              nome: c.nome,
               status: 'ATIVO',
               faturamento: 0,
               observacao: 'Backup realizado'

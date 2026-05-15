@@ -9,6 +9,7 @@ import { ComandaItem } from './types'
 // Adicionar item (serviço ou produto)
 export async function addComandaItem(formData: FormData) {
   const user = await requireUser()
+  if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
   const supabase = await createClient()
 
   const parsed = addItemSchema.safeParse({
@@ -56,6 +57,7 @@ export async function addComandaItem(formData: FormData) {
 // Remover item
 export async function removeComandaItem(itemId: string) {
   const user = await requireUser()
+  if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -74,6 +76,7 @@ export async function removeComandaItem(itemId: string) {
 // Fechar comanda (processar pagamento)
 export async function closeComanda(formData: FormData) {
   const user = await requireUser()
+  if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
   const supabase = await createClient()
 
   const parsed = closeComandaSchema.safeParse({
@@ -138,8 +141,8 @@ export async function closeComanda(formData: FormData) {
         .single() as any)
 
       if (client && typeof client === 'object') {
-        await supabase
-          .from('clients')
+        await (supabase
+          .from('clients') as any)
           .update({
             total_visits: ((client as any).total_visits || 0) + 1,
             total_spent_cents: ((client as any).total_spent_cents || 0) + totalCents,

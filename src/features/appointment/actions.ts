@@ -2,17 +2,19 @@
 
 import { revalidatePath } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { requireUser } from '@/lib/auth/require-auth'
+import { requireUser, requireClient } from '@/lib/auth/require-auth'
 import {
   createAppointmentSchema,
   updateAppointmentSchema,
   updateAppointmentStatusSchema,
+  createClientAppointmentSchema,
 } from './schemas'
 import { checkTimeConflict } from './queries'
 
 const REVALIDATE_PATHS = [
   '/admin/appointments',
   '/barber/appointments',
+  '/client/appointments',
   '/agendamentos',
   '/admin/reports'
 ]
@@ -254,12 +256,11 @@ export async function updateAppointmentStatus(formData: FormData) {
 
 /**
  * Cancelar agendamento (soft: status = 'cancelled').
+ * Admin/Barber: cancelam qualquer agendamento da organização.
+ * Client: cancela apenas os seus próprios agendamentos.
  */
 export async function cancelAppointment(appointmentId: string) {
   const user = await requireUser()
-  if (!['admin', 'barber'].includes(user.role)) {
-    return { error: 'Sem permissão' }
-  }
 
   let query = supabaseAdmin
     .from('appointments')
@@ -269,6 +270,16 @@ export async function cancelAppointment(appointmentId: string) {
 
   if (user.role === 'barber') {
     query = query.eq('barber_id', user.id)
+  } else if (user.role === 'client') {
+    // Client can only cancel their own appointment — look up their clients.id first
+    const { data: clientRow } = await supabaseAdmin
+      .from('clients')
+      .select('id')
+      .eq('organization_id', user.organization_id)
+      .eq('profile_id', user.id)
+      .single()
+    if (!clientRow) return { error: 'Perfil de cliente não encontrado' }
+    query = query.eq('client_id', clientRow.id)
   }
 
   const { error } = await query
@@ -280,4 +291,69 @@ export async function cancelAppointment(appointmentId: string) {
 
   revalidateAll()
   return { success: true }
+}
+
+/**
+ * Cliente agenda para si mesmo.
+ */
+export async function createClientAppointment(formData: FormData) {
+  const user = await requireClient()
+
+  const parsed = createClientAppointmentSchema.safeParse({
+    service_id: formData.get('service_id'),
+    barber_id: formData.get('barber_id'),
+    start_time: formData.get('start_time'),
+    notes: formData.get('notes') || null,
+  })
+
+  if (!parsed.success) {
+    return { error: 'Dados inválidos', issues: parsed.error.flatten() }
+  }
+
+  const { data: clientRow } = await supabaseAdmin
+    .from('clients')
+    .select('id')
+    .eq('organization_id', user.organization_id)
+    .eq('profile_id', user.id)
+    .single()
+
+  if (!clientRow) return { error: 'Perfil de cliente não encontrado. Fale com a barbearia.' }
+
+  const { service_id, barber_id, start_time, notes } = parsed.data
+
+  const { data: service } = await supabaseAdmin
+    .from('services')
+    .select('duration_minutes, price_cents')
+    .eq('id', service_id)
+    .single()
+
+  if (!service) return { error: 'Serviço não encontrado' }
+
+  const startDt = new Date(start_time)
+  const endDt = new Date(startDt.getTime() + service.duration_minutes * 60 * 1000)
+
+  const hasConflict = await checkTimeConflict(barber_id, startDt.toISOString(), endDt.toISOString())
+  if (hasConflict) return { error: 'Horário indisponível para o barbeiro selecionado' }
+
+  const { data, error } = await (supabaseAdmin
+    .from('appointments') as any)
+    .insert({
+      client_id: clientRow.id,
+      service_id,
+      barber_id,
+      start_time: startDt.toISOString(),
+      end_time: endDt.toISOString(),
+      duration_minutes: service.duration_minutes,
+      price_cents: service.price_cents,
+      status: 'scheduled',
+      organization_id: user.organization_id,
+      notes: notes || null,
+    })
+    .select('id')
+    .single()
+
+  if (error) return { error: 'Erro ao criar agendamento' }
+
+  revalidatePath('/client/appointments')
+  return { success: true, data }
 }

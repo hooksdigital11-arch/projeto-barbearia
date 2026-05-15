@@ -12,8 +12,8 @@ function getMemberColor(name: string): string {
     'João': '#5c35a0',
     'Test': '#7c4a8a'
   }
-  const firstName = name.split(' ')[0]
-  return nameMap[firstName] || '#1a1400'
+  const firstName = name.split(' ')[0] ?? ''
+  return nameMap[firstName] ?? '#1a1400'
 }
 
 function formatCurrency(cents: number): string {
@@ -105,8 +105,8 @@ export function BarberDetailModal({ isOpen, onClose, member, showRevenue }: Barb
         <div className="px-[24px] py-[10px]">
           {activeTab === 'profile' && (
             <div className="flex flex-col">
-              <InfoRow label="EMAIL" value={member.email} />
-              <InfoRow label="TELEFONE" value={member.phone} />
+              <InfoRow label="EMAIL" value={member.email ?? undefined} />
+              <InfoRow label="TELEFONE" value={member.phone ?? undefined} />
               <InfoRow label="ESPECIALIDADE" value={member.specialty?.replace('_', ' ')} />
               <InfoRow label="MEMBRO DESDE" value={member.created_at ? new Date(member.created_at).toLocaleDateString('pt-BR') : undefined} />
               <InfoRow label="CARGO" value={member.role === 'admin' ? 'ADMINISTRADOR' : 'BARBEIRO'} isLast />

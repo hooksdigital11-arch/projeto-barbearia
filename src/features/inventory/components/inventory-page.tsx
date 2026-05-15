@@ -76,7 +76,8 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
         }
 
         try {
-          const dataArray = await getSalesByPeriodAction(start.toISOString(), end.toISOString())
+          const result = await getSalesByPeriodAction(start.toISOString(), end.toISOString())
+          const dataArray = ('error' in result) ? [] : result
           const newSalesMap = new Map<string, { qtdVendida: number, faturamento: number }>()
           dataArray.forEach(item => {
             newSalesMap.set(item.id, { qtdVendida: item.qtdVendida, faturamento: item.faturamento })

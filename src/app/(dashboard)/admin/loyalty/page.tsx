@@ -1,9 +1,11 @@
 import { Suspense } from 'react'
+import { requireAdmin } from '@/lib/auth/require-auth'
 import { getLoyaltyConfig, getAllClientsLoyalty, getLoyaltyStats } from '@/features/loyalty/queries'
 import { LoyaltyPageAdmin } from '@/features/loyalty/components/loyalty-page-admin'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default async function AdminLoyaltyPage() {
+  await requireAdmin()
   return (
     <Suspense fallback={<LoyaltySkeleton />}>
       <LoyaltyContent />

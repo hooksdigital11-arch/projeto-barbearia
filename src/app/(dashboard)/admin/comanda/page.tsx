@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { getComandasHistory, getComandasStats } from '@/features/comanda/queries'
 import { ComandaPageAdmin } from '@/features/comanda/components/comanda-page-admin'
 import { createClient } from '@/lib/supabase/server'
-import { requireUser } from '@/lib/auth/require-auth'
+import { requireAdmin } from '@/lib/auth/require-auth'
 
 export default async function AdminComandaPage({
   searchParams,
@@ -10,7 +10,7 @@ export default async function AdminComandaPage({
   searchParams: Promise<{ period?: string; barberId?: string }>
 }) {
   const params = await searchParams
-  const user = await requireUser()
+  const user = await requireAdmin()
   const supabase = await createClient()
 
   // Buscar dados em paralelo para evitar waterfalls

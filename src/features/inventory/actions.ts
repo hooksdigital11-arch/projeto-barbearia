@@ -25,7 +25,8 @@ import {
  */
 export async function createProduct(formData: FormData) {
   const user = await requireUser()
-  
+  if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
+
   const data = {
     name: formData.get('name'),
     type: formData.get('type'),
@@ -70,7 +71,8 @@ export async function createProduct(formData: FormData) {
 
 export async function updateProduct(productId: string, formData: FormData) {
   const user = await requireUser()
-  
+  if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
+
   const parsed = updateProductSchema.safeParse({
     name: formData.get('name'),
     type: formData.get('type'),
@@ -124,7 +126,8 @@ export async function updateProduct(productId: string, formData: FormData) {
  */
 export async function moveStock(productId: string, formData: FormData) {
   const user = await requireUser()
-  
+  if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
+
   const parsed = moveStockSchema.safeParse({
     direction: formData.get('direction'),
     quantity: Number(formData.get('quantity')),
@@ -199,7 +202,8 @@ export async function moveStock(productId: string, formData: FormData) {
 
 export async function deleteProduct(productId: string) {
   const user = await requireUser()
-  
+  if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
+
   const { error } = await supabaseAdmin
     .from('inventory')
     .delete()
@@ -218,7 +222,8 @@ export async function deleteProduct(productId: string) {
 
 export async function reactivateProduct(productId: string) {
   const user = await requireUser()
-  
+  if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
+
   const { error } = await supabaseAdmin
     .from('inventory')
     .update({ active: true })
@@ -237,6 +242,7 @@ export async function reactivateProduct(productId: string) {
 
 export async function getSalesByPeriodAction(startDateStr: string, endDateStr: string) {
   const user = await requireUser()
+  if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
   
   const { data, error } = await (supabaseAdmin as any)
     .from('inventory_movements')

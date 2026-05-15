@@ -40,7 +40,7 @@ export default async function DashboardLayout({
   const filteredNavItems = navItems
     .filter((item) => {
       if (profile.role === 'admin') return item.label !== 'Perfil'
-      if (profile.role === 'barber') return ['Home', 'Agendamentos', 'Serviços'].includes(item.label)
+      if (profile.role === 'barber') return ['Home', 'Agendamentos', 'Serviços', 'Clientes', 'Comanda', 'Fila', 'Fidelidade', 'Mensageria', 'Relatórios'].includes(item.label)
       if (profile.role === 'client') return ['Home', 'Agendamentos', 'Serviços', 'Fila', 'Fidelidade', 'Perfil'].includes(item.label)
       return false
     })
@@ -57,7 +57,7 @@ export default async function DashboardLayout({
       else if (item.label === 'Fila') href = profile.role === 'admin' ? '/admin/waiting-list' : profile.role === 'barber' ? '/barber/waiting-list' : '/client/waiting-list'
       else if (item.label === 'Fidelidade') href = profile.role === 'admin' ? '/admin/loyalty' : profile.role === 'barber' ? '/barber/loyalty' : '/client/loyalty'
       else if (item.label === 'Mensageria') href = profile.role === 'admin' ? '/admin/messaging' : profile.role === 'barber' ? '/barber/messaging' : '/client/messaging'
-      else if (item.label === 'Relatórios') href = '/admin/reports'
+      else if (item.label === 'Relatórios') href = profile.role === 'barber' ? '/barber/reports' : '/admin/reports'
       else if (item.label === 'Usuários') href = '/admin/users'
 
       return { ...item, href }

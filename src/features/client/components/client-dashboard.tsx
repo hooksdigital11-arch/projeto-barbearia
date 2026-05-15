@@ -1,7 +1,8 @@
-import { 
-  Star, 
-  Calendar, 
-  ClockCounterClockwise, 
+import Link from 'next/link'
+import {
+  Star,
+  Calendar,
+  ClockCounterClockwise,
   Ticket,
   Plus,
   Clock,
@@ -14,7 +15,7 @@ import { getClientDashboardData } from '../queries'
 import 'server-only'
 import { cn } from '@/lib/utils/cn'
 import { EmptyState } from '@/components/shared/empty-state'
-
+import { CopyLinkButton } from './copy-link-button'
 import { RealtimeRefresher } from '@/components/shared/realtime-refresher'
 
 export async function ClientDashboard() {
@@ -35,13 +36,13 @@ export async function ClientDashboard() {
           </div>
         </div>
         
-        <button className="flex items-center justify-between gap-6 px-[24px] py-[12px] bg-[#fff] text-[#000] font-medium text-[11px] uppercase tracking-[0.08em] rounded-[10px] hover:bg-[#e8e8e8] transition-all shrink-0">
+        <Link href="/client/appointments" className="flex items-center justify-between gap-6 px-[24px] py-[12px] bg-[#fff] text-[#000] font-medium text-[11px] uppercase tracking-[0.08em] rounded-[10px] hover:bg-[#e8e8e8] transition-all shrink-0">
           <div className="flex items-center gap-2">
             <Plus size={14} weight="bold" />
             <span>Agendar Corte</span>
           </div>
           <ArrowRight size={14} weight="bold" />
-        </button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-[18px]">
@@ -109,9 +110,9 @@ export async function ClientDashboard() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                         <button className="px-3 py-1.5 bg-[#141414] border border-[#1e1e1e] text-[#555] text-[10px] font-medium rounded-[6px] hover:text-[#bbb] transition-all uppercase">
+                         <Link href="/client/appointments" className="px-3 py-1.5 bg-[#141414] border border-[#1e1e1e] text-[#555] text-[10px] font-medium rounded-[6px] hover:text-[#bbb] transition-all uppercase">
                             Remarcar
-                         </button>
+                         </Link>
                       </div>
                     </div>
                   ))}
@@ -123,9 +124,9 @@ export async function ClientDashboard() {
                      <p className="text-[14px] font-medium text-[#333] uppercase tracking-wider">Nenhum agendamento ativo</p>
                      <p className="text-[11px] text-[#222] uppercase tracking-widest max-w-[240px] mt-1">Você ainda não tem nenhum corte marcado para os próximos dias.</p>
                    </div>
-                   <button className="text-[10px] text-[#00d4aa] uppercase font-medium tracking-[0.06em] mt-2">
+                   <Link href="/client/appointments" className="text-[10px] text-[#00d4aa] uppercase font-medium tracking-[0.06em] mt-2">
                      Agendar agora
-                   </button>
+                   </Link>
                 </div>
              )}
           </div>
@@ -147,9 +148,9 @@ export async function ClientDashboard() {
                   <div className="w-[8px] h-[8px] rounded-full bg-[#00d4aa]" />
                   <span className="text-[11px] font-medium text-[#bbb] uppercase tracking-tight truncate">Corte + Barba (12 Abr)</span>
                 </div>
-                <button className="text-[10px] text-[#00d4aa] font-medium uppercase tracking-wider mt-[8px]">
+                <Link href="/client/services" className="text-[10px] text-[#00d4aa] font-medium uppercase tracking-wider mt-[8px]">
                   Repetir este serviço
-                </button>
+                </Link>
               </div>
 
               <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-[8px] p-[12px_14px] space-y-3">
@@ -178,9 +179,7 @@ export async function ClientDashboard() {
                <div className="bg-[#0d0d0d] border border-[#1e1e1e] rounded-[7px] p-[10px_13px] text-[#bbb] text-[12px] truncate">
                  barber.saas/ref/davi
                </div>
-               <button className="w-full py-2.5 bg-[#1a1a1a] text-[#bbb] text-[10px] font-medium uppercase tracking-wider rounded-[6px] hover:bg-[#222] transition-all">
-                 Copiar Link
-               </button>
+               <CopyLinkButton url="barber.saas/ref/davi" />
              </div>
           </div>
         </div>

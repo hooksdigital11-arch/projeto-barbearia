@@ -79,7 +79,7 @@ export function ClientHistoryTab({ appointments, showFinancials }: ClientHistory
               <div className="flex items-center gap-1.5 mt-0.5">
                 <div 
                   className="w-[5px] h-[5px] rounded-full opacity-50" 
-                  style={{ backgroundcolor: 'var(--accent, #00d4aa)' }}
+                  style={{ backgroundColor: 'var(--accent, #00d4aa)' }}
                 />
                 <span className="text-[10px] text-[#333] font-medium uppercase truncate">
                   {apt.barber.full_name}

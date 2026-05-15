@@ -35,7 +35,7 @@ export function StatusBadge({ status, appointmentId, interactive = false }: Stat
     no_show: { bg: '#111', text: '#333', border: '#1e1e1e' },
   }
 
-  const colors = semanticColors[status] || semanticColors.scheduled
+  const colors = semanticColors[status] ?? semanticColors['scheduled']!
 
   return (
     <span

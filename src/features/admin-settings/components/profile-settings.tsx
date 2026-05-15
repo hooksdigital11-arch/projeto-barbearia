@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { SignOut, Lock, Key, FloppyDisk, CircleNotch, X, Eye, EyeSlash } from '@phosphor-icons/react'
+import { SignOut, Lock, Key, FloppyDisk, CircleNotch, X, Eye, EyeSlash, Plus } from '@phosphor-icons/react'
 import { adminProfileSchema, type AdminProfileInput } from '../schemas'
 import { updateAdminProfile, updatePassword } from '../actions'
 import {

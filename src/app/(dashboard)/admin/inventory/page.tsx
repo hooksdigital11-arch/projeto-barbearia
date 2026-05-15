@@ -1,9 +1,11 @@
 import { Suspense } from 'react'
+import { requireAdmin } from '@/lib/auth/require-auth'
 import { getInventory, getInventoryStats } from '@/features/inventory/queries'
 import { InventoryPage } from '@/features/inventory/components/inventory-page'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default async function AdminInventoryPage() {
+  await requireAdmin()
   return (
     <Suspense fallback={<InventorySkeleton />}>
       <InventoryContent />

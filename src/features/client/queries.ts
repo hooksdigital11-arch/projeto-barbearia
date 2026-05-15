@@ -12,7 +12,7 @@ export const getClientDashboardData = cache(async () => {
     .from('clients')
     .select('id, full_name, total_spent_cents, total_visits')
     .eq('organization_id', user.organization_id)
-    .eq('user_id', user.id)
+    .eq('profile_id', user.id)
     .single()
 
   const clientId = (clientData as any)?.id
@@ -85,7 +85,7 @@ export const getClientDashboardData = cache(async () => {
 
   return {
     profile: {
-      name: user.full_name || clientData?.full_name || 'Cliente',
+      name: user.full_name || (clientData as any)?.full_name || 'Cliente',
       avatar: user.avatar_url,
       preferredBarber,
       loyaltyStamps,

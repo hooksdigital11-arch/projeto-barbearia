@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Receipt, AlertCircle, Clock, User } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import { ComandaActive } from './comanda-active'
 import { getActiveComanda } from '../queries'
 import { ComandaItem } from '../types'
@@ -63,7 +64,7 @@ export function ComandaPageBarber({
           variant="cyan" 
           size="lg"
           className="gap-4 px-8 py-7 rounded-[2rem] font-black text-xs uppercase tracking-widest bg-white text-black hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group ml-7 lg:ml-0"
-          onClick={() => alert('Venda avulsa em desenvolvimento')}
+          onClick={() => toast.info('Venda avulsa disponível em breve')}
         >
           <Plus size={22} className="group-hover:rotate-90 transition-transform duration-500" />
           Venda Avulsa

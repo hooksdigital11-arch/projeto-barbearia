@@ -1,16 +1,28 @@
 'use client'
 
-import type { AppointmentWithRelations } from '../types'
+import { useState, useEffect } from 'react'
+import { Plus } from '@phosphor-icons/react'
+import type { AppointmentWithRelations, ServiceOption, BarberOption } from '../types'
 import { StatusBadge, CancelButton } from './appointment-status'
+import { ClientBookingModal } from './client-booking-modal'
 import { CalendarX } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 interface ClientAppointmentsPageProps {
   appointments: AppointmentWithRelations[]
+  services: ServiceOption[]
+  barbers: BarberOption[]
+  initialServiceId?: string
 }
 
-export function ClientAppointmentsPage({ appointments }: ClientAppointmentsPageProps) {
+export function ClientAppointmentsPage({ appointments, services, barbers, initialServiceId }: ClientAppointmentsPageProps) {
   const now = new Date()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Auto-open modal when coming from services page with ?service=
+  useEffect(() => {
+    if (initialServiceId) setIsModalOpen(true)
+  }, [initialServiceId])
   
   const upcoming = appointments.filter(a => 
     new Date(a.start_time) >= now && !['completed', 'cancelled', 'no_show'].includes(a.status)
@@ -22,15 +34,32 @@ export function ClientAppointmentsPage({ appointments }: ClientAppointmentsPageP
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      <ClientBookingModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        services={services}
+        barbers={barbers}
+        initialServiceId={initialServiceId}
+      />
+
       {/* Header */}
-      <div className="space-y-1">
-        <p className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.14em] mb-[6px]">MEUS SERVIÇOS</p>
-        <h1 className="text-[28px] font-medium text-[#fff] tracking-[-0.01em] uppercase leading-none">
-          Meus Agendamentos
-        </h1>
-        <p className="text-[11px] text-[#333] mt-[5px] uppercase tracking-wider font-medium">
-          Acompanhe seu histórico e próximos horários.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.14em] mb-[6px]">MEUS SERVIÇOS</p>
+          <h1 className="text-[28px] font-medium text-[#fff] tracking-[-0.01em] uppercase leading-none">
+            Meus Agendamentos
+          </h1>
+          <p className="text-[11px] text-[#333] mt-[5px] uppercase tracking-wider font-medium">
+            Acompanhe seu histórico e próximos horários.
+          </p>
+        </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-[16px] py-[10px] bg-[#00d4aa] text-[#000] text-[10px] font-medium uppercase tracking-[0.08em] rounded-[8px] hover:brightness-110 transition-all shrink-0"
+        >
+          <Plus size={13} weight="bold" />
+          Novo Agendamento
+        </button>
       </div>
 
       <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] min-h-[320px] flex flex-col">

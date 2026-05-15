@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { Skeleton } from '@/components/shared/loading-skeleton'
-import { requireUser } from '@/lib/auth/require-auth'
+import { requireClient } from '@/lib/auth/require-auth'
 import { getActiveServices } from '@/features/service/queries'
 import { ClientServicesPage } from '@/features/service/components/client-services-page'
 
@@ -18,7 +18,7 @@ export default async function ClientServicesRoute() {
 }
 
 async function Content() {
-  await requireUser()
+  await requireClient()
   const services = await getActiveServices()
   return <ClientServicesPage services={services} />
 }

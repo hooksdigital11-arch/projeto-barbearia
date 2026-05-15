@@ -483,6 +483,157 @@ export const getLoyaltyReport = cache(async (startDate: string, endDate: string)
   }
 })
 
+// ─── Relatórios do Barbeiro (filtrado por barber_id) ─────────
+
+export const getBarberRevenueReport = cache(async (startDate: string, endDate: string): Promise<RevenueReport> => {
+  const user = await requireUser()
+
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  end.setHours(23, 59, 59, 999)
+
+  const diffTime = end.getTime() - start.getTime()
+  const prevEnd = new Date(start.getTime() - 1)
+  const prevStart = new Date(prevEnd.getTime() - diffTime)
+
+  const { data: currApps } = await supabaseAdmin
+    .from('appointments')
+    .select('id, price_cents, start_time, status, barber_id, service_id, service:services(name)')
+    .eq('organization_id', user.organization_id)
+    .eq('barber_id', user.id)
+    .eq('status', 'completed')
+    .gte('start_time', start.toISOString())
+    .lte('start_time', end.toISOString())
+
+  const { data: prevApps } = await supabaseAdmin
+    .from('appointments')
+    .select('price_cents')
+    .eq('organization_id', user.organization_id)
+    .eq('barber_id', user.id)
+    .eq('status', 'completed')
+    .gte('start_time', prevStart.toISOString())
+    .lte('start_time', prevEnd.toISOString())
+
+  const rows = (currApps ?? []) as any[]
+  let serviceRevenueCents = 0
+  const byDay: Record<string, number> = {}
+  const serviceMap: Record<string, { name: string, count: number }> = {}
+
+  for (const r of rows) {
+    const price = r.price_cents ?? 0
+    serviceRevenueCents += price
+    const day = r.start_time.split('T')[0]
+    byDay[day] = (byDay[day] ?? 0) + price
+    const sid = r.service_id
+    if (sid) {
+      if (!serviceMap[sid]) serviceMap[sid] = { name: (r.service as any)?.name || 'Serviço', count: 0 }
+      serviceMap[sid].count += 1
+    }
+  }
+
+  const prevServiceRevenueCents = (prevApps ?? []).reduce((acc: number, r: any) => acc + (r.price_cents ?? 0), 0)
+  const totalRevenue = serviceRevenueCents / 100
+  const prevTotalRevenue = prevServiceRevenueCents / 100
+  const totalComandas = rows.length
+  const averageTicket = totalComandas > 0 ? totalRevenue / totalComandas : 0
+  const calcChange = (curr: number, prev: number) => prev === 0 ? (curr > 0 ? 100 : 0) : ((curr - prev) / prev) * 100
+
+  const chartData = Object.entries(byDay)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, cents]) => ({
+      date: date.split('-').slice(1).reverse().join('/'),
+      revenue: cents / 100,
+      previousRevenue: 0
+    }))
+
+  const topServices = Object.entries(serviceMap)
+    .map(([, s]) => ({ name: s.name, quantity: s.count, totalRevenue: 0 }))
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 5)
+
+  return {
+    kpis: {
+      totalRevenue,
+      totalRevenueChange: calcChange(totalRevenue, prevTotalRevenue),
+      serviceRevenue: totalRevenue,
+      serviceRevenueChange: calcChange(totalRevenue, prevTotalRevenue),
+      productRevenue: 0,
+      productRevenueChange: 0,
+      averageTicket,
+      averageTicketChange: 0,
+      totalComandas,
+      totalComandasChange: 0,
+      totalDiscounts: 0,
+      totalDiscountsChange: 0
+    },
+    chartData,
+    paymentMethods: [],
+    topServices,
+    topProducts: [],
+    barberPerformance: [],
+    consumedStock: []
+  }
+})
+
+export const getBarberAppointmentsReport = cache(async (startDate: string, endDate: string): Promise<AppointmentReport> => {
+  const user = await requireUser()
+
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  end.setHours(23, 59, 59, 999)
+
+  const { data, error } = await supabaseAdmin
+    .from('appointments')
+    .select('id, status, price_cents, barber_id, start_time')
+    .eq('organization_id', user.organization_id)
+    .eq('barber_id', user.id)
+    .gte('start_time', start.toISOString())
+    .lte('start_time', end.toISOString())
+
+  if (error) {
+    return {
+      kpis: { total: 0, completed: 0, cancelled: 0, noShow: 0, completionRate: 0, totalChange: 0, completedChange: 0, cancelledChange: 0, noShowChange: 0, completionRateChange: 0 },
+      statusDistribution: [], dayOfWeekDistribution: [], peakHours: [], barberDistribution: []
+    }
+  }
+
+  const rows = data ?? []
+  const total = rows.length
+  const completed = rows.filter(r => r.status === 'completed').length
+  const cancelled = rows.filter(r => r.status === 'cancelled').length
+  const noShow = rows.filter(r => r.status === 'no_show').length
+
+  const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+  const dayMap: Record<string, number> = {}
+  days.forEach(d => dayMap[d] = 0)
+  const hourMap: Record<string, number> = {}
+  for (let i = 7; i <= 22; i++) hourMap[`${i}h`] = 0
+
+  rows.forEach(r => {
+    const d = new Date(r.start_time)
+    const dayLabel = days[d.getDay()]!
+    dayMap[dayLabel] = (dayMap[dayLabel] || 0) + 1
+    const hourLabel = `${d.getHours()}h`
+    if (hourMap[hourLabel] !== undefined) hourMap[hourLabel]! += 1
+  })
+
+  return {
+    kpis: {
+      total, completed, cancelled, noShow,
+      completionRate: total > 0 ? (completed / total) * 100 : 0,
+      totalChange: 0, completedChange: 0, cancelledChange: 0, noShowChange: 0, completionRateChange: 0
+    },
+    statusDistribution: [
+      { status: 'Concluído', count: completed, color: '#10b981' },
+      { status: 'Cancelado', count: cancelled, color: '#ef4444' },
+      { status: 'No-show', count: noShow, color: '#f59e0b' }
+    ].filter(s => s.count > 0),
+    dayOfWeekDistribution: days.map(day => ({ day, count: dayMap[day] || 0 })),
+    peakHours: Object.entries(hourMap).map(([hour, count]) => ({ hour, count })),
+    barberDistribution: []
+  }
+})
+
 export async function getFullReport(startDate: string, endDate: string) {
   const [revenue, appointments, clients, team, loyalty] = await Promise.all([
     getRevenueReport(startDate, endDate),

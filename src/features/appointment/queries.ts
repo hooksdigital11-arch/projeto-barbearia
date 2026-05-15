@@ -77,10 +77,15 @@ export const getAppointments = cache(async (filters?: {
   if (user.role === 'barber') {
     query = query.eq('barber_id', user.id)
   } else if (user.role === 'client') {
-    // Cliente só vê os seus (se o client_id for igual ao user.id)
-    // No Supabase schema: clients(id) references auth.users(id) - usually.
-    // Wait, let's verify if client_id is auth user id or separate table.
-    query = query.eq('client_id', user.id)
+    // appointments.client_id references clients.id (not profiles.id)
+    const { data: clientRow } = await supabaseAdmin
+      .from('clients')
+      .select('id')
+      .eq('organization_id', user.organization_id)
+      .eq('profile_id', user.id)
+      .single()
+    if (!clientRow) return []
+    query = query.eq('client_id', clientRow.id)
   } else if (filters?.barberId) {
     query = query.eq('barber_id', filters.barberId)
   }

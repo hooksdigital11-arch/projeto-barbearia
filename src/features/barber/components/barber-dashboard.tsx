@@ -140,10 +140,14 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
               </div>
 
               <div className="flex items-center gap-3 relative z-10">
-                <button className="flex-1 bg-[#00d4aa] text-[#000] text-[11px] font-medium tracking-[0.06em] py-3.5 rounded-[8px] hover:brightness-110 transition-all uppercase">
+                <button
+                  onClick={() => router.push('/barber/comanda')}
+                  className="flex-1 bg-[#00d4aa] text-[#000] text-[11px] font-medium tracking-[0.06em] py-3.5 rounded-[8px] hover:brightness-110 transition-all uppercase">
                   Finalizar e Próximo
                 </button>
-                <button className="px-6 py-3.5 bg-[#141414] border border-[#1e1e1e] text-[#fff] text-[11px] font-medium rounded-[8px] hover:bg-[#1a1a1a] transition-all uppercase tracking-wider">
+                <button
+                  onClick={() => router.push('/barber/comanda')}
+                  className="px-6 py-3.5 bg-[#141414] border border-[#1e1e1e] text-[#fff] text-[11px] font-medium rounded-[8px] hover:bg-[#1a1a1a] transition-all uppercase tracking-wider">
                   Comanda Digital
                 </button>
               </div>
@@ -166,7 +170,9 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
           <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] p-[18px_20px]">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-[14px] font-medium text-[#bbb] uppercase tracking-wider">Agenda do Período</h3>
-              <button className="text-[10px] text-[#2e2e2e] hover:text-[#444] transition-colors uppercase tracking-wider">
+              <button
+                onClick={() => router.push('/barber/appointments')}
+                className="text-[10px] text-[#2e2e2e] hover:text-[#444] transition-colors uppercase tracking-wider">
                 Ver calendário completo →
               </button>
             </div>
@@ -240,7 +246,9 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
               )}
             </div>
 
-            <button className="w-full bg-[#0d0d0d] border border-[#1e1e1e] rounded-[8px] p-[11px_14px] text-[10px] font-medium text-[#555] tracking-[0.07em] hover:border-[#2a2a2a] hover:text-[#888] transition-all uppercase text-center">
+            <button
+              onClick={() => router.push('/barber/waiting-list')}
+              className="w-full bg-[#0d0d0d] border border-[#1e1e1e] rounded-[8px] p-[11px_14px] text-[10px] font-medium text-[#555] tracking-[0.07em] hover:border-[#2a2a2a] hover:text-[#888] transition-all uppercase text-center">
               Adicionar Cliente Manualmente
             </button>
           </div>

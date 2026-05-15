@@ -16,11 +16,15 @@ export async function GET(req: NextRequest) {
 
   const { data: profile } = await supabaseAdmin
     .from('profiles')
-    .select('organization_id')
+    .select('organization_id, role')
     .eq('id', user.id)
     .single()
 
   if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 403 })
+
+  if (!['admin', 'barber'].includes((profile as any).role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const { data, error } = await supabaseAdmin
     .from('messages')

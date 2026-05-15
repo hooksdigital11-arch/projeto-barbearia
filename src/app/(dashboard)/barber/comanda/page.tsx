@@ -1,11 +1,11 @@
 import { Suspense } from 'react'
 
-import { requireUser } from '@/lib/auth/require-auth'
+import { requireBarber } from '@/lib/auth/require-auth'
 import { createClient } from '@/lib/supabase/server'
 import { ComandaPageBarber } from '@/features/comanda/components/comanda-page-barber'
 
 export default async function BarberComandaPage() {
-  const user = await requireUser()
+  const user = await requireBarber()
   const supabase = await createClient()
 
   // Fetch today's appointments for this barber
