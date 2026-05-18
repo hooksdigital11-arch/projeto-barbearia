@@ -33,7 +33,12 @@ export default async function BarberReportsPage({
 
   return (
     <Suspense fallback={<ReportsLoading />}>
-      <ReportsContent startDate={start} endDate={end} organizationId={profile.organization_id} />
+      <ReportsContent
+        startDate={start}
+        endDate={end}
+        organizationId={profile.organization_id}
+        barberName={profile.full_name || 'Barbeiro'}
+      />
     </Suspense>
   )
 }
@@ -42,10 +47,12 @@ async function ReportsContent({
   startDate,
   endDate,
   organizationId,
+  barberName,
 }: {
   startDate: string
   endDate: string
   organizationId: string
+  barberName: string
 }) {
   const [revenue, appointments, clients, team, loyalty] = await Promise.all([
     getBarberRevenueReport(startDate, endDate),
@@ -63,6 +70,8 @@ async function ReportsContent({
       initialTeam={team}
       initialLoyalty={loyalty}
       organizationId={organizationId}
+      orgName="Barbearia"
+      adminName={barberName}
     />
   )
 }

@@ -39,6 +39,32 @@ async function notificarAgendamento(
   }
 }
 
+const DAY_KEYS: string[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+type DayHours = { isOpen?: boolean; open?: string; close?: string; pauseStart?: string; pauseEnd?: string }
+
+function isWithinBusinessHours(
+  startDt: Date,
+  hours: Record<string, DayHours> | null | undefined
+): { allowed: boolean; reason?: string } {
+  if (!hours) return { allowed: true }
+  const dayKey = DAY_KEYS[startDt.getDay()] as string | undefined
+  if (!dayKey) return { allowed: true }
+  const day = hours[dayKey] as DayHours | undefined
+  if (!day?.isOpen) return { allowed: false, reason: 'Barbearia fechada neste dia' }
+  if (!day.open || !day.close) return { allowed: true }
+  const timeStr = startDt.toLocaleTimeString('pt-BR', {
+    hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo', hour12: false,
+  })
+  if (timeStr < day.open || timeStr >= day.close) {
+    return { allowed: false, reason: `Fora do horário de funcionamento (${day.open}–${day.close})` }
+  }
+  if (day.pauseStart && day.pauseEnd && timeStr >= day.pauseStart && timeStr < day.pauseEnd) {
+    return { allowed: false, reason: `Horário de pausa (${day.pauseStart}–${day.pauseEnd})` }
+  }
+  return { allowed: true }
+}
+
 const REVALIDATE_PATHS = [
   '/admin/appointments',
   '/barber/appointments',
@@ -274,8 +300,6 @@ export async function updateAppointmentStatus(formData: FormData) {
     }
   }
 
-  const { error: queryError } = { error }
-
   if (error) {
     console.error('[UPDATE_STATUS]', error.message)
     return { error: 'Erro ao atualizar status' }
@@ -374,6 +398,18 @@ export async function createClientAppointment(formData: FormData) {
 
   if (startDt <= new Date()) {
     return { error: 'Não é possível agendar em data/hora passada' }
+  }
+
+  // Validar horário de funcionamento da barbearia
+  const { data: org } = await supabaseAdmin
+    .from('organizations')
+    .select('business_hours')
+    .eq('id', user.organization_id)
+    .single()
+
+  const hoursCheck = isWithinBusinessHours(startDt, (org as any)?.business_hours)
+  if (!hoursCheck.allowed) {
+    return { error: hoursCheck.reason || 'Horário fora do funcionamento da barbearia' }
   }
 
   const endDt = new Date(startDt.getTime() + service.duration_minutes * 60 * 1000)

@@ -93,6 +93,9 @@ export const getClientDashboardData = cache(async () => {
     },
     upcomingAppointments,
     history,
-    availableCoupons: [] as any[]
+    lastVisit: history[0] || null,
+    availableCoupons: [] as any[],
+    organizationId: user.organization_id,
+    clientId: clientId || null,
   }
 })

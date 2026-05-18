@@ -2,15 +2,48 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { loginSchema, signupSchema, recoverySchema, resetPasswordSchema } from './schemas'
 import type { AuthResponse } from './types'
 
+// Lazy-initialize rate limiter only when Upstash env vars are present
+async function checkLoginRateLimit(ip: string): Promise<{ limited: boolean }> {
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  if (!url || !token) return { limited: false }
+
+  try {
+    const { Redis } = await import('@upstash/redis')
+    const { Ratelimit } = await import('@upstash/ratelimit')
+    const ratelimit = new Ratelimit({
+      redis: new Redis({ url, token }),
+      limiter: Ratelimit.slidingWindow(5, '15 m'),
+      prefix: 'rl:login',
+    })
+    const { success } = await ratelimit.limit(ip)
+    return { limited: !success }
+  } catch {
+    return { limited: false }
+  }
+}
+
 /**
  * Server Action: Login
  */
 export async function login(formData: FormData): Promise<AuthResponse | void> {
+  const headersList = await headers()
+  const ip =
+    headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    headersList.get('x-real-ip') ??
+    '127.0.0.1'
+
+  const { limited } = await checkLoginRateLimit(ip)
+  if (limited) {
+    return { error: 'Muitas tentativas. Aguarde 15 minutos e tente novamente.' }
+  }
+
   const data = Object.fromEntries(formData)
   const parsed = loginSchema.safeParse({
     ...data,

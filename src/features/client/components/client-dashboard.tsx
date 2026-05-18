@@ -1,21 +1,16 @@
 import Link from 'next/link'
 import {
-  Star,
   Calendar,
   ClockCounterClockwise,
   Ticket,
   Plus,
   Clock,
   ArrowRight,
-  CheckCircle,
   Scissors,
-  ArrowsClockwise
 } from '@phosphor-icons/react/dist/ssr'
 import { getClientDashboardData } from '../queries'
 import 'server-only'
 import { cn } from '@/lib/utils/cn'
-import { EmptyState } from '@/components/shared/empty-state'
-import { CopyLinkButton } from './copy-link-button'
 import { RealtimeRefresher } from '@/components/shared/realtime-refresher'
 
 export async function ClientDashboard() {
@@ -23,7 +18,7 @@ export async function ClientDashboard() {
 
   return (
     <div className="space-y-12 animate-in fade-in duration-1000 pb-20">
-      <RealtimeRefresher organizationId="" />
+      <RealtimeRefresher organizationId={data.organizationId} />
       
       {/* Header Boas-vindas */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
@@ -144,44 +139,30 @@ export async function ClientDashboard() {
             <div className="space-y-4">
               <div className="bg-bg-black border border-border-main rounded-[8px] p-[12px_14px]">
                 <p className="text-[8px] text-text-muted font-medium uppercase tracking-[0.12em] mb-[7px]">Última Visita</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-[8px] h-[8px] rounded-full bg-accent-main" />
-                  <span className="text-[11px] font-medium text-text-secondary uppercase tracking-tight truncate">Corte + Barba (12 Abr)</span>
-                </div>
-                <Link href="/client/services" className="text-[10px] text-accent-main font-medium uppercase tracking-wider mt-[8px]">
-                  Repetir este serviço
-                </Link>
+                {data.lastVisit ? (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <div className="w-[8px] h-[8px] rounded-full bg-accent-main" />
+                      <span className="text-[11px] font-medium text-text-secondary uppercase tracking-tight truncate">
+                        {data.lastVisit.service} ({data.lastVisit.date})
+                      </span>
+                    </div>
+                    <Link href="/client/services" className="text-[10px] text-accent-main font-medium uppercase tracking-wider mt-[8px] block">
+                      Repetir este serviço
+                    </Link>
+                  </>
+                ) : (
+                  <p className="text-[11px] text-text-muted uppercase tracking-tight">Nenhuma visita ainda</p>
+                )}
               </div>
 
               <div className="bg-bg-black border border-border-main rounded-[8px] p-[12px_14px] space-y-3">
                  <p className="text-[9px] text-text-muted font-medium uppercase tracking-[0.1em]">Cupons Disponíveis</p>
-                 {data.availableCoupons.map((coupon) => (
-                    <div key={coupon.id} className="flex items-center justify-between">
-                       <div className="flex items-center gap-2">
-                          <Ticket size={14} weight="fill" className="text-text-muted" />
-                          <span className="text-[11px] font-medium text-text-secondary">{coupon.code}</span>
-                       </div>
-                       <span className="text-[10px] font-medium text-accent-main">-{coupon.discount}</span>
-                    </div>
-                 ))}
-                 {data.availableCoupons.length === 0 && (
-                   <p className="text-[9px] text-text-muted uppercase tracking-widest">Nenhum cupom</p>
-                 )}
+                 <p className="text-[9px] text-text-muted uppercase tracking-widest">Em breve</p>
               </div>
             </div>
           </div>
 
-          {/* Indique um Amigo */}
-          <div className="bg-bg-sidebar border border-border-main rounded-[10px] p-[16px]">
-             <h4 className="text-[16px] font-medium text-text-primary leading-[1.2] tracking-[-0.01em] uppercase mb-[10px]">Indique um Amigo</h4>
-             <p className="text-[10px] text-text-muted leading-[1.4] uppercase tracking-tight mb-[14px]">E ambos ganham 20% de desconto no próximo corte!</p>
-             <div className="space-y-2">
-               <div className="bg-bg-black border border-border-main rounded-[7px] p-[10px_13px] text-text-secondary text-[12px] truncate">
-                 barber.saas/ref/davi
-               </div>
-               <CopyLinkButton url="barber.saas/ref/davi" />
-             </div>
-          </div>
         </div>
       </div>
     </div>

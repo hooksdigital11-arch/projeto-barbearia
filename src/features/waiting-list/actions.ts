@@ -256,14 +256,15 @@ async function recalculatePositions(organizationId: string) {
     .in('status', ['waiting', 'notified'])
     .order('position', { ascending: true })
 
-  if (remaining) {
-    for (let i = 0; i < remaining.length; i++) {
-      const item = remaining[i]
-      if (!item) continue
-      await supabaseAdmin
+  if (!remaining || remaining.length === 0) return
+
+  // Dispara todos os updates em paralelo em vez de sequencial
+  await Promise.all(
+    remaining.map((item, i) =>
+      supabaseAdmin
         .from('waiting_list')
         .update({ position: i + 1 })
         .eq('id', item.id)
-    }
-  }
+    )
+  )
 }

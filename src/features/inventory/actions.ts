@@ -139,34 +139,36 @@ export async function moveStock(productId: string, formData: FormData) {
     return { error: 'Quantidade ou direção da movimentação inválida.' }
   }
 
-  // Buscar produto atual
+  // Fetch product for price/type (needed for movement log) — no lock needed here
   const { data: product } = await supabaseAdmin
     .from('inventory')
-    .select('quantity, type, price_cents')
+    .select('type, price_cents')
     .eq('id', productId)
     .eq('organization_id', user.organization_id)
     .single()
 
   if (!product) return { error: 'Produto não localizado nesta barbearia.' }
 
-  const newQuantity =
-    parsed.data.direction === 'in'
-      ? product.quantity + parsed.data.quantity
-      : product.quantity - parsed.data.quantity
+  // Atomic read-modify-write via SQL RPC (prevents race conditions under concurrent requests)
+  const { data: newQuantity, error: rpcError } = await (supabaseAdmin as any).rpc(
+    'move_stock_atomic',
+    {
+      p_product_id: productId,
+      p_organization_id: user.organization_id,
+      p_direction: parsed.data.direction,
+      p_quantity: parsed.data.quantity,
+    }
+  )
 
-  if (newQuantity < 0) {
-    return { error: 'Operação negada: o estoque não pode ficar negativo.' }
-  }
-
-  // 1. Update Inventory Quantity
-  const { error: updateError } = await supabaseAdmin
-    .from('inventory')
-    .update({ quantity: newQuantity })
-    .eq('id', productId)
-    .eq('organization_id', user.organization_id)
-
-  if (updateError) {
-    console.error('[MOVE_STOCK_UPDATE]', updateError.message)
+  if (rpcError) {
+    const msg: string = rpcError.message || ''
+    if (msg.includes('insufficient_stock')) {
+      return { error: 'Operação negada: o estoque não pode ficar negativo.' }
+    }
+    if (msg.includes('product_not_found')) {
+      return { error: 'Produto não localizado nesta barbearia.' }
+    }
+    console.error('[MOVE_STOCK_RPC]', msg)
     return { error: 'Erro ao atualizar saldo no inventário.' }
   }
 

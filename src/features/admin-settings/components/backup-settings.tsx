@@ -158,12 +158,12 @@ export function BackupSettings() {
 
           <div className="space-y-3">
             <div className="bg-[#0a1a14] border-[0.5px] border-[var(--accent-10, #00d4aa1a)] rounded-[8px] p-4 flex flex-col gap-1">
-              <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a3a2e]">Último Backup Automático</span>
+              <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a3a2e]">Backup Automático</span>
               <div className="flex items-center justify-between">
-                <span className="text-[20px] font-medium text-text-primary tracking-tight">HOJE ÀS <span className="text-accent-main">03:00</span></span>
+                <span className="text-[14px] font-medium text-text-primary tracking-tight uppercase">Gerenciado pelo Supabase</span>
                 <div className="flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded-md">
                   <div className="w-[7px] h-[7px] rounded-full bg-accent-main" />
-                  <span className="text-[10px] text-accent-main uppercase tracking-[0.06em]">OK</span>
+                  <span className="text-[10px] text-accent-main uppercase tracking-[0.06em]">Ativo</span>
                 </div>
               </div>
               <span className="text-[9px] text-[#2a2a2a] uppercase tracking-wider ml-auto mt-1">Supabase Cloud</span>
@@ -171,7 +171,7 @@ export function BackupSettings() {
 
             <div className="bg-bg-surface border-[0.5px] border-border-main rounded-[8px] p-[12px_14px]">
               <p className="text-[10px] text-[#2e2e2e] leading-[1.6]">
-                Sua base de dados é sincronizada diariamente às <span className="font-medium text-[#383838]">03:00 da manhã</span> para garantir a integridade total das informações.
+                Os backups são realizados automaticamente pela infraestrutura do <span className="font-medium text-[#383838]">Supabase Cloud</span>, garantindo a integridade total das informações sem necessidade de configuração manual.
               </p>
             </div>
 

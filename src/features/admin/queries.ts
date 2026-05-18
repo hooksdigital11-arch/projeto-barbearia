@@ -57,6 +57,50 @@ export async function getAdminKPIs(period: string = 'month', search: string = ''
   }
 }
 
+export const getAdminHomeSummary = cache(async () => {
+  const user = await requireUser()
+  const supabase = await createClient()
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayISO = today.toISOString()
+  const tomorrowISO = new Date(today.getTime() + 86400000).toISOString()
+
+  const [{ data: revenueData }, { count: newClients }, { data: aptsData }] = await Promise.all([
+    supabase
+      .from('comanda_items')
+      .select('amount_cents')
+      .eq('organization_id', user.organization_id)
+      .gte('created_at', todayISO)
+      .lt('created_at', tomorrowISO),
+    supabase
+      .from('clients')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', user.organization_id)
+      .gte('created_at', todayISO)
+      .lt('created_at', tomorrowISO),
+    supabase
+      .from('appointments')
+      .select('status')
+      .eq('organization_id', user.organization_id)
+      .gte('start_time', todayISO)
+      .lt('start_time', tomorrowISO),
+  ])
+
+  const revenueToday = ((revenueData || []) as any[]).reduce((acc, item) => acc + (item.amount_cents || 0), 0) / 100
+
+  const apts = (aptsData || []) as any[]
+  const totalApts = apts.length
+  const completedApts = apts.filter(a => a.status === 'completed').length
+  const occupancy = totalApts > 0 ? Math.round((completedApts / totalApts) * 100) : 0
+
+  return {
+    revenueToday: revenueToday.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    occupancy: occupancy.toString(),
+    newClients: ((newClients || 0)).toString(),
+  }
+})
+
 export async function getBarbersPerformance(search: string = '') {
   const user = await requireUser()
   const supabase = await createClient()

@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { timingSafeEqual } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
+function isValidSecret(provided: string | null): boolean {
+  const expected = process.env.WEBHOOK_SECRET
+  if (!expected || !provided) return false
+  try {
+    const a = Buffer.from(provided)
+    const b = Buffer.from(expected)
+    if (a.length !== b.length) return false
+    return timingSafeEqual(a, b)
+  } catch {
+    return false
+  }
+}
+
 export async function POST(req: NextRequest) {
-  const secret = req.headers.get('x-webhook-secret')
-  if (secret !== process.env.WEBHOOK_SECRET) {
+  if (!isValidSecret(req.headers.get('x-webhook-secret'))) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 

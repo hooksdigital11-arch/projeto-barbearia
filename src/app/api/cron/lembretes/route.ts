@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { timingSafeEqual } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { enviarMensagem, isEvolutionConfigured } from '@/lib/evolution'
 
+function isValidCronSecret(header: string | null): boolean {
+  const secret = process.env.CRON_SECRET
+  const provided = header?.startsWith('Bearer ') ? header.slice(7) : null
+  if (!secret || !provided) return false
+  try {
+    const a = Buffer.from(provided)
+    const b = Buffer.from(secret)
+    if (a.length !== b.length) return false
+    return timingSafeEqual(a, b)
+  } catch {
+    return false
+  }
+}
+
 export async function GET(req: NextRequest) {
-  const auth = req.headers.get('authorization')
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isValidCronSecret(req.headers.get('authorization'))) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
@@ -37,6 +51,7 @@ export async function GET(req: NextRequest) {
   }
 
   let enviados = 0
+  let falhas = 0
   const ids: string[] = []
 
   for (const ag of (agendamentos ?? []) as any[]) {
@@ -59,6 +74,7 @@ export async function GET(req: NextRequest) {
       enviados++
       ids.push(ag.id)
     } catch (e) {
+      falhas++
       console.error('[CRON_LEMBRETES] Falha ao enviar para', ag.id, e)
     }
   }
@@ -69,5 +85,5 @@ export async function GET(req: NextRequest) {
       .in('id', ids)
   }
 
-  return NextResponse.json({ enviados })
+  return NextResponse.json({ enviados, falhas, total: enviados + falhas })
 }

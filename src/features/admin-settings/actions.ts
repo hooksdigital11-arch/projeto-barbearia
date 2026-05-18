@@ -11,15 +11,33 @@ import {
   notificationPreferencesSchema,
   adminProfileSchema
 } from './schemas'
-import type { 
-  GeneralSettingsInput, 
-  BusinessHoursInput, 
-  ServiceInput, 
+import type {
+  GeneralSettingsInput,
+  BusinessHoursInput,
+  ServiceInput,
   NotificationPreferencesInput,
   AdminProfileInput
 } from './schemas'
 
 import { createClient } from '@/lib/supabase/server'
+import { verificarConexao, isEvolutionConfigured } from '@/lib/evolution'
+
+export async function getEvolutionStatus(): Promise<{
+  configured: boolean
+  state: 'connected' | 'disconnected' | 'not_configured' | 'error'
+}> {
+  await requireAdmin()
+  if (!isEvolutionConfigured()) {
+    return { configured: false, state: 'not_configured' }
+  }
+  try {
+    const result = await verificarConexao()
+    const state = result?.instance?.state === 'open' ? 'connected' : 'disconnected'
+    return { configured: true, state }
+  } catch {
+    return { configured: true, state: 'error' }
+  }
+}
 
 const updatePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Senha atual obrigatória'),
@@ -141,7 +159,7 @@ export async function createService(input: ServiceInput) {
         duration: parsed.data.duration,
         category: parsed.data.category,
         is_active: parsed.data.isActive,
-        price_cents: Math.round(parsed.data.price * 100),
+        price_cents: Math.round(parsed.data.price * 100 + Number.EPSILON),
         organization_id: admin.organization_id
       } as any)
 
@@ -170,7 +188,7 @@ export async function updateService(id: string, input: ServiceInput) {
         duration: parsed.data.duration,
         category: parsed.data.category,
         is_active: parsed.data.isActive,
-        price_cents: Math.round(parsed.data.price * 100)
+        price_cents: Math.round(parsed.data.price * 100 + Number.EPSILON)
       } as any)
       .eq('id', id)
       .eq('organization_id', admin.organization_id)

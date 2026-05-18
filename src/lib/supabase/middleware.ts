@@ -6,10 +6,11 @@ import { supabaseAdmin } from './admin'
 /**
  * Rotas que NÃO precisam de autenticação.
  */
-const publicRoutes = ['/login', '/signup', '/recovery', '/auth/callback']
+const publicRoutes = ['/', '/login', '/signup', '/recovery', '/auth/callback']
 
 function isPublicRoute(pathname: string): boolean {
-  return publicRoutes.some((route) => pathname.startsWith(route))
+  if (pathname === '/') return true
+  return publicRoutes.some((route) => route !== '/' && pathname.startsWith(route))
 }
 
 export async function updateSession(request: NextRequest) {

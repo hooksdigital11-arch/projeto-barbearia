@@ -1,9 +1,30 @@
 'use client'
 
-import { WhatsappLogo, GoogleLogo, InstagramLogo, CreditCard, QrCode, Plug } from '@phosphor-icons/react'
+import { useState, useEffect } from 'react'
+import { WhatsappLogo, GoogleLogo, InstagramLogo, CreditCard, QrCode, Plug, CircleNotch } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
+import { getEvolutionStatus } from '../actions'
+
+type WhatsAppState = 'loading' | 'connected' | 'disconnected' | 'not_configured' | 'error'
 
 export function IntegrationsSettings() {
+  const [whatsAppState, setWhatsAppState] = useState<WhatsAppState>('loading')
+
+  useEffect(() => {
+    getEvolutionStatus().then(({ state }) => {
+      setWhatsAppState(state as WhatsAppState)
+    }).catch(() => setWhatsAppState('error'))
+  }, [])
+
+  const statusLabel: Record<WhatsAppState, { label: string; color: string }> = {
+    loading:        { label: 'Verificando...', color: '#555555' },
+    connected:      { label: 'Conectado',      color: '#00c070' },
+    disconnected:   { label: 'Desconectado',   color: '#c04040' },
+    not_configured: { label: 'Não configurado', color: '#c04040' },
+    error:          { label: 'Erro de conexão', color: '#f59e0b' },
+  }
+  const status = statusLabel[whatsAppState]
+
   return (
     <div className="space-y-10 max-w-4xl">
       <div className="space-y-0.5">
@@ -26,8 +47,14 @@ export function IntegrationsSettings() {
               <div className="flex flex-col">
                 <h3 className="text-[16px] font-medium text-text-primary tracking-[0.02em] leading-[1.2] uppercase">WhatsApp Business</h3>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <div className="w-[5px] h-[5px] rounded-full bg-[#c04040]" />
-                  <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-[#c04040]">Desconectado</span>
+                  {whatsAppState === 'loading' ? (
+                    <CircleNotch size={10} className="animate-spin" style={{ color: status.color }} />
+                  ) : (
+                    <div className="w-[5px] h-[5px] rounded-full" style={{ background: status.color }} />
+                  )}
+                  <span className="text-[9px] font-medium uppercase tracking-[0.08em]" style={{ color: status.color }}>
+                    {status.label}
+                  </span>
                 </div>
               </div>
             </div>
@@ -39,7 +66,7 @@ export function IntegrationsSettings() {
             <div className="flex items-center gap-4 pt-1">
               <button className="flex items-center gap-2 bg-accent-main text-black px-5 py-[10px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] hover:opacity-90 transition-all">
                 <Plug size={14} weight="bold" />
-                Conectar Agora
+                {whatsAppState === 'connected' ? 'Gerenciar Instância' : 'Conectar Agora'}
               </button>
               <button className="text-[10px] font-medium uppercase tracking-[0.08em] text-[#383838] hover:text-text-nav transition-colors">
                 Documentação
@@ -49,8 +76,17 @@ export function IntegrationsSettings() {
 
           {/* Right Side (QR) */}
           <div className="bg-[#0d1a12] border-[0.5px] border-[#1a2a1a] rounded-[9px] h-[130px] flex flex-col items-center justify-center gap-2.5">
-            <QrCode size={36} className="text-[#1e2e1e]" />
-            <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-[#1e3020]">Conecte para ver</span>
+            {whatsAppState === 'connected' ? (
+              <>
+                <div className="w-[7px] h-[7px] rounded-full bg-[#00c070]" />
+                <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-[#00c070]">Ativo</span>
+              </>
+            ) : (
+              <>
+                <QrCode size={36} className="text-[#1e2e1e]" />
+                <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-[#1e3020]">Conecte para ver</span>
+              </>
+            )}
           </div>
         </div>
 

@@ -27,7 +27,7 @@ export async function createService(input: CreateServiceInput) {
         duration_minutes: parsed.data.duration,
         category: parsed.data.category,
         is_active: parsed.data.isActive,
-        price_cents: Math.round(parsed.data.price * 100),
+        price_cents: Math.round(parsed.data.price * 100 + Number.EPSILON),
         organization_id: admin.organization_id,
       })
 
@@ -63,7 +63,7 @@ export async function updateService(id: string, input: CreateServiceInput) {
         duration_minutes: parsed.data.duration,
         category: parsed.data.category,
         is_active: parsed.data.isActive,
-        price_cents: Math.round(parsed.data.price * 100),
+        price_cents: Math.round(parsed.data.price * 100 + Number.EPSILON),
       })
       .eq('id', id)
       .eq('organization_id', admin.organization_id)

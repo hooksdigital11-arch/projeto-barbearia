@@ -120,37 +120,58 @@ export async function closeComanda(formData: FormData) {
 
   if (payError) return { error: 'Erro ao processar pagamento' }
 
-  // 3. Atualizar agendamento para completed (Isso dispara a Trigger de Fidelidade e Estoque)
+  // 3. Atualizar agendamento para completed — valida que pertence à org antes
   if (parsed.data.appointment_id) {
     const { data: apptBefore } = await supabase
       .from('appointments')
-      .select('status')
-      .eq('id', parsed.data.appointment_id)
-      .single() as { data: { status: string } | null }
-
-    await (supabase
-      .from('appointments') as any)
-      .update({ status: 'completed' })
+      .select('status, client_id')
       .eq('id', parsed.data.appointment_id)
       .eq('organization_id', user.organization_id)
+      .single() as { data: { status: string; client_id: string } | null }
 
-    if (apptBefore?.status !== 'completed') {
-      const totalCents = items.reduce((sum: number, i: ComandaItem) => sum + i.total_cents, 0) - (parsed.data.discount_cents || 0)
-      const { data: client } = await (supabase
-        .from('clients')
-        .select('total_visits, total_spent_cents')
-        .eq('id', parsed.data.client_id)
-        .single() as any)
+    // Garante que o agendamento pertence à org e ao cliente informado
+    if (apptBefore && apptBefore.client_id !== parsed.data.client_id) {
+      return { error: 'Agendamento não pertence a este cliente' }
+    }
 
-      if (client && typeof client === 'object') {
-        await (supabase
-          .from('clients') as any)
-          .update({
-            total_visits: ((client as any).total_visits || 0) + 1,
-            total_spent_cents: ((client as any).total_spent_cents || 0) + totalCents,
-            last_visit_at: new Date().toISOString()
-          })
+    if (apptBefore) {
+      await (supabase
+        .from('appointments') as any)
+        .update({ status: 'completed' })
+        .eq('id', parsed.data.appointment_id)
+        .eq('organization_id', user.organization_id)
+
+      if (apptBefore.status !== 'completed') {
+        const totalCents = items.reduce((sum: number, i: ComandaItem) => sum + i.total_cents, 0) - (parsed.data.discount_cents || 0)
+        const { data: client } = await (supabase
+          .from('clients')
+          .select('total_visits, total_spent_cents')
           .eq('id', parsed.data.client_id)
+          .eq('organization_id', user.organization_id)
+          .single() as any)
+
+        if (client && typeof client === 'object') {
+          await (supabase
+            .from('clients') as any)
+            .update({
+              total_visits: ((client as any).total_visits || 0) + 1,
+              total_spent_cents: ((client as any).total_spent_cents || 0) + totalCents,
+              last_visit_at: new Date().toISOString()
+            })
+            .eq('id', parsed.data.client_id)
+        }
+
+        // Adicionar carimbo de fidelidade automaticamente após atendimento pago
+        try {
+          await addStampAfterAppointment(
+            user.organization_id,
+            parsed.data.client_id,
+            parsed.data.appointment_id,
+            totalCents
+          )
+        } catch (err) {
+          console.error('[CLOSE_COMANDA] Falha ao adicionar carimbo de fidelidade:', err)
+        }
       }
     }
   }

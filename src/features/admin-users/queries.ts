@@ -26,11 +26,13 @@ export const getOrganizationUsers = cache(async (filters?: AdminUsersFilter): Pr
   }
 
   if (filters?.search) {
-    // Filtro simples por nome ou email (se existir no profile)
-    query = query.or(`full_name.ilike.%${filters.search}%`)
+    const term = filters.search.trim().slice(0, 100)
+    query = query.or(`full_name.ilike.%${term}%`)
   }
 
-  const { data, error } = await query.order('created_at', { ascending: false })
+  const { data, error } = await query
+    .order('created_at', { ascending: false })
+    .limit(200)
 
   if (error) {
     console.error('Error fetching organization users:', error)

@@ -163,18 +163,27 @@ export async function recordBroadcast(formData: FormData) {
     return { error: 'Erro ao registrar disparo' }
   }
 
-  // Enviar via Evolution API para cada cliente com telefone
+  // Enviar via Evolution API em lotes paralelos de 5
   let sentCount = 0
   if (isEvolutionConfigured()) {
-    for (const client of clients) {
-      if (!client.phone) continue
-      const msg = parsed.data.content.replace(/\{nome\}/g, client.full_name)
-      try {
-        await enviarMensagem(client.phone, msg)
-        sentCount++
-      } catch (e) {
-        console.error('[BROADCAST_EVOLUTION]', client.id, e)
-      }
+    const BATCH_SIZE = 5
+    const withPhone = clients.filter(c => c.phone)
+
+    for (let i = 0; i < withPhone.length; i += BATCH_SIZE) {
+      const batch = withPhone.slice(i, i + BATCH_SIZE)
+      const results = await Promise.allSettled(
+        batch.map(client => {
+          const msg = parsed.data.content.replace(/\{nome\}/g, client.full_name)
+          return enviarMensagem(client.phone!, msg)
+        })
+      )
+      results.forEach((result, idx) => {
+        if (result.status === 'fulfilled') {
+          sentCount++
+        } else {
+          console.error('[BROADCAST_EVOLUTION]', batch[idx]?.id, result.reason)
+        }
+      })
     }
   }
 

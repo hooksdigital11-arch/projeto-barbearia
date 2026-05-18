@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export async function GET(req: NextRequest) {
   const clientId = req.nextUrl.searchParams.get('clientId')
 
-  if (!clientId) {
-    return NextResponse.json({ error: 'clientId required' }, { status: 400 })
+  if (!clientId || !z.string().uuid().safeParse(clientId).success) {
+    return NextResponse.json({ error: 'clientId inválido' }, { status: 400 })
   }
 
-  // Auth check
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -26,13 +26,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  // Valida que o cliente pertence à org do usuário autenticado
+  const { data: clientRecord } = await supabaseAdmin
+    .from('clients')
+    .select('id')
+    .eq('id', clientId)
+    .eq('organization_id', (profile as any).organization_id)
+    .maybeSingle()
+
+  if (!clientRecord) {
+    return NextResponse.json({ error: 'Cliente não encontrado' }, { status: 404 })
+  }
+
   const { data, error } = await supabaseAdmin
     .from('messages')
     .select(`
       id, client_id, direction, content, template_used,
       status, sent_by, created_at
     `)
-    .eq('organization_id', profile.organization_id)
+    .eq('organization_id', (profile as any).organization_id)
     .eq('client_id', clientId)
     .order('created_at', { ascending: true })
     .limit(100)

@@ -89,35 +89,46 @@ export const getAllClientsLoyalty = cache(async (): Promise<ClientLoyalty[]> => 
 
   const stamps = allStamps || []
 
+  // Agrupa stamps por client_id com Map para O(n+m) em vez de O(n*m)
+  const stampsByClient = new Map<string, Array<{ type: string; amount: number }>>()
+  const clientsWithStamps = new Set<string>()
+  for (const stamp of stamps) {
+    if (!stamp.client_id) continue
+    clientsWithStamps.add(stamp.client_id)
+    if (!stampsByClient.has(stamp.client_id)) {
+      stampsByClient.set(stamp.client_id, [])
+    }
+    stampsByClient.get(stamp.client_id)!.push(stamp)
+  }
+
   // Calcular saldo por cliente
-  const results: ClientLoyalty[] = clients.map(client => {
-    const clientStamps = stamps.filter(s => s.client_id === client.id)
-    
-    let balance = 0
-    for (const stamp of clientStamps) {
-      if (stamp.type === 'redeem') {
-        balance = 0
-      } else {
-        balance += stamp.amount
+  const results: ClientLoyalty[] = clients
+    .filter(client => clientsWithStamps.has(client.id))
+    .map(client => {
+      const clientStamps = stampsByClient.get(client.id) || []
+
+      let balance = 0
+      for (const stamp of clientStamps) {
+        if (stamp.type === 'redeem') {
+          balance = 0
+        } else {
+          balance += stamp.amount
+        }
       }
-    }
 
-    return {
-      id: client.id,
-      full_name: client.full_name || 'Sem nome',
-      email: client.email,
-      phone: client.phone,
-      balance,
-      goal,
-      progress: Math.min(Math.round((balance / goal) * 100), 100),
-      ready: balance >= goal,
-    }
-  })
+      return {
+        id: client.id,
+        full_name: client.full_name || 'Sem nome',
+        email: client.email,
+        phone: client.phone,
+        balance,
+        goal,
+        progress: Math.min(Math.round((balance / goal) * 100), 100),
+        ready: balance >= goal,
+      }
+    })
 
-  // Só retornar clientes que têm algum carimbo
-  return results
-    .filter(c => c.balance > 0 || stamps.some(s => s.client_id === c.id))
-    .sort((a, b) => b.balance - a.balance)
+  return results.sort((a, b) => b.balance - a.balance)
 })
 
 /**

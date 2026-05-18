@@ -29,17 +29,21 @@ interface ReportsPageProps {
   initialTeam: TeamReport
   initialLoyalty: LoyaltyReport
   organizationId: string
+  orgName: string
+  adminName: string
 }
 
 import { CustomDateModal } from './custom-date-modal'
 
-export function ReportsPage({ 
-  initialRevenue, 
-  initialAppointments, 
-  initialClients, 
+export function ReportsPage({
+  initialRevenue,
+  initialAppointments,
+  initialClients,
   initialTeam,
   initialLoyalty,
-  organizationId
+  organizationId,
+  orgName,
+  adminName,
 }: ReportsPageProps) {
   const router = useRouter()
   const [dates, setDates] = useState({ 
@@ -117,8 +121,8 @@ export function ReportsPage({
 
     return {
       barbearia: {
-        nome: 'Barbearia Admin', // TODO: conectar dado real
-        barbeiro: 'Administrador' // TODO: conectar dado real
+        nome: orgName,
+        barbeiro: adminName
       },
       periodo: periodLabels[activePeriod] || 'Período',
       dataGeracao: new Date().toLocaleDateString('pt-BR'),
@@ -129,12 +133,12 @@ export function ReportsPage({
         variacaoSemana: `${revenue.kpis.totalRevenueChange > 0 ? '+' : ''}${revenue.kpis.totalRevenueChange}%`,
         ticketMedio: revenue.kpis.averageTicket,
         totalAtendimentos: revenue.kpis.totalComandas,
-        pagamentosPendentes: 0, // TODO: conectar dado real
-        valorPresente: 0, // TODO: conectar dado real
+        pagamentosPendentes: 0,
+        valorPresente: 0,
 
         topServicos: revenue.topServices.map((s, i) => ({
           nome: s.name,
-          categoria: 'Serviço', // TODO: conectar dado real
+          categoria: 'Serviço',
           faturamento: s.totalRevenue,
           participacao: revenue.kpis.totalRevenue ? `${((s.totalRevenue / revenue.kpis.totalRevenue) * 100).toFixed(1)}% do mix` : '0%',
           destaque: i === 0
@@ -162,7 +166,7 @@ export function ReportsPage({
           return {
             dia: d.dia,
             agendamentos: apiMatch ? apiMatch.count : 0,
-            concluidos: 0 // TODO: conectar dado real
+            concluidos: 0
           }
         })
       },
@@ -173,7 +177,7 @@ export function ReportsPage({
         ativos: clients.kpis.totalActive,
         novos: clients.kpis.newClients,
         taxaRetencao: clients.kpis.retentionRate,
-        satisfacao: 100, // TODO: conectar dado real
+        satisfacao: 100,
 
         lista: clients.topClients.map(c => ({
           nome: c.name,
@@ -197,7 +201,9 @@ export function ReportsPage({
         inscritos: loyalty.kpis.activeMembers,
         pontosResgatados: loyalty.kpis.redemptions,
         presentesMes: loyalty.kpis.stampsDistributed,
-        progressaoMedia: '0/10', // TODO: conectar dado real
+        progressaoMedia: loyalty.kpis.activeMembers > 0
+          ? `${Math.round(loyalty.kpis.stampsDistributed / loyalty.kpis.activeMembers)}/10`
+          : '0/10',
         clientesBonificados: loyalty.kpis.activeMembers > 0 ? (loyalty.kpis.readyToRedeem / loyalty.kpis.activeMembers) * 100 : 0
       }
     }

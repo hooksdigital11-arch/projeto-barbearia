@@ -36,12 +36,15 @@ export const getClients = cache(async (filters?: {
   }
 
   if (filters?.search) {
+    const term = filters.search.trim().slice(0, 100)
     query = query.or(
-      `full_name.ilike.%${filters.search}%,phone.ilike.%${filters.search}%,email.ilike.%${filters.search}%`
+      `full_name.ilike.%${term}%,phone.ilike.%${term}%,email.ilike.%${term}%`
     )
   }
 
-  const { data, error } = await query.order('full_name', { ascending: true })
+  const { data, error } = await query
+    .order('full_name', { ascending: true })
+    .limit(500)
 
   if (error) {
     console.error('[GET_CLIENTS]', error.message)

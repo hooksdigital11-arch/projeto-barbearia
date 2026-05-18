@@ -73,15 +73,28 @@ const modules = [
   },
 ]
 
-interface AdminHomeProps {
-  userName: string
+interface AdminHomeSummary {
+  revenueToday: string
+  occupancy: string
+  newClients: string
 }
 
-export function AdminHome({ userName }: AdminHomeProps) {
+interface AdminHomeProps {
+  userName: string
+  summary: AdminHomeSummary
+}
+
+export function AdminHome({ userName, summary }: AdminHomeProps) {
   const firstName = userName?.split(' ')[0] || 'Admin'
   const now = new Date()
   const hour = now.getHours()
   const greeting = hour < 12 ? 'BOM DIA' : hour < 18 ? 'BOA TARDE' : 'BOA NOITE'
+
+  const kpis = [
+    { label: 'FATURAMENTO HOJE', value: summary.revenueToday, unit: 'R$' },
+    { label: 'TAXA DE OCUPAÇÃO', value: summary.occupancy, unit: '%' },
+    { label: 'NOVOS CLIENTES', value: summary.newClients, unit: '' },
+  ]
 
   return (
     <div className="space-y-16 py-8">
@@ -95,11 +108,7 @@ export function AdminHome({ userName }: AdminHomeProps) {
 
       {/* KPI Section - Precision Data */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-[12px]">
-        {[
-          { label: 'FATURAMENTO HOJE', value: '4.280', unit: 'R$' },
-          { label: 'TAXA DE OCUPAÇÃO', value: '94', unit: '%' },
-          { label: 'NOVOS CLIENTES', value: '12', unit: '' },
-        ].map((kpi, idx) => (
+        {kpis.map((kpi, idx) => (
           <div key={idx} className="bg-bg-surface border-[0.5px] border-border-main rounded-[10px] p-[20px] px-[22px] flex flex-col justify-between h-[120px]">
             <p className="text-[10px] tracking-[0.1em] text-text-secondary font-medium uppercase">{kpi.label}</p>
             <div className="flex items-baseline gap-1">
