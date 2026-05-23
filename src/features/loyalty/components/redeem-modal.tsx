@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { X, Gift, Sparkle, Ticket, CircleNotch } from '@phosphor-icons/react'
+import { Gift, Sparkle, Ticket, CircleNotch } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { redeemReward } from '../actions'
 import { toast } from 'sonner'

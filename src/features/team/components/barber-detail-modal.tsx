@@ -36,7 +36,6 @@ export function BarberDetailModal({ isOpen, onClose, member, showRevenue }: Barb
 
   const color = getMemberColor(member.full_name || '')
   const initials = (member.full_name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-  const isActive = member.status === 'active' || !member.status
 
   const tabs: { value: Tab; label: string; icon: typeof UserCircle }[] = [
     { value: 'profile', label: 'PERFIL', icon: UserCircle },

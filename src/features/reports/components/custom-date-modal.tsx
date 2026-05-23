@@ -13,16 +13,15 @@ export function CustomDateModal({ onApply, onClose }: CustomDateModalProps) {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [daysCount, setDaysCount] = useState<number>(0)
   const [activeId, setActiveId] = useState<string | null>(null)
 
   useEffect(() => {
     validate()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate])
 
   const validate = () => {
     setError(null)
-    setDaysCount(0)
 
     if (!startDate || !endDate) return
 
@@ -52,8 +51,6 @@ export function CustomDateModal({ onApply, onClose }: CustomDateModalProps) {
       setError('Máximo de 365 dias por consulta')
       return
     }
-
-    setDaysCount(diffDays + 1)
   }
 
   const applyShortcut = (label: string, days: number, currentYear: boolean = false) => {

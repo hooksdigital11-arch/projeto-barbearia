@@ -6,20 +6,13 @@ import {
   Users,
   UserCheck,
   UserPlus,
-  Cake,
   Gift,
   Plus,
-  FunnelSimple,
   MagnifyingGlass,
   Faders,
   List,
   Cards,
 } from '@phosphor-icons/react'
-import { KPICard } from '@/components/shared/kpi-card'
-import { PageTitle } from '@/components/shared/page-title'
-import { SearchInput } from '@/components/shared/search-input'
-import { ViewToggle } from './view-toggle'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils/cn'
 import type { ClientRecord, ClientsStats, BarberOption, ClientStatus } from '../types'
 

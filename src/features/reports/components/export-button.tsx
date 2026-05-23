@@ -1,6 +1,5 @@
 'use client'
 
-import { DownloadSimple } from '@phosphor-icons/react'
 
 interface ExportCSVButtonProps {
   kpis: {

@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { MagnifyingGlass, Funnel, X, FadersHorizontal } from '@phosphor-icons/react'
-import { Input } from '@/components/ui/input'
+import { useState, useRef } from 'react'
+import { MagnifyingGlass, X, FadersHorizontal } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 
 interface Filters {
@@ -19,7 +18,6 @@ interface InventoryFiltersProps {
   setSearch: (s: string) => void
   filters: Filters
   setFilters: (f: Filters) => void
-  inactiveCount: number
   period: 'hoje' | 'semana' | 'mes' | 'ano'
   setPeriod: (p: 'hoje' | 'semana' | 'mes' | 'ano') => void
 }
@@ -41,19 +39,46 @@ const PERIODS = [
 const CATEGORIES = ['POMADA', 'SHAMPOO', 'LAMINA', 'TESOURA', 'OLEO', 'CREME', 'OUTROS']
 
 export function InventoryFilters({
-  activeTab, setActiveTab, search, setSearch, filters, setFilters, inactiveCount, period, setPeriod
+  activeTab, setActiveTab, search, setSearch, filters, setFilters, period, setPeriod
 }: InventoryFiltersProps) {
   const [showPanel, setShowPanel] = useState(false)
   const hasActiveFilters = filters.category || filters.minQty || filters.maxQty || filters.lowStockOnly
 
   const resetFilters = () => setFilters({ category: '', minQty: '', maxQty: '', lowStockOnly: false })
 
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = scrollRef.current
+    if (!el) return
+    const startX = e.pageX - el.offsetLeft
+    const scrollLeft = el.scrollLeft
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const x = moveEvent.pageX - el.offsetLeft
+      const walk = (x - startX) * 1.5
+      el.scrollLeft = scrollLeft - walk
+    }
+
+    const handleMouseUp = () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div 
+          ref={scrollRef}
+          onMouseDown={handleMouseDown}
+          className="flex items-center gap-4 overflow-x-auto scrollbar-none w-full pb-2 -mb-2 cursor-grab active:cursor-grabbing select-none"
+        >
           {/* Grupo 1: Categorias/Status */}
-          <div className="flex p-[3px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px]">
+          <div className="flex p-[3px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] shrink-0">
             {TABS.map(tab => (
               <button
                 key={tab.value}
@@ -71,10 +96,10 @@ export function InventoryFilters({
           </div>
 
           {/* Divider */}
-          <div className="w-[0.5px] h-[20px] bg-[#1a1a1a]" />
+          <div className="w-[0.5px] h-[20px] bg-[#1a1a1a] shrink-0" />
 
           {/* Grupo 2: Período */}
-          <div className="flex p-[3px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px]">
+          <div className="flex p-[3px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] shrink-0">
             {PERIODS.map(p => (
               <button
                 key={p.value}

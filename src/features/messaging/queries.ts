@@ -43,8 +43,15 @@ export const getConversations = cache(async (): Promise<MessageConversation[]> =
 
   // Group by client_id — keep the latest
   const map = new Map<string, MessageConversation>()
-  for (const row of (data || []) as any[]) {
-    const cid = row.client_id as string
+  type ConversationRow = {
+    client_id: string
+    content: string
+    created_at: string
+    direction: string
+    client: { id: string; full_name: string; phone: string | null } | null
+  }
+  for (const row of (data || []) as unknown as ConversationRow[]) {
+    const cid = row.client_id
     if (!map.has(cid)) {
       map.set(cid, {
         client_id: cid,
@@ -123,7 +130,7 @@ export const getClientsForMessaging = cache(async (group?: string): Promise<Clie
   const user = await requireUser()
   const now = new Date()
 
-  let query = supabaseAdmin
+  const query = supabaseAdmin
     .from('clients')
     .select('id, full_name, phone, last_visit_at, birthday, status')
     .eq('organization_id', user.organization_id)

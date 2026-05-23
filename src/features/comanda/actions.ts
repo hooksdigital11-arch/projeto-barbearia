@@ -43,7 +43,9 @@ export async function addComandaItem(formData: FormData) {
     paid: false,
   }
 
-  const { error } = await (supabase.from('comanda_items') as any).insert(insertData)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client: any = supabase
+  const { error } = await client.from('comanda_items').insert(insertData)
 
   if (error) {
     console.error('Error adding comanda item:', error)
@@ -91,10 +93,12 @@ export async function closeComanda(formData: FormData) {
   if (!parsed.success) return { error: 'Dados inválidos' }
 
   const now = new Date().toISOString()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client: any = supabase
 
   // 1. Buscar todos os itens não pagos do cliente
-  const { data: items } = await (supabase
-    .from('comanda_items') as any)
+  const { data: items } = await client
+    .from('comanda_items')
     .select('*')
     .eq('organization_id', user.organization_id)
     .eq('client_id', parsed.data.client_id)
@@ -111,8 +115,8 @@ export async function closeComanda(formData: FormData) {
   }
 
   // 2. Marcar todos como pagos
-  const { error: payError } = await (supabase
-    .from('comanda_items') as any)
+  const { error: payError } = await client
+    .from('comanda_items')
     .update(updateData)
     .eq('organization_id', user.organization_id)
     .eq('client_id', parsed.data.client_id)
@@ -135,27 +139,32 @@ export async function closeComanda(formData: FormData) {
     }
 
     if (apptBefore) {
-      await (supabase
-        .from('appointments') as any)
+      await client
+        .from('appointments')
         .update({ status: 'completed' })
         .eq('id', parsed.data.appointment_id)
         .eq('organization_id', user.organization_id)
 
       if (apptBefore.status !== 'completed') {
         const totalCents = items.reduce((sum: number, i: ComandaItem) => sum + i.total_cents, 0) - (parsed.data.discount_cents || 0)
-        const { data: client } = await (supabase
+        
+        type ClientStatsRow = {
+          total_visits: number | null
+          total_spent_cents: number | null
+        }
+        const { data: clientObj } = await client
           .from('clients')
           .select('total_visits, total_spent_cents')
           .eq('id', parsed.data.client_id)
           .eq('organization_id', user.organization_id)
-          .single() as any)
+          .single() as { data: ClientStatsRow | null }
 
-        if (client && typeof client === 'object') {
-          await (supabase
-            .from('clients') as any)
+        if (clientObj) {
+          await client
+            .from('clients')
             .update({
-              total_visits: ((client as any).total_visits || 0) + 1,
-              total_spent_cents: ((client as any).total_spent_cents || 0) + totalCents,
+              total_visits: (clientObj.total_visits || 0) + 1,
+              total_spent_cents: (clientObj.total_spent_cents || 0) + totalCents,
               last_visit_at: new Date().toISOString()
             })
             .eq('id', parsed.data.client_id)

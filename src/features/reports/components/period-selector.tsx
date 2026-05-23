@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar as CalendarIcon, X } from '@phosphor-icons/react'
+import { X } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 import { CustomDateModal } from './custom-date-modal'
 import type { ReportPeriod } from '../types'
@@ -10,18 +10,18 @@ interface PeriodSelectorProps {
   onPeriodChange: (start: string, end: string, period: ReportPeriod) => void
 }
 
+const periods: { label: string; value: ReportPeriod }[] = [
+  { label: 'Hoje', value: 'today' },
+  { label: 'Semana', value: 'week' },
+  { label: 'Mês', value: 'month' },
+  { label: 'Ano', value: 'year' },
+]
+
 export function PeriodSelector({ onPeriodChange }: PeriodSelectorProps) {
   const [activePeriod, setActivePeriod] = useState<ReportPeriod | 'custom'>('month')
   const [showCustom, setShowCustom] = useState(false)
   const [customRange, setCustomRange] = useState<{ start: string; end: string } | null>(null)
   const [compare, setCompare] = useState(false)
-
-  const periods: { label: string; value: ReportPeriod }[] = [
-    { label: 'Hoje', value: 'today' },
-    { label: 'Semana', value: 'week' },
-    { label: 'Mês', value: 'month' },
-    { label: 'Ano', value: 'year' },
-  ]
 
   useEffect(() => {
     const saved = localStorage.getItem('reports-period') as ReportPeriod
@@ -30,6 +30,7 @@ export function PeriodSelector({ onPeriodChange }: PeriodSelectorProps) {
     } else {
       handlePeriodSelect('month')
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handlePeriodSelect = (period: ReportPeriod | 'custom') => {
@@ -42,7 +43,7 @@ export function PeriodSelector({ onPeriodChange }: PeriodSelectorProps) {
     const end = new Date()
     end.setHours(23, 59, 59, 999)
     
-    let start = new Date()
+    const start = new Date()
     start.setHours(0, 0, 0, 0)
 
     if (period === 'week') {

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { TeamReport } from '../types'
-import { cn } from '@/lib/utils/cn'
 import { useThemeColors } from '@/lib/hooks/use-theme-colors'
 
 interface TeamSectionProps {
@@ -77,7 +76,7 @@ export function TeamSection({ data }: TeamSectionProps) {
         ...baseOpts,
         indexAxis: 'y',
         scales: {
-          x: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 }, callback: (v: any) => 'R$' + v } },
+          x: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 }, callback: (v: string | number) => 'R$' + v } },
           y: { grid: { display: false }, ticks: { color: TICK, font: { size: 10 } } }
         }
       }

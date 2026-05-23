@@ -2,14 +2,13 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, PencilSimple, Trash, Copy, Scissors, Play, Pause, X } from '@phosphor-icons/react'
+import { Plus, PencilSimple, Trash, Copy, Play, Pause, X } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 import { toast } from 'sonner'
 import { createService, updateService, deleteService, toggleServiceStatus, duplicateService } from '../actions'
 import { CATEGORY_CONFIG } from '../types'
 import type { Service, ServiceCategory } from '../types'
 import type { CreateServiceInput } from '../schemas'
-import { PageTitle } from '@/components/shared/page-title'
 
 interface ServiceStats {
   total: number
@@ -30,9 +29,6 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingService, setEditingService] = useState<Partial<Service> | null>(null)
   const [categoryFilter, setCategoryFilter] = useState<string>('')
-
-  const formatPrice = (cents: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100)
 
   const filtered = categoryFilter
     ? services.filter(s => s.category === categoryFilter)
@@ -191,7 +187,7 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
       {/* Services List */}
       <div className="min-h-[400px] space-y-6">
         {/* Column Header — desktop only */}
-        <div className="hidden md:grid grid-cols-[2fr_64px_110px_70px_88px] gap-3 px-[18px] pb-2 border-b-[0.5px] border-border-main">
+        <div className="hidden lg:grid grid-cols-[2fr_64px_110px_70px_88px] gap-3 px-[18px] pb-2 border-b-[0.5px] border-border-main">
           <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em]">SERVIÇO</span>
           <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em] text-right">DURAÇÃO</span>
           <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em] text-right">PREÇO</span>
@@ -211,7 +207,7 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                 className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] group hover:bg-bg-surface hover:border-[#222] transition-all"
               >
                 {/* Mobile card layout */}
-                <div className="md:hidden p-[14px] flex flex-col gap-2">
+                <div className="lg:hidden p-[14px] flex flex-col gap-2">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-[2px] h-[30px] bg-accent-main opacity-35 rounded-[2px] shrink-0" />
@@ -242,17 +238,17 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                       <span>{service.duration_minutes} MIN</span>
                       <span className="text-text-secondary">R$ {(service.price_cents / 100).toFixed(2)}</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <button onClick={() => handleToggleActive(service)} className="text-[#2e2e2e] hover:text-[#666] transition-colors" title={service.is_active ? "Pausar" : "Ativar"}>
+                    <div className="flex items-center gap-0 -mr-2">
+                      <button onClick={() => handleToggleActive(service)} className="w-11 h-11 flex items-center justify-center text-[#2e2e2e] hover:text-[#666] transition-colors" title={service.is_active ? "Pausar" : "Ativar"}>
                         {service.is_active ? <Pause size={14} weight="regular" /> : <Play size={14} weight="regular" />}
                       </button>
-                      <button onClick={() => handleDuplicate(service)} className="text-[#2e2e2e] hover:text-[#666] transition-colors" title="Duplicar">
+                      <button onClick={() => handleDuplicate(service)} className="w-11 h-11 flex items-center justify-center text-[#2e2e2e] hover:text-[#666] transition-colors" title="Duplicar">
                         <Copy size={14} weight="regular" />
                       </button>
-                      <button onClick={() => handleEdit(service)} className="text-[#2e2e2e] hover:text-[#666] transition-colors" title="Editar">
+                      <button onClick={() => handleEdit(service)} className="w-11 h-11 flex items-center justify-center text-[#2e2e2e] hover:text-[#666] transition-colors" title="Editar">
                         <PencilSimple size={14} weight="regular" />
                       </button>
-                      <button onClick={() => handleDelete(service.id)} className="text-[#2e2e2e] hover:text-red-900 transition-colors" title="Excluir">
+                      <button onClick={() => handleDelete(service.id)} className="w-11 h-11 flex items-center justify-center text-[#2e2e2e] hover:text-red-900 transition-colors" title="Excluir">
                         <Trash size={14} weight="regular" />
                       </button>
                     </div>
@@ -260,7 +256,7 @@ export function AdminServicesPage({ services: initialServices, stats }: AdminSer
                 </div>
 
                 {/* Desktop table row */}
-                <div className="hidden md:grid grid-cols-[2fr_64px_110px_70px_88px] gap-3 py-[14px] px-[18px] items-center">
+                <div className="hidden lg:grid grid-cols-[2fr_64px_110px_70px_88px] gap-3 py-[14px] px-[18px] items-center">
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="w-[2px] h-[30px] bg-accent-main opacity-35 rounded-[2px] shrink-0" />
                     <div className="flex flex-col min-w-0">

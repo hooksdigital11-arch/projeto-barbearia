@@ -8,7 +8,6 @@ import {
   Pause,
   Play,
   Trash,
-  Eye,
 } from '@phosphor-icons/react'
 import { AdminUser, AdminUsersFilter } from '../types'
 import { UserAvatar } from './user-avatar'
@@ -121,7 +120,7 @@ export function UsersList({ initialUsers }: UsersListProps) {
       {/* Modern Table Grid */}
       <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] overflow-hidden">
         {/* Table Header — desktop only */}
-        <div className="hidden md:grid grid-cols-[2.2fr_1fr_100px_80px] gap-[12px] px-5 py-3 border-b-[0.5px] border-border-main/50 items-center">
+        <div className="hidden lg:grid grid-cols-[2.2fr_1fr_100px_80px] gap-[12px] px-5 py-3 border-b-[0.5px] border-border-main/50 items-center">
           <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a2a2a]">Usuário</span>
           <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a2a2a]">Cargo</span>
           <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a2a2a]">Status</span>
@@ -136,7 +135,7 @@ export function UsersList({ initialUsers }: UsersListProps) {
               style={{ borderBottom: idx !== filteredUsers.length - 1 ? '0.5px solid #141414' : 'none' }}
             >
               {/* Mobile card */}
-              <div className="md:hidden px-4 py-3 flex items-center justify-between gap-3 hover:bg-bg-surface transition-all">
+              <div className="lg:hidden px-4 py-3 flex items-center justify-between gap-3 hover:bg-bg-surface transition-all">
                 <div className="flex items-center gap-3 min-w-0">
                   <UserAvatar name={user.full_name || ''} url={user.avatar_url} />
                   <div className="flex flex-col min-w-0">
@@ -154,22 +153,28 @@ export function UsersList({ initialUsers }: UsersListProps) {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => handleEdit(user)} title="Editar" className="w-[28px] h-[28px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:text-[#777] transition-all">
-                    <PencilSimple size={12} weight="bold" />
+                <div className="flex items-center gap-0 shrink-0 -mr-2">
+                  <button onClick={() => handleEdit(user)} title="Editar" className="w-11 h-11 flex items-center justify-center text-[#3d3d3d] hover:text-[#777] transition-all">
+                    <span className="w-[28px] h-[28px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center">
+                      <PencilSimple size={12} weight="bold" />
+                    </span>
                   </button>
-                  <button onClick={() => handleToggleStatus(user.id, user.status || 'active')} disabled={isPending} title={user.status === 'active' ? 'Pausar' : 'Ativar'} className="w-[28px] h-[28px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:text-[#777] transition-all disabled:opacity-30">
-                    {user.status === 'active' ? <Pause size={12} weight="bold" /> : <Play size={12} weight="bold" />}
+                  <button onClick={() => handleToggleStatus(user.id, user.status || 'active')} disabled={isPending} title={user.status === 'active' ? 'Pausar' : 'Ativar'} className="w-11 h-11 flex items-center justify-center text-[#3d3d3d] hover:text-[#777] transition-all disabled:opacity-30">
+                    <span className="w-[28px] h-[28px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center">
+                      {user.status === 'active' ? <Pause size={12} weight="bold" /> : <Play size={12} weight="bold" />}
+                    </span>
                   </button>
-                  <button onClick={() => handleDelete(user.id)} disabled={isPending} title="Excluir" className="w-[28px] h-[28px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center text-[#3d3d3d] hover:text-[#ef4444] transition-all disabled:opacity-30">
-                    <Trash size={12} weight="bold" />
+                  <button onClick={() => handleDelete(user.id)} disabled={isPending} title="Excluir" className="w-11 h-11 flex items-center justify-center text-[#3d3d3d] hover:text-[#ef4444] transition-all disabled:opacity-30">
+                    <span className="w-[28px] h-[28px] rounded-full border-[0.5px] border-border-main bg-bg-sidebar flex items-center justify-center">
+                      <Trash size={12} weight="bold" />
+                    </span>
                   </button>
                 </div>
               </div>
 
               {/* Desktop row */}
               <div className={cn(
-                "hidden md:grid grid-cols-[2.2fr_1fr_100px_80px] gap-[12px] px-5 py-3.5 items-center hover:bg-bg-surface transition-all"
+                "hidden lg:grid grid-cols-[2.2fr_1fr_100px_80px] gap-[12px] px-5 py-3.5 items-center hover:bg-bg-surface transition-all"
               )}>
                 <div className="flex items-center gap-3">
                   <UserAvatar name={user.full_name || ''} url={user.avatar_url} />
@@ -227,7 +232,7 @@ export function UsersList({ initialUsers }: UsersListProps) {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSuccess={(newUser) => {
-            setUsers(prev => [newUser as any, ...prev])
+            setUsers(prev => [newUser, ...prev])
             setIsModalOpen(false)
           }}
         />

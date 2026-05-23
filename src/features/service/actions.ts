@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { requireAdmin } from '@/lib/auth/require-auth'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { createServiceSchema, updateServiceSchema, toggleServiceStatusSchema } from './schemas'
+import { createServiceSchema } from './schemas'
 import type { CreateServiceInput } from './schemas'
 
 /**

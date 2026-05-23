@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useState, useTransition, useDeferredValue } from 'react'
 import type { AppointmentWithRelations, ServiceOption, BarberOption, ClientOption, AppointmentStats } from '../types'
-import { StatusBadge, QuickStatusButton, CancelButton } from './appointment-status'
+import { StatusBadge, QuickStatusButton } from './appointment-status'
 import { cn } from '@/lib/utils/cn'
 import {
   Plus,
@@ -12,21 +12,8 @@ import {
   ArrowRight
 } from '@phosphor-icons/react'
 import { useRouter, usePathname } from 'next/navigation'
-import { PageTitle } from '@/components/shared/page-title'
 
 const AppointmentModal = dynamic(() => import('./appointment-modal').then(m => m.AppointmentModal), { ssr: false })
-
-// Hash de cor por barbeiro
-const BARBER_PALETTE = ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#00e5ff']
-const barberColorCache: Record<string, string> = {}
-let colorIndex = 0
-function getBarberColor(barberId: string): string {
-  if (!barberColorCache[barberId]) {
-    barberColorCache[barberId] = BARBER_PALETTE[colorIndex % BARBER_PALETTE.length] ?? '#00e5ff'
-    colorIndex++
-  }
-  return barberColorCache[barberId] ?? '#00e5ff'
-}
 
 type Period = 'today' | 'week' | 'month'
 
@@ -175,7 +162,7 @@ export function AdminAppointmentsPage({
                   className="bg-bg-surface border-[0.5px] border-border-main rounded-[10px] p-[14px] px-[16px] md:px-[20px] group hover:border-[#2a2a2a] transition-all"
                 >
                   {/* Mobile layout */}
-                  <div className="flex md:hidden flex-col gap-2">
+                  <div className="flex lg:hidden flex-col gap-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <span className="text-[18px] font-medium text-text-primary tracking-tight leading-none">
@@ -212,7 +199,7 @@ export function AdminAppointmentsPage({
                   </div>
 
                   {/* Desktop layout */}
-                  <div className="hidden md:flex items-center gap-6">
+                  <div className="hidden lg:flex items-center gap-6">
                     <div className="flex flex-col min-w-[70px]">
                       <span className="text-[20px] font-medium text-text-primary tracking-tight leading-none">
                         {startDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}

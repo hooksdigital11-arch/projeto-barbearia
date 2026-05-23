@@ -21,7 +21,7 @@ export function LogoutButton() {
     <button
       onClick={handleLogout}
       disabled={isPending}
-      className="flex items-center gap-[7px] w-full text-[10px] font-medium text-[#7a2020] hover:text-[#c04040] transition-colors duration-200 disabled:opacity-50 tracking-[0.06em] uppercase"
+      className="flex items-center gap-[7px] w-full min-h-[44px] text-[10px] font-medium text-[#7a2020] hover:text-[#c04040] transition-colors duration-200 disabled:opacity-50 tracking-[0.06em] uppercase"
     >
       <SignOut size={14} weight="regular" />
       {isPending ? 'SAINDO...' : 'SAIR DA CONTA'}

@@ -209,6 +209,7 @@ export async function createTemplate(formData: FormData) {
     return { error: 'Dados inválidos', issues: parsed.error.flatten() }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabaseAdmin as any)
     .from('message_templates')
     .insert({
@@ -252,6 +253,7 @@ export async function updateTemplate(formData: FormData) {
     return { error: 'Dados inválidos', issues: parsed.error.flatten() }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabaseAdmin as any)
     .from('message_templates')
     .update({
@@ -281,6 +283,7 @@ export async function duplicateTemplate(templateId: string) {
   const user = await requireUser()
   if (user.role !== 'admin') return { error: 'Sem permissão' }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: original, error: fetchError } = await (supabaseAdmin as any)
     .from('message_templates')
     .select('*')
@@ -292,6 +295,7 @@ export async function duplicateTemplate(templateId: string) {
     return { error: 'Template não encontrado' }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabaseAdmin as any)
     .from('message_templates')
     .insert({
@@ -322,6 +326,7 @@ export async function deleteTemplate(templateId: string) {
   const user = await requireUser()
   if (user.role !== 'admin') return { error: 'Sem permissão' }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: template } = await (supabaseAdmin as any)
     .from('message_templates')
     .select('is_system')
@@ -332,6 +337,7 @@ export async function deleteTemplate(templateId: string) {
     return { error: 'Templates do sistema não podem ser deletados' }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabaseAdmin as any)
     .from('message_templates')
     .delete()

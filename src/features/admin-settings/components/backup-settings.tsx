@@ -2,7 +2,6 @@
 
 import { CloudArrowDown, FileCsv, Users, Calendar, Receipt, Database, ArrowRight, WarningCircle, CircleNotch } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils/cn'
 import { useState } from 'react'
 import { fetchInsightsData } from '@/features/analytics/actions'
 import { downloadInsightsPDF } from '@/lib/insights-pdf'
@@ -28,7 +27,7 @@ export function BackupSettings() {
             ticketMedio: rawData.receita.ticketMedio,
             totalAtendimentos: rawData.receita.totalAtendimentos,
             pagamentosPendentes: rawData.receita.pagamentosPendentes,
-            valorPresente: (rawData.receita as any).valorPresente || 0,
+            valorPresente: (rawData.receita as { valorPresente?: number }).valorPresente || 0,
             topServicos: rawData.receita.topServicos.map(s => ({
               nome: s.nome,
               categoria: s.categoria,
@@ -106,7 +105,7 @@ export function BackupSettings() {
     <div className="space-y-10 max-w-4xl">
       <div className="space-y-0.5">
         <h2 className="text-[16px] font-medium text-text-primary uppercase tracking-[0.02em]">Backup</h2>
-        <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a]">Mantenha seus dados seguros e exporte quando precisar</p>
+        <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-text-muted/65">Mantenha seus dados seguros e exporte quando precisar</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -134,13 +133,13 @@ export function BackupSettings() {
                 className="flex items-center justify-between p-[12px_14px] bg-bg-surface border-[0.5px] border-border-main rounded-[8px] hover:bg-bg-surface hover:border-[#222] transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-3">
-                  <item.icon size={14} className="text-[#2e2e2e] group-hover:text-text-secondary transition-colors" />
+                  <item.icon size={14} className="text-text-muted/50 group-hover:text-text-secondary transition-colors" />
                   <span className="text-[11px] text-text-muted group-hover:text-text-secondary uppercase tracking-[0.04em] transition-colors">{item.label}</span>
                 </div>
                 {isExporting === item.label ? (
-                  <CircleNotch size={14} className="text-[#2a2a2a] animate-spin" />
+                  <CircleNotch size={14} className="text-text-muted/40 animate-spin" />
                 ) : (
-                  <ArrowRight size={14} className="text-[#2a2a2a] group-hover:text-accent-main transition-all group-hover:translate-x-0.5" />
+                  <ArrowRight size={14} className="text-text-muted/30 group-hover:text-accent-main transition-all group-hover:translate-x-0.5" />
                 )}
               </button>
             ))}
@@ -158,7 +157,7 @@ export function BackupSettings() {
 
           <div className="space-y-3">
             <div className="bg-[#0a1a14] border-[0.5px] border-[var(--accent-10, #00d4aa1a)] rounded-[8px] p-4 flex flex-col gap-1">
-              <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#2a3a2e]">Backup Automático</span>
+              <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#68a07c]">Backup Automático</span>
               <div className="flex items-center justify-between">
                 <span className="text-[14px] font-medium text-text-primary tracking-tight uppercase">Gerenciado pelo Supabase</span>
                 <div className="flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded-md">
@@ -166,12 +165,12 @@ export function BackupSettings() {
                   <span className="text-[10px] text-accent-main uppercase tracking-[0.06em]">Ativo</span>
                 </div>
               </div>
-              <span className="text-[9px] text-[#2a2a2a] uppercase tracking-wider ml-auto mt-1">Supabase Cloud</span>
+              <span className="text-[9px] text-text-muted/50 uppercase tracking-wider ml-auto mt-1">Supabase Cloud</span>
             </div>
 
             <div className="bg-bg-surface border-[0.5px] border-border-main rounded-[8px] p-[12px_14px]">
-              <p className="text-[10px] text-[#2e2e2e] leading-[1.6]">
-                Os backups são realizados automaticamente pela infraestrutura do <span className="font-medium text-[#383838]">Supabase Cloud</span>, garantindo a integridade total das informações sem necessidade de configuração manual.
+              <p className="text-[10px] text-text-secondary/80 leading-[1.6]">
+                Os backups são realizados automaticamente pela infraestrutura do <span className="font-medium text-text-primary">Supabase Cloud</span>, garantindo a integridade total das informações sem necessidade de configuração manual.
               </p>
             </div>
 
@@ -180,7 +179,7 @@ export function BackupSettings() {
                 <WarningCircle size={12} className="text-[#d4aa00]" />
                 <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#d4aa00]">Nota</span>
               </div>
-              <p className="text-[10px] text-[#6a5a20] leading-[1.6]">
+              <p className="text-[10px] text-[#d4b040] leading-[1.6]">
                 Em caso de necessidade de restauração de dados críticos, entre em contato com o suporte técnico para assistência imediata.
               </p>
             </div>

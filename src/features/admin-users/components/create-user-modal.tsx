@@ -16,12 +16,12 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils/cn'
+import type { AdminUser } from '../types'
 
 interface CreateUserModalProps {
   isOpen: boolean
   onClose: () => void
-  onSuccess: (newUser: any) => void
+  onSuccess: (newUser: AdminUser) => void
 }
 
 export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalProps) {
@@ -52,9 +52,9 @@ export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalP
       
       if (result.error) {
         toast.error(result.error)
-      } else {
+      } else if (result.success && result.data) {
         toast.success('Usuário criado com sucesso! 🎉')
-        onSuccess(result.data)
+        onSuccess(result.data as AdminUser)
         form.reset()
       }
     })

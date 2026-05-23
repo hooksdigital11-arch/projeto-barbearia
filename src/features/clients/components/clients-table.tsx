@@ -41,7 +41,7 @@ export function ClientsTable({ clients, basePath, showFinancials }: ClientsTable
   return (
     <div className="space-y-6">
       {/* Desktop: column header */}
-      <div className={cn(gridStyle, "hidden md:grid px-[18px] pb-2")}>
+      <div className={cn(gridStyle, "hidden lg:grid px-[18px] pb-2")}>
         <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em]">CLIENTE</span>
         <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em]">TELEFONE</span>
         <span className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.1em]">STATUS</span>
@@ -58,7 +58,7 @@ export function ClientsTable({ clients, basePath, showFinancials }: ClientsTable
             className="block bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] group hover:bg-bg-surface hover:border-[#222] transition-all"
           >
             {/* Mobile card layout */}
-            <div className="md:hidden p-[14px] flex flex-col gap-2">
+            <div className="lg:hidden p-[14px] flex flex-col gap-2">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-[10px] min-w-0">
                   <div className="relative w-8 h-8 rounded-full bg-[#1e1e2e] flex items-center justify-center shrink-0">
@@ -106,7 +106,7 @@ export function ClientsTable({ clients, basePath, showFinancials }: ClientsTable
             {/* Desktop table row */}
             <div className={cn(
               gridStyle,
-              "hidden md:grid py-[12px] px-[18px] items-center"
+              "hidden lg:grid py-[12px] px-[18px] items-center"
             )}>
               <div className="flex items-center gap-[10px] min-w-0 overflow-hidden">
                 <div className="relative w-8 h-8 rounded-full bg-[#1e1e2e] flex items-center justify-center shrink-0">

@@ -51,7 +51,7 @@ export function MobileSidebar({
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="w-10 h-10 flex items-center justify-center text-accent-main"
+        className="w-11 h-11 flex items-center justify-center text-accent-main"
         aria-label="Abrir menu"
       >
         <List size={20} weight="regular" />
@@ -92,7 +92,7 @@ export function MobileSidebar({
           </Link>
           <button
             onClick={() => setIsOpen(false)}
-            className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
+            className="w-11 h-11 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
             aria-label="Fechar menu"
           >
             <X size={18} weight="regular" />

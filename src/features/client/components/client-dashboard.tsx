@@ -2,7 +2,6 @@ import Link from 'next/link'
 import {
   Calendar,
   ClockCounterClockwise,
-  Ticket,
   Plus,
   Clock,
   ArrowRight,
@@ -40,7 +39,7 @@ export async function ClientDashboard() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-[18px]">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-[18px]">
         {/* Coluna Esquerda */}
         <div className="space-y-[14px]">
           {/* Cartão de Fidelidade */}

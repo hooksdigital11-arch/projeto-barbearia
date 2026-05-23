@@ -1,35 +1,54 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Plus, Receipt, AlertCircle, Clock, User } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { Plus, Receipt, Clock, User } from 'lucide-react'
 import { toast } from 'sonner'
 import { ComandaActive } from './comanda-active'
 import { getActiveComanda } from '../queries'
 import { ComandaItem } from '../types'
 
+interface BarberAppointment {
+  id: string
+  client_id: string
+  client: { full_name: string | null } | null
+  service: { name: string | null } | null
+  start_time: string
+  price_cents: number
+}
+
 export function ComandaPageBarber({
   appointments,
-  barber,
 }: {
-  appointments: any[]
-  barber: any
+  appointments: BarberAppointment[]
 }) {
-  const [selectedClient, setSelectedClient] = useState<any>(null)
+  const [selectedClient, setSelectedClient] = useState<{
+    id: string
+    name: string
+    appointment: BarberAppointment
+  } | null>(null)
   const [items, setItems] = useState<ComandaItem[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loadingClientId, setLoadingClientId] = useState<string | null>(null)
 
-  const handleSelectClient = async (appt: any) => {
-    setLoading(true)
-    const activeItems = await getActiveComanda(appt.client_id)
-    setItems(activeItems as ComandaItem[])
-    setSelectedClient({
-      id: appt.client_id,
-      name: appt.client?.full_name,
-      appointment: appt
-    })
-    setLoading(false)
+  const handleSelectClient = async (appt: BarberAppointment) => {
+    setLoadingClientId(appt.client_id)
+    try {
+      const activeItems = await getActiveComanda(appt.client_id)
+      setItems(activeItems as ComandaItem[])
+      setSelectedClient({
+        id: appt.client_id,
+        name: appt.client?.full_name || 'Desconhecido',
+        appointment: appt
+      })
+    } finally {
+      setLoadingClientId(null)
+    }
+  }
+
+  const refreshItems = async () => {
+    if (selectedClient) {
+      const activeItems = await getActiveComanda(selectedClient.id)
+      setItems(activeItems as ComandaItem[])
+    }
   }
 
   if (selectedClient) {
@@ -38,107 +57,108 @@ export function ComandaPageBarber({
         clientId={selectedClient.id}
         clientName={selectedClient.name}
         items={items}
-        appointment={selectedClient.appointment}
+        onRefresh={refreshItems}
+        appointment={{
+          id: selectedClient.appointment.id,
+          start_time: selectedClient.appointment.start_time,
+          service: selectedClient.appointment.service?.name ? {
+            name: selectedClient.appointment.service.name
+          } : undefined
+        }}
         onBack={() => setSelectedClient(null)}
       />
     )
   }
 
   return (
-    <div className="space-y-16 animate-in fade-in duration-1000">
-      {/* Header com Design Assimétrico */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="w-3 h-12 bg-accent-cyan rounded-full shadow-[0_0_30px_rgba(0,229,255,0.4)]" />
-            <h1 className="text-[28px] sm:text-5xl md:text-7xl font-black font-syne text-text-primary tracking-tighter leading-none uppercase">
-              Atendimento<span className="text-accent-cyan">.</span>
-            </h1>
-          </div>
-          <p className="text-text-secondary text-lg font-medium max-w-xl ml-7 border-l border-white/10 pl-6">
-            Gestão operacional de comandas. Selecione um agendamento para abrir a comanda digital e processar o checkout com excelência.
+    <div className="space-y-8 animate-in fade-in duration-700">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <p className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.14em] mb-[6px]">GESTÃO OPERACIONAL</p>
+          <h1 className="text-[28px] font-medium text-[#fff] tracking-[-0.01em] uppercase leading-none">
+            Atendimento
+          </h1>
+          <p className="text-[11px] text-[#333] mt-1 font-medium uppercase tracking-wider">
+            Selecione um agendamento para abrir a comanda digital e processar o checkout.
           </p>
         </div>
         
-        <Button 
-          variant="cyan" 
-          size="lg"
-          className="gap-4 px-8 py-7 rounded-[2rem] font-black text-xs uppercase tracking-widest bg-white text-black hover:bg-accent-cyan transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-accent-cyan/20 active:scale-95 group ml-7 lg:ml-0"
+        <button 
+          className="bg-accent-main text-black text-[10px] font-medium tracking-[0.1em] p-[10px_18px] rounded-[8px] flex items-center gap-2 hover:brightness-110 transition-all uppercase shrink-0"
           onClick={() => toast.info('Venda avulsa disponível em breve')}
         >
-          <Plus size={22} className="group-hover:rotate-90 transition-transform duration-500" />
+          <Plus className="w-3.5 h-3.5" />
           Venda Avulsa
-        </Button>
+        </button>
       </div>
 
       {/* Grid de Agendamentos (Comandas) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {appointments.map((appt) => (
           <div 
             key={appt.id} 
-            className="group relative"
+            className="group relative flex flex-col justify-between p-5 rounded-[10px] border border-[#1a1a1a] bg-[#0f0f0f] hover:bg-[#111] hover:border-[#222] transition-all cursor-pointer overflow-hidden"
             onClick={() => handleSelectClient(appt)}
           >
-            <div className="absolute -inset-0.5 bg-gradient-to-br from-accent-cyan/20 to-transparent rounded-[2.5rem] blur opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 group-hover:border-white/10 group-hover:bg-white/[0.04] transition-all duration-500 cursor-pointer overflow-hidden">
-              <div className="flex justify-between items-start mb-8">
-                <div className="w-16 h-16 rounded-3xl bg-white/[0.03] border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                  <User size={32} className="text-accent-cyan opacity-40" />
-                </div>
-                <div className="w-10 h-10 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center group-hover:bg-accent-cyan group-hover:text-black transition-all duration-500">
-                  <Receipt size={20} />
-                </div>
+            <div className="flex justify-between items-start mb-5">
+              <div className="w-9 h-9 rounded-[8px] bg-white/[0.03] border border-white/5 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                <User size={16} className="text-accent-main opacity-60" />
               </div>
-
-              <div className="space-y-1 mb-8">
-                <h3 className="text-2xl font-bold text-text-primary tracking-tight group-hover:text-accent-cyan transition-colors truncate">
-                  {appt.client?.full_name}
-                </h3>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Clock size={16} className="text-accent-cyan" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">
-                    {new Date(appt.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
+              <div className="w-8 h-8 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center group-hover:bg-accent-main group-hover:text-black transition-all duration-300">
+                <Receipt size={14} />
               </div>
-
-              <div className="pt-6 border-t border-white/5 flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Serviço</p>
-                  <p className="text-sm font-bold text-text-primary group-hover:translate-x-1 transition-transform duration-500 truncate max-w-[150px]">
-                    {appt.service?.name}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Valor</p>
-                  <p className="text-xl font-bold text-accent-cyan font-syne tabular-nums">
-                    R$ {(appt.price_cents / 100).toFixed(2)}
-                  </p>
-                </div>
-              </div>
-
-              {loading && selectedClient?.id === appt.client_id && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm z-20">
-                  <div className="w-8 h-8 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin" />
-                </div>
-              )}
             </div>
+
+            <div className="space-y-1 mb-5">
+              <h3 className="text-[14px] font-bold text-text-primary tracking-tight group-hover:text-accent-main transition-colors truncate">
+                {appt.client?.full_name}
+              </h3>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Clock size={12} className="text-accent-main" />
+                <span className="text-[9px] font-medium uppercase tracking-wider">
+                  {new Date(appt.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+              <div className="space-y-0.5">
+                <p className="text-[9px] font-medium text-muted-foreground uppercase tracking-wider">Serviço</p>
+                <p className="text-xs font-bold text-text-primary truncate max-w-[120px]">
+                  {appt.service?.name}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[9px] font-medium text-muted-foreground uppercase tracking-wider">Valor</p>
+                <p className="text-sm font-bold text-accent-main font-mono">
+                  R$ {(appt.price_cents / 100).toFixed(2)}
+                </p>
+              </div>
+            </div>
+
+            {loadingClientId === appt.client_id && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm z-20">
+                <div className="w-6 h-6 border-2 border-accent-main border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
           </div>
         ))}
       </div>
 
       {appointments.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-white/5 rounded-3xl bg-white/2">
-          <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-6">
-            <AlertCircle className="h-8 w-8 text-muted-foreground opacity-20" />
+        <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] min-h-[360px] flex flex-col items-center justify-center p-8 gap-4">
+          <Receipt className="w-8 h-8 text-[#1e1e1e]" />
+          <div className="text-center space-y-1">
+            <p className="text-[14px] font-medium text-[#333] uppercase tracking-wider">Nenhum atendimento agendado</p>
+            <p className="text-[11px] text-[#222] uppercase tracking-widest">Seus clientes agendados aparecerão aqui para abertura de comanda.</p>
           </div>
-          <h3 className="text-xl font-bold text-text-primary uppercase tracking-tight">Nenhum atendimento agendado</h3>
-          <p className="text-muted-foreground max-w-xs mx-auto mt-2 text-sm">
-            Seus clientes agendados aparecerão aqui para abertura de comanda.
-          </p>
-          <Button variant="outline" className="mt-8 border-white/10 hover:bg-white/5 uppercase font-bold text-xs">
-            VER AGENDA COMPLETA
-          </Button>
+          <button 
+            className="mt-2 px-[18px] py-[10px] bg-transparent border border-white/10 hover:bg-white/5 text-[#fff] text-[10px] font-medium uppercase tracking-[0.1em] rounded-[8px] transition-all"
+            onClick={() => toast.info('Agenda completa disponível em breve')}
+          >
+            Ver Agenda Completa
+          </button>
         </div>
       )}
     </div>

@@ -16,8 +16,8 @@ import {
 } from '@/components/ui/form'
 import { toast } from 'sonner'
 import { logout } from '@/features/auth/actions'
-import { cn } from '@/lib/utils/cn'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ProfileSettings({ initialData }: { initialData: any }) {
   const [isPending, startTransition] = useTransition()
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
@@ -77,27 +77,27 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
   return (
     <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] overflow-hidden max-w-4xl">
       {/* Hero Header */}
-      <div className="relative p-[22px_24px] border-b-[0.5px] border-border-main/50 flex items-center justify-between gap-4 overflow-hidden">
+      <div className="relative p-[22px_24px] border-b-[0.5px] border-border-main/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 overflow-hidden">
         {/* Glow effect */}
         <div className="absolute left-0 top-0 w-full h-full pointer-events-none opacity-40" 
           style={{ background: 'radial-gradient(ellipse at 10% 50%, var(--accent-04, #00d4aa06), transparent)' }} />
         
         <div className="flex items-center gap-[18px] relative z-10">
-          <div className="w-[56px] h-[56px] rounded-[12px] bg-[#1a1a2e] border-[0.5px] border-[#2a2a3e] flex items-center justify-center text-[20px] font-medium text-[#8b7cf6]">
+          <div className="w-[56px] h-[56px] rounded-[12px] bg-[#1a1a2e] border-[0.5px] border-[#2a2a3e] flex items-center justify-center text-[20px] font-medium text-[#8b7cf6] shrink-0">
             {initialData?.full_name?.[0] || 'A'}
           </div>
-          <div className="flex flex-col">
-            <h2 className="text-[22px] font-medium text-text-primary tracking-[-0.01em] leading-tight">{initialData?.full_name}</h2>
+          <div className="flex flex-col min-w-0">
+            <h2 className="text-[22px] font-medium text-text-primary tracking-[-0.01em] leading-tight truncate">{initialData?.full_name}</h2>
             <div className="flex items-center gap-[5px] mt-1">
               <div className="w-[5px] h-[5px] rounded-full bg-accent-main opacity-60" />
-              <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#383838]">Administrador Master</span>
+              <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-text-muted/70">Administrador Master</span>
             </div>
           </div>
         </div>
 
         <button 
           onClick={() => logout()}
-          className="flex items-center gap-2 bg-transparent border-[0.5px] border-[#3a1a1a] rounded-[7px] p-[8px_14px] text-[10px] font-medium uppercase tracking-[0.08em] text-[#c04040] hover:bg-[#1a0d0d] hover:border-[#c04040] transition-all relative z-10"
+          className="flex items-center justify-center gap-2 bg-transparent border-[0.5px] border-[#3a1a1a] rounded-[7px] p-[8px_14px] text-[10px] font-medium uppercase tracking-[0.08em] text-[#c04040] hover:bg-[#1a0d0d] hover:border-[#c04040] transition-all relative z-10 w-full sm:w-auto shrink-0"
         >
           <SignOut size={14} weight="bold" />
           Encerrar Sessão
@@ -115,7 +115,7 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
                 name="fullName"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Seu Nome</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Seu Nome</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
@@ -131,7 +131,7 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
                 name="phone"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Telefone</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Telefone</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
@@ -151,16 +151,16 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
                 name="email"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Email de Acesso</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Email de Acesso</FormLabel>
                     <FormControl>
                       <div className="space-y-1.5">
                         <input 
                           {...field} 
                           type="email" 
                           disabled 
-                          className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[11px_14px] text-[12px] text-[#2e2e2e] cursor-not-allowed" 
+                          className="w-full bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[11px_14px] text-[12px] text-text-muted/50 cursor-not-allowed" 
                         />
-                        <p className="text-[9px] text-[#2a2a2a] uppercase tracking-[0.06em]">Acesso restrito para alteração</p>
+                        <p className="text-[9px] text-text-muted/40 uppercase tracking-[0.06em]">Acesso restrito para alteração</p>
                       </div>
                     </FormControl>
                   </FormItem>
@@ -171,7 +171,7 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
                 name="bio"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Biografia / Notas</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Biografia / Notas</FormLabel>
                     <FormControl>
                       <textarea 
                         {...field} 
@@ -193,7 +193,7 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
               </div>
               <div className="flex flex-col">
                 <span className="text-[11px] font-medium text-text-muted uppercase tracking-wider">Segurança</span>
-                <span className="text-[9px] text-[#2a2a2a] uppercase tracking-wider mt-0.5">Mantenha sua conta protegida</span>
+                <span className="text-[9px] text-text-muted/40 uppercase tracking-wider mt-0.5">Mantenha sua conta protegida</span>
               </div>
             </div>
             <button 
@@ -233,11 +233,11 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <h3 className="text-[16px] font-medium text-text-primary uppercase tracking-[0.02em]">Nova Senha</h3>
-                  <p className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Segurança da conta</p>
+                  <p className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/70">Segurança da conta</p>
                 </div>
                 <button 
                   onClick={() => setIsPasswordModalOpen(false)}
-                  className="w-[28px] h-[28px] flex items-center justify-center text-[#444] hover:text-text-primary transition-all rounded-full"
+                  className="w-[28px] h-[28px] flex items-center justify-center text-text-muted/40 hover:text-text-primary transition-all rounded-full"
                 >
                   <X size={16} />
                 </button>
@@ -246,7 +246,7 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
 
             <form onSubmit={handlePasswordSubmit} className="p-6 space-y-6">
               <div className="space-y-1.5">
-                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Senha Atual</label>
+                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Senha Atual</label>
                 <div className="relative">
                   <input 
                     name="currentPassword" 
@@ -257,7 +257,7 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
                   <button 
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#333] hover:text-text-nav transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted/40 hover:text-text-nav transition-colors"
                   >
                     {showCurrentPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
                   </button>
@@ -265,7 +265,7 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Nova Senha</label>
+                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Nova Senha</label>
                 <div className="relative">
                   <input 
                     name="newPassword" 
@@ -277,7 +277,7 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
                   <button 
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#333] hover:text-text-nav transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted/40 hover:text-text-nav transition-colors"
                   >
                     {showNewPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
                   </button>
@@ -285,7 +285,7 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Confirmar Nova Senha</label>
+                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Confirmar Nova Senha</label>
                 <input 
                   name="confirmPassword" 
                   type={showNewPassword ? 'text' : 'password'}
@@ -299,7 +299,7 @@ export function ProfileSettings({ initialData }: { initialData: any }) {
                 <button 
                   type="button" 
                   onClick={() => setIsPasswordModalOpen(false)} 
-                  className="py-[11px] rounded-[7px] bg-bg-sidebar border-[0.5px] border-border-main text-[10px] font-medium text-[#444] uppercase tracking-wider hover:bg-bg-surface transition-all"
+                  className="py-[11px] rounded-[7px] bg-bg-sidebar border-[0.5px] border-border-main text-[10px] font-medium text-text-muted hover:text-text-primary transition-all"
                   disabled={isChangingPassword}
                 >
                   Cancelar

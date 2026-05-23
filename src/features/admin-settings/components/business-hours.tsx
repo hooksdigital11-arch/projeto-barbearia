@@ -3,7 +3,7 @@
 import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { FloppyDisk, CircleNotch, Check } from '@phosphor-icons/react'
+import { FloppyDisk, CircleNotch } from '@phosphor-icons/react'
 import { businessHoursSchema, type BusinessHoursInput } from '../schemas'
 import { updateBusinessHours } from '../actions'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -12,7 +12,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
 } from '@/components/ui/form'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
@@ -27,6 +26,7 @@ const days = [
   { id: 'sunday', label: 'Domingo' },
 ] as const
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function BusinessHours({ initialData }: { initialData: any }) {
   const [isPending, startTransition] = useTransition()
   
@@ -58,7 +58,7 @@ export function BusinessHours({ initialData }: { initialData: any }) {
     <div className="space-y-10 max-w-4xl">
       <div className="space-y-0.5">
         <h2 className="text-[16px] font-medium text-text-primary uppercase tracking-[0.02em]">Horários</h2>
-        <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a]">Defina as janelas de operação para agendamentos</p>
+        <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-text-muted/65">Defina as janelas de operação para agendamentos</p>
       </div>
 
       <Form {...form}>
@@ -71,78 +71,83 @@ export function BusinessHours({ initialData }: { initialData: any }) {
                 <div 
                   key={day.id} 
                   className={cn(
-                    "grid grid-cols-[24px_130px_1fr_auto_1fr_90px] gap-3 items-center py-[13px] transition-all",
-                    idx !== days.length - 1 && "border-bottom-[0.5px] border-border-main",
+                    "flex flex-col sm:grid sm:grid-cols-[24px_130px_1fr_auto_1fr_90px] gap-3 sm:items-center py-4 sm:py-[13px] transition-all",
                     !isOpen && "opacity-40"
                   )}
                   style={{ borderBottom: idx !== days.length - 1 ? '0.5px solid #141414' : 'none' }}
                 >
-                  {/* Checkbox */}
-                  <FormField
-                    control={form.control}
-                    name={`${day.id}.isOpen`}
-                    render={({ field }) => (
-                      <FormItem className="space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            className="w-4 h-4 border-[0.5px] border-[#2a2a2a] rounded-[4px] bg-bg-surface data-[state=checked]:bg-accent-main data-[state=checked]:border-accent-main transition-all"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Day Name */}
-                  <span className={cn(
-                    "text-[11px] font-medium uppercase tracking-wide transition-colors",
-                    isOpen ? "text-text-secondary" : "text-text-muted"
-                  )}>
-                    {day.label}
-                  </span>
-
-                  {/* Open Time */}
-                  <FormField
-                    control={form.control}
-                    name={`${day.id}.open`}
-                    render={({ field }) => (
-                      <input 
-                        {...field} 
-                        type="time" 
-                        disabled={!isOpen}
-                        className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] p-[8px_12px] text-[11px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all disabled:opacity-20"
+                  <div className="flex items-center justify-between sm:contents">
+                    <div className="flex items-center gap-3">
+                      {/* Checkbox */}
+                      <FormField
+                        control={form.control}
+                        name={`${day.id}.isOpen`}
+                        render={({ field }) => (
+                          <FormItem className="space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="w-4 h-4 border-[0.5px] border-border-main rounded-[4px] bg-bg-surface data-[state=checked]:bg-accent-main data-[state=checked]:border-accent-main transition-all"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
                       />
-                    )}
-                  />
 
-                  {/* ATÉ */}
-                  <span className="text-[9px] text-[#2a2a2a] uppercase tracking-[0.08em] font-medium w-8 text-center">ATÉ</span>
+                      {/* Day Name */}
+                      <span className={cn(
+                        "text-[11px] font-medium uppercase tracking-wide transition-colors",
+                        isOpen ? "text-text-secondary" : "text-text-muted"
+                      )}>
+                        {day.label}
+                      </span>
+                    </div>
 
-                  {/* Close Time */}
-                  <FormField
-                    control={form.control}
-                    name={`${day.id}.close`}
-                    render={({ field }) => (
-                      <input 
-                        {...field} 
-                        type="time" 
-                        disabled={!isOpen}
-                        className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] p-[8px_12px] text-[11px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all disabled:opacity-20"
-                      />
-                    )}
-                  />
+                    {/* Badge */}
+                    <div className="flex justify-end sm:contents">
+                      <span className={cn(
+                        "px-[10px] py-[4px] rounded-[5px] text-[9px] font-medium uppercase tracking-[0.08em] border-[0.5px] w-fit sm:col-start-6",
+                        isOpen 
+                          ? "bg-[#0d2e1a] text-[#00c070] border-[#00c07033]" 
+                          : "bg-[#2e1a1a] text-[#c04040] border-[#c0404033]"
+                      )}>
+                        {isOpen ? 'ABERTO' : 'FECHADO'}
+                      </span>
+                    </div>
+                  </div>
 
-                  {/* Badge */}
-                  <div className="flex justify-end">
-                    <span className={cn(
-                      "px-[10px] py-[4px] rounded-[5px] text-[9px] font-medium uppercase tracking-[0.08em] border-[0.5px] w-fit",
-                      isOpen 
-                        ? "bg-[#0d2e1a] text-[#00c070] border-[#00c07033]" 
-                        : "bg-[#2e1a1a] text-[#c04040] border-[#c0404033]"
-                    )}>
-                      {isOpen ? 'ABERTO' : 'FECHADO'}
-                    </span>
+                  <div className="flex items-center gap-2 sm:contents">
+                    {/* Open Time */}
+                    <FormField
+                      control={form.control}
+                      name={`${day.id}.open`}
+                      render={({ field }) => (
+                        <input 
+                          {...field} 
+                          type="time" 
+                          disabled={!isOpen}
+                          className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] p-[8px_12px] text-[11px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all disabled:opacity-20 flex-1 sm:flex-initial sm:col-start-3"
+                        />
+                      )}
+                    />
+
+                    {/* ATÉ */}
+                    <span className="text-[9px] text-text-muted/50 uppercase tracking-[0.08em] font-medium w-8 text-center shrink-0 sm:col-start-4">ATÉ</span>
+
+                    {/* Close Time */}
+                    <FormField
+                      control={form.control}
+                      name={`${day.id}.close`}
+                      render={({ field }) => (
+                        <input 
+                          {...field} 
+                          type="time" 
+                          disabled={!isOpen}
+                          className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] p-[8px_12px] text-[11px] text-text-secondary focus:outline-none focus:border-accent-main/20 transition-all disabled:opacity-20 flex-1 sm:flex-initial sm:col-start-5"
+                        />
+                      )}
+                    />
                   </div>
                 </div>
               )

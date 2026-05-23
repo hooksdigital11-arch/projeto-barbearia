@@ -23,7 +23,7 @@ const STATUS_ACTION_LABEL: Partial<Record<AppointmentStatus, string>> = {
   in_progress: 'Finalizar',
 }
 
-export function StatusBadge({ status, appointmentId, interactive = false }: StatusBadgeProps) {
+export function StatusBadge({ status }: StatusBadgeProps) {
   const cfg = STATUS_CONFIG[status]
   
   // Minimalist semantic colors

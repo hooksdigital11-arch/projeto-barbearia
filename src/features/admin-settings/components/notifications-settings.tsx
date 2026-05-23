@@ -58,14 +58,14 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
         "w-[36px] h-[20px] rounded-[10px] relative cursor-pointer transition-all duration-200 border-[0.5px]",
         value 
           ? "bg-accent-main border-accent-main" 
-          : "bg-[#1e1e1e] border-[#2a2a2a]"
+          : "bg-bg-surface border-border-main"
       )}
     >
       <div className={cn(
         "w-[14px] h-[14px] rounded-full absolute top-[2px] transition-all duration-200",
         value 
           ? "bg-black left-[18px]" 
-          : "bg-[#444] left-[2px]"
+          : "bg-text-muted/50 left-[2px]"
       )} />
     </div>
   )
@@ -74,7 +74,7 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
     <div className="space-y-10 max-w-4xl">
       <div className="space-y-0.5">
         <h2 className="text-[15px] font-medium text-text-primary uppercase tracking-[0.02em]">Notificações</h2>
-        <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a] mb-[18px]">Controle como você e seus clientes são avisados</p>
+        <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-text-muted/65 mb-[18px]">Controle como você e seus clientes são avisados</p>
       </div>
 
       <Form {...form}>
@@ -89,7 +89,7 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
                 <div key={item.id} className="flex items-center justify-between gap-[14px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[14px_16px]">
                   <div className="flex flex-col">
                     <span className="text-[11px] font-medium text-text-secondary tracking-[0.04em] uppercase">{item.label}</span>
-                    <span className="text-[10px] text-[#2e2e2e] leading-tight">{item.desc}</span>
+                    <span className="text-[10px] text-text-muted/70 leading-tight">{item.desc}</span>
                     <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-accent-main mt-0.5">{item.tag}</span>
                   </div>
                   <FormField
@@ -110,10 +110,10 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
               <div className="flex items-center justify-between gap-[14px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[14px_16px]">
                 <div className="flex flex-col">
                   <span className="text-[11px] font-medium text-text-secondary tracking-[0.04em] uppercase">Relatório Diário</span>
-                  <span className="text-[10px] text-[#2e2e2e] leading-tight">Resumo do faturamento e agendamentos do dia anterior</span>
+                  <span className="text-[10px] text-text-muted/70 leading-tight">Resumo do faturamento e agendamentos do dia anterior</span>
                   <div className="flex items-center gap-2 mt-2">
                     <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[6px] p-[5px_10px] flex items-center gap-1.5">
-                      <Clock size={12} className="text-[#333]" />
+                      <Clock size={12} className="text-text-muted/50" />
                       <FormField
                         control={form.control}
                         name="dailyReportTime"
@@ -153,7 +153,7 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
               <div className="flex items-center justify-between gap-[14px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[14px_16px]">
                 <div className="flex flex-col">
                   <span className="text-[11px] font-medium text-text-secondary tracking-[0.04em] uppercase">Confirmação Automática</span>
-                  <span className="text-[10px] text-[#2e2e2e] leading-tight">Envio de mensagem instantânea via WhatsApp</span>
+                  <span className="text-[10px] text-text-muted/70 leading-tight">Envio de mensagem instantânea via WhatsApp</span>
                   <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-accent-main mt-0.5">WHATSAPP</span>
                 </div>
                 <FormField
@@ -172,7 +172,7 @@ export function NotificationsSettings({ initialData }: { initialData: any }) {
               <div className="flex items-center justify-between gap-[14px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[14px_16px]">
                 <div className="flex flex-col">
                   <span className="text-[11px] font-medium text-text-secondary tracking-[0.04em] uppercase">Lembrete 24h</span>
-                  <span className="text-[10px] text-[#2e2e2e] leading-tight">Notificação enviada um dia antes do agendamento</span>
+                  <span className="text-[10px] text-text-muted/70 leading-tight">Notificação enviada um dia antes do agendamento</span>
                   <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-accent-main mt-0.5">REDUÇÃO DE NO-SHOW</span>
                 </div>
                 <FormField

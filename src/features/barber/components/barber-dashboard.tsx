@@ -4,29 +4,53 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   Clock, 
-  CheckCircle, 
   User, 
-  ArrowRight,
-  ListNumbers,
   ChartBar,
-  Phone,
-  UserMinus,
-  Coffee,
-  SignOut,
   Stop,
   BellRinging,
-  CalendarBlank,
   List,
   CalendarSlash
 } from '@phosphor-icons/react'
 import { ServiceTimer } from './service-timer'
-import { QuickNotes } from './quick-notes'
 import { cn } from '@/lib/utils/cn'
-import { createClient } from '@/lib/supabase/client'
 
 import { useDashboardRealtime } from '@/features/analytics/useDashboardRealtime'
 
-export function BarberDashboard({ initialData, organizationId }: { initialData: any, organizationId: string }) {
+interface AppointmentItem {
+  id: string
+  time: string
+  client: string
+  service: string
+  duration: string
+  status: string
+}
+
+interface WaitingItem {
+  id: string
+  name: string
+  waitingTime: string
+}
+
+interface CurrentClient {
+  name: string
+  todayService: string
+  elapsedMinutes?: number
+  visits: number
+  rating: number
+  totalSpent: string | number
+}
+
+interface BarberDashboardData {
+  shift: string
+  stats: {
+    revenueDay: string | number
+  }
+  currentClient: CurrentClient | null
+  appointments: AppointmentItem[]
+  waitingList: WaitingItem[]
+}
+
+export function BarberDashboard({ initialData, organizationId }: { initialData: BarberDashboardData, organizationId: string }) {
   const router = useRouter()
   const [data, setData] = useState(initialData)
 
@@ -101,7 +125,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
       </div>
 
       {/* Grid Principal */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-[14px]">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-[14px]">
         {/* Coluna Esquerda: Atendimento Ativo */}
         <div className="space-y-[14px]">
           {data.currentClient ? (
@@ -179,7 +203,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
 
             <div className="space-y-2">
               {data.appointments.length > 0 ? (
-                data.appointments.map((apt: any) => (
+                data.appointments.map((apt: AppointmentItem) => (
                   <div
                     key={apt.id}
                     className={cn(
@@ -228,7 +252,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
 
             <div className="space-y-2 mb-4">
               {data.waitingList.length > 0 ? (
-                data.waitingList.map((client: any) => (
+                data.waitingList.map((client: WaitingItem) => (
                   <div key={client.id} className="p-3 bg-bg-black border border-surface-secondary rounded-[8px] flex items-center justify-between group hover:border-border-main transition-all">
                     <div>
                       <p className="text-[12px] font-medium text-text-secondary tracking-tight">{client.name}</p>

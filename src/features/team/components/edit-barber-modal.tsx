@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react'
 import { X, CircleNotch, FloppyDisk, UserCircle, CaretDown } from '@phosphor-icons/react'
 import { updateBarber } from '../actions'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils/cn'
 import type { TeamMemberWithStats } from '../types'
 
 interface EditBarberModalProps {

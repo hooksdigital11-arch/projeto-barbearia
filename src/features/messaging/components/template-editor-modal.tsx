@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 import { X, FileText, FloppyDisk, CaretDown, CircleNotch } from '@phosphor-icons/react'
 import { createTemplate, updateTemplate } from '../actions'
 import type { MessageTemplate } from '../types'
-import { cn } from '@/lib/utils/cn'
 
 interface TemplateEditorModalProps {
   isOpen: boolean

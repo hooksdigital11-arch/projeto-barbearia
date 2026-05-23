@@ -11,7 +11,6 @@ import {
   CheckCircle,
   X,
   Queue,
-  Plus,
 } from '@phosphor-icons/react'
 import { PageTitle } from '@/components/shared/page-title'
 import { QueueTimer } from './queue-timer'
@@ -29,9 +28,6 @@ interface WaitingListPageClientProps {
 
 export function WaitingListPageClient({
   entry,
-  clientId,
-  services,
-  barbers,
   organizationId,
 }: WaitingListPageClientProps) {
   const [isPending, startTransition] = useTransition()

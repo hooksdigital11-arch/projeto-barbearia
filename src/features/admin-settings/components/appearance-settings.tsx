@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Palette, Moon, MoonStars, Circle, FloppyDisk, CircleNotch, ArrowCounterClockwise, CheckCircle, WarningCircle } from '@phosphor-icons/react'
+import { Moon, MoonStars, Circle, FloppyDisk, CircleNotch, ArrowCounterClockwise, CheckCircle, WarningCircle } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 import { toast } from 'sonner'
 
@@ -215,20 +215,17 @@ export function AppearanceSettings() {
   const accentLuminance = relativeLuminance(accent)
   const contrastOk = accentLuminance >= 0.2
 
-  // Active preset detection
-  const activePreset = PRESETS.find(p => p.accent === accent && p.secondary === secondary)
-
   return (
     <div className="space-y-10 max-w-4xl">
       {/* Header */}
       <div className="space-y-0.5">
         <h2 className="text-[15px] font-medium text-text-primary uppercase tracking-[0.02em]">Aparência</h2>
-        <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a]">Personalize as cores e o visual do seu painel</p>
+        <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-text-muted/65">Personalize as cores e o visual do seu painel</p>
       </div>
 
       {/* Section 1 — Paletas Prontas */}
       <div className="space-y-3">
-        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Paletas Prontas</span>
+        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Paletas Prontas</span>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {PRESETS.map((p) => {
             const isActive = p.accent === accent && p.secondary === secondary
@@ -251,7 +248,7 @@ export function AppearanceSettings() {
                 />
                 <span className={cn(
                   "text-[8px] font-medium uppercase tracking-[0.08em] transition-colors",
-                  isActive ? "text-text-primary" : "text-[#333]"
+                  isActive ? "text-text-primary" : "text-text-muted/50 group-hover:text-text-secondary"
                 )}>
                   {p.label}
                 </span>
@@ -263,11 +260,11 @@ export function AppearanceSettings() {
 
       {/* Section 2 — Custom Colors */}
       <div className="space-y-3">
-        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Cores Personalizadas</span>
+        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Cores Personalizadas</span>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-[14px]">
           {/* Accent */}
           <div className="space-y-1.5">
-            <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Cor Primária (Accent)</label>
+            <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Cor Primária (Accent)</label>
             <div className="flex items-center gap-[10px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[10px_14px]">
               <div className="relative shrink-0">
                 <div
@@ -294,7 +291,7 @@ export function AppearanceSettings() {
 
           {/* Secondary */}
           <div className="space-y-1.5">
-            <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Cor Secundária</label>
+            <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Cor Secundária</label>
             <div className="flex items-center gap-[10px] bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] p-[10px_14px]">
               <div className="relative shrink-0">
                 <div
@@ -323,7 +320,7 @@ export function AppearanceSettings() {
 
       {/* Section 3 — Live Preview */}
       <div className="space-y-3">
-        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Preview em Tempo Real</span>
+        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Preview em Tempo Real</span>
         <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-4 space-y-4">
           <div className="flex flex-wrap items-center gap-3">
             {/* Primary Button */}
@@ -361,7 +358,7 @@ export function AppearanceSettings() {
           {/* Progress Bar */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-[9px] text-[#383838] uppercase tracking-wider">Progresso</span>
+              <span className="text-[9px] text-text-muted/85 uppercase tracking-wider">Progresso</span>
               <span className="text-[9px] font-mono" style={{ color: accent }}>68%</span>
             </div>
             <div className="w-full h-[4px] bg-[#1a1a1a] rounded-full overflow-hidden">
@@ -418,7 +415,7 @@ export function AppearanceSettings() {
 
       {/* Section 4 — Interface Mode */}
       <div className="space-y-4">
-        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Modo de Interface</span>
+        <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Modo de Interface</span>
 
         <div className="grid grid-cols-3 gap-[10px]">
           {DARK_MODES.map((m) => {
@@ -460,7 +457,7 @@ export function AppearanceSettings() {
       <div className="pt-4 border-t-[0.5px] border-border-main/50 flex items-center justify-between">
         <button
           onClick={handleRestore}
-          className="text-[10px] font-medium uppercase tracking-wider text-[#2e2e2e] hover:text-text-nav transition-colors flex items-center gap-2"
+          className="text-[10px] font-medium uppercase tracking-wider text-text-muted hover:text-text-primary hover:text-text-nav transition-colors flex items-center gap-2"
         >
           <ArrowCounterClockwise size={14} />
           Restaurar Padrão

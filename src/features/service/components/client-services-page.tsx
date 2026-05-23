@@ -2,10 +2,8 @@
 
 import { useState } from 'react'
 import { Scissors, Clock, CheckCircle, MagnifyingGlass } from '@phosphor-icons/react'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils/cn'
-import { CATEGORY_CONFIG } from '../types'
-import type { Service, ServiceCategory } from '../types'
+import type { Service } from '../types'
 import Link from 'next/link'
 
 interface ClientServicesPageProps {
@@ -16,9 +14,6 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('')
-
-  const formatPrice = (cents: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100)
 
   const filtered = services.filter(s => {
     if (search) {
@@ -91,13 +86,13 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
           const catKey = (service.category || 'outros').toUpperCase()
           const colors: Record<string, string> = {
             BARBA: '#d4aa00',
-            COMBO: '#00d4aa',
+            COMBO: 'var(--accent)',
             CORTE: '#6b9fff',
             OUTROS: '#9b7cf6'
           }
           const bgColors: Record<string, string> = {
             BARBA: '#2e1a00',
-            COMBO: '#0d2e1a',
+            COMBO: 'color-mix(in srgb, var(--accent) 10%, transparent)',
             CORTE: '#0d1a2e',
             OUTROS: '#1a0d2e'
           }
@@ -111,7 +106,7 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
               className={cn(
                 "bg-[#0f0f0f] border rounded-[10px] p-[18px_18px_16px] text-left relative overflow-hidden transition-all group flex flex-col justify-between",
                 isSelected
-                  ? "border-[#00d4aa] ring-1 ring-[#00d4aa]/20"
+                  ? "border-accent-main ring-1 ring-accent-main/20"
                   : "border-[#1a1a1a] hover:bg-[#111] hover:border-[#222]"
               )}
             >
@@ -124,7 +119,7 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
                     {service.category || 'Outros'}
                   </span>
                   {isSelected && (
-                    <CheckCircle size={14} weight="fill" className="text-[#00d4aa]" />
+                    <CheckCircle size={14} weight="fill" className="text-accent-main" />
                   )}
                 </div>
 
@@ -173,11 +168,11 @@ export function ClientServicesPage({ services }: ClientServicesPageProps) {
       {/* Floating CTA */}
       {selected && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 fade-in duration-500">
-          <div className="bg-[#0f0f0f] border border-[#00d4aa]/30 p-4 pr-5 rounded-[12px] flex items-center gap-6 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)]">
+          <div className="bg-[#0f0f0f] border border-accent-main/30 p-4 pr-5 rounded-[12px] flex items-center gap-6 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)]">
             <div className="flex flex-col min-w-0">
               <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#333]">Selecionado</span>
               <span className="text-[13px] font-medium text-[#fff] uppercase truncate max-w-[200px]">{selected.name}</span>
-              <span className="text-[11px] font-medium text-[#00d4aa] uppercase mt-0.5">R$ {(selected.price_cents / 100).toFixed(0)} • {selected.duration_minutes}min</span>
+              <span className="text-[11px] font-medium text-accent-main uppercase mt-0.5">R$ {(selected.price_cents / 100).toFixed(0)} • {selected.duration_minutes}min</span>
             </div>
             <Link 
               href={`/client/appointments?service=${selected.id}`}

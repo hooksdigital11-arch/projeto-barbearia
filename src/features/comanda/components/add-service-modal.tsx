@@ -3,25 +3,39 @@
 import { useState, useEffect, useTransition } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { addComandaItem } from '../actions'
 import { createClient } from '@/lib/supabase/client'
 
-export function AddServiceModal({ isOpen, onClose, clientId, appointmentId, onAdded }: any) {
-  const [services, setServices] = useState<any[]>([])
+interface AddServiceModalProps {
+  isOpen: boolean
+  onClose: () => void
+  clientId: string
+  appointmentId: string | null
+  onAdded: () => void
+}
+
+interface ServiceOption {
+  id: string
+  name: string
+  duration_minutes: number
+  price_cents: number
+}
+
+export function AddServiceModal({ isOpen, onClose, clientId, appointmentId, onAdded }: AddServiceModalProps) {
+  const [services, setServices] = useState<ServiceOption[]>([])
   const [isPending, startTransition] = useTransition()
-  const supabase = createClient()
 
   useEffect(() => {
     if (isOpen) {
+      const supabase = createClient()
       supabase.from('services').select('*').eq('is_active', true).then(({ data }) => {
-        if (data) setServices(data)
+        if (data) setServices(data as ServiceOption[])
       })
     }
   }, [isOpen])
 
-  const handleAdd = (service: any) => {
+  const handleAdd = (service: ServiceOption) => {
     startTransition(async () => {
       const formData = new FormData()
       formData.append('client_id', clientId)

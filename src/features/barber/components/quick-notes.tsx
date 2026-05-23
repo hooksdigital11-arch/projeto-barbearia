@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Note, CloudCheck, CloudArrowUp } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils/cn'
 import { toast } from 'sonner'
 
 export function QuickNotes({ initialNote }: { initialNote: string }) {
@@ -12,14 +11,14 @@ export function QuickNotes({ initialNote }: { initialNote: string }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (note !== initialNote) {
-        saveNote(note)
+        saveNote()
       }
     }, 1500)
 
     return () => clearTimeout(timer)
   }, [note, initialNote])
 
-  const saveNote = async (content: string) => {
+  const saveNote = async () => {
     setIsSaving(true)
     // Simulate API call
     await new Promise(r => setTimeout(r, 800))

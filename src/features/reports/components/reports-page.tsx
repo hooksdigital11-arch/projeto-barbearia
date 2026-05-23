@@ -5,7 +5,7 @@ import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils/cn'
-import { FadersHorizontal, CircleNotch, CaretDown, FilePdf } from '@phosphor-icons/react'
+import { FadersHorizontal, CircleNotch, FilePdf } from '@phosphor-icons/react'
 import type { 
   RevenueReport, 
   AppointmentReport, 
@@ -46,10 +46,6 @@ export function ReportsPage({
   adminName,
 }: ReportsPageProps) {
   const router = useRouter()
-  const [dates, setDates] = useState({ 
-    start: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString(),
-    end: new Date().toISOString()
-  })
   const [revenue, setRevenue] = useState(initialRevenue)
   const [appointments, setAppointments] = useState(initialAppointments)
   const [clients, setClients] = useState(initialClients)
@@ -82,7 +78,7 @@ export function ReportsPage({
     startTransition(() => {
       setActivePeriod(period)
       const now = new Date()
-      let start = new Date()
+      const start = new Date()
       
       if (period === 'today') start.setHours(0, 0, 0, 0)
       else if (period === 'week') start.setDate(now.getDate() - 7)

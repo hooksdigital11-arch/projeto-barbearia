@@ -25,7 +25,7 @@ const logger = pino({
  */
 export async function logSecurityEvent(
   action: string,
-  details: Record<string, any>,
+  details: Record<string, unknown>,
   severity: 'info' | 'warn' | 'error' | 'fatal' = 'warn'
 ) {
   logger[severity]({

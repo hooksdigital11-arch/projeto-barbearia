@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 
 import { requireBarber } from '@/lib/auth/require-auth'
 import { createClient } from '@/lib/supabase/server'
@@ -28,7 +27,6 @@ export default async function BarberComandaPage() {
   return (
     <ComandaPageBarber
       appointments={appointments || []}
-      barber={user as any}
     />
   )
 }

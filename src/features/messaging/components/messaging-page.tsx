@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ConversationPanel, ChatPanel } from './chat-interface'
 import { BroadcastModal } from './broadcast-modal'
 import { TemplateModal } from './template-modal'
+import { cn } from '@/lib/utils/cn'
 import type { Message, MessageConversation, MessagingStats, ClientForMessage, MessageTemplate } from '../types'
 import { 
   ChatCircle, 
@@ -16,7 +17,6 @@ import {
   CircleNotch,
   ChatCircleText
 } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils/cn'
 
 interface MessagingPageProps {
   conversations: MessageConversation[]
@@ -84,7 +84,7 @@ export function MessagingPage({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsTemplateOpen(true)}
-            className="flex items-center gap-2 bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[16px] py-[10px] text-[10px] font-medium text-[#666] uppercase tracking-[0.08em] transition-all hover:border-[#333] hover:text-[#aaa]"
+            className="flex items-center justify-center gap-2 bg-bg-sidebar border-[0.5px] border-border-main rounded-[8px] px-[16px] min-h-[44px] text-[10px] font-medium text-[#666] uppercase tracking-[0.08em] transition-all hover:border-[#333] hover:text-[#aaa]"
           >
             <FileText size={14} weight="regular" />
             Templates
@@ -92,7 +92,7 @@ export function MessagingPage({
           {isAdmin && (
             <button
               onClick={() => setIsBroadcastOpen(true)}
-              className="flex items-center gap-2 bg-accent-main text-black rounded-[8px] px-[16px] py-[10px] text-[10px] font-medium uppercase tracking-[0.08em] transition-all hover:opacity-90"
+              className="flex items-center justify-center gap-2 bg-accent-main text-black rounded-[8px] px-[16px] min-h-[44px] text-[10px] font-medium uppercase tracking-[0.08em] transition-all hover:opacity-90"
             >
               <Lightning size={14} weight="bold" />
               Disparo em Massa
@@ -124,7 +124,10 @@ export function MessagingPage({
       {/* Main Chat Area */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] overflow-hidden min-h-[320px] h-[calc(100vh-400px)]">
         {/* Left Column: Conversations */}
-        <div className="border-r-[0.5px] border-border-main flex flex-col bg-bg-sidebar">
+        <div className={cn(
+          "border-r-[0.5px] border-border-main flex flex-col bg-bg-sidebar",
+          selectedClientId ? "hidden lg:flex" : "flex"
+        )}>
           <ConversationPanel
             conversations={conversations}
             allClients={clients}
@@ -134,7 +137,10 @@ export function MessagingPage({
         </div>
 
         {/* Right Column: Central de Atendimento */}
-        <div className="flex flex-col bg-bg-sidebar">
+        <div className={cn(
+          "flex flex-col bg-bg-sidebar",
+          selectedClientId ? "flex" : "hidden lg:flex"
+        )}>
           {selectedClientId ? (
             loadingMessages ? (
               <div className="flex-1 flex items-center justify-center">
@@ -146,7 +152,7 @@ export function MessagingPage({
                 clientId={selectedClientId}
                 clientName={selectedClientName}
                 clientPhone={selectedClientPhone}
-                orgName={orgName}
+                onBack={() => setSelectedClientId(null)}
               />
             )
           ) : (

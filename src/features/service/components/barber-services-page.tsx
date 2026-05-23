@@ -1,7 +1,6 @@
 import { Scissors, Clock } from '@phosphor-icons/react/dist/ssr'
 import { cn } from '@/lib/utils/cn'
-import { CATEGORY_CONFIG } from '../types'
-import type { Service, ServiceCategory } from '../types'
+import type { Service } from '../types'
 
 interface BarberServicesPageProps {
   services: Service[]
@@ -14,9 +13,6 @@ export function BarberServicesPage({ services }: BarberServicesPageProps) {
     acc[cat].push(s)
     return acc
   }, {})
-
-  const formatPrice = (cents: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100)
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
@@ -48,13 +44,13 @@ export function BarberServicesPage({ services }: BarberServicesPageProps) {
         const catKey = category.toUpperCase()
         const colors: Record<string, string> = {
           BARBA: '#d4aa00',
-          COMBO: '#00d4aa',
+          COMBO: 'var(--accent)',
           CORTE: '#6b9fff',
           OUTROS: '#9b7cf6'
         }
         const bgColors: Record<string, string> = {
           BARBA: '#2e1a00',
-          COMBO: '#0d2e1a',
+          COMBO: 'color-mix(in srgb, var(--accent) 10%, transparent)',
           CORTE: '#0d1a2e',
           OUTROS: '#1a0d2e'
         }

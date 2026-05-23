@@ -2,11 +2,9 @@
 
 import { useState } from 'react'
 import type { AppointmentWithRelations, ServiceOption, ClientOption } from '../types'
-import { STATUS_CONFIG } from '../types'
 import { AppointmentModal } from './appointment-modal'
 import { QuickStatusButton, CancelButton, StatusBadge } from './appointment-status'
-import { Button } from '@/components/ui/button'
-import { Plus, Clock, User, Scissors, ChevronRight, Calendar, CalendarX } from 'lucide-react'
+import { Plus, CalendarX } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 interface BarberAppointmentsPageProps {
@@ -49,7 +47,7 @@ export function BarberAppointmentsPage({
           </p>
         </div>
         <button
-          className="bg-[#00d4aa] text-[#000] text-[10px] font-medium tracking-[0.1em] p-[10px_18px] rounded-[8px] flex items-center gap-2 hover:brightness-110 transition-all uppercase shrink-0"
+          className="bg-accent-main text-black text-[10px] font-medium tracking-[0.1em] p-[10px_18px] rounded-[8px] flex items-center gap-2 hover:brightness-110 transition-all uppercase shrink-0"
           onClick={() => { setEditingAppointment(null); setIsModalOpen(true) }}
         >
           <Plus className="w-3.5 h-3.5" />
@@ -87,7 +85,7 @@ export function BarberAppointmentsPage({
                 {nextAppointment.service.name} · {new Date(nextAppointment.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
               </p>
               {nextAppointment.notes && (
-                <p className="text-xs text-muted-foreground italic mt-1">"{nextAppointment.notes}"</p>
+                <p className="text-xs text-muted-foreground italic mt-1">&quot;{nextAppointment.notes}&quot;</p>
               )}
             </div>
             <div className="flex flex-col gap-2 items-end shrink-0">
@@ -105,7 +103,7 @@ export function BarberAppointmentsPage({
             <CalendarX className="w-8 h-8 text-[#1e1e1e]" />
             <div className="text-center space-y-1">
               <p className="text-[14px] font-medium text-[#333] uppercase tracking-wider">Nenhum agendamento hoje</p>
-              <p className="text-[11px] text-[#222] uppercase tracking-widest">Clique em "Agendar Cliente" para criar um.</p>
+              <p className="text-[11px] text-[#222] uppercase tracking-widest">Clique em &quot;Agendar Cliente&quot; para criar um.</p>
             </div>
           </div>
         ) : (
@@ -167,54 +165,66 @@ function AppointmentCard({
   dimmed?: boolean
 }) {
   const startDt = new Date(appt.start_time)
-  const cfg = STATUS_CONFIG[appt.status]
   const canEdit = !['completed', 'cancelled', 'no_show'].includes(appt.status)
 
   return (
     <div
       className={cn(
-        'group relative flex items-center gap-4 p-4 rounded-2xl border border-white/5 bg-bg-surface hover:border-white/10 transition-all',
+        'group relative flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl border border-white/5 bg-bg-surface hover:border-white/10 transition-all',
         dimmed && 'opacity-50'
       )}
     >
-      {/* Time column */}
-      <div className="w-14 shrink-0 text-center">
-        <p className="text-sm font-bold text-text-primary">
-          {startDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-        </p>
-        <p className="text-[10px] text-muted-foreground">{appt.duration_minutes}min</p>
-      </div>
+      {/* Top Section / Main Row: contains time, details, and mobile status */}
+      <div className="flex items-center gap-4 flex-1 min-w-0">
+        {/* Time column */}
+        <div className="w-14 shrink-0 text-center">
+          <p className="text-sm font-bold text-text-primary">
+            {startDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+          </p>
+          <p className="text-[10px] text-muted-foreground">{appt.duration_minutes}min</p>
+        </div>
 
-      {/* Divider */}
-      <div className="w-px h-12 bg-white/10 shrink-0" />
+        {/* Divider */}
+        <div className="w-px h-12 bg-white/10 shrink-0" />
 
-      {/* Content */}
-      <div className="flex-1 min-w-0 space-y-1">
-        <p className="text-sm font-bold text-text-primary truncate">{appt.client.full_name}</p>
-        <div className="flex items-center gap-3">
-          <p className="text-xs text-muted-foreground truncate">{appt.service.name}</p>
-          <span className="text-xs font-bold text-text-primary/40">·</span>
-          <p className="text-xs font-medium text-text-primary">R$ {(appt.price_cents / 100).toFixed(2)}</p>
+        {/* Content */}
+        <div className="flex-1 min-w-0 space-y-1">
+          <p className="text-sm font-bold text-text-primary truncate">{appt.client.full_name}</p>
+          <div className="flex items-center gap-3">
+            <p className="text-xs text-muted-foreground truncate">{appt.service.name}</p>
+            <span className="text-xs font-bold text-text-primary/40">·</span>
+            <p className="text-xs font-medium text-text-primary">R$ {(appt.price_cents / 100).toFixed(2)}</p>
+          </div>
+        </div>
+
+        {/* Mobile Status Badge */}
+        <div className="sm:hidden shrink-0">
+          <StatusBadge status={appt.status} appointmentId={appt.id} />
         </div>
       </div>
 
-      {/* Status */}
-      <StatusBadge status={appt.status} appointmentId={appt.id} />
+      {/* Bottom Section: Actions and Desktop Status */}
+      <div className="flex items-center justify-between sm:justify-end gap-3 pt-3 sm:pt-0 border-t border-white/5 sm:border-t-0 shrink-0">
+        {/* Desktop Status Badge */}
+        <div className="hidden sm:block">
+          <StatusBadge status={appt.status} appointmentId={appt.id} />
+        </div>
 
-      {/* Actions (hover) */}
-      <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        <QuickStatusButton status={appt.status} appointmentId={appt.id} />
-        {canEdit && (
-          <>
-            <button
-              onClick={onEdit}
-              className="text-[10px] font-bold uppercase px-3 py-1 rounded-lg bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-text-primary transition-colors"
-            >
-              Editar
-            </button>
-            <CancelButton appointmentId={appt.id} />
-          </>
-        )}
+        {/* Actions panel: visible by default on mobile, hover-only on sm and up */}
+        <div className="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+          <QuickStatusButton status={appt.status} appointmentId={appt.id} />
+          {canEdit && (
+            <>
+              <button
+                onClick={onEdit}
+                className="text-[10px] font-bold uppercase px-3 py-1.5 sm:py-1 rounded-lg bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-text-primary transition-colors"
+              >
+                Editar
+              </button>
+              <CancelButton appointmentId={appt.id} />
+            </>
+          )}
+        </div>
       </div>
     </div>
   )

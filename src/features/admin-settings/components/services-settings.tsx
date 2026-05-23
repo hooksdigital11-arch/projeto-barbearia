@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, PencilSimple, Trash, Play, Pause, X, CircleNotch } from '@phosphor-icons/react'
 import { deleteService, createService, updateService, toggleServiceStatus } from '../actions'
@@ -68,7 +68,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
       description: formData.get('description') as string,
       duration: parseInt(formData.get('duration') as string, 10),
       price: parseFloat(formData.get('price') as string),
-      category: formData.get('category') as any,
+      category: formData.get('category') as "corte" | "barba" | "combo" | "outros",
       isActive: editingService?.is_active ?? true,
     }
 
@@ -90,17 +90,40 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
     })
   }
 
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = scrollRef.current
+    if (!el) return
+    const startX = e.pageX - el.offsetLeft
+    const scrollLeft = el.scrollLeft
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const x = moveEvent.pageX - el.offsetLeft
+      const walk = (x - startX) * 1.5
+      el.scrollLeft = scrollLeft - walk
+    }
+
+    const handleMouseUp = () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+  }
+
   return (
     <div className="space-y-10 max-w-5xl">
       {/* Header Container */}
       <div className="flex items-start justify-between">
         <div className="space-y-0.5">
           <h2 className="text-[14px] font-medium text-text-primary uppercase tracking-wider">Catálogo de Serviços</h2>
-          <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a]">Gerencie o cardápio de experiências e valores do seu negócio</p>
+          <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-text-muted/65">Gerencie o cardápio de experiências e valores do seu negócio</p>
         </div>
         <button 
           onClick={handleNew} 
-          className="flex items-center gap-2 bg-accent-main text-black px-4 py-[9px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.08em] hover:opacity-90 transition-all shrink-0"
+          className="flex items-center justify-center gap-2 bg-accent-main text-black px-4 min-h-[44px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.08em] hover:opacity-90 transition-all shrink-0"
         >
           <Plus size={14} weight="bold" />
           Novo Serviço
@@ -108,15 +131,20 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
       </div>
 
       {/* Services Table */}
-      <div className="space-y-2.5">
-        {/* Table Head */}
-        <div className="grid grid-cols-[2fr_90px_90px_80px_70px_70px] gap-3 px-3.5 pb-2.5 items-center">
-          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a]">Serviço</span>
-          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a] text-center">Categoria</span>
-          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a] text-center">Duração</span>
-          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a] text-center">Investimento</span>
-          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a] text-center">Status</span>
-          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-[#2a2a2a] text-right pr-2">Ações</span>
+      <div 
+        ref={scrollRef}
+        onMouseDown={handleMouseDown}
+        className="w-full overflow-x-auto scrollbar-none pb-4 cursor-grab active:cursor-grabbing select-none"
+      >
+        <div className="min-w-[640px] space-y-2.5">
+          {/* Table Head */}
+          <div className="grid grid-cols-[2fr_90px_90px_80px_70px_70px] gap-3 px-3.5 pb-2.5 items-center">
+          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-text-muted/70">Serviço</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-text-muted/70 text-center">Categoria</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-text-muted/70 text-center">Duração</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-text-muted/70 text-center">Investimento</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-text-muted/70 text-center">Status</span>
+          <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-text-muted/70 text-right pr-2">Ações</span>
         </div>
 
         {/* Table Rows */}
@@ -132,7 +160,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
               {/* Service Info */}
               <div className="flex flex-col truncate pl-1">
                 <span className="text-[11px] font-medium text-text-secondary truncate uppercase">{service.name}</span>
-                <span className="text-[9px] text-[#2e2e2e] truncate uppercase tracking-wider">{service.description || 'sem descrição'}</span>
+                <span className="text-[9px] text-text-muted/50 truncate uppercase tracking-wider">{service.description || 'sem descrição'}</span>
               </div>
 
               {/* Category Badge */}
@@ -142,14 +170,14 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                   service.category?.toUpperCase() === 'CORTE' ? "bg-[#0d2e1a] text-[#00c070] border-[#00c07033]" :
                   service.category?.toUpperCase() === 'BARBA' ? "bg-[#0d1e2e] text-[#6b9fff] border-[#6b9fff33]" :
                   service.category?.toUpperCase() === 'COMBO' ? "bg-[#1e1a0d] text-[#c0a000] border-[#c0a00033]" :
-                  "bg-bg-surface text-[#444] border-[#222]"
+                  "bg-bg-surface text-text-muted/70 border-border-main"
                 )}>
                   {service.category}
                 </span>
               </div>
 
               {/* Duration */}
-              <span className="text-[10px] text-[#444] text-center font-medium">{service.duration_minutes} MIN</span>
+              <span className="text-[10px] text-text-secondary/70 text-center font-medium">{service.duration_minutes} MIN</span>
 
               {/* Price */}
               <span className="text-[10px] text-text-secondary text-center font-medium">{formatPrice(service.price_cents)}</span>
@@ -160,7 +188,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                   "w-[5px] h-[5px] rounded-full",
                   service.is_active ? "bg-accent-main" : "bg-[#2a2a2a]"
                 )} />
-                <span className="text-[9px] text-[#333] uppercase tracking-wider">{service.is_active ? 'ATIVO' : 'OFF'}</span>
+                <span className="text-[9px] text-text-muted/55 uppercase tracking-wider">{service.is_active ? 'ATIVO' : 'OFF'}</span>
               </div>
 
               {/* Actions */}
@@ -168,7 +196,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                 <button 
                   onClick={() => handleEdit(service)}
                   title="Editar" 
-                  className="text-[#2e2e2e] hover:text-[#666] transition-all"
+                  className="text-text-muted/40 hover:text-text-primary transition-all"
                 >
                   <PencilSimple size={13} weight="bold" />
                 </button>
@@ -176,7 +204,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                   onClick={() => handleToggleActive(service)}
                   disabled={isPending}
                   title={service.is_active ? 'Pausar' : 'Ativar'}
-                  className="text-[#2e2e2e] hover:text-[#666] transition-all"
+                  className="text-text-muted/40 hover:text-text-primary transition-all"
                 >
                   {service.is_active ? <Pause size={13} weight="bold" /> : <Play size={13} weight="bold" />}
                 </button>
@@ -184,7 +212,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                   onClick={() => handleDelete(service.id)}
                   disabled={isPending}
                   title="Excluir" 
-                  className="text-[#2e2e2e] hover:text-[#ef4444] transition-all"
+                  className="text-text-muted/40 hover:text-[#ef4444] transition-all"
                 >
                   <Trash size={13} weight="bold" />
                 </button>
@@ -193,12 +221,13 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
           ))}
         </div>
       </div>
+    </div>
 
       {/* Empty State */}
       {services.length === 0 && (
         <div className="py-20 text-center flex flex-col items-center justify-center gap-4">
           <div className="w-px h-8 bg-[#161616]" />
-          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#333]">Nenhum serviço cadastrado</p>
+          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-text-muted/40">Nenhum serviço cadastrado</p>
         </div>
       )}
 
@@ -213,11 +242,11 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                   <h3 className="text-[16px] font-medium text-text-primary uppercase tracking-[0.02em]">
                     {editingService?.id ? 'Editar Serviço' : 'Novo Serviço'}
                   </h3>
-                  <p className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Configurações técnicas & comerciais</p>
+                  <p className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/70">Configurações técnicas & comerciais</p>
                 </div>
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="w-[28px] h-[28px] flex items-center justify-center text-[#444] hover:text-text-primary transition-all rounded-full"
+                  className="w-[28px] h-[28px] flex items-center justify-center text-text-muted/40 hover:text-text-primary transition-all rounded-full"
                 >
                   <X size={16} />
                 </button>
@@ -226,7 +255,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="space-y-1.5">
-                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Nome da Experiência</label>
+                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Nome da Experiência</label>
                 <input 
                   name="name" 
                   required 
@@ -237,7 +266,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Descrição</label>
+                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Descrição</label>
                 <textarea 
                   name="description" 
                   defaultValue={editingService?.description || ''} 
@@ -248,7 +277,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
 
               <div className="grid grid-cols-2 gap-[10px]">
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Duração (min)</label>
+                  <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Duração (min)</label>
                   <input 
                     name="duration" 
                     type="number" 
@@ -260,7 +289,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Preço (R$)</label>
+                  <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Preço (R$)</label>
                   <input 
                     name="price" 
                     type="number" 
@@ -274,7 +303,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Categoria</label>
+                <label className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Categoria</label>
                 <select 
                   name="category" 
                   required 
@@ -292,7 +321,7 @@ export function ServicesSettings({ initialData }: { initialData: Service[] }) {
                 <button 
                   type="button" 
                   onClick={() => setIsModalOpen(false)} 
-                  className="py-[11px] rounded-[7px] bg-bg-sidebar border-[0.5px] border-border-main text-[10px] font-medium text-[#444] uppercase tracking-wider hover:bg-bg-surface transition-all"
+                  className="py-[11px] rounded-[7px] bg-bg-sidebar border-[0.5px] border-border-main text-[10px] font-medium text-text-muted hover:text-text-primary transition-all"
                   disabled={isPending}
                 >
                   Cancelar

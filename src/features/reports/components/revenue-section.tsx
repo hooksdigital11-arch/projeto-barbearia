@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { RevenueReport } from '../types'
-import { cn } from '@/lib/utils/cn'
 import { useThemeColors } from '@/lib/hooks/use-theme-colors'
 
 interface RevenueSectionProps {
@@ -114,7 +113,7 @@ export function RevenueSection({ data }: RevenueSectionProps) {
             bodyColor: '#ccc',
             padding: 8,
             callbacks: { 
-              label: (ctx: any) => {
+              label: (ctx: { parsed: number; label: string }) => {
                 const val = ctx.parsed
                 const pct = totalServices > 0 ? Math.round((val / totalServices) * 100) : 0
                 return ` ${ctx.label}: ${pct}%`
@@ -134,7 +133,7 @@ export function RevenueSection({ data }: RevenueSectionProps) {
   return (
     <div className="space-y-4">
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
         <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[14px_16px]">
           <div className="text-[9px] tracking-[0.1em] text-[#383838] mb-2 uppercase">Faturamento Total</div>
           <div className="flex items-baseline gap-1">

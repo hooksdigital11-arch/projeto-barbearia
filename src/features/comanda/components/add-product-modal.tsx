@@ -8,21 +8,36 @@ import { toast } from 'sonner'
 import { addComandaItem } from '../actions'
 import { createClient } from '@/lib/supabase/client'
 
-export function AddProductModal({ isOpen, onClose, clientId, appointmentId, onAdded }: any) {
-  const [products, setProducts] = useState<any[]>([])
+interface AddProductModalProps {
+  isOpen: boolean
+  onClose: () => void
+  clientId: string
+  appointmentId: string | null
+  onAdded: () => void
+}
+
+interface ProductOption {
+  id: string
+  name: string
+  quantity: number
+  price_cents: number
+}
+
+export function AddProductModal({ isOpen, onClose, clientId, appointmentId, onAdded }: AddProductModalProps) {
+  const [products, setProducts] = useState<ProductOption[]>([])
   const [isPending, startTransition] = useTransition()
   const [quantities, setQuantities] = useState<Record<string, number>>({})
-  const supabase = createClient()
 
   useEffect(() => {
     if (isOpen) {
+      const supabase = createClient()
       supabase.from('inventory').select('*').eq('active', true).gt('quantity', 0).then(({ data }) => {
-        if (data) setProducts(data)
+        if (data) setProducts(data as ProductOption[])
       })
     }
   }, [isOpen])
 
-  const handleAdd = (product: any) => {
+  const handleAdd = (product: ProductOption) => {
     startTransition(async () => {
       const quantity = quantities[product.id] || 1
       const formData = new FormData()

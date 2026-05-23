@@ -17,8 +17,8 @@ import {
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { cn } from '@/lib/utils/cn'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function GeneralSettings({ initialData }: { initialData: any }) {
   const [isPending, startTransition] = useTransition()
   const [isUploading, setIsUploading] = useState(false)
@@ -71,7 +71,7 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
         } else {
           toast.error(result.error)
         }
-      } catch (err) {
+      } catch {
         toast.error('Erro ao salvar configurações.')
       }
     })
@@ -99,7 +99,7 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
       } else if (result.error) {
         toast.error(result.error)
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro no upload da logo.')
     } finally {
       setIsUploading(false)
@@ -138,7 +138,7 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
 
             <div className="flex-1 space-y-1">
               <h3 className="text-[13px] font-medium text-text-secondary">Logo da Marca</h3>
-              <p className="text-[10px] text-[#2e2e2e] leading-[1.5]">
+              <p className="text-[10px] text-text-muted leading-[1.5]">
                 Esta imagem será exibida nos agendamentos, mensagens e faturas. Recomendamos o uso de uma versão quadrada da sua logo.
               </p>
               {form.watch('logoUrl') && (
@@ -162,7 +162,7 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
                 name="name"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Nome da Barbearia</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Nome da Barbearia</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
@@ -178,7 +178,7 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
                 name="email"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Email de Contato</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Email de Contato</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
@@ -199,7 +199,7 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
                 name="phone"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Telefone</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Telefone</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
@@ -215,7 +215,7 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
                 name="zipCode"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">CEP</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">CEP</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
@@ -229,13 +229,13 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
             </div>
 
             {/* Row 3: Address + Number */}
-            <div className="grid grid-cols-[2fr_0.5fr] gap-[10px]">
+            <div className="grid grid-cols-1 sm:grid-cols-[2fr_0.5fr] gap-[10px]">
               <FormField
                 control={form.control}
                 name="address"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Endereço (Rua/Av)</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Endereço (Rua/Av)</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
@@ -251,7 +251,7 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
                 name="number"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Nº</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Nº</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
@@ -265,13 +265,13 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
             </div>
 
             {/* Row 4: Neighborhood + City + UF */}
-            <div className="grid grid-cols-[1.5fr_1.5fr_0.6fr] gap-[10px]">
+            <div className="grid grid-cols-1 sm:grid-cols-[1.5fr_1.5fr_0.6fr] gap-[10px]">
               <FormField
                 control={form.control}
                 name="neighborhood"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Bairro</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Bairro</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
@@ -287,7 +287,7 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
                 name="city"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Cidade</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Cidade</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
@@ -303,7 +303,7 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
                 name="state"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">UF</FormLabel>
+                    <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">UF</FormLabel>
                     <FormControl>
                       <input 
                         {...field} 
@@ -323,7 +323,7 @@ export function GeneralSettings({ initialData }: { initialData: any }) {
               name="description"
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
-                  <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">Descrição / Bio</FormLabel>
+                  <FormLabel className="text-[9px] font-medium uppercase tracking-[0.12em] text-text-muted/85">Descrição / Bio</FormLabel>
                   <FormControl>
                     <textarea 
                       {...field} 

@@ -3,6 +3,43 @@ import { cache } from 'react'
 import { requireBarber } from '@/lib/auth/require-auth'
 import { createClient } from '@/lib/supabase/server'
 
+interface ServiceItem {
+  id: string
+  name: string
+  duration_minutes: number | null
+}
+
+interface DashboardAppointment {
+  id: string
+  start_time: string
+  end_time: string
+  status: string
+  price_cents: number | null
+  client_id: string | null
+  client_name: string | null
+  service_id: string | null
+  clients: {
+    full_name: string | null
+    total_visits: number | null
+    total_spent_cents: number | null
+    rating: number | null
+    notes: string | null
+  } | null
+}
+
+interface WaitingDataRow {
+  id: string
+  client_id: string | null
+  client_name: string | null
+  service_id: string | null
+  status: string
+  joined_at: string
+  estimated_time: string | null
+  clients: {
+    full_name: string | null
+  } | null
+}
+
 export const getBarberDashboardData = cache(async () => {
   const user = await requireBarber()
   const supabase = await createClient()
@@ -39,9 +76,9 @@ export const getBarberDashboardData = cache(async () => {
     .select('id, name, duration_minutes')
     .eq('organization_id', user.organization_id)
 
-  const serviceMap = new Map(((services as any[]) || []).map((s: any) => [s.id, s]))
+  const serviceMap = new Map(((services as ServiceItem[] | null) || []).map((s) => [s.id, s]))
 
-  const allApps = (appointmentsData as any[]) || []
+  const allApps = (appointmentsData as DashboardAppointment[] | null) || []
   
   const completedApps = allApps.filter(a => a.status === 'completed')
   const inProgressApps = allApps.filter(a => a.status === 'in_progress')
@@ -50,13 +87,12 @@ export const getBarberDashboardData = cache(async () => {
 
   // Format appointments for timeline
   const formattedAppointments = allApps.map(a => {
-    const srv = serviceMap.get(a.service_id)
+    const srv = serviceMap.get(a.service_id || '')
     const startTime = new Date(a.start_time)
     
     // Determine status for UI
     let uiStatus = a.status
     if (a.status === 'pending') {
-        const now = new Date()
         // If it's the next pending appointment
         const firstPending = allApps.find(app => app.status === 'pending')
         if (firstPending && firstPending.id === a.id) {
@@ -78,20 +114,22 @@ export const getBarberDashboardData = cache(async () => {
   let currentClient = null
   if (inProgressApps.length > 0) {
     const activeApp = inProgressApps[0]
-    const srv = serviceMap.get(activeApp.service_id)
-    const clientData = activeApp.clients || {}
-    
-    const startTime = new Date(activeApp.start_time)
-    const elapsedMinutes = Math.floor((new Date().getTime() - startTime.getTime()) / 60000)
+    if (activeApp) {
+      const srv = serviceMap.get(activeApp.service_id || '')
+      const clientData = activeApp.clients
+      
+      const startTime = new Date(activeApp.start_time)
+      const elapsedMinutes = Math.floor((new Date().getTime() - startTime.getTime()) / 60000)
 
-    currentClient = {
-      name: clientData.full_name || activeApp.client_name || 'Cliente',
-      todayService: srv?.name || 'Serviço',
-      visits: clientData.total_visits || 1,
-      rating: clientData.rating || 5.0,
-      totalSpent: (clientData.total_spent_cents || 0) / 100,
-      lastNote: clientData.notes || '',
-      elapsedMinutes: Math.max(0, elapsedMinutes)
+      currentClient = {
+        name: clientData?.full_name || activeApp.client_name || 'Cliente',
+        todayService: srv?.name || 'Serviço',
+        visits: clientData?.total_visits || 1,
+        rating: clientData?.rating || 5.0,
+        totalSpent: (clientData?.total_spent_cents || 0) / 100,
+        lastNote: clientData?.notes || '',
+        elapsedMinutes: Math.max(0, elapsedMinutes)
+      }
     }
   }
 
@@ -103,8 +141,8 @@ export const getBarberDashboardData = cache(async () => {
     .in('status', ['waiting', 'notified'])
     .order('joined_at', { ascending: true })
 
-  const waitingList = ((waitingData as any[]) || []).map(w => {
-    const srv = serviceMap.get(w.service_id)
+  const waitingList = ((waitingData as WaitingDataRow[] | null) || []).map(w => {
+    const srv = serviceMap.get(w.service_id || '')
     const joined = new Date(w.joined_at)
     const waitingMins = Math.floor((new Date().getTime() - joined.getTime()) / 60000)
     

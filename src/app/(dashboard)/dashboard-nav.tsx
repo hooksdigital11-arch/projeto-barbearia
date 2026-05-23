@@ -64,7 +64,7 @@ export function DashboardNav({ items }: DashboardNavProps) {
             href={item.href}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              "flex items-center gap-3 px-[20px] py-[9px] text-[12px] font-medium transition-all group relative",
+              "flex items-center gap-3 px-[20px] py-[9px] min-h-[44px] text-[12px] font-medium transition-all group relative",
               "text-text-nav hover:text-text-primary hover:bg-nav-hover",
               isActive && "text-text-primary bg-nav-hover"
             )}

@@ -43,19 +43,19 @@ export function ClientAppointmentsPage({ appointments, services, barbers, initia
       />
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
-          <p className="text-[9px] font-medium text-[#2a2a2a] uppercase tracking-[0.14em] mb-[6px]">MEUS SERVIÇOS</p>
+          <p className="text-[9px] font-medium text-text-muted/65 uppercase tracking-[0.14em] mb-[6px]">MEUS SERVIÇOS</p>
           <h1 className="text-[28px] font-medium text-[#fff] tracking-[-0.01em] uppercase leading-none">
             Meus Agendamentos
           </h1>
-          <p className="text-[11px] text-[#333] mt-[5px] uppercase tracking-wider font-medium">
+          <p className="text-[11px] text-text-muted/70 mt-[5px] uppercase tracking-wider font-medium">
             Acompanhe seu histórico e próximos horários.
           </p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-[16px] py-[10px] bg-[#00d4aa] text-[#000] text-[10px] font-medium uppercase tracking-[0.08em] rounded-[8px] hover:brightness-110 transition-all shrink-0"
+          className="flex items-center justify-center gap-2 px-[16px] py-[10px] min-h-[44px] bg-accent-main text-black text-[10px] font-medium uppercase tracking-[0.08em] rounded-[8px] hover:brightness-110 transition-all shrink-0 w-full sm:w-auto"
         >
           <Plus size={13} weight="bold" />
           Novo Agendamento
@@ -65,14 +65,14 @@ export function ClientAppointmentsPage({ appointments, services, barbers, initia
       <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] min-h-[320px] flex flex-col">
         {upcoming.length === 0 && past.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 gap-3">
-            <CalendarX className="w-8 h-8 text-[#1e1e1e]" />
-            <p className="text-[14px] font-medium text-[#333] uppercase tracking-wider">Nenhum agendamento encontrado</p>
+            <CalendarX className="w-8 h-8 text-text-muted/30" />
+            <p className="text-[14px] font-medium text-text-muted/60 uppercase tracking-wider">Nenhum agendamento encontrado</p>
           </div>
         ) : (
           <div className="p-4 space-y-8">
             {upcoming.length > 0 && (
               <div className="space-y-4">
-                <p className="text-[10px] font-medium text-[#333] uppercase tracking-[0.1em] px-1">Próximos Agendamentos</p>
+                <p className="text-[10px] font-medium text-text-muted/60 uppercase tracking-[0.1em] px-1">Próximos Agendamentos</p>
                 <div className="grid gap-[6px]">
                   {upcoming.map(appt => (
                     <ClientAppointmentCard key={appt.id} appt={appt} />
@@ -83,7 +83,7 @@ export function ClientAppointmentsPage({ appointments, services, barbers, initia
             
             {past.length > 0 && (
               <div className="space-y-4">
-                <p className="text-[10px] font-medium text-[#333] uppercase tracking-[0.1em] px-1 mt-6">Histórico Recente</p>
+                <p className="text-[10px] font-medium text-text-muted/60 uppercase tracking-[0.1em] px-1 mt-6">Histórico Recente</p>
                 <div className="grid gap-[6px]">
                   {past.map(appt => (
                     <ClientAppointmentCard key={appt.id} appt={appt} dimmed />
@@ -112,7 +112,7 @@ function ClientAppointmentCard({ appt, dimmed }: { appt: AppointmentWithRelation
           <p className="text-[13px] font-medium text-[#fff] uppercase tracking-tight leading-none">{appt.service.name}</p>
           <StatusBadge status={appt.status} appointmentId={appt.id} />
         </div>
-        <div className="text-[10px] text-[#333] flex items-center gap-2 uppercase tracking-wide">
+        <div className="text-[10px] text-text-muted/70 flex items-center gap-2 uppercase tracking-wide">
           <span>{startDt.toLocaleDateString('pt-BR')} às {startDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
           <span className="opacity-30">·</span>
           <span className="text-[#bbb] font-medium">COM {appt.barber.full_name}</span>

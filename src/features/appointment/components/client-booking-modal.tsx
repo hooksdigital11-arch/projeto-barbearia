@@ -170,7 +170,7 @@ export function ClientBookingModal({
             <button
               type="submit"
               disabled={isPending || !serviceId || !barberId || !startTime}
-              className="flex-1 py-[10px] bg-[#00d4aa] text-[#000] text-[11px] font-medium uppercase tracking-[0.08em] rounded-[7px] hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-1 py-[10px] bg-accent-main text-black text-[11px] font-medium uppercase tracking-[0.08em] rounded-[7px] hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isPending ? 'Agendando...' : 'Confirmar Agendamento'}
             </button>

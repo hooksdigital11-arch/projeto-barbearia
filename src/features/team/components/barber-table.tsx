@@ -41,7 +41,7 @@ export function BarberTable({ members, onView, onEdit, canManage, showRevenue }:
             className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] group hover:bg-bg-surface transition-all"
           >
             {/* Mobile card layout */}
-            <div className="md:hidden p-[14px] flex flex-col gap-2">
+            <div className="lg:hidden p-[14px] flex flex-col gap-2">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div
@@ -60,12 +60,12 @@ export function BarberTable({ members, onView, onEdit, canManage, showRevenue }:
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => onView(member)} className="text-[#2e2e2e] hover:text-[#666] transition-all" title="Ver detalhes">
+                <div className="flex items-center gap-0 -mr-2 shrink-0">
+                  <button onClick={() => onView(member)} className="w-11 h-11 flex items-center justify-center text-[#2e2e2e] hover:text-[#666] transition-all" title="Ver detalhes">
                     <Eye size={14} />
                   </button>
                   {canManage && (
-                    <button onClick={() => onEdit(member)} className="text-[#2e2e2e] hover:text-[#666] transition-all" title="Editar">
+                    <button onClick={() => onEdit(member)} className="w-11 h-11 flex items-center justify-center text-[#2e2e2e] hover:text-[#666] transition-all" title="Editar">
                       <PencilSimple size={14} />
                     </button>
                   )}
@@ -86,7 +86,7 @@ export function BarberTable({ members, onView, onEdit, canManage, showRevenue }:
             </div>
 
             {/* Desktop table row */}
-            <div className="hidden md:grid grid-cols-[2fr_1.2fr_80px_60px_100px_80px_70px] gap-[12px] items-center py-[13px] px-[18px]">
+            <div className="hidden lg:grid grid-cols-[2fr_1.2fr_80px_60px_100px_80px_70px] gap-[12px] items-center py-[13px] px-[18px]">
               <div className="flex items-center gap-3">
                 <div
                   className="w-[32px] h-[32px] rounded-[8px] flex items-center justify-center text-text-primary font-medium text-[11px] shrink-0"

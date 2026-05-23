@@ -8,8 +8,8 @@ import type { Message, MessageConversation, ClientForMessage } from '../types'
 import { 
   PaperPlaneRight, 
   MagnifyingGlass, 
-  Phone, 
-  ChatCircleText
+  ChatCircleText,
+  CaretLeft
 } from '@phosphor-icons/react'
 
 interface ConversationPanelProps {
@@ -108,10 +108,10 @@ interface ChatPanelProps {
   clientId: string
   clientName: string
   clientPhone: string | null
-  orgName: string
+  onBack?: () => void
 }
 
-export function ChatPanel({ messages, clientId, clientName, clientPhone, orgName }: ChatPanelProps) {
+export function ChatPanel({ messages, clientId, clientName, clientPhone, onBack }: ChatPanelProps) {
   const [text, setText] = useState('')
   const [isPending, startTransition] = useTransition()
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -146,6 +146,15 @@ export function ChatPanel({ messages, clientId, clientName, clientPhone, orgName
       {/* Header */}
       <div className="px-5 py-4 border-b-[0.5px] border-border-main flex items-center justify-between">
         <div className="flex items-center gap-3">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="lg:hidden w-11 h-11 flex items-center justify-center text-text-secondary hover:text-text-primary rounded-full hover:bg-white/5 transition-all shrink-0"
+              aria-label="Voltar para lista de conversas"
+            >
+              <CaretLeft size={20} weight="bold" />
+            </button>
+          )}
           <div className="w-[32px] h-[32px] rounded-[8px] bg-[#1a1a2e] flex items-center justify-center text-[#8b7cf6] text-[11px] font-medium uppercase shrink-0">
             {clientName.charAt(0)}
           </div>
@@ -220,13 +229,13 @@ export function ChatPanel({ messages, clientId, clientName, clientPhone, orgName
             value={text}
             onChange={e => setText(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) handleSend() }}
-            className="flex-1 bg-bg-black border-[0.5px] border-border-main rounded-[8px] px-4 py-3 text-[11px] text-text-secondary outline-none transition-all focus:border-[#333] uppercase placeholder:text-[#222]"
+            className="flex-1 bg-bg-black border-[0.5px] border-border-main rounded-[8px] px-4 py-3 min-h-[44px] text-[11px] text-text-secondary outline-none transition-all focus:border-[#333] uppercase placeholder:text-[#222]"
             disabled={isPending || !clientPhone}
           />
           <button
             onClick={handleSend}
             disabled={isPending || !text.trim() || !clientPhone}
-            className="w-[42px] h-[42px] rounded-[8px] bg-accent-main flex items-center justify-center text-black hover:opacity-90 transition-all disabled:opacity-20 shrink-0"
+            className="w-11 h-11 rounded-[8px] bg-accent-main flex items-center justify-center text-black hover:opacity-90 transition-all disabled:opacity-20 shrink-0"
           >
             <PaperPlaneRight size={18} weight="bold" />
           </button>

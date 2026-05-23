@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { cn } from '@/lib/utils/cn'
 import type { ClientRecord } from '../types'
 
 interface ClientCardProps {

@@ -44,7 +44,10 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
     .lte('start_time', prevEnd.toISOString())
 
   // Fetch current inventory_movements (products)
-  const { data: currInv } = await (supabaseAdmin as any)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client: any = supabaseAdmin
+
+  const { data: currInv } = await client
     .from('inventory_movements')
     .select('inventory_id, type, quantity, unit_price_cents, created_at, inventory(name, category)')
     .eq('organization_id', user.organization_id)
@@ -53,7 +56,7 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
     .lte('created_at', end.toISOString())
 
   // Fetch previous inventory_movements (sales only for revenue)
-  const { data: prevInv } = await (supabaseAdmin as any)
+  const { data: prevInv } = await client
     .from('inventory_movements')
     .select('quantity, unit_price_cents')
     .eq('organization_id', user.organization_id)
@@ -62,7 +65,7 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
     .lte('created_at', prevEnd.toISOString())
 
   // Fetch payment methods from comanda_items
-  const { data: payData } = await (supabaseAdmin as any)
+  const { data: payData } = await client
     .from('comanda_items')
     .select('payment_method, total_cents')
     .eq('organization_id', user.organization_id)
@@ -71,7 +74,17 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
     .lte('paid_at', end.toISOString())
 
   // ---- Process Current Appointments ----
-  const rows = (currApps ?? []) as any[]
+  type AppointmentRow = {
+    id: string
+    price_cents: number | null
+    start_time: string
+    status: string
+    barber_id: string | null
+    service_id: string | null
+    barber: { full_name: string | null } | null
+    service: { name: string | null } | null
+  }
+  const rows = (currApps ?? []) as unknown as AppointmentRow[]
   let serviceRevenueCents = 0
   const byDay: Record<string, number> = {}
   const barberMap: Record<string, { name: string, cents: number, count: number }> = {}
@@ -89,27 +102,37 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
     serviceRevenueCents += price
     
     // Gráfico
-    const day = r.start_time.split('T')[0]
+    const day = r.start_time.split('T')[0] || ''
     byDay[day] = (byDay[day] ?? 0) + price
 
     // Barbeiros
     const bid = r.barber_id
     if (bid) {
-      if (!barberMap[bid]) barberMap[bid] = { name: (r.barber as any)?.full_name || 'Desconhecido', cents: 0, count: 0 }
-      barberMap[bid].cents += price
-      barberMap[bid].count += 1
+      const key = String(bid)
+      if (!barberMap[key]) barberMap[key] = { name: r.barber?.full_name || 'Desconhecido', cents: 0, count: 0 }
+      barberMap[key].cents += price
+      barberMap[key].count += 1
     }
 
     // Serviços
     const sid = r.service_id
     if (sid) {
-      if (!serviceMap[sid]) serviceMap[sid] = { name: (r.service as any)?.name || 'Serviço', count: 0 }
-      serviceMap[sid].count += 1
+      const key = String(sid)
+      if (!serviceMap[key]) serviceMap[key] = { name: r.service?.name || 'Serviço', count: 0 }
+      serviceMap[key].count += 1
     }
   }
 
   // ---- Process Current Inventory ----
-  const invRows = currInv ?? []
+  type InventoryMovementRow = {
+    inventory_id: string | null
+    type: string
+    quantity: number
+    unit_price_cents: number | null
+    created_at: string
+    inventory: { name: string | null; category: string | null } | null
+  }
+  const invRows = (currInv as unknown as InventoryMovementRow[]) ?? []
   let productRevenueCents = 0
   const productMap: Record<string, { name: string, category: string, qty: number, rev: number }> = {}
   const consumedStockMap: Record<string, { inventoryId: string, name: string, category: string, type: 'venda'|'uso_interno', qtdSaida: number }> = {}
@@ -124,7 +147,7 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
       const rev = qty * price
       productRevenueCents += rev
       // Gráfico (add product revenue to byDay)
-      const day = r.created_at.split('T')[0]
+      const day = r.created_at.split('T')[0] || ''
       byDay[day] = (byDay[day] ?? 0) + rev
       
       // Top products
@@ -150,8 +173,11 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
   }
 
   // ---- Previous Period calculations ----
-  const prevServiceRevenueCents = (prevApps ?? []).reduce((acc: number, r: any) => acc + (r.price_cents ?? 0), 0)
-  const prevProductRevenueCents = (prevInv ?? []).reduce((acc: number, r: any) => acc + ((r.quantity ?? 0) * (r.unit_price_cents ?? 0)), 0)
+  const prevServiceRevenueCents = (prevApps ?? []).reduce((acc: number, r: { price_cents: number | null }) => acc + (r.price_cents ?? 0), 0)
+  const prevProductRevenueCents = ((prevInv as unknown as { quantity: number | null; unit_price_cents: number | null }[]) ?? []).reduce(
+    (acc: number, r) => acc + ((r.quantity ?? 0) * (r.unit_price_cents ?? 0)),
+    0
+  )
 
   const totalRevenue = (serviceRevenueCents + productRevenueCents) / 100
   const prevTotalRevenue = (prevServiceRevenueCents + prevProductRevenueCents) / 100
@@ -183,7 +209,7 @@ export const getRevenueReport = cache(async (startDate: string, endDate: string)
     averageTicket: b.count > 0 ? (b.cents / 100) / b.count : 0
   })).sort((a, b) => b.revenue - a.revenue)
 
-  const topServices = Object.entries(serviceMap).map(([id, s]) => ({
+  const topServices = Object.entries(serviceMap).map(([, s]) => ({
     name: s.name,
     quantity: s.count,
     totalRevenue: 0
@@ -280,7 +306,7 @@ export const getAppointmentsReport = cache(async (startDate: string, endDate: st
     const hourLabel = `${d.getHours()}h`
     if (hourMap[hourLabel] !== undefined) hourMap[hourLabel]! += 1
 
-    const bName = (r.barber as any)?.full_name || 'Desconhecido'
+    const bName = (r.barber as { full_name: string | null } | null)?.full_name || 'Desconhecido'
     barberDistMap[bName] = (barberDistMap[bName] || 0) + 1
   })
 
@@ -417,30 +443,43 @@ export const getTeamReport = cache(async (startDate: string, endDate: string): P
   const barberList = barbers ?? []
   const allApps = apps ?? []
 
-  const stats: Record<string, any> = {}
+  type BarberStatRow = {
+    id: string
+    name: string
+    avatarUrl: string | null
+    appointments: number
+    revenue: number
+    rating: number
+    completionRate: number
+    cancellations: number
+    services: Record<string, number>
+  }
+  const stats: Record<string, BarberStatRow> = {}
   barberList.forEach(b => {
     stats[b.id] = {
-      id: b.id, name: b.full_name, avatarUrl: null,
+      id: b.id, name: b.full_name || 'Desconhecido', avatarUrl: null,
       appointments: 0, revenue: 0, rating: 5.0, completionRate: 0, cancellations: 0,
-      services: {} as Record<string, number>
+      services: {}
     }
   })
 
   allApps.forEach(a => {
-    if (a.barber_id && stats[a.barber_id]) {
+    if (a.barber_id) {
       const b = stats[a.barber_id]
-      b.appointments++
-      if (a.status === 'completed') {
-        b.revenue += (a.price_cents || 0) / 100
-        const sName = (a.service as any)?.name || 'Outros'
-        b.services[sName] = (b.services[sName] || 0) + 1
-      } else if (a.status === 'cancelled') {
-        b.cancellations++
+      if (b) {
+        b.appointments++
+        if (a.status === 'completed') {
+          b.revenue += (a.price_cents || 0) / 100
+          const sName = (a.service as { name: string } | null)?.name || 'Outros'
+          b.services[sName] = (b.services[sName] || 0) + 1
+        } else if (a.status === 'cancelled') {
+          b.cancellations++
+        }
       }
     }
   })
 
-  const finalBarbers = Object.values(stats).map((b: any) => ({
+  const finalBarbers = Object.values(stats).map((b: BarberStatRow) => ({
     ...b,
     completionRate: b.appointments > 0 ? Math.round(((b.appointments - b.cancellations) / b.appointments) * 100) : 0
   }))
@@ -460,6 +499,8 @@ export const getTeamReport = cache(async (startDate: string, endDate: string): P
 
 export const getLoyaltyReport = cache(async (startDate: string, endDate: string): Promise<LoyaltyReport> => {
   const user = await requireUser()
+  void startDate
+  void endDate
   
   const { data: stamps } = await supabaseAdmin
     .from('loyalty_stamps')
@@ -514,24 +555,34 @@ export const getBarberRevenueReport = cache(async (startDate: string, endDate: s
     .gte('start_time', prevStart.toISOString())
     .lte('start_time', prevEnd.toISOString())
 
-  const rows = (currApps ?? []) as any[]
+  type BarberAppointmentRow = {
+    id: string
+    price_cents: number | null
+    start_time: string
+    status: string
+    barber_id: string | null
+    service_id: string | null
+    service: { name: string | null } | null
+  }
+  const rows = (currApps ?? []) as unknown as BarberAppointmentRow[]
   let serviceRevenueCents = 0
   const byDay: Record<string, number> = {}
   const serviceMap: Record<string, { name: string, count: number }> = {}
-
+ 
   for (const r of rows) {
     const price = r.price_cents ?? 0
     serviceRevenueCents += price
-    const day = r.start_time.split('T')[0]
+    const day = r.start_time.split('T')[0] || ''
     byDay[day] = (byDay[day] ?? 0) + price
     const sid = r.service_id
     if (sid) {
-      if (!serviceMap[sid]) serviceMap[sid] = { name: (r.service as any)?.name || 'Serviço', count: 0 }
-      serviceMap[sid].count += 1
+      const key = String(sid)
+      if (!serviceMap[key]) serviceMap[key] = { name: r.service?.name || 'Serviço', count: 0 }
+      serviceMap[key].count += 1
     }
   }
-
-  const prevServiceRevenueCents = (prevApps ?? []).reduce((acc: number, r: any) => acc + (r.price_cents ?? 0), 0)
+ 
+  const prevServiceRevenueCents = (prevApps ?? []).reduce((acc: number, r: { price_cents: number | null }) => acc + (r.price_cents ?? 0), 0)
   const totalRevenue = serviceRevenueCents / 100
   const prevTotalRevenue = prevServiceRevenueCents / 100
   const totalComandas = rows.length

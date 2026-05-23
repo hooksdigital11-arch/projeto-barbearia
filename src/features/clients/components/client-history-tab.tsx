@@ -1,7 +1,6 @@
 'use client'
 
-import { cn } from '@/lib/utils/cn'
-import { Calendar, Clock, User, CurrencyDollar } from '@phosphor-icons/react'
+import { Calendar, Clock } from '@phosphor-icons/react'
 import type { AppointmentRecord } from '../types'
 
 interface ClientHistoryTabProps {
@@ -29,18 +28,6 @@ function formatTime(dateStr: string): string {
     hour: '2-digit',
     minute: '2-digit',
   })
-}
-
-/** Cores dos barbeiros */
-const BARBER_COLORS: Record<string, string> = {
-  rafael: '#3b82f6',
-  thiago: '#f59e0b',
-  marcos: '#10b981',
-}
-
-function getBarberColor(name: string): string {
-  const key = name.toLowerCase().split(' ')[0] ?? ''
-  return BARBER_COLORS[key] || '#6b7280'
 }
 
 export function ClientHistoryTab({ appointments, showFinancials }: ClientHistoryTabProps) {

@@ -12,7 +12,6 @@ import {
   Envelope,
   Cake,
   Calendar,
-  User,
   Scissors,
   CurrencyDollar,
   Star,
@@ -20,10 +19,8 @@ import {
   Prohibit,
   WhatsappLogo,
   ArrowCounterClockwise,
-  Clock,
 } from '@phosphor-icons/react'
 import Link from 'next/link'
-import { ClientAvatar } from './client-avatar'
 import { EditClientModal } from './edit-client-modal'
 import { ClientHistoryTab } from './client-history-tab'
 import { ClientUpcomingTab } from './client-upcoming-tab'
@@ -75,7 +72,7 @@ export function ClientProfileComponent({
   const [activeTab, setActiveTab] = useState<Tab>('history')
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
   const isAdmin = role === 'admin'
   const showFinancials = isAdmin

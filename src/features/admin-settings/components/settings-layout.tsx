@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef } from 'react'
 import { cn } from '@/lib/utils/cn'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -30,6 +31,28 @@ const sections = [
 
 export function SettingsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const navRef = useRef<HTMLDivElement>(null)
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = navRef.current
+    if (!el) return
+    const startX = e.pageX - el.offsetLeft
+    const scrollLeft = el.scrollLeft
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const x = moveEvent.pageX - el.offsetLeft
+      const walk = (x - startX) * 1.5
+      el.scrollLeft = scrollLeft - walk
+    }
+
+    const handleMouseUp = () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+  }
 
   return (
     <div className="space-y-24">
@@ -40,7 +63,11 @@ export function SettingsLayout({ children }: { children: React.ReactNode }) {
 
       <div className="flex flex-col lg:flex-row gap-12 min-h-[600px]">
         {/* Sidebar Navigation: Floating & Pill-Style */}
-        <aside className="w-full lg:w-64 flex flex-col gap-2 sticky top-8 shrink-0">
+        <aside 
+          ref={navRef}
+          onMouseDown={handleMouseDown}
+          className="w-full lg:w-64 flex flex-row lg:flex-col gap-2 sticky top-8 shrink-0 overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 scrollbar-none cursor-grab active:cursor-grabbing select-none"
+        >
           {sections.map((item) => {
             const isActive = pathname === item.href
             return (
@@ -48,7 +75,7 @@ export function SettingsLayout({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-4 px-5 py-3 text-[11px] font-medium uppercase tracking-[0.06em] transition-all rounded-[10px] relative group",
+                  "flex items-center gap-4 px-5 py-3 text-[11px] font-medium uppercase tracking-[0.06em] transition-all rounded-[10px] relative group shrink-0",
                   isActive 
                     ? (item.danger 
                         ? "bg-[#1a0d0d] text-[#c04040]" 
@@ -59,7 +86,7 @@ export function SettingsLayout({ children }: { children: React.ReactNode }) {
                 {/* Active Indicator Bar */}
                 {isActive && (
                   <div 
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-[60%] rounded-full"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-[60%] rounded-full lg:block hidden"
                     style={{ background: item.danger ? '#c04040' : 'var(--accent, #00d4aa)' }}
                   />
                 )}

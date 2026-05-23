@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 import { X, Plus, CaretDown, ListBullets } from '@phosphor-icons/react'
 import { joinQueue } from '../actions'
 import type { ServiceOption, BarberOption, ClientOption } from '../types'
-import { cn } from '@/lib/utils/cn'
 
 interface AddToQueueModalProps {
   isOpen: boolean

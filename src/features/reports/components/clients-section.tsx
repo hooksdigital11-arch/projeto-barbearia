@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { ClientReport } from '../types'
-import { cn } from '@/lib/utils/cn'
 import { useThemeColors } from '@/lib/hooks/use-theme-colors'
 
 interface ClientsSectionProps {
@@ -84,7 +83,7 @@ export function ClientsSection({ data }: ClientsSectionProps) {
   return (
     <div className="space-y-2.5">
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         <div className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] p-[14px_16px]">
           <div className="text-[9px] tracking-[0.1em] text-[#383838] mb-2 uppercase">Total</div>
           <div className="text-[22px] font-medium text-text-primary leading-none">{kpis.totalActive}</div>

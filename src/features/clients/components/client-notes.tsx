@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { PencilSimple, NoteBlank, Check } from '@phosphor-icons/react'
 import { updateClientNotes } from '../actions'
-import { cn } from '@/lib/utils/cn'
 
 interface ClientNotesProps {
   clientId: string

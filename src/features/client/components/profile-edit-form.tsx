@@ -90,7 +90,7 @@ export function ProfileEditForm({ initialName, initialPhone }: ProfileEditFormPr
         <button
           type="submit"
           disabled={isPending}
-          className="flex items-center gap-2 px-[14px] py-[8px] bg-[#00d4aa] text-[#000] text-[10px] font-medium uppercase tracking-wider rounded-[7px] hover:brightness-110 transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-[14px] py-[8px] bg-accent-main text-black text-[10px] font-medium uppercase tracking-wider rounded-[7px] hover:brightness-110 transition-all disabled:opacity-50"
         >
           <Check size={12} weight="bold" />
           {isPending ? 'Salvando...' : 'Salvar'}

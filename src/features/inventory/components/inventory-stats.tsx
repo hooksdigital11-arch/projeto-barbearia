@@ -1,19 +1,18 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Package, Tag, Wrench, Warning, WarningCircle } from '@phosphor-icons/react'
+import { Package, Tag, Wrench, WarningCircle } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 import type { InventoryStats, InventoryItem } from '../types'
 
 interface InventoryStatsCardsProps {
   stats: InventoryStats
   items: InventoryItem[]
-  period: 'hoje' | 'semana' | 'mes' | 'ano'
   salesData: Map<string, { qtdVendida: number, faturamento: number }>
   isLoading?: boolean
 }
 
-export function InventoryStatsCards({ stats, items, period, salesData, isLoading }: InventoryStatsCardsProps) {
+export function InventoryStatsCards({ stats, items, salesData, isLoading }: InventoryStatsCardsProps) {
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100)
   }

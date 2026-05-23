@@ -42,7 +42,7 @@ export function TemplateDeleteConfirm({ isOpen, onClose, template, onSuccess }: 
         <div className="space-y-2">
           <h2 className="font-syne font-bold text-xl text-text-primary tracking-tight">Deletar template?</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            O template <strong className="text-text-primary">"{template.name}"</strong> será removido permanentemente. Esta ação não pode ser desfeita.
+            O template <strong className="text-text-primary">&ldquo;{template.name}&rdquo;</strong> será removido permanentemente. Esta ação não pode ser desfeita.
           </p>
         </div>
 

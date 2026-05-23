@@ -1,7 +1,6 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { 
   CurrencyDollar, 
@@ -17,7 +16,6 @@ import {
 import { KPICard } from '@/components/shared/kpi-card'
 import { Skeleton, CardSkeleton, TableSkeleton } from '@/components/shared/loading-skeleton'
 import { cn } from '@/lib/utils/cn'
-import { createClient } from '@/lib/supabase/client'
 
 const RevenueChart = dynamic(() => import('./revenue-chart'), {
   loading: () => <Skeleton className="h-[350px] w-full rounded-3xl" />
@@ -25,18 +23,49 @@ const RevenueChart = dynamic(() => import('./revenue-chart'), {
 
 import { AdminControls } from './admin-controls'
 
+interface BarberPerformance {
+  id: string
+  name: string
+  avatar: string | null
+  appointments: number
+  revenue: number
+  rating: number
+  color: string
+}
+
+interface RecentActivity {
+  status: string
+  client_name: string
+  value?: number
+  time: string
+}
+
+interface WeeklyChartPoint {
+  name: string
+  revenue: number
+  lastWeek?: number
+}
+
+interface AdminKPIs {
+  revenue: { value: number; trend: number; isPositive: boolean }
+  appointments: { total: number; completed: number; pending: number }
+  newClients: { value: number; trend: number; isPositive: boolean }
+  loyaltyRedeemable: { value: number }
+  weekly_chart: WeeklyChartPoint[]
+  recent_activities: RecentActivity[]
+}
+
 interface AdminDashboardProps {
-  initialKpis: any
-  initialBarbers: any
+  initialKpis: AdminKPIs
+  initialBarbers: BarberPerformance[]
   organizationId: string
 }
 
 import { useDashboardRealtime } from '@/features/analytics/useDashboardRealtime'
 
 export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: AdminDashboardProps) {
-  const router = useRouter()
-  const [kpis, setKpis] = useState(initialKpis)
-  const [barbers, setBarbers] = useState(initialBarbers)
+  const [kpis, setKpis] = useState<AdminKPIs>(initialKpis)
+  const [barbers, setBarbers] = useState<BarberPerformance[]>(initialBarbers)
 
   // Ativa Sincronização em Tempo Real (Event-Driven)
   useDashboardRealtime(organizationId)
@@ -133,14 +162,14 @@ export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: 
             
             <Suspense fallback={<TableSkeleton rows={3} />}>
               <div className="space-y-4">
-                {barbers.map((barber: any) => (
+                {barbers.map((barber) => (
                   <div 
                     key={barber.id}
-                    className="flex items-center justify-between p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.05] transition-all duration-500 group"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.05] transition-all duration-500 gap-4 sm:gap-0 group"
                   >
                     <div className="flex items-center gap-5">
                       <div 
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black text-black group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl"
+                        className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black text-black group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl shrink-0"
                         style={{ backgroundColor: barber.color }}
                       >
                         {barber.name[0]}
@@ -158,22 +187,22 @@ export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: 
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-10">
+                    <div className="flex items-center justify-between sm:justify-end gap-10">
                       <div className="hidden xl:flex items-center gap-3">
                          <button title="WhatsApp" className="tap-target glass rounded-xl text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/20 active:scale-90 transition-all">
                             <WhatsappLogo size={20} weight="bold" />
-                         </button>
+                          </button>
                          <button title="Agenda" className="tap-target glass rounded-xl text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/20 active:scale-90 transition-all">
                             <Calendar size={20} weight="bold" />
-                         </button>
+                          </button>
                          <button title="Gráficos" className="tap-target glass rounded-xl text-accent-cyan hover:bg-accent-cyan/10 hover:border-accent-cyan/20 active:scale-90 transition-all">
                             <ChartBar size={20} weight="bold" />
-                         </button>
+                          </button>
                       </div>
 
-                      <div className="text-right min-w-[120px]">
+                      <div className="text-left sm:text-right min-w-0 sm:min-w-[120px]">
                         <p className="text-xl font-black text-text-primary tracking-tight">R$ {barber.revenue}</p>
-                        <div className="w-20 h-1.5 bg-white/10 rounded-full mt-3 ml-auto overflow-hidden shadow-inner">
+                        <div className="w-20 h-1.5 bg-white/10 rounded-full mt-3 mr-auto sm:ml-auto overflow-hidden shadow-inner">
                           <div 
                             className="h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_currentColor]" 
                             style={{ 
@@ -204,7 +233,7 @@ export function AdminDashboard({ initialKpis, initialBarbers, organizationId }: 
             </div>
             
             <div className="space-y-5">
-              {kpis.recent_activities?.map((activity: any, idx: number) => (
+              {kpis.recent_activities?.map((activity, idx) => (
                 <div key={idx} className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all duration-300 relative overflow-hidden group">
                   <div className={cn(
                     "absolute top-0 left-0 w-1 h-full",

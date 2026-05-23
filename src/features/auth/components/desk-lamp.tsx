@@ -129,7 +129,7 @@ export function DeskLamp({ isOn, onToggle }: { isOn: boolean; onToggle: () => vo
               cx={isOn ? "65" : "55"}
               cy="215"
               r="3.5"
-              fill={isOn ? "#00d4aa" : "#555"}
+              fill={isOn ? "var(--accent, #00d4aa)" : "#555"}
               className="transition-all duration-300"
             />
           </g>

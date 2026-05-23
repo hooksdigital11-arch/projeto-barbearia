@@ -54,9 +54,10 @@ export function StockMovementModal({ isOpen, onClose, product, onSuccess }: { is
         toast.success('MOVIMENTAÇÃO REALIZADA!')
         onSuccess?.()
         onClose()
-      } catch (err: any) {
-        console.error('[StockMovement]', err.message)
-        toast.error(`Erro: ${err.message}`)
+      } catch (err) {
+        const error = err as Error
+        console.error('[StockMovement]', error.message)
+        toast.error(`Erro: ${error.message}`)
       }
     })
   }

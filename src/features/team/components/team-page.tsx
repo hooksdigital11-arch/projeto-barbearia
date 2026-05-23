@@ -2,11 +2,10 @@
 
 import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
-import { Plus, UsersThree } from '@phosphor-icons/react'
+import { UsersThree } from '@phosphor-icons/react'
 import { TeamStatsCards } from './team-stats'
 import { ViewToggle } from './view-toggle'
 import { BarberCard } from './barber-card'
-import { cn } from '@/lib/utils/cn'
 import type { TeamMemberWithStats, TeamStats } from '../types'
 
 const BarberTable = dynamic(() => import('./barber-table').then(m => m.BarberTable), { ssr: false })

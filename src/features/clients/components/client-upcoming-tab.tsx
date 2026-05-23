@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils/cn'
-import { Calendar, Clock, User } from '@phosphor-icons/react'
+import { Calendar } from '@phosphor-icons/react'
 import type { AppointmentRecord } from '../types'
 
 interface ClientUpcomingTabProps {

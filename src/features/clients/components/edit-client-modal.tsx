@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 import { X, PencilSimple, CaretDown, Check } from '@phosphor-icons/react'
 import { updateClientAction } from '../actions'
 import type { ClientRecord, BarberOption } from '../types'
-import { cn } from '@/lib/utils/cn'
 
 interface EditClientModalProps {
   isOpen: boolean

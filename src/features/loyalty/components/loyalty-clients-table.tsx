@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Plus, Minus, MagnifyingGlass, Funnel } from '@phosphor-icons/react'
+import { Plus, Minus, MagnifyingGlass } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 import { addStamp, removeStamp } from '../actions'
 import { toast } from 'sonner'
@@ -14,12 +14,11 @@ interface LoyaltyClientsTableProps {
   config: LoyaltyConfig
 }
 
-export function LoyaltyClientsTable({ clients, config }: LoyaltyClientsTableProps) {
+export function LoyaltyClientsTable({ clients }: LoyaltyClientsTableProps) {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<FilterType>('all')
   const [isPending, startTransition] = useTransition()
 
-  const unit = config.mode === 'stamps' ? 'carimbo' : 'pt'
 
   const filtered = clients.filter(c => {
     const matchesSearch = !search || c.full_name.toLowerCase().includes(search.toLowerCase())
@@ -100,20 +99,24 @@ export function LoyaltyClientsTable({ clients, config }: LoyaltyClientsTableProp
             {filtered.map(client => {
               const initials = client.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
               const actions = (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-0 -mr-2">
                   <button
                     disabled={isPending}
                     onClick={() => handleAdd(client.id)}
-                    className="w-7 h-7 flex items-center justify-center rounded-[6px] bg-bg-surface border-[0.5px] border-border-main text-accent-main opacity-40 hover:opacity-100 transition-all disabled:opacity-20"
+                    className="w-11 h-11 flex items-center justify-center text-accent-main transition-all disabled:opacity-20 group"
                   >
-                    <Plus size={14} weight="bold" />
+                    <span className="w-7 h-7 flex items-center justify-center rounded-[6px] bg-bg-surface border-[0.5px] border-border-main opacity-40 group-hover:opacity-100 transition-all">
+                      <Plus size={14} weight="bold" />
+                    </span>
                   </button>
                   <button
                     disabled={isPending || client.balance <= 0}
                     onClick={() => handleRemove(client.id)}
-                    className="w-7 h-7 flex items-center justify-center rounded-[6px] bg-bg-surface border-[0.5px] border-border-main text-red-500/50 hover:text-red-500/80 hover:opacity-100 transition-all disabled:opacity-10"
+                    className="w-11 h-11 flex items-center justify-center text-red-500/50 transition-all disabled:opacity-20 group"
                   >
-                    <Minus size={14} weight="bold" />
+                    <span className="w-7 h-7 flex items-center justify-center rounded-[6px] bg-bg-surface border-[0.5px] border-border-main opacity-40 group-hover:opacity-100 transition-all">
+                      <Minus size={14} weight="bold" />
+                    </span>
                   </button>
                 </div>
               )
@@ -126,7 +129,7 @@ export function LoyaltyClientsTable({ clients, config }: LoyaltyClientsTableProp
                   )}
                 >
                   {/* Mobile card */}
-                  <div className="md:hidden p-[14px] flex flex-col gap-2">
+                  <div className="lg:hidden p-[14px] flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-8 h-8 rounded-[6px] bg-bg-surface border-[0.5px] border-border-main flex items-center justify-center text-text-nav font-medium text-[10px] shrink-0">
@@ -153,7 +156,7 @@ export function LoyaltyClientsTable({ clients, config }: LoyaltyClientsTableProp
                   </div>
 
                   {/* Desktop row */}
-                  <div className="hidden md:grid grid-cols-[1fr_120px_100px_90px] gap-4 items-center py-[14px] px-[18px]">
+                  <div className="hidden lg:grid grid-cols-[1fr_120px_100px_90px] gap-4 items-center py-[14px] px-[18px]">
                     <div className="flex items-center gap-3 truncate">
                       <div className="w-8 h-8 rounded-[6px] bg-bg-surface border-[0.5px] border-border-main flex items-center justify-center text-text-nav font-medium text-[10px] shrink-0">
                         {initials}

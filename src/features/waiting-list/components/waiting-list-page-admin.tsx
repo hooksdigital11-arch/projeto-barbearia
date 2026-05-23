@@ -9,7 +9,6 @@ import {
   Calendar,
   Plus,
 } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils/cn'
 import { WaitingListRealtime } from './waiting-list-realtime'
 import type { WaitingListEntry, QueueStats, ServiceOption, BarberOption, ClientOption } from '../types'
 
@@ -68,7 +67,7 @@ export function WaitingListPageAdmin({
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-accent-main text-black px-[18px] py-[10px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 active:scale-95 shrink-0"
+          className="flex items-center justify-center gap-2 bg-accent-main text-black px-[18px] min-h-[44px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] transition-all hover:opacity-90 active:scale-95 shrink-0"
         >
           <Plus size={14} weight="bold" />
           Novo Registro
@@ -110,7 +109,7 @@ export function WaitingListPageAdmin({
           </p>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-[18px] py-[9px] rounded-[7px] border-[0.5px] border-border-main text-[10px] font-medium text-[#444] tracking-[0.08em] uppercase transition-all hover:border-[#333] hover:text-text-muted"
+            className="flex items-center justify-center px-[18px] min-h-[44px] rounded-[7px] border-[0.5px] border-border-main text-[10px] font-medium text-[#444] tracking-[0.08em] uppercase transition-all hover:border-[#333] hover:text-text-muted"
           >
             + Adicionar à fila
           </button>

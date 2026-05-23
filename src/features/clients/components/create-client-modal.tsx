@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 import { X, UserPlus, CaretDown } from '@phosphor-icons/react'
 import { createClientAction } from '../actions'
 import type { BarberOption } from '../types'
-import { cn } from '@/lib/utils/cn'
 
 interface CreateClientModalProps {
   isOpen: boolean

@@ -11,13 +11,11 @@ interface InventoryTableProps {
   onDelete: (item: InventoryItem) => void
   canManage: boolean
   showCost: boolean
-  period: 'hoje' | 'semana' | 'mes' | 'ano'
   salesData: Map<string, { qtdVendida: number, faturamento: number }>
-  isLoading?: boolean
 }
 
 export function InventoryTable({
-  items, onEdit, onMove, onDelete, canManage, showCost, period, salesData, isLoading
+  items, onEdit, onMove, onDelete, canManage, showCost, salesData
 }: InventoryTableProps) {
   const formatPrice = (cents: number | null | undefined) => {
     if (cents === null || cents === undefined) return '—'
@@ -27,7 +25,7 @@ export function InventoryTable({
   return (
     <div className="space-y-[4px]">
       {/* Desktop header — hidden on mobile */}
-      <div className="hidden md:grid grid-cols-[2fr_100px_70px_90px_90px_70px_110px_70px] gap-[12px] px-[18px] py-1">
+      <div className="hidden lg:grid grid-cols-[2fr_100px_70px_90px_90px_70px_110px_70px] gap-[12px] px-[18px] py-1">
         <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838]">PRODUTO</span>
         <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838] text-center">TIPO</span>
         <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-[#383838] text-center">ESTOQUE</span>
@@ -49,7 +47,7 @@ export function InventoryTable({
         return (
           <div key={item.id} className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] group hover:bg-bg-surface transition-all">
             {/* Mobile card layout */}
-            <div className="md:hidden p-[14px] flex flex-col gap-2">
+            <div className="lg:hidden p-[14px] flex flex-col gap-2">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-[32px] h-[32px] rounded-[7px] bg-bg-surface border-[0.5px] border-border-main flex items-center justify-center text-[#444] shrink-0">
@@ -86,17 +84,17 @@ export function InventoryTable({
                     <span className="text-accent-main">{formatPrice(faturamento).replace('R$', '').trim()}</span>
                   )}
                 </div>
-                <div className="flex items-center gap-[10px]">
+                <div className="flex items-center gap-0 -mr-2">
                   {canManage && (
-                    <button onClick={() => onEdit(item)} className="text-[#2e2e2e] hover:text-[#666] transition-all" title="Editar">
+                    <button onClick={() => onEdit(item)} className="w-11 h-11 flex items-center justify-center text-[#2e2e2e] hover:text-[#666] transition-all" title="Editar">
                       <PencilSimple size={14} />
                     </button>
                   )}
-                  <button onClick={() => onMove(item)} className="text-[#2e2e2e] hover:text-[#666] transition-all" title="Movimentar">
+                  <button onClick={() => onMove(item)} className="w-11 h-11 flex items-center justify-center text-[#2e2e2e] hover:text-[#666] transition-all" title="Movimentar">
                     <ArrowsDownUp size={14} />
                   </button>
                   {canManage && (
-                    <button onClick={() => onDelete(item)} className="text-[#2e2e2e] hover:text-[#666] transition-all" title="Deletar">
+                    <button onClick={() => onDelete(item)} className="w-11 h-11 flex items-center justify-center text-[#2e2e2e] hover:text-[#666] transition-all" title="Deletar">
                       <Trash size={14} />
                     </button>
                   )}
@@ -105,7 +103,7 @@ export function InventoryTable({
             </div>
 
             {/* Desktop table row */}
-            <div className="hidden md:grid grid-cols-[2fr_100px_70px_90px_90px_70px_110px_70px] gap-[12px] items-center py-[13px] px-[18px]">
+            <div className="hidden lg:grid grid-cols-[2fr_100px_70px_90px_90px_70px_110px_70px] gap-[12px] items-center py-[13px] px-[18px]">
               <div className="flex items-center gap-3 truncate">
                 <div className="w-[32px] h-[32px] rounded-[7px] bg-bg-surface border-[0.5px] border-border-main flex items-center justify-center text-[#444] shrink-0">
                   <Package size={16} weight="regular" />

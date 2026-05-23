@@ -15,6 +15,7 @@
   --color-border-main: #1e1e1e;
   
   --color-accent-main: #00d4aa;
+  --color-accent-cyan: var(--accent);
   
   --color-text-primary: #ffffff;
   --color-text-secondary: #444444;
@@ -30,6 +31,7 @@
   
   --accent-main: #00d4aa;
   --accent: #00d4aa;
+  --accent-cyan: var(--accent);
   --secondary: #5c35a0;
   --border-main: #1e1e1e;
   --surface-main: #111111;
@@ -52,11 +54,13 @@
 
   /* Typography Scale */
   .heading-hero {
-    @apply font-syne font-medium text-6xl md:text-7xl lg:text-9xl tracking-[-0.04em] uppercase leading-[0.85];
+    font-size: clamp(3rem, 10vw, 7.5rem);
+    @apply font-syne font-medium tracking-[-0.04em] uppercase leading-[0.85];
   }
   
   .heading-section {
-    @apply font-syne font-medium text-4xl md:text-5xl tracking-[-0.02em] uppercase;
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    @apply font-syne font-medium tracking-[-0.02em] uppercase;
   }
 
   input, select, textarea {

@@ -1,7 +1,15 @@
 'use client'
 
 import { ComandaItemWithRelations } from '../types'
-import { cn } from '@/lib/utils/cn'
+interface GroupedComanda {
+  client: string
+  barber: string
+  itemCount: number
+  total: number
+  method: string | null | undefined
+  status: string
+  time: string
+}
 
 interface ComandaHistoryTableProps {
   items: ComandaItemWithRelations[]
@@ -21,10 +29,13 @@ export function ComandaHistoryTable({ items }: ComandaHistoryTableProps) {
         time: item.paid_at || item.created_at
       }
     }
-    acc[key].itemCount += 1
-    acc[key].total += item.total_cents
+    const group = acc[key]
+    if (group) {
+      group.itemCount += 1
+      group.total += item.total_cents
+    }
     return acc
-  }, {} as Record<string, any>)
+  }, {} as Record<string, GroupedComanda>)
 
   const records = Object.values(grouped).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
 
@@ -43,7 +54,7 @@ export function ComandaHistoryTable({ items }: ComandaHistoryTableProps) {
           className="bg-bg-sidebar border-[0.5px] border-border-main rounded-[9px] group hover:bg-bg-surface hover:border-[#222] transition-all"
         >
           {/* Mobile card layout */}
-          <div className="md:hidden p-[14px] flex flex-col gap-2">
+          <div className="lg:hidden p-[14px] flex flex-col gap-2">
             <div className="flex items-center justify-between gap-3">
               <div className="flex flex-col min-w-0">
                 <span className="text-[12px] font-medium text-text-secondary truncate uppercase tracking-tight">
@@ -77,7 +88,7 @@ export function ComandaHistoryTable({ items }: ComandaHistoryTableProps) {
           </div>
 
           {/* Desktop table row */}
-          <div className="hidden md:grid grid-cols-[1.8fr_1.4fr_70px_100px_110px_90px] gap-[14px] items-center py-[14px] px-[18px]">
+          <div className="hidden lg:grid grid-cols-[1.8fr_1.4fr_70px_100px_110px_90px] gap-[14px] items-center py-[14px] px-[18px]">
             <span className="text-[12px] font-medium text-text-secondary truncate uppercase tracking-tight">
               {row.client}
             </span>

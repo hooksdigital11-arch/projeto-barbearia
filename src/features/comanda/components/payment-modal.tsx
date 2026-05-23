@@ -16,7 +16,21 @@ const METHODS = [
   { id: 'cash', label: 'Dinheiro', icon: Banknote },
 ]
 
-export function PaymentModal({ isOpen, onClose, clientId, appointmentId, subtotal, onSuccess }: any) {
+interface PaymentModalProps {
+  isOpen: boolean
+  onClose: () => void
+  clientId: string
+  appointmentId: string | null | undefined
+  subtotal: number
+  onSuccess: (data: {
+    receiptNumber: string
+    items: import('../types').ComandaItem[]
+    totalCents: number
+    paymentMethod: string
+  }) => void
+}
+
+export function PaymentModal({ isOpen, onClose, clientId, appointmentId, subtotal, onSuccess }: PaymentModalProps) {
   const [method, setMethod] = useState<string>('')
   const [discount, setDiscount] = useState('0')
   const [isPending, startTransition] = useTransition()

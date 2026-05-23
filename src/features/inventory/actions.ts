@@ -149,8 +149,11 @@ export async function moveStock(productId: string, formData: FormData) {
 
   if (!product) return { error: 'Produto não localizado nesta barbearia.' }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client: any = supabaseAdmin
+
   // Atomic read-modify-write via SQL RPC (prevents race conditions under concurrent requests)
-  const { data: newQuantity, error: rpcError } = await (supabaseAdmin as any).rpc(
+  const { data: newQuantity, error: rpcError } = await client.rpc(
     'move_stock_atomic',
     {
       p_product_id: productId,
@@ -181,7 +184,7 @@ export async function moveStock(productId: string, formData: FormData) {
     ? product.price_cents 
     : null
 
-  const { error: insertError } = await (supabaseAdmin as any)
+  const { error: insertError } = await client
     .from('inventory_movements')
     .insert({
       organization_id: user.organization_id,
@@ -246,7 +249,10 @@ export async function getSalesByPeriodAction(startDateStr: string, endDateStr: s
   const user = await requireUser()
   if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
   
-  const { data, error } = await (supabaseAdmin as any)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client: any = supabaseAdmin
+  
+  const { data, error } = await client
     .from('inventory_movements')
     .select('inventory_id, quantity, unit_price_cents')
     .eq('organization_id', user.organization_id)
@@ -261,7 +267,14 @@ export async function getSalesByPeriodAction(startDateStr: string, endDateStr: s
 
   const salesMap = new Map<string, { qtdVendida: number, faturamento: number }>()
 
-  data.forEach((movement: any) => {
+  type SaleMovementRow = {
+    inventory_id: string
+    quantity: number | null
+    unit_price_cents: number | null
+  }
+  const movements = (data || []) as unknown as SaleMovementRow[]
+
+  movements.forEach((movement) => {
     const id = movement.inventory_id
     const qty = movement.quantity || 0
     const price = movement.unit_price_cents || 0

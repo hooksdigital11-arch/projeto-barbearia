@@ -55,8 +55,7 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
 
     function loadSales() {
       startTransition(async () => {
-        const now = new Date()
-        let start = new Date()
+        const start = new Date()
         const end = new Date()
 
         if (period === 'hoje') {
@@ -183,7 +182,7 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
         </div>
       </div>
 
-      <InventoryStatsCards stats={stats} items={activeItems} period={period} salesData={salesData} isLoading={isPending} />
+      <InventoryStatsCards stats={stats} items={activeItems} salesData={salesData} isLoading={isPending} />
 
       <div className="space-y-6">
         <InventoryFilters
@@ -193,7 +192,6 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
           setSearch={(s) => startTransition(() => setSearch(s))}
           filters={filters}
           setFilters={(f) => startTransition(() => setFilters(f))}
-          inactiveCount={inactiveItems.length}
           period={period}
           setPeriod={(p) => startTransition(() => setPeriod(p))}
         />
@@ -213,9 +211,7 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
             onDelete={handleDelete}
             canManage={userRole === 'admin'}
             showCost={showCost}
-            period={period}
             salesData={salesData}
-            isLoading={isPending}
           />
         )}
       </div>

@@ -2,8 +2,6 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { ComandaHistoryTable } from './comanda-history-table'
 import { ComandaItemWithRelations } from '../types'
 import {
@@ -241,7 +239,7 @@ export function ComandaPageAdmin({
       {/* Table Section */}
       <div className="space-y-4">
         {/* Table Header — desktop only */}
-        <div className="hidden md:grid grid-cols-[1.8fr_1.4fr_70px_100px_110px_90px] gap-[14px] px-[18px] pb-[10px] border-b border-border-main">
+        <div className="hidden lg:grid grid-cols-[1.8fr_1.4fr_70px_100px_110px_90px] gap-[14px] px-[18px] pb-[10px] border-b border-border-main">
           {['CLIENTE', 'BARBEIRO', 'ITENS', 'TOTAL', 'PAGAMENTO', 'STATUS'].map((label, idx) => (
             <span
               key={label}
