@@ -110,12 +110,19 @@ export function WaitingListCard({ entry, role }: WaitingListCardProps) {
       const result = await notifyClient(entry.id)
       if (result.error) {
         toast.error(result.error)
-      } else if (result.whatsappData) {
-        toast.success(`${entry.client?.full_name || 'Cliente'} foi notificado!`)
-        openWhatsApp(result.whatsappData)
+      } else {
+        if (result.whatsappSent) {
+          toast.success(`Notificação enviada com sucesso para ${entry.client?.full_name || 'o cliente'} via WhatsApp!`)
+        } else {
+          toast.warning(`Cliente marcado como notificado, mas o envio automático falhou. Abrindo WhatsApp manual...`)
+          if (result.whatsappData) {
+            openWhatsApp(result.whatsappData)
+          }
+        }
       }
     })
   }
+
 
   function handleRemove() {
     startTransition(async () => {

@@ -104,6 +104,7 @@ export async function joinQueue(formData: FormData) {
 export async function notifyClient(waitingListId: string): Promise<{
   error?: string
   success?: boolean
+  whatsappSent?: boolean
   whatsappData?: WhatsAppData
 }> {
   if (!z.string().uuid().safeParse(waitingListId).success) return { error: 'ID inválido' }
@@ -143,8 +144,37 @@ export async function notifyClient(waitingListId: string): Promise<{
   const serviceData = entry.service as { name: string } | null
   const barberData = entry.barber as { full_name: string } | null
 
+  let whatsappSent = false
+  if (clientData?.phone) {
+    try {
+      const { enviarMensagem, isEvolutionConfigured } = await import('@/lib/evolution')
+      if (isEvolutionConfigured()) {
+        const clientName = clientData.full_name || 'Cliente'
+        const serviceName = serviceData?.name || 'Não especificado'
+        const barberName = barberData?.full_name || 'Qualquer barbeiro'
+        
+        const message = `Olá ${clientName}! 🎉\n` +
+          `Uma vaga abriu na Barbearia hoje!\n\n` +
+          `✂️ Serviço: ${serviceName}\n` +
+          `💈 Barbeiro: ${barberName}\n\n` +
+          `Você tem 15 minutos para confirmar sua vaga.\n` +
+          `Acesse o app para confirmar!\n\n` +
+          `Se não confirmar, a vaga irá para o próximo da fila.`
+          
+        await enviarMensagem(clientData.phone, message)
+        whatsappSent = true
+        console.log(`[NOTIFY_CLIENT] WhatsApp enviado automaticamente para ${clientData.phone}`)
+      } else {
+        console.warn('[NOTIFY_CLIENT] Evolution API não configurada no ambiente')
+      }
+    } catch (whatsappError) {
+      console.error('[NOTIFY_CLIENT] Erro ao enviar mensagem automática no WhatsApp:', whatsappError)
+    }
+  }
+
   return {
     success: true,
+    whatsappSent,
     whatsappData: {
       phone: clientData?.phone || null,
       clientName: clientData?.full_name || null,
