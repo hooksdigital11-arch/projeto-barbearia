@@ -30,18 +30,21 @@ export async function addComandaItem(formData: FormData) {
 
   const total_cents = parsed.data.unit_price_cents * parsed.data.quantity
 
-  const insertData = {
+  const insertData: any = {
     organization_id: user.organization_id,
     barber_id: user.id,
     client_id: parsed.data.client_id,
     appointment_id: parsed.data.appointment_id || null,
-    inventory_id: parsed.data.inventory_id || null,
     item_type: parsed.data.item_type as 'service' | 'product',
     name: parsed.data.name,
     quantity: parsed.data.quantity,
     unit_price_cents: parsed.data.unit_price_cents,
     total_cents,
     paid: false,
+  }
+
+  if (parsed.data.inventory_id) {
+    insertData.inventory_id = parsed.data.inventory_id
   }
 
   const { error } = await supabaseAdmin.from('comanda_items').insert(insertData)
