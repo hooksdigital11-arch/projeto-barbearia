@@ -220,3 +220,44 @@ export async function getActiveComandaAction(clientId: string) {
   }
 }
 
+export async function getServicesAction() {
+  await requireUser()
+  try {
+    const { getServices } = await import('@/features/appointment/queries')
+    const services = await getServices()
+    return { success: true, data: services }
+  } catch (err: any) {
+    console.error('[GET_SERVICES_ACTION] error:', err)
+    return { error: err.message || 'Erro ao carregar serviços' }
+  }
+}
+
+export async function getProductsAction() {
+  await requireUser()
+  try {
+    const { getInventory } = await import('@/features/inventory/queries')
+    const products = await getInventory(true)
+    return { success: true, data: products }
+  } catch (err: any) {
+    console.error('[GET_PRODUCTS_ACTION] error:', err)
+    return { error: err.message || 'Erro ao carregar produtos' }
+  }
+}
+
+export async function getClientNameAction(clientId: string) {
+  await requireUser()
+  if (!z.string().uuid().safeParse(clientId).success) return { error: 'ID de cliente inválido' }
+  try {
+    const { supabaseAdmin } = await import('@/lib/supabase/admin')
+    const { data } = await supabaseAdmin
+      .from('clients')
+      .select('full_name')
+      .eq('id', clientId)
+      .single()
+    return { success: true, name: data?.full_name || 'Desconhecido' }
+  } catch (err: any) {
+    console.error('[GET_CLIENT_NAME_ACTION] error:', err)
+    return { error: err.message || 'Erro ao carregar nome do cliente' }
+  }
+}
+

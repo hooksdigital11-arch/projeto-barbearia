@@ -5,8 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { addComandaItem } from '../actions'
-import { createClient } from '@/lib/supabase/client'
+import { addComandaItem, getProductsAction } from '../actions'
 
 interface AddProductModalProps {
   isOpen: boolean
@@ -30,9 +29,12 @@ export function AddProductModal({ isOpen, onClose, clientId, appointmentId, onAd
 
   useEffect(() => {
     if (isOpen) {
-      const supabase = createClient()
-      supabase.from('inventory').select('*').eq('active', true).gt('quantity', 0).then(({ data }) => {
-        if (data) setProducts(data as ProductOption[])
+      getProductsAction().then(res => {
+        if (res.success && res.data) {
+          setProducts(res.data as ProductOption[])
+        } else if (res.error) {
+          toast.error(res.error)
+        }
       })
     }
   }, [isOpen])

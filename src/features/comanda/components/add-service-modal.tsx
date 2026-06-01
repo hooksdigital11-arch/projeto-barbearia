@@ -4,8 +4,7 @@ import { useState, useEffect, useTransition } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { addComandaItem } from '../actions'
-import { createClient } from '@/lib/supabase/client'
+import { addComandaItem, getServicesAction } from '../actions'
 
 interface AddServiceModalProps {
   isOpen: boolean
@@ -28,9 +27,12 @@ export function AddServiceModal({ isOpen, onClose, clientId, appointmentId, onAd
 
   useEffect(() => {
     if (isOpen) {
-      const supabase = createClient()
-      supabase.from('services').select('*').eq('is_active', true).then(({ data }) => {
-        if (data) setServices(data as ServiceOption[])
+      getServicesAction().then(res => {
+        if (res.success && res.data) {
+          setServices(res.data as ServiceOption[])
+        } else if (res.error) {
+          toast.error(res.error)
+        }
       })
     }
   }, [isOpen])

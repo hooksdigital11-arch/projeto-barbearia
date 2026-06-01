@@ -16,9 +16,8 @@ import { Plus, Receipt, User, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ComandaActive } from './comanda-active'
-import { getActiveComandaAction } from '../actions'
+import { getActiveComandaAction, getClientNameAction } from '../actions'
 import { ComandaItem } from '../types'
-import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils/cn'
 
 type Period = 'today' | 'week' | 'month'
@@ -107,14 +106,9 @@ export function ComandaPageAdmin({
           if (client) {
             clientName = client.full_name
           } else {
-            const supabase = createClient()
-            const { data } = await (supabase
-              .from('clients')
-              .select('full_name')
-              .eq('id', urlClientId)
-              .single() as any)
-            if (data?.full_name) {
-              clientName = data.full_name
+            const res = await getClientNameAction(urlClientId)
+            if (res.success && res.name) {
+              clientName = res.name
             }
           }
 
