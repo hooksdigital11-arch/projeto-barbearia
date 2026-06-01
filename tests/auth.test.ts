@@ -41,7 +41,7 @@ describe('Auth Schemas Validation', () => {
     })
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.error.flatten().fieldErrors.confirmPassword).toContain('Senhas não conferem')
+      expect(result.error.flatten().fieldErrors.confirmPassword).toContain('As senhas não conferem')
     }
   })
 

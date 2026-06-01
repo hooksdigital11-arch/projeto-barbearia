@@ -1,7 +1,9 @@
 'use client'
 
 import { useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useConfirm } from '@/components/providers/confirm-provider'
 import { updateAppointmentStatus, cancelAppointment } from '../actions'
 import type { AppointmentStatus } from '../types'
 import { STATUS_CONFIG } from '../types'
@@ -52,10 +54,15 @@ export function StatusBadge({ status }: StatusBadgeProps) {
 export function QuickStatusButton({
   status,
   appointmentId,
+  clientId,
+  role = 'barber',
 }: {
   status: AppointmentStatus
   appointmentId: string
+  clientId?: string
+  role?: 'admin' | 'barber'
 }) {
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const nextStatus = STATUS_NEXT[status]
 
@@ -65,12 +72,40 @@ export function QuickStatusButton({
 
   const handleAdvance = () => {
     startTransition(async () => {
+      // Se for a ação de finalizar, redirecionamos para o checkout da comanda
+      if (status === 'in_progress') {
+        let activeClientId = clientId
+        if (!activeClientId) {
+          const { createClient } = await import('@/lib/supabase/client')
+          const supabase = createClient()
+          const { data } = await (supabase
+            .from('appointments')
+            .select('client_id')
+            .eq('id', appointmentId)
+            .single() as any)
+          if (data?.client_id) {
+            activeClientId = data.client_id
+          }
+        }
+
+        if (activeClientId) {
+          router.push(`/${role}/comanda?clientId=${activeClientId}&appointmentId=${appointmentId}`)
+          return
+        } else {
+          toast.error('Não foi possível carregar a comanda: Cliente inválido')
+          return
+        }
+      }
+
       const fd = new FormData()
       fd.append('id', appointmentId)
       fd.append('status', nextStatus)
       const res = await updateAppointmentStatus(fd)
       if (res.error) toast.error(res.error)
-      else toast.success(`Status: ${STATUS_CONFIG[nextStatus].label}`)
+      else {
+        toast.success(`Status: ${STATUS_CONFIG[nextStatus].label}`)
+        router.refresh()
+      }
     })
   }
 
@@ -86,14 +121,27 @@ export function QuickStatusButton({
 }
 
 export function CancelButton({ appointmentId }: { appointmentId: string }) {
+  const router = useRouter()
+  const confirm = useConfirm()
   const [isPending, startTransition] = useTransition()
 
-  const handleCancel = () => {
-    if (!confirm('Cancelar este agendamento?')) return
+  const handleCancel = async () => {
+    const ok = await confirm({
+      title: 'Cancelar Agendamento',
+      message: 'Tem certeza que deseja cancelar este agendamento?',
+      variant: 'danger',
+      confirmText: 'Cancelar Agendamento',
+      cancelText: 'Manter Agendamento'
+    })
+    if (!ok) return
+    
     startTransition(async () => {
       const res = await cancelAppointment(appointmentId)
       if (res.error) toast.error(res.error)
-      else toast.success('Agendamento cancelado')
+      else {
+        toast.success('Agendamento cancelado')
+        router.refresh()
+      }
     })
   }
 
@@ -107,3 +155,38 @@ export function CancelButton({ appointmentId }: { appointmentId: string }) {
     </button>
   )
 }
+
+interface ConfirmationStageBadgeProps {
+  stage?: string | null
+}
+
+export function ConfirmationStageBadge({ stage }: ConfirmationStageBadgeProps) {
+  if (!stage || stage === 'pendente') {
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded-[4px] text-[9px] font-medium uppercase tracking-[0.06em] bg-[#111] text-[#555] border border-[#1e1e1e] shrink-0">
+        Pendente
+      </span>
+    )
+  }
+
+  const configs: Record<string, { label: string; bg: string; text: string; border: string }> = {
+    '24h_enviado': { label: '24h Enviado', bg: 'rgba(59, 130, 246, 0.1)', text: '#60a5fa', border: 'rgba(59, 130, 246, 0.2)' },
+    '24h_confirmado': { label: '24h Confirmado', bg: 'rgba(6, 182, 212, 0.1)', text: '#22d3ee', border: 'rgba(6, 182, 212, 0.2)' },
+    '2h_enviado': { label: '2h Enviado', bg: 'rgba(249, 115, 22, 0.1)', text: '#fb923c', border: 'rgba(249, 115, 22, 0.2)' },
+    'confirmado': { label: 'Confirmado', bg: 'rgba(16, 185, 129, 0.1)', text: '#34d399', border: 'rgba(16, 185, 129, 0.2)' },
+    'cancelado': { label: 'Cancelado', bg: 'rgba(239, 68, 68, 0.1)', text: '#f87171', border: 'rgba(239, 68, 68, 0.2)' },
+  }
+
+  const cfg = configs[stage]
+  if (!cfg) return null
+
+  return (
+    <span
+      className="inline-flex items-center px-2 py-0.5 rounded-[4px] text-[9px] font-medium uppercase tracking-[0.06em] border-[0.5px] shrink-0"
+      style={{ backgroundColor: cfg.bg, color: cfg.text, borderColor: cfg.border }}
+    >
+      {cfg.label}
+    </span>
+  )
+}
+

@@ -6,6 +6,8 @@ import { requireUser } from '@/lib/auth/require-auth'
 import { addItemSchema, closeComandaSchema } from './schemas'
 import { addStampAfterAppointment } from '@/features/loyalty/actions'
 import { ComandaItem } from './types'
+import { getActiveComanda } from './queries'
+
 
 // Adicionar item (serviço ou produto)
 export async function addComandaItem(formData: FormData) {
@@ -204,3 +206,17 @@ export async function closeComanda(formData: FormData) {
     paymentMethod: parsed.data.payment_method,
   }
 }
+
+export async function getActiveComandaAction(clientId: string) {
+  const user = await requireUser()
+  if (!z.string().uuid().safeParse(clientId).success) return { error: 'ID de cliente inválido' }
+
+  try {
+    const data = await getActiveComanda(clientId)
+    return { success: true, data }
+  } catch (error) {
+    console.error('Error fetching active comanda:', error)
+    return { error: 'Erro ao buscar comanda ativa' }
+  }
+}
+

@@ -24,15 +24,12 @@ export const getConversations = cache(async (): Promise<MessageConversation[]> =
       content,
       created_at,
       direction,
+      status,
       client:clients(id, full_name, phone)
     `)
     .eq('organization_id', user.organization_id)
+    .not('client_id', 'is', null)
     .order('created_at', { ascending: false })
-
-  // Barber: só clientes com quem interagiu
-  if (user.role === 'barber') {
-    query = query.eq('sent_by', user.id)
-  }
 
   const { data, error } = await query.limit(200)
 
@@ -48,10 +45,12 @@ export const getConversations = cache(async (): Promise<MessageConversation[]> =
     content: string
     created_at: string
     direction: string
+    status: string
     client: { id: string; full_name: string; phone: string | null } | null
   }
   for (const row of (data || []) as unknown as ConversationRow[]) {
     const cid = row.client_id
+    if (!cid) continue // pula mensagens sem client_id
     if (!map.has(cid)) {
       map.set(cid, {
         client_id: cid,
@@ -59,12 +58,16 @@ export const getConversations = cache(async (): Promise<MessageConversation[]> =
         client_phone: row.client?.phone ?? null,
         last_message: row.content,
         last_message_at: row.created_at,
-        unread_count: 0,
+        direction: row.direction as 'sent' | 'received',
+        unread_count: row.direction === 'received' && row.status !== 'read' ? 1 : 0,
         total_count: 1,
       })
     } else {
       const existing = map.get(cid)!
       existing.total_count++
+      if (row.direction === 'received' && row.status !== 'read') {
+        existing.unread_count++
+      }
     }
   }
 
@@ -142,6 +145,59 @@ export const getClientsForMessaging = cache(async (group?: string): Promise<Clie
 
   let clients = (data || []) as ClientForMessage[]
 
+  // Busca todos os stamps da org para calcular o saldo de cada cliente
+  const { data: stamps } = await supabaseAdmin
+    .from('loyalty_stamps')
+    .select('client_id, type, amount')
+    .eq('organization_id', user.organization_id)
+
+  const balances: Record<string, number> = {}
+  for (const s of stamps || []) {
+    if (!s.client_id) continue
+    if (s.type === 'redeem') balances[s.client_id] = 0
+    else balances[s.client_id] = (balances[s.client_id] || 0) + s.amount
+  }
+
+  // Busca todos os próximos agendamentos futuros
+  const nowStr = now.toISOString()
+  const { data: futureAppts } = await supabaseAdmin
+    .from('appointments')
+    .select('client_id, start_time, price_cents, barber:profiles(full_name), service:services(name)')
+    .eq('organization_id', user.organization_id)
+    .eq('status', 'scheduled')
+    .gte('start_time', nowStr)
+    .order('start_time', { ascending: true })
+
+  const nextAppts: Record<string, any> = {}
+  for (const a of futureAppts || []) {
+    if (!a.client_id) continue
+    if (!nextAppts[a.client_id]) {
+      nextAppts[a.client_id] = a
+    }
+  }
+
+  // Busca agendamentos passados/completos ordenados pelo mais recente como fallback
+  const { data: pastAppts } = await supabaseAdmin
+    .from('appointments')
+    .select('client_id, start_time, price_cents, barber:profiles(full_name), service:services(name)')
+    .eq('organization_id', user.organization_id)
+    .order('start_time', { ascending: false })
+
+  const fallbackAppts: Record<string, any> = {}
+  for (const a of pastAppts || []) {
+    if (!a.client_id) continue
+    if (!fallbackAppts[a.client_id]) {
+      fallbackAppts[a.client_id] = a
+    }
+  }
+
+  // Atribui carimbos e agendamento a cada cliente
+  clients = clients.map(c => ({
+    ...c,
+    loyalty_balance: balances[c.id] || 0,
+    next_appointment: nextAppts[c.id] || fallbackAppts[c.id] || null,
+  }))
+
   if (group === 'birthday_month') {
     const thisMonth = now.getMonth()
     clients = clients.filter(c => {
@@ -155,19 +211,8 @@ export const getClientsForMessaging = cache(async (group?: string): Promise<Clie
       return new Date(c.last_visit_at) < thirtyDaysAgo
     })
   } else if (group === 'loyalty_complete') {
-    // Clientes que completaram fidelidade — simplificado: verificar stamps
-    const { data: stamps } = await supabaseAdmin
-      .from('loyalty_stamps')
-      .select('client_id, type, amount')
-      .eq('organization_id', user.organization_id)
-
-    const balances: Record<string, number> = {}
-    for (const s of stamps || []) {
-      if (s.type === 'redeem') balances[s.client_id] = 0
-      else balances[s.client_id] = (balances[s.client_id] || 0) + s.amount
-    }
     // Default goal: 10 stamps
-    clients = clients.filter(c => (balances[c.id] || 0) >= 10)
+    clients = clients.filter(c => (c.loyalty_balance || 0) >= 10)
   }
 
   return clients

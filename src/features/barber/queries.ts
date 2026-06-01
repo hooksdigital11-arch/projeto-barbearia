@@ -2,6 +2,8 @@ import 'server-only'
 import { cache } from 'react'
 import { requireBarber } from '@/lib/auth/require-auth'
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
+import type { Profile } from '@/types/database'
 
 interface ServiceItem {
   id: string
@@ -44,11 +46,21 @@ export const getBarberDashboardData = cache(async () => {
   const user = await requireBarber()
   const supabase = await createClient()
   
+  // Fetch barber shift status from profile
+  const { data: profileData } = await supabaseAdmin
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+  const profile = profileData as unknown as Profile | null
+  const isInactive = profile?.status === 'inactive'
+
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
   
   const todayEnd = new Date()
   todayEnd.setHours(23, 59, 59, 999)
+
 
   // 1. Appointments for today
   const { data: appointmentsData } = await supabase
@@ -92,10 +104,10 @@ export const getBarberDashboardData = cache(async () => {
     
     // Determine status for UI
     let uiStatus = a.status
-    if (a.status === 'pending') {
-        // If it's the next pending appointment
-        const firstPending = allApps.find(app => app.status === 'pending')
-        if (firstPending && firstPending.id === a.id) {
+    if (a.status === 'scheduled') {
+        // If it's the next scheduled appointment
+        const firstScheduled = allApps.find(app => app.status === 'scheduled')
+        if (firstScheduled && firstScheduled.id === a.id) {
             uiStatus = 'next'
         }
     }
@@ -104,6 +116,7 @@ export const getBarberDashboardData = cache(async () => {
       id: a.id,
       time: startTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
       client: a.clients?.full_name || a.client_name || 'Cliente',
+      client_id: a.client_id,
       service: srv?.name || 'Serviço',
       duration: srv ? `${srv.duration_minutes} min` : '30 min',
       status: uiStatus
@@ -155,8 +168,12 @@ export const getBarberDashboardData = cache(async () => {
   })
 
   return {
-    status: inProgressApps.length > 0 ? 'Em Atendimento' : 'Disponível',
-    shift: '09:00 - 18:00',
+    status: isInactive 
+      ? 'Fora de Serviço' 
+      : inProgressApps.length > 0 
+        ? 'Em Atendimento' 
+        : 'Disponível',
+    shift: isInactive ? 'Turno Finalizado' : '09:00 - 18:00',
     stats: { 
         revenueDay: revenueDayCents / 100, 
         appointmentsCompleted: completedApps.length, 

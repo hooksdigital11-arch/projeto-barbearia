@@ -34,6 +34,15 @@ export async function joinQueue(formData: FormData) {
     return { error: 'Dados inválidos', issues: parsed.error.flatten() }
   }
 
+  // Verificar que o client_id pertence à organização do usuário
+  const { data: clientOwnership } = await supabaseAdmin
+    .from('clients')
+    .select('id')
+    .eq('id', parsed.data.client_id)
+    .eq('organization_id', user.organization_id)
+    .maybeSingle()
+  if (!clientOwnership) return { error: 'Cliente não pertence a esta organização' }
+
   // Verificar se cliente já está na fila
   const { data: existing } = await supabaseAdmin
     .from('waiting_list')
@@ -162,6 +171,18 @@ export async function confirmQueueSpot(waitingListId: string) {
 
   if (!entry) return { error: 'Entrada não encontrada' }
   if (entry.organization_id !== user.organization_id) return { error: 'Sem permissão' }
+
+  if (user.role === 'client') {
+    const { data: ownClient } = await supabaseAdmin
+      .from('clients')
+      .select('id')
+      .eq('id', entry.client_id)
+      .eq('organization_id', user.organization_id)
+      .eq('profile_id', user.id)
+      .maybeSingle()
+    if (!ownClient) return { error: 'Sem permissão' }
+  }
+
   if (entry.status !== 'notified') return { error: 'Vaga não disponível' }
 
   if (entry.expires_at && new Date(entry.expires_at) < new Date()) {
@@ -198,6 +219,23 @@ export async function confirmQueueSpot(waitingListId: string) {
 export async function leaveQueue(waitingListId: string) {
   if (!z.string().uuid().safeParse(waitingListId).success) return { error: 'ID inválido' }
   const user = await requireUser()
+
+  if (user.role === 'client') {
+    const { data: entry } = await supabaseAdmin
+      .from('waiting_list')
+      .select('client_id, organization_id')
+      .eq('id', waitingListId)
+      .maybeSingle()
+    if (!entry || entry.organization_id !== user.organization_id) return { error: 'Sem permissão' }
+    const { data: ownClient } = await supabaseAdmin
+      .from('clients')
+      .select('id')
+      .eq('id', entry.client_id)
+      .eq('organization_id', user.organization_id)
+      .eq('profile_id', user.id)
+      .maybeSingle()
+    if (!ownClient) return { error: 'Sem permissão' }
+  }
 
   const { error } = await supabaseAdmin
     .from('waiting_list')

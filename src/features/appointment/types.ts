@@ -19,6 +19,7 @@ export interface AppointmentWithRelations {
   notes: string | null
   rating: number | null
   created_at: string
+  confirmacao_etapa?: string | null
   client: {
     id: string
     full_name: string
@@ -53,6 +54,7 @@ export interface ServiceOption {
 export interface BarberOption {
   id: string
   full_name: string
+  status?: string | null
 }
 
 export interface ClientOption {

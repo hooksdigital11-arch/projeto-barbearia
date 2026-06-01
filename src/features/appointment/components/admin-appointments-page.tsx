@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useState, useTransition, useDeferredValue } from 'react'
 import type { AppointmentWithRelations, ServiceOption, BarberOption, ClientOption, AppointmentStats } from '../types'
-import { StatusBadge, QuickStatusButton } from './appointment-status'
+import { StatusBadge, QuickStatusButton, ConfirmationStageBadge } from './appointment-status'
 import { cn } from '@/lib/utils/cn'
 import {
   Plus,
@@ -176,15 +176,18 @@ export function AdminAppointmentsPage({
                     </div>
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex flex-col min-w-0">
-                        <span className="text-[13px] font-medium text-text-primary uppercase tracking-tight truncate">
-                          {appt.client.full_name}
-                        </span>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-[13px] font-medium text-text-primary uppercase tracking-tight truncate">
+                            {appt.client.full_name}
+                          </span>
+                          <ConfirmationStageBadge stage={appt.confirmacao_etapa} />
+                        </div>
                         <span className="text-[10px] font-medium text-[#444] uppercase tracking-wider truncate">
-                          {appt.service.name} · {appt.duration_minutes} MIN
+                          {appt.service.name} · {appt.duration_minutes} MIN · Com {appt.barber?.full_name}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <QuickStatusButton status={appt.status} appointmentId={appt.id} />
+                        <QuickStatusButton status={appt.status} appointmentId={appt.id} clientId={appt.client_id} role="admin" />
                         {canEdit && (
                           <button
                             onClick={() => { setEditingAppointment(appt); setIsModalOpen(true) }}
@@ -212,9 +215,12 @@ export function AdminAppointmentsPage({
                     <div className="w-[1px] h-[36px] bg-accent-main opacity-40" />
 
                     <div className="flex-1 flex flex-col min-w-0">
-                      <span className="text-[14px] font-medium text-text-primary uppercase tracking-tight truncate">
-                        {appt.client.full_name}
-                      </span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-[14px] font-medium text-text-primary uppercase tracking-tight truncate">
+                          {appt.client.full_name}
+                        </span>
+                        <ConfirmationStageBadge stage={appt.confirmacao_etapa} />
+                      </div>
                       <div className="flex items-center gap-3">
                         <span className="text-[10px] font-medium text-[#444] uppercase tracking-wider">
                           {appt.service.name}
@@ -222,12 +228,15 @@ export function AdminAppointmentsPage({
                         <span className="text-[9px] text-[#333] font-medium uppercase">
                           {appt.duration_minutes} MIN
                         </span>
+                        <span className="text-[9px] text-[#666] font-medium uppercase tracking-wider">
+                          · Com {appt.barber?.full_name}
+                        </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-6">
                       <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all">
-                        <QuickStatusButton status={appt.status} appointmentId={appt.id} />
+                        <QuickStatusButton status={appt.status} appointmentId={appt.id} clientId={appt.client_id} role="admin" />
                         {canEdit && (
                           <button
                             onClick={() => { setEditingAppointment(appt); setIsModalOpen(true) }}

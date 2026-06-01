@@ -2,10 +2,12 @@
 import { requireBarber } from '@/lib/auth/require-auth'
 import { createClient } from '@/lib/supabase/server'
 import { ComandaPageBarber } from '@/features/comanda/components/comanda-page-barber'
+import { getClients } from '@/features/clients/queries'
 
 export default async function BarberComandaPage() {
   const user = await requireBarber()
   const supabase = await createClient()
+  const clients = await getClients()
 
   // Fetch today's appointments for this barber
   const today = new Date().toISOString().split('T')[0]
@@ -27,6 +29,7 @@ export default async function BarberComandaPage() {
   return (
     <ComandaPageBarber
       appointments={appointments || []}
+      clients={clients || []}
     />
   )
 }

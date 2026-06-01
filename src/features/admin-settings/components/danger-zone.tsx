@@ -5,15 +5,24 @@ import { Warning, Trash, Power, CheckCircle, CircleNotch } from '@phosphor-icons
 import { deactivateOrganization, activateOrganization } from '../actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
+import { useConfirm } from '@/components/providers/confirm-provider'
 
 export function DangerZone({ initialStatus = 'active' }: { initialStatus?: string }) {
+  const confirm = useConfirm()
   const [isPending, startTransition] = useTransition()
   const [status, setStatus] = useState(initialStatus)
   const [confirmText, setConfirmText] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  const handleDeactivate = () => {
-    if (!confirm('Deseja realmente desativar a barbearia? Todos os usuários perderão acesso temporariamente.')) return
+  const handleDeactivate = async () => {
+    const ok = await confirm({
+      title: 'Desativar Unidade',
+      message: 'Deseja realmente desativar a barbearia? Todos os usuários perderão acesso temporariamente.',
+      variant: 'warning',
+      confirmText: 'Desativar',
+      cancelText: 'Cancelar'
+    })
+    if (!ok) return
     
     startTransition(async () => {
       const result = await deactivateOrganization()

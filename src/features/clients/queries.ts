@@ -36,7 +36,7 @@ export const getClients = cache(async (filters?: {
   }
 
   if (filters?.search) {
-    const term = filters.search.trim().slice(0, 100)
+    const term = filters.search.trim().slice(0, 100).replace(/[()%,]/g, '')
     query = query.or(
       `full_name.ilike.%${term}%,phone.ilike.%${term}%,email.ilike.%${term}%`
     )

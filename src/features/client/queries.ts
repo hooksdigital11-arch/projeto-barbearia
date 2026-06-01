@@ -2,6 +2,7 @@ import 'server-only'
 import { cache } from 'react'
 import { requireUser } from '@/lib/auth/require-auth'
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 interface ClientRow {
   id: string
@@ -53,12 +54,64 @@ export const getClientDashboardData = cache(async () => {
   const supabase = await createClient()
   
   // Get Client details
-  const { data: clientData } = await supabase
+  const { data: clientRows } = await supabase
     .from('clients')
     .select('id, full_name, total_spent_cents, total_visits')
     .eq('organization_id', user.organization_id)
     .eq('profile_id', user.id)
-    .single()
+    .limit(1)
+
+  let clientData: any = clientRows?.[0] || null
+
+  if (!clientData) {
+    const phoneFilter = user.phone ? `phone.eq.${user.phone}` : ''
+    const emailFilter = user.email ? `email.eq.${user.email}` : ''
+    const orFilter = [phoneFilter, emailFilter].filter(Boolean).join(',')
+
+    if (orFilter) {
+      const { data: matchedClient } = await supabaseAdmin
+        .from('clients')
+        .select('id, full_name, total_spent_cents, total_visits')
+        .eq('organization_id', user.organization_id)
+        .or(orFilter)
+        .is('profile_id', null)
+        .limit(1)
+        .maybeSingle()
+
+      if (matchedClient) {
+        const { data: updatedClient } = await supabaseAdmin
+          .from('clients')
+          .update({ profile_id: user.id })
+          .eq('id', matchedClient.id)
+          .select('id, full_name, total_spent_cents, total_visits')
+          .single()
+        if (updatedClient) {
+          clientData = updatedClient
+        }
+      }
+    }
+
+    if (!clientData) {
+      const { data: newClient } = await supabaseAdmin
+        .from('clients')
+        .insert({
+          organization_id: user.organization_id,
+          profile_id: user.id,
+          full_name: user.full_name || 'Cliente',
+          email: user.email || null,
+          phone: user.phone || null,
+          status: 'active',
+          total_visits: 0,
+          total_spent_cents: 0
+        })
+        .select('id, full_name, total_spent_cents, total_visits')
+        .single()
+
+      if (newClient) {
+        clientData = newClient
+      }
+    }
+  }
 
   const clientId = (clientData as ClientRow | null)?.id
 

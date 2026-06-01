@@ -29,13 +29,14 @@ export const getServices = cache(async (): Promise<Service[]> => {
   return data as Service[]
 })
 
-export const getBusinessHours = cache(async (orgId: string): Promise<BusinessHours | null> => {
+export const getBusinessHours = cache(async (): Promise<BusinessHours | null> => {
+  const admin = await requireAdmin()
   const { data, error } = await supabaseAdmin
     .from('organizations')
     .select('business_hours')
-    .eq('id', orgId)
+    .eq('id', admin.organization_id)
     .single()
-  
+
   if (error) return null
   return (data.business_hours as any) as BusinessHours
 })

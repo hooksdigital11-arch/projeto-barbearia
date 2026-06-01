@@ -20,22 +20,110 @@ import type {
 } from './schemas'
 
 import { createClient } from '@/lib/supabase/server'
-import { verificarConexao, isEvolutionConfigured } from '@/lib/evolution'
+import {
+  verificarConexao,
+  isEvolutionConfigured,
+  criarInstancia,
+  configurarWebhook,
+  obterQrCode,
+  desconectarInstancia
+} from '@/lib/evolution'
 
 export async function getEvolutionStatus(): Promise<{
   configured: boolean
   state: 'connected' | 'disconnected' | 'not_configured' | 'error'
 }> {
-  await requireAdmin()
+  try {
+    await requireAdmin()
+  } catch {
+    return { configured: false, state: 'not_configured' }
+  }
+
   if (!isEvolutionConfigured()) {
     return { configured: false, state: 'not_configured' }
   }
   try {
     const result = await verificarConexao()
-    const state = result?.instance?.state === 'open' ? 'connected' : 'disconnected'
-    return { configured: true, state }
+    if (result?.status === 404 || result?.error || result?.instance?.state !== 'open') {
+      return { configured: true, state: 'disconnected' }
+    }
+    return { configured: true, state: 'connected' }
   } catch {
     return { configured: true, state: 'error' }
+  }
+}
+
+export async function getWhatsappQrCodeAction(): Promise<{
+  qrcode?: string
+  connected?: boolean
+  error?: string
+}> {
+  try {
+    await requireAdmin()
+
+    if (!isEvolutionConfigured()) {
+      return { error: 'Evolution API não configurada. Verifique as variáveis de ambiente.' }
+    }
+
+    const instance = process.env.EVOLUTION_INSTANCE
+    if (!instance) {
+      return { error: 'Nome da instância não configurado.' }
+    }
+
+    // 1. Verifica estado atual
+    try {
+      const conn = await verificarConexao()
+      if (conn?.instance?.state === 'open') {
+        return { connected: true }
+      }
+    } catch (e) {
+      console.log('[evolution] Instância desplugada ou não encontrada. Criando...', e)
+    }
+
+    // 2. Garante que exista (cria se necessário)
+    try {
+      await criarInstancia(instance)
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : ''
+      if (!errMsg.includes('already exists') && !errMsg.includes('400')) {
+        console.error('[evolution] Erro ao criar instância:', err)
+      }
+    }
+
+    // 3. Garante que o webhook está ativo
+    try {
+      await configurarWebhook(instance)
+    } catch (err) {
+      console.error('[evolution] Erro ao configurar webhook:', err)
+    }
+
+    // 4. Busca o QR Code
+    const qrData = await obterQrCode(instance)
+    return { qrcode: qrData.base64 }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Erro desconhecido ao conectar ao WhatsApp' }
+  }
+}
+
+export async function disconnectWhatsappAction(): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireAdmin()
+
+    if (!isEvolutionConfigured()) {
+      return { success: false, error: 'Evolution API não configurada.' }
+    }
+
+    const instance = process.env.EVOLUTION_INSTANCE
+    if (!instance) {
+      return { success: false, error: 'Instância não configurada.' }
+    }
+
+    await desconectarInstancia(instance)
+
+    revalidatePath('/admin/settings')
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Erro desconhecido ao desconectar' }
   }
 }
 
@@ -109,7 +197,7 @@ export async function updateGeneralSettings(input: GeneralSettingsInput) {
 
     if (error) return { error: error.message }
     
-    revalidateTag('organization-settings')
+    revalidateTag('organization-settings', 'max')
     revalidatePath('/admin/settings/general')
     revalidatePath('/', 'layout')
     return { success: true }
@@ -134,7 +222,7 @@ export async function updateBusinessHours(input: BusinessHoursInput) {
 
     if (error) return { error: error.message }
     
-    revalidateTag('organization-settings')
+    revalidateTag('organization-settings', 'max')
     revalidatePath('/admin/settings/services')
     return { success: true }
   } catch (err) {
@@ -165,7 +253,7 @@ export async function createService(input: ServiceInput) {
 
     if (error) return { error: error.message }
     
-    revalidateTag('services-settings')
+    revalidateTag('services-settings', 'max')
     revalidatePath('/admin/settings/services')
     return { success: true }
   } catch (err) {
@@ -195,7 +283,7 @@ export async function updateService(id: string, input: ServiceInput) {
 
     if (error) return { error: error.message }
     
-    revalidateTag('services-settings')
+    revalidateTag('services-settings', 'max')
     revalidatePath('/admin/settings/services')
     return { success: true }
   } catch (err) {
@@ -215,7 +303,7 @@ export async function toggleServiceStatus(id: string, isActive: boolean) {
 
     if (error) return { error: error.message }
     
-    revalidateTag('services-settings')
+    revalidateTag('services-settings', 'max')
     revalidatePath('/admin/settings/services')
     return { success: true }
   } catch (err) {
@@ -235,7 +323,7 @@ export async function deleteService(id: string) {
 
     if (error) return { error: error.message }
     
-    revalidateTag('services-settings')
+    revalidateTag('services-settings', 'max')
     revalidatePath('/admin/settings/services')
     return { success: true }
   } catch (err) {
@@ -348,7 +436,11 @@ export async function uploadLogo(formData: FormData) {
       return { error: 'Arquivo muito grande. Máximo 5MB.' }
     }
 
-    const fileExt = file.name.split('.').pop()
+    const EXT_BY_MIME: Record<string, string> = {
+      'image/jpeg': 'jpg', 'image/png': 'png',
+      'image/webp': 'webp', 'image/gif': 'gif',
+    }
+    const fileExt = EXT_BY_MIME[file.type] ?? 'jpg'
     const fileName = `${admin.organization_id}/logo-${Date.now()}.${fileExt}`
 
     // Faz o upload usando o admin client (ignora RLS do bucket)

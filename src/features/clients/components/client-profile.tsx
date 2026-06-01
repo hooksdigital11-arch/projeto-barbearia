@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
+import { useConfirm } from '@/components/providers/confirm-provider'
 import {
   ArrowLeft,
   PencilSimple,
@@ -69,6 +70,7 @@ export function ClientProfileComponent({
   loyaltyGoal,
 }: ClientProfileProps) {
   const router = useRouter()
+  const confirm = useConfirm()
   const [activeTab, setActiveTab] = useState<Tab>('history')
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
@@ -77,8 +79,16 @@ export function ClientProfileComponent({
   const isAdmin = role === 'admin'
   const showFinancials = isAdmin
 
-  function handleDelete() {
-    if (!confirm(`Remover ${client.full_name}?`)) return
+  async function handleDelete() {
+    const ok = await confirm({
+      title: 'Excluir Cliente',
+      message: `Remover ${client.full_name}?`,
+      variant: 'danger',
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar'
+    })
+    if (!ok) return
+
     startTransition(async () => {
       const result = await deleteClientAction(client.id)
       if (result.error) toast.error(result.error)
@@ -89,8 +99,16 @@ export function ClientProfileComponent({
     })
   }
 
-  function handleBlock() {
-    if (!confirm(`Bloquear ${client.full_name}? O cliente não poderá fazer novos agendamentos.`)) return
+  async function handleBlock() {
+    const ok = await confirm({
+      title: 'Bloquear Cliente',
+      message: `Bloquear ${client.full_name}? O cliente não poderá fazer novos agendamentos.`,
+      variant: 'danger',
+      confirmText: 'Bloquear',
+      cancelText: 'Cancelar'
+    })
+    if (!ok) return
+
     startTransition(async () => {
       const result = await blockClientAction(client.id)
       if (result.error) toast.error(result.error)

@@ -1,6 +1,7 @@
 'use server'
 
 import { z } from 'zod'
+import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireUser } from '@/lib/auth/require-auth'
@@ -108,6 +109,18 @@ export async function redeemReward(clientId: string) {
   if (!z.string().uuid().safeParse(clientId).success) return { error: 'ID inválido' }
   const user = await requireUser()
 
+  // Clientes só podem resgatar o próprio registro
+  if (user.role === 'client') {
+    const { data: ownClient } = await supabaseAdmin
+      .from('clients')
+      .select('id')
+      .eq('id', clientId)
+      .eq('organization_id', user.organization_id)
+      .eq('profile_id', user.id)
+      .maybeSingle()
+    if (!ownClient) return { error: 'Sem permissão para resgatar este benefício' }
+  }
+
   // Buscar saldo — usa admin para bypassar RLS
   const { data: stamps } = await supabaseAdmin
     .from('loyalty_stamps')
@@ -140,10 +153,7 @@ export async function redeemReward(clientId: string) {
     return { error: 'Carimbos insuficientes para resgatar' }
   }
 
-  const code = `FIDE-${new Date().getFullYear()}-${Math.random()
-    .toString(36)
-    .substring(2, 6)
-    .toUpperCase()}`
+  const code = `FIDE-${new Date().getFullYear()}-${randomBytes(3).toString('hex').toUpperCase()}`
 
   const { error } = await supabaseAdmin
     .from('loyalty_stamps')
@@ -165,13 +175,26 @@ export async function redeemReward(clientId: string) {
   return { success: true, code, reward: config.reward_description }
 }
 
-/** Automático: adicionar carimbo após atendimento completado */
+/** Automático: adicionar carimbo após atendimento completado (chamado internamente pelo comanda) */
 export async function addStampAfterAppointment(
   organizationId: string,
   clientId: string,
   appointmentId: string,
   priceCents: number
 ) {
+  if (!z.string().uuid().safeParse(organizationId).success) return
+  if (!z.string().uuid().safeParse(clientId).success) return
+  if (appointmentId && !z.string().uuid().safeParse(appointmentId).success) return
+
+  // Garantir que o cliente pertence à organização informada (evita injeção cross-org)
+  const { data: clientCheck } = await supabaseAdmin
+    .from('clients')
+    .select('id')
+    .eq('id', clientId)
+    .eq('organization_id', organizationId)
+    .maybeSingle()
+  if (!clientCheck) return
+
   // Buscar config via admin (sem RLS)
   const { data: org } = await supabaseAdmin
     .from('organizations')

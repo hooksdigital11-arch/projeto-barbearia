@@ -1,20 +1,126 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { WhatsappLogo, GoogleLogo, InstagramLogo, CreditCard, QrCode, Plug, CircleNotch } from '@phosphor-icons/react'
+import { WhatsappLogo, GoogleLogo, InstagramLogo, CreditCard, QrCode, Plug, CircleNotch, X } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
-import { getEvolutionStatus } from '../actions'
+import { getEvolutionStatus, getWhatsappQrCodeAction, disconnectWhatsappAction } from '../actions'
+import { toast } from 'sonner'
 
 type WhatsAppState = 'loading' | 'connected' | 'disconnected' | 'not_configured' | 'error'
 
 export function IntegrationsSettings() {
   const [whatsAppState, setWhatsAppState] = useState<WhatsAppState>('loading')
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null)
+  const [isGeneratingQr, setIsGeneratingQr] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isDisconnectModalOpen, setIsDisconnectModalOpen] = useState(false)
+  const [isDisconnecting, setIsDisconnecting] = useState(false)
 
-  useEffect(() => {
+  // 1. Carrega status inicial
+  const loadStatus = () => {
     getEvolutionStatus().then(({ state }) => {
       setWhatsAppState(state as WhatsAppState)
     }).catch(() => setWhatsAppState('error'))
+  }
+
+  useEffect(() => {
+    loadStatus()
   }, [])
+
+  // 2. Busca QR Code
+  const fetchQrCode = async () => {
+    setIsGeneratingQr(true)
+    setQrCodeUrl(null)
+    setErrorMessage(null)
+    try {
+      const res = await getWhatsappQrCodeAction()
+      if (res.error) {
+        setErrorMessage(res.error)
+        toast.error(res.error)
+      } else if (res.connected) {
+        setWhatsAppState('connected')
+        setIsConnectModalOpen(false)
+        toast.success('WhatsApp já está conectado!')
+      } else if (res.qrcode) {
+        setQrCodeUrl(res.qrcode)
+      }
+    } catch (err) {
+      setErrorMessage('Erro ao gerar QR Code.')
+    } finally {
+      setIsGeneratingQr(false)
+    }
+  }
+
+  // 3. Polling de status e refresh de QR Code quando o QR Code é exibido
+  useEffect(() => {
+    let statusIntervalId: NodeJS.Timeout | null = null
+    let qrRefreshIntervalId: NodeJS.Timeout | null = null
+
+    if (isConnectModalOpen && qrCodeUrl) {
+      // Polling de status da conexão
+      statusIntervalId = setInterval(async () => {
+        try {
+          const { state } = await getEvolutionStatus()
+          if (state === 'connected') {
+            setWhatsAppState('connected')
+            setIsConnectModalOpen(false)
+            toast.success('WhatsApp conectado com sucesso!')
+            if (statusIntervalId) clearInterval(statusIntervalId)
+            if (qrRefreshIntervalId) clearInterval(qrRefreshIntervalId)
+          }
+        } catch (e) {
+          console.error('[evolution] Erro no polling de status:', e)
+        }
+      }, 3000)
+
+      // Atualização silenciosa do QR Code a cada 20 segundos para não expirar
+      qrRefreshIntervalId = setInterval(async () => {
+        try {
+          const res = await getWhatsappQrCodeAction()
+          if (res.qrcode) {
+            setQrCodeUrl(res.qrcode)
+          }
+        } catch (err) {
+          console.warn('[evolution] Erro silencioso ao atualizar QR Code:', err)
+        }
+      }, 20000)
+    }
+
+    return () => {
+      if (statusIntervalId) clearInterval(statusIntervalId)
+      if (qrRefreshIntervalId) clearInterval(qrRefreshIntervalId)
+    }
+  }, [isConnectModalOpen, qrCodeUrl])
+
+  // 4. Conectar
+  const handleConnectClick = () => {
+    if (whatsAppState === 'not_configured') {
+      toast.error('Evolution API não está configurada no servidor.')
+      return
+    }
+    setIsConnectModalOpen(true)
+    fetchQrCode()
+  }
+
+  // 5. Desconectar
+  const handleDisconnect = async () => {
+    setIsDisconnecting(true)
+    try {
+      const res = await disconnectWhatsappAction()
+      if (res.error) {
+        toast.error(res.error)
+      } else {
+        setWhatsAppState('disconnected')
+        setIsDisconnectModalOpen(false)
+        toast.success('Instância desconectada e removida.')
+      }
+    } catch (err) {
+      toast.error('Erro ao desconectar.')
+    } finally {
+      setIsDisconnecting(false)
+    }
+  }
 
   const statusLabel: Record<WhatsAppState, { label: string; color: string }> = {
     loading:        { label: 'Verificando...', color: '#555555' },
@@ -59,15 +165,41 @@ export function IntegrationsSettings() {
               </div>
             </div>
 
-            <p className="text-[11px] text-text-secondary/80 leading-[1.6] max-w-[340px]">
+            <p className="text-[11px] text-text-secondary/80 glanced-text leading-[1.6] max-w-[340px]">
               Envie lembretes automáticos, confirmações de agendamento e mensagens de boas-vindas diretamente para seus clientes.
             </p>
 
-            <div className="flex flex-wrap items-center gap-4 pt-1">
-              <button className="flex items-center gap-2 bg-accent-main text-black px-5 py-[10px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] hover:opacity-90 transition-all">
-                <Plug size={14} weight="bold" />
-                {whatsAppState === 'connected' ? 'Gerenciar Instância' : 'Conectar Agora'}
-              </button>
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              {whatsAppState === 'connected' ? (
+                <button
+                  onClick={() => setIsDisconnectModalOpen(true)}
+                  className="flex items-center gap-2 bg-[#1a0f0f] border border-red-500/20 text-red-400 px-5 py-[10px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] hover:bg-red-500/10 hover:text-red-300 transition-all cursor-pointer"
+                >
+                  <Plug size={14} weight="bold" />
+                  Desconectar WhatsApp
+                </button>
+              ) : (
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={handleConnectClick}
+                    disabled={whatsAppState === 'loading'}
+                    className="flex items-center gap-2 bg-accent-main text-black px-5 py-[10px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer"
+                  >
+                    <Plug size={14} weight="bold" />
+                    Conectar Agora
+                  </button>
+                  
+                  {(whatsAppState === 'disconnected' || whatsAppState === 'error') && (
+                    <button
+                      onClick={() => setIsDisconnectModalOpen(true)}
+                      className="flex items-center gap-2 bg-[#1a0f0f] border border-red-500/10 text-red-400/70 px-4 py-[10px] rounded-[7px] text-[10px] font-medium uppercase tracking-[0.1em] hover:bg-red-500/20 hover:text-red-300 transition-all cursor-pointer"
+                      title="Apaga a instância antiga e inicia uma conexão limpa"
+                    >
+                      Resetar Conexão
+                    </button>
+                  )}
+                </div>
+              )}
               <button className="text-[10px] font-medium uppercase tracking-[0.08em] text-text-muted hover:text-text-primary transition-colors">
                 Documentação
               </button>
@@ -131,6 +263,153 @@ export function IntegrationsSettings() {
           ))}
         </div>
       </div>
+
+      {/* Connect QR Code Modal */}
+      {isConnectModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/85 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setIsConnectModalOpen(false)}
+          />
+          <div className="relative w-full max-w-[480px] rounded-[12px] border border-border-main bg-bg-surface overflow-hidden animate-in fade-in zoom-in-95 duration-500 flex flex-col max-h-[90vh]">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between p-[24px] pb-5 border-b-[0.5px] border-border-main">
+              <div className="flex items-center gap-4">
+                <div className="w-[32px] h-[32px] flex items-center justify-center bg-bg-sidebar border-[0.5px] border-border-main rounded-[7px] text-accent-main shrink-0">
+                  <WhatsappLogo size={18} weight="fill" />
+                </div>
+                <div className="space-y-0.5">
+                  <h2 className="text-[14px] font-medium text-text-primary uppercase tracking-tight">Conectar WhatsApp</h2>
+                  <p className="text-[9px] text-text-muted font-medium uppercase tracking-[0.08em]">Evolution API Integration</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsConnectModalOpen(false)}
+                className="w-[26px] h-[26px] flex items-center justify-center bg-[#1a1a1a] border-[0.5px] border-[#252525] rounded-[6px] text-[#444] transition-all hover:text-text-primary cursor-pointer"
+              >
+                <X size={12} weight="regular" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="overflow-y-auto px-[24px] py-[24px] custom-scrollbar flex flex-col items-center">
+              {isGeneratingQr ? (
+                <div className="flex flex-col items-center py-12 space-y-4">
+                  <CircleNotch size={32} className="animate-spin text-accent-main" />
+                  <p className="text-[10px] text-text-muted uppercase tracking-[0.08em] text-center max-w-[280px]">
+                    Iniciando a instância e gerando código QR...
+                  </p>
+                </div>
+              ) : errorMessage ? (
+                <div className="flex flex-col items-center py-6 text-center space-y-4 w-full">
+                  <div className="w-12 h-12 rounded-full bg-red-950/20 border border-red-500/20 flex items-center justify-center text-red-500">
+                    <X size={20} weight="bold" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[12px] font-medium text-text-primary uppercase tracking-tight">Falha na Conexão</p>
+                    <p className="text-[10px] text-text-muted max-w-[340px] leading-relaxed uppercase break-words">{errorMessage}</p>
+                  </div>
+                  <button
+                    onClick={fetchQrCode}
+                    className="px-6 py-2 bg-bg-sidebar border border-border-main rounded-[6px] text-[10px] text-text-primary uppercase tracking-wider hover:border-[#444] transition-all cursor-pointer"
+                  >
+                    Tentar Novamente
+                  </button>
+                </div>
+              ) : qrCodeUrl ? (
+                <div className="w-full flex flex-col items-center space-y-6">
+                  {/* QR Code Container */}
+                  <div className="p-3 bg-white rounded-[10px] border border-border-main shadow-lg">
+                    <div className="relative w-[200px] h-[200px] bg-white">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={qrCodeUrl}
+                        alt="WhatsApp QR Code"
+                        className="w-full h-full object-contain"
+                      />
+                      {/* Dynamic Color Overlay - colors the black pixels to theme accent main while keeping white background */}
+                      <div className="absolute inset-0 bg-accent-main mix-blend-screen pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* Instructions */}
+                  <div className="w-full space-y-3 bg-bg-sidebar/30 border border-border-main/50 rounded-[8px] p-4">
+                    <p className="text-[9px] font-medium text-text-primary uppercase tracking-[0.08em] border-b border-border-main/30 pb-2">
+                      Instruções de Conexão:
+                    </p>
+                    <ol className="list-decimal list-inside text-[11px] text-text-secondary leading-relaxed space-y-1.5 font-light">
+                      <li>Abra o <span className="font-medium text-text-primary">WhatsApp</span> no seu celular.</li>
+                      <li>Toque em <span className="font-medium text-text-primary">Aparelhos conectados</span> nas Configurações.</li>
+                      <li>Selecione <span className="font-medium text-text-primary">Conectar um aparelho</span>.</li>
+                      <li>Aponte a câmera para ler o código QR acima.</li>
+                    </ol>
+                  </div>
+
+                  {/* Connection status/pulse */}
+                  <div className="w-full bg-[#0a1a0f]/50 border border-accent-main/10 rounded-[8px] p-3 flex items-center justify-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-accent-main animate-pulse shadow-[0_0_10px_#00d4aa]" />
+                    <span className="text-[9px] font-medium text-accent-main uppercase tracking-[0.1em]">
+                      Aguardando leitura do QR Code...
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Disconnect Confirmation Modal */}
+      {isDisconnectModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/85 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setIsDisconnectModalOpen(false)}
+          />
+          <div className="relative w-full max-w-[420px] rounded-[12px] border border-border-main bg-bg-surface overflow-hidden animate-in fade-in zoom-in-95 duration-500 flex flex-col">
+            <div className="flex items-center justify-between p-[20px] pb-4 border-b-[0.5px] border-border-main">
+              <h3 className="text-[12px] font-medium text-text-primary uppercase tracking-[0.08em]">
+                Desconectar WhatsApp
+              </h3>
+              <button
+                onClick={() => setIsDisconnectModalOpen(false)}
+                className="w-[24px] h-[24px] flex items-center justify-center bg-[#1a1a1a] border-[0.5px] border-[#252525] rounded-[5px] text-[#444] hover:text-text-primary transition-colors cursor-pointer"
+              >
+                <X size={10} />
+              </button>
+            </div>
+            
+            <div className="p-[20px] space-y-4">
+              <p className="text-[11px] text-text-secondary leading-relaxed uppercase">
+                Tem certeza que deseja desconectar a instância do WhatsApp? 
+                Esta ação interromperá o envio de mensagens automáticas de confirmação, lembretes e disparos em massa.
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsDisconnectModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-[7px] border border-border-main text-text-muted hover:text-text-primary hover:border-[#333] text-[10px] font-medium uppercase tracking-[0.08em] transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleDisconnect}
+                  disabled={isDisconnecting}
+                  className="flex-1 py-2.5 rounded-[7px] bg-red-950/20 border border-red-500/30 hover:bg-red-900/30 text-red-400 text-[10px] font-medium uppercase tracking-[0.08em] transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {isDisconnecting ? (
+                    <CircleNotch size={12} className="animate-spin" />
+                  ) : (
+                    'Desconectar'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+

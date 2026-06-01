@@ -1,11 +1,11 @@
 import 'server-only'
 import { cache } from 'react'
-import { requireUser } from '@/lib/auth/require-auth'
+import { requireAdmin } from '@/lib/auth/require-auth'
 import { createClient } from '@/lib/supabase/server'
 
 // Sem cache() para permitir revalidação por searchParams de período e busca
 export async function getAdminKPIs(period: string = 'month', search: string = '') {
-  const user = await requireUser()
+  const user = await requireAdmin()
   const supabase = await createClient()
   
   const { data, error } = await (supabase as any)
@@ -58,7 +58,7 @@ export async function getAdminKPIs(period: string = 'month', search: string = ''
 }
 
 export const getAdminHomeSummary = cache(async () => {
-  const user = await requireUser()
+  const user = await requireAdmin()
   const supabase = await createClient()
 
   const today = new Date()
@@ -102,7 +102,7 @@ export const getAdminHomeSummary = cache(async () => {
 })
 
 export async function getBarbersPerformance(search: string = '') {
-  const user = await requireUser()
+  const user = await requireAdmin()
   const supabase = await createClient()
   
   const startOfCurrentMonth = new Date()
@@ -115,7 +115,7 @@ export async function getBarbersPerformance(search: string = '') {
     .select('*')
     .eq('organization_id', user.organization_id)
     .eq('month', startOfCurrentMonth.toISOString())
-    .ilike('barber_name', `%${search}%`)
+    .ilike('barber_name', `%${search.replace(/[()%,]/g, '')}%`)
 
   if (error || !data) {
     console.error('[GET_BARBERS_PERFORMANCE] Error:', error)

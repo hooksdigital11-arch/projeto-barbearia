@@ -26,7 +26,7 @@ export const getOrganizationUsers = cache(async (filters?: AdminUsersFilter): Pr
   }
 
   if (filters?.search) {
-    const term = filters.search.trim().slice(0, 100)
+    const term = filters.search.trim().slice(0, 100).replace(/[()%,]/g, '')
     query = query.or(`full_name.ilike.%${term}%`)
   }
 

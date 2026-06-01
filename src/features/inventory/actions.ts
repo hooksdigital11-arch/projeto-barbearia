@@ -248,6 +248,11 @@ export async function reactivateProduct(productId: string) {
 export async function getSalesByPeriodAction(startDateStr: string, endDateStr: string) {
   const user = await requireUser()
   if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
+
+  const isoDate = /^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]+)?$/
+  if (!isoDate.test(startDateStr) || !isoDate.test(endDateStr)) {
+    return { error: 'Formato de data inválido' }
+  }
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client: any = supabaseAdmin

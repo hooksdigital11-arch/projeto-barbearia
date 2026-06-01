@@ -7,9 +7,10 @@ const EVOLUTION_URL = process.env.EVOLUTION_API_URL
 const EVOLUTION_KEY = process.env.EVOLUTION_API_KEY
 const INSTANCE = process.env.EVOLUTION_INSTANCE
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
 
-if (!EVOLUTION_URL || !EVOLUTION_KEY || !INSTANCE || !APP_URL) {
-  console.error('Variáveis obrigatórias ausentes: EVOLUTION_API_URL, EVOLUTION_API_KEY, EVOLUTION_INSTANCE, NEXT_PUBLIC_APP_URL')
+if (!EVOLUTION_URL || !EVOLUTION_KEY || !INSTANCE || !APP_URL || !WEBHOOK_SECRET) {
+  console.error('Variáveis obrigatórias ausentes: EVOLUTION_API_URL, EVOLUTION_API_KEY, EVOLUTION_INSTANCE, NEXT_PUBLIC_APP_URL, WEBHOOK_SECRET')
   process.exit(1)
 }
 
@@ -25,10 +26,16 @@ async function main() {
       apikey: EVOLUTION_KEY!,
     },
     body: JSON.stringify({
-      url: webhookUrl,
-      webhook_by_events: true,
-      webhook_base64: false,
-      events: ['MESSAGES_UPSERT', 'MESSAGES_UPDATE', 'CONNECTION_UPDATE'],
+      webhook: {
+        enabled: true,
+        url: webhookUrl,
+        byEvents: true,
+        base64: false,
+        events: ['MESSAGES_UPSERT', 'MESSAGES_UPDATE', 'CONNECTION_UPDATE'],
+        headers: {
+          'x-webhook-secret': WEBHOOK_SECRET,
+        },
+      },
     }),
   })
 

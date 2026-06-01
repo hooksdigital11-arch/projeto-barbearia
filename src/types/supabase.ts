@@ -488,9 +488,10 @@ export type Database = {
           direction: 'sent' | 'received'
           content: string
           template_used: string | null
-          status: 'sent' | 'delivered' | 'read' | 'failed'
+          status: 'sent' | 'delivered' | 'read' | 'failed' | 'pending'
           error_message: string | null
           sent_by: string | null
+          sender_phone: string | null
           created_at: string
         }
         Insert: {
@@ -501,9 +502,10 @@ export type Database = {
           direction: 'sent' | 'received'
           content: string
           template_used?: string | null
-          status?: 'sent' | 'delivered' | 'read' | 'failed'
+          status?: 'sent' | 'delivered' | 'read' | 'failed' | 'pending'
           error_message?: string | null
           sent_by?: string | null
+          sender_phone?: string | null
           created_at?: string
         }
         Update: {
@@ -514,9 +516,10 @@ export type Database = {
           direction?: 'sent' | 'received'
           content?: string
           template_used?: string | null
-          status?: 'sent' | 'delivered' | 'read' | 'failed'
+          status?: 'sent' | 'delivered' | 'read' | 'failed' | 'pending'
           error_message?: string | null
           sent_by?: string | null
+          sender_phone?: string | null
           created_at?: string
         }
         Relationships: []

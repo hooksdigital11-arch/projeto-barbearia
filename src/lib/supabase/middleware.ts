@@ -5,8 +5,10 @@ import { supabaseAdmin } from './admin'
 
 /**
  * Rotas que NÃO precisam de autenticação.
+ * - /api/webhook/* tem autenticação própria via x-webhook-secret
+ * - /api/cron/* tem autenticação própria via CRON_SECRET
  */
-const publicRoutes = ['/', '/login', '/signup', '/recovery', '/auth/callback']
+const publicRoutes = ['/', '/login', '/signup', '/recovery', '/auth/callback', '/api/webhook', '/api/cron']
 
 function isPublicRoute(pathname: string): boolean {
   if (pathname === '/') return true

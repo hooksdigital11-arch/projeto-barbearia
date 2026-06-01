@@ -13,6 +13,8 @@ import { createClient } from '@/lib/supabase/server'
  */
 export async function finalizarAgendamento(appointmentId: string) {
   const user = await requireUser()
+  if (user.role !== 'admin' && user.role !== 'barber') return { error: 'Sem permissão' }
+  if (!appointmentId || !/^[0-9a-f-]{36}$/i.test(appointmentId)) return { error: 'ID inválido' }
   const supabase = await createClient()
 
   // 1. Atualizar o banco de dados

@@ -1,5 +1,5 @@
 export type MessageDirection = 'sent' | 'received'
-export type MessageStatus = 'sent' | 'delivered' | 'read' | 'failed'
+export type MessageStatus = 'sent' | 'delivered' | 'read' | 'failed' | 'pending'
 
 export interface Message {
   id: string
@@ -30,6 +30,7 @@ export interface MessageConversation {
   client_phone: string | null
   last_message: string
   last_message_at: string
+  direction: MessageDirection
   unread_count: number
   total_count: number
 }
@@ -48,6 +49,13 @@ export interface ClientForMessage {
   last_visit_at: string | null
   birthday: string | null
   status: string
+  loyalty_balance?: number
+  next_appointment?: {
+    start_time: string
+    price_cents: number | null
+    barber: { full_name: string | null } | null
+    service: { name: string } | null
+  } | null
 }
 
 export interface MessageTemplate {

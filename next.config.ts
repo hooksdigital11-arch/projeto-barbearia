@@ -14,7 +14,7 @@ const cspHeader = `
   upgrade-insecure-requests;
 `
 
-const nextConfig: NextConfig = {
+const nextConfig: any = {
   eslint: {
     // Os erros de ESLint são pré-existentes e serão corrigidos incrementalmente.
     // O ESLint ainda pode ser rodado manualmente com: npm run lint

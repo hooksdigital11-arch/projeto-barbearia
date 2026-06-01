@@ -23,21 +23,9 @@ export const getUser = cache(async (): Promise<Profile | null> => {
     .eq('id', user.id)
     .single()
 
-  // Se o profile não existe, o trigger do Supabase falhou silenciosamente.
-  // Retorna fallback com role='client' para não travar, mas loga o incidente.
   if (!profile) {
     console.error('[REQUIRE_AUTH] Profile não encontrado para user:', user.id, '— trigger pode ter falhado')
-    return {
-      id: user.id,
-      full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
-      email: user.email || '',
-      role: 'client',
-      organization_id: '',
-      avatar_url: null,
-      created_at: user.created_at,
-      updated_at: new Date().toISOString(),
-      phone: user.user_metadata?.phone || '',
-    } as Profile
+    return null
   }
 
   return profile

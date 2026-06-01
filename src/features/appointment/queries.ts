@@ -24,6 +24,26 @@ const APPOINTMENT_SELECT = `
   notes,
   rating,
   created_at,
+  confirmacao_etapa,
+  client:clients!appointments_client_id_fkey(id, full_name, phone),
+  barber:profiles!appointments_barber_id_fkey(id, full_name),
+  service:services!appointments_service_id_fkey(id, name, price_cents)
+`
+
+const APPOINTMENT_SELECT_FALLBACK = `
+  id,
+  organization_id,
+  client_id,
+  barber_id,
+  service_id,
+  start_time,
+  end_time,
+  duration_minutes,
+  status,
+  price_cents,
+  notes,
+  rating,
+  created_at,
   client:clients!appointments_client_id_fkey(id, full_name, phone),
   barber:profiles!appointments_barber_id_fkey(id, full_name),
   service:services!appointments_service_id_fkey(id, name, price_cents)
@@ -53,16 +73,21 @@ export const getAppointments = cache(async (filters?: {
     const monday = new Date(now)
     monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1))
     monday.setHours(0, 0, 0, 0)
-    const sunday = new Date(monday)
-    sunday.setDate(monday.getDate() + 6)
-    sunday.setHours(23, 59, 59, 999)
+    const nextSunday = new Date(monday)
+    nextSunday.setDate(monday.getDate() + 13)
+    nextSunday.setHours(23, 59, 59, 999)
     startDate = monday.toISOString()
-    endDate = sunday.toISOString()
+    endDate = nextSunday.toISOString()
+  } else if (user.role === 'client') {
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+    const oneYearAhead = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000)
+    startDate = thirtyDaysAgo.toISOString()
+    endDate = oneYearAhead.toISOString()
   } else {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+    const nextMonthEnd = new Date(now.getFullYear(), now.getMonth() + 2, 0, 23, 59, 59)
     startDate = monthStart.toISOString()
-    endDate = monthEnd.toISOString()
+    endDate = nextMonthEnd.toISOString()
   }
 
   let query = supabaseAdmin
@@ -78,12 +103,13 @@ export const getAppointments = cache(async (filters?: {
     query = query.eq('barber_id', user.id)
   } else if (user.role === 'client') {
     // appointments.client_id references clients.id (not profiles.id)
-    const { data: clientRow } = await supabaseAdmin
+    const { data: clientRows } = await supabaseAdmin
       .from('clients')
       .select('id')
       .eq('organization_id', user.organization_id)
       .eq('profile_id', user.id)
-      .single()
+      .limit(1)
+    const clientRow = clientRows?.[0]
     if (!clientRow) return []
     query = query.eq('client_id', clientRow.id)
   } else if (filters?.barberId) {
@@ -97,6 +123,50 @@ export const getAppointments = cache(async (filters?: {
   const { data, error } = await query
 
   if (error) {
+    if (error.code === '42703' || error.message?.includes('confirmacao_etapa')) {
+      console.warn('[GET_APPOINTMENTS] confirmacao_etapa column missing, retrying with fallback select...')
+      let fallbackQuery = supabaseAdmin
+        .from('appointments')
+        .select(APPOINTMENT_SELECT_FALLBACK)
+        .eq('organization_id', user.organization_id)
+        .gte('start_time', startDate)
+        .lte('start_time', endDate)
+        .order('start_time', { ascending: true })
+
+      if (user.role === 'barber') {
+        fallbackQuery = fallbackQuery.eq('barber_id', user.id)
+      } else if (user.role === 'client') {
+        const { data: clientRows } = await supabaseAdmin
+          .from('clients')
+          .select('id')
+          .eq('organization_id', user.organization_id)
+          .eq('profile_id', user.id)
+          .limit(1)
+        const clientRow = clientRows?.[0]
+        if (clientRow) {
+          fallbackQuery = fallbackQuery.eq('client_id', clientRow.id)
+        } else {
+          return []
+        }
+      } else if (filters?.barberId) {
+        fallbackQuery = fallbackQuery.eq('barber_id', filters.barberId)
+      }
+
+      if (filters?.status) {
+        fallbackQuery = fallbackQuery.eq('status', filters.status as any)
+      }
+
+      const { data: fallbackData, error: fallbackError } = await fallbackQuery
+      if (fallbackError) {
+        console.error('[GET_APPOINTMENTS_FALLBACK]', fallbackError.message)
+        return []
+      }
+      return (fallbackData || []).map((item: any) => ({
+        ...item,
+        confirmacao_etapa: 'pendente'
+      })) as unknown as AppointmentWithRelations[]
+    }
+
     console.error('[GET_APPOINTMENTS]', error.message)
     return []
   }
@@ -156,7 +226,7 @@ export const getBarbersForAppointment = cache(async (): Promise<BarberOption[]> 
 
   const { data } = await supabaseAdmin
     .from('profiles')
-    .select('id, full_name')
+    .select('id, full_name, status')
     .eq('organization_id', user.organization_id)
     .eq('role', 'barber')
     .order('full_name', { ascending: true })

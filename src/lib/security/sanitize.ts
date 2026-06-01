@@ -1,5 +1,3 @@
-'use client'
-
 import DOMPurify from 'dompurify'
 
 /**
@@ -15,12 +13,16 @@ export function sanitizeString(input: string, maxLength = 1000): string {
   // Limitar tamanho
   cleaned = cleaned.substring(0, maxLength)
   
-  // Remover HTML/scripts usando DOMPurify
-  cleaned = DOMPurify.sanitize(cleaned, {
-    ALLOWED_TAGS: [], // Rejeita todas as tags
-    ALLOWED_ATTR: [],
-    KEEP_CONTENT: true,
-  })
+  // Remover HTML/scripts usando DOMPurify se no browser, ou regex fallback no servidor
+  if (typeof window === 'undefined') {
+    cleaned = cleaned.replace(/<[^>]*>/g, '')
+  } else {
+    cleaned = DOMPurify.sanitize(cleaned, {
+      ALLOWED_TAGS: [], // Rejeita todas as tags
+      ALLOWED_ATTR: [],
+      KEEP_CONTENT: true,
+    })
+  }
   
   return cleaned.trim()
 }

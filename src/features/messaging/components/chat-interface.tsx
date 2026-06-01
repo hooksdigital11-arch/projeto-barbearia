@@ -42,7 +42,7 @@ export function ConversationPanel({
         <div className="relative">
           <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#2e2e2e]" />
           <input
-            placeholder="BUSCAR CLIENTE..."
+            placeholder="Buscar cliente..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full bg-bg-black border-[0.5px] border-border-main rounded-[7px] py-2 pl-9 pr-3 text-[10px] text-text-secondary placeholder:text-[#2e2e2e] outline-none transition-all focus:border-[#333]"
@@ -56,7 +56,10 @@ export function ConversationPanel({
           filtered.map(c => (
             <button
               key={c.id}
-              onClick={() => onSelectClient(c.id, c.full_name, c.phone)}
+              onClick={() => {
+                onSelectClient(c.id, c.full_name, c.phone)
+                setSearch('')
+              }}
               className={cn(
                 'w-full text-left flex items-start gap-[10px] px-4 py-3 border-b-[0.5px] border-border-main transition-all hover:bg-bg-surface',
                 selectedClientId === c.id && 'bg-bg-surface border-l-2 border-l-accent-main'
@@ -67,7 +70,7 @@ export function ConversationPanel({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-medium text-text-secondary truncate">{c.full_name}</p>
-                <p className="text-[10px] text-[#2e2e2e] truncate uppercase tracking-tight">{c.phone || 'Sem telefone'}</p>
+                <p className="text-[10px] text-[#2e2e2e] truncate tracking-tight">{c.phone || 'Sem telefone'}</p>
               </div>
             </button>
           ))
@@ -81,18 +84,31 @@ export function ConversationPanel({
                 selectedClientId === conv.client_id && 'bg-bg-surface border-l-2 border-l-accent-main'
               )}
             >
-              <div className="w-[32px] h-[32px] rounded-[8px] bg-[#1a1a2e] flex items-center justify-center text-[#8b7cf6] text-[11px] font-medium uppercase shrink-0">
-                {conv.client_name.charAt(0)}
+              <div className="relative w-[32px] h-[32px] shrink-0">
+                <div className="w-full h-full rounded-[8px] bg-[#1a1a2e] flex items-center justify-center text-[#8b7cf6] text-[11px] font-medium uppercase">
+                  {conv.client_name.charAt(0)}
+                </div>
+                {conv.unread_count > 0 && (
+                  <span className="absolute -top-1 -right-1 w-[16px] h-[16px] bg-[#25D366] rounded-full flex items-center justify-center text-[7px] font-bold text-white shadow-sm">
+                    {conv.unread_count > 9 ? '9+' : conv.unread_count}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-baseline gap-2">
-                  <p className="text-[11px] font-medium text-text-secondary truncate">{conv.client_name}</p>
+                  <p className={cn(
+                    "text-[11px] font-medium truncate",
+                    conv.unread_count > 0 ? 'text-text-primary' : 'text-text-secondary'
+                  )}>{conv.client_name}</p>
                   <span className="text-[9px] text-[#2a2a2a] shrink-0 uppercase">
                     {new Date(conv.last_message_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                   </span>
                 </div>
-                <p className="text-[10px] text-[#2e2e2e] truncate uppercase tracking-tight leading-tight mt-0.5">
-                  {conv.last_message}
+                <p className={cn(
+                  "text-[10px] truncate tracking-tight leading-tight mt-0.5",
+                  conv.unread_count > 0 ? 'text-text-secondary font-medium' : 'text-[#2e2e2e]'
+                )}>
+                  {conv.direction === 'received' ? '' : ''}{conv.last_message}
                 </p>
               </div>
             </button>
@@ -109,9 +125,10 @@ interface ChatPanelProps {
   clientName: string
   clientPhone: string | null
   onBack?: () => void
+  onMessageSent?: () => void
 }
 
-export function ChatPanel({ messages, clientId, clientName, clientPhone, onBack }: ChatPanelProps) {
+export function ChatPanel({ messages, clientId, clientName, clientPhone, onBack, onMessageSent }: ChatPanelProps) {
   const [text, setText] = useState('')
   const [isPending, startTransition] = useTransition()
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -136,7 +153,8 @@ export function ChatPanel({ messages, clientId, clientName, clientPhone, onBack 
       if (res.error) toast.error(res.error)
       else {
         setText('')
-        toast.success('ENVIADA!')
+        toast.success('Mensagem enviada!')
+        onMessageSent?.()
       }
     })
   }
@@ -149,7 +167,7 @@ export function ChatPanel({ messages, clientId, clientName, clientPhone, onBack 
           {onBack && (
             <button
               onClick={onBack}
-              className="lg:hidden w-11 h-11 flex items-center justify-center text-text-secondary hover:text-text-primary rounded-full hover:bg-white/5 transition-all shrink-0"
+              className="md:hidden w-11 h-11 flex items-center justify-center text-text-secondary hover:text-text-primary rounded-full hover:bg-white/5 transition-all shrink-0"
               aria-label="Voltar para lista de conversas"
             >
               <CaretLeft size={20} weight="bold" />
@@ -159,8 +177,8 @@ export function ChatPanel({ messages, clientId, clientName, clientPhone, onBack 
             {clientName.charAt(0)}
           </div>
           <div>
-            <p className="text-[11px] font-medium text-text-secondary uppercase">{clientName}</p>
-            <p className="text-[9px] text-[#2a2a2a] flex items-center gap-1 uppercase tracking-wider">
+            <p className="text-[11px] font-medium text-text-secondary">{clientName}</p>
+            <p className="text-[9px] text-[#2a2a2a] flex items-center gap-1 tracking-wide">
               {clientPhone || 'Sem telefone'}
             </p>
           </div>
@@ -202,12 +220,12 @@ export function ChatPanel({ messages, clientId, clientName, clientPhone, onBack 
                     : 'bg-bg-surface border-[0.5px] border-border-main text-text-secondary rounded-tl-none'
                 )}
               >
-                <p className="uppercase tracking-tight">{msg.content}</p>
+                <p className="tracking-tight">{msg.content}</p>
                 <div className={cn(
                   'flex items-center gap-2 mt-2',
                   msg.direction === 'sent' ? 'justify-end' : 'justify-start'
                 )}>
-                  <span className={cn('text-[8px] uppercase', msg.direction === 'sent' ? 'text-black/60' : 'text-[#2a2a2a]')} suppressHydrationWarning>
+                  <span className={cn('text-[8px]', msg.direction === 'sent' ? 'text-black/60' : 'text-[#2a2a2a]')} suppressHydrationWarning>
                     {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                   {msg.template_used && (
@@ -225,11 +243,11 @@ export function ChatPanel({ messages, clientId, clientName, clientPhone, onBack 
       <div className="p-4 border-t-[0.5px] border-border-main">
         <div className="flex gap-2">
           <input
-            placeholder="DIGITE UMA MENSAGEM..."
+            placeholder="Digite uma mensagem..."
             value={text}
             onChange={e => setText(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) handleSend() }}
-            className="flex-1 bg-bg-black border-[0.5px] border-border-main rounded-[8px] px-4 py-3 min-h-[44px] text-[11px] text-text-secondary outline-none transition-all focus:border-[#333] uppercase placeholder:text-[#222]"
+            className="flex-1 bg-bg-black border-[0.5px] border-border-main rounded-[8px] px-4 py-3 min-h-[44px] text-[11px] text-text-secondary outline-none transition-all focus:border-[#333] placeholder:text-[#222]"
             disabled={isPending || !clientPhone}
           />
           <button

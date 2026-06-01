@@ -22,6 +22,13 @@ const VARIABLES = [
   { key: '{barbeiro}', label: 'Barbeiro' },
   { key: '{valor}', label: 'Valor' },
   { key: '{link_agendamento}', label: 'Link' },
+  { key: '{nome_barbearia}', label: 'Nome da Barbearia' },
+  { key: '{endereco_barbearia}', label: 'Endereço' },
+  { key: '{telefone_barbearia}', label: 'Telefone' },
+  { key: '{pontos_fidelidade}', label: 'Carimbos Acumulados' },
+  { key: '{proximo_selo}', label: 'Carimbos Restantes' },
+  { key: '{cupom_desconto}', label: 'Cupom Desconto' },
+  { key: '{ultima_visita}', label: 'Última Visita' },
 ]
 
 export function TemplateEditorModal({ isOpen, onClose, template, onSuccess, mode }: TemplateEditorModalProps) {
@@ -113,6 +120,13 @@ export function TemplateEditorModal({ isOpen, onClose, template, onSuccess, mode
       .replace(/\{barbeiro\}/g, 'RAFAEL')
       .replace(/\{valor\}/g, 'R$ 80,00')
       .replace(/\{link_agendamento\}/g, 'BARBEARIA.COM/AGENDAR')
+      .replace(/\{nome_barbearia\}/g, 'BARBEARIA ELITE')
+      .replace(/\{endereco_barbearia\}/g, 'AV. PAULISTA, 1000 - APTO 12')
+      .replace(/\{telefone_barbearia\}/g, '(11) 99999-9999')
+      .replace(/\{pontos_fidelidade\}/g, '8')
+      .replace(/\{proximo_selo\}/g, '2')
+      .replace(/\{cupom_desconto\}/g, 'VIP10')
+      .replace(/\{ultima_visita\}/g, new Date(Date.now() - 30 * 86400000).toLocaleDateString('pt-BR'))
   }
 
   return (

@@ -16,7 +16,7 @@ export default async function BarberAppointmentsRoute() {
   const user = await requireBarber()
 
   const [appointments, services, clients] = await Promise.all([
-    getAppointments({ period: 'today' }),
+    getAppointments({ period: 'week' }),
     getServices(),
     getClientsForAppointment(),
   ])

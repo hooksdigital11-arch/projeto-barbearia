@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Receipt, Clock, User } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Plus, Receipt, Clock, User, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { ComandaActive } from './comanda-active'
-import { getActiveComanda } from '../queries'
+import { getActiveComandaAction } from '../actions'
 import { ComandaItem } from '../types'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 interface BarberAppointment {
   id: string
@@ -16,29 +18,71 @@ interface BarberAppointment {
   price_cents: number
 }
 
+interface ClientOption {
+  id: string
+  full_name: string
+  phone?: string | null
+}
+
 export function ComandaPageBarber({
   appointments,
+  clients,
 }: {
   appointments: BarberAppointment[]
+  clients: ClientOption[]
 }) {
+  const router = useRouter()
   const [selectedClient, setSelectedClient] = useState<{
     id: string
     name: string
-    appointment: BarberAppointment
+    appointment: BarberAppointment | null
   } | null>(null)
   const [items, setItems] = useState<ComandaItem[]>([])
   const [loadingClientId, setLoadingClientId] = useState<string | null>(null)
+  const [isClientModalOpen, setIsClientModalOpen] = useState(false)
+  const [searchClientTerm, setSearchClientTerm] = useState('')
 
   const handleSelectClient = async (appt: BarberAppointment) => {
     setLoadingClientId(appt.client_id)
     try {
-      const activeItems = await getActiveComanda(appt.client_id)
+      const result = await getActiveComandaAction(appt.client_id)
+      if ('error' in result && result.error) {
+        toast.error(result.error)
+        return
+      }
+      const activeItems = result.data || []
       setItems(activeItems as ComandaItem[])
       setSelectedClient({
         id: appt.client_id,
         name: appt.client?.full_name || 'Desconhecido',
         appointment: appt
       })
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao carregar comanda')
+    } finally {
+      setLoadingClientId(null)
+    }
+  }
+
+  const handleSelectClientOption = async (client: ClientOption) => {
+    setLoadingClientId(client.id)
+    try {
+      const result = await getActiveComandaAction(client.id)
+      if ('error' in result && result.error) {
+        toast.error(result.error)
+        return
+      }
+      const activeItems = result.data || []
+      setItems(activeItems as ComandaItem[])
+      setSelectedClient({
+        id: client.id,
+        name: client.full_name,
+        appointment: null
+      })
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao carregar comanda')
     } finally {
       setLoadingClientId(null)
     }
@@ -46,10 +90,13 @@ export function ComandaPageBarber({
 
   const refreshItems = async () => {
     if (selectedClient) {
-      const activeItems = await getActiveComanda(selectedClient.id)
-      setItems(activeItems as ComandaItem[])
+      const result = await getActiveComandaAction(selectedClient.id)
+      if ('success' in result && result.success && result.data) {
+        setItems(result.data as ComandaItem[])
+      }
     }
   }
+
 
   if (selectedClient) {
     return (
@@ -58,13 +105,13 @@ export function ComandaPageBarber({
         clientName={selectedClient.name}
         items={items}
         onRefresh={refreshItems}
-        appointment={{
+        appointment={selectedClient.appointment ? {
           id: selectedClient.appointment.id,
           start_time: selectedClient.appointment.start_time,
           service: selectedClient.appointment.service?.name ? {
             name: selectedClient.appointment.service.name
           } : undefined
-        }}
+        } : null}
         onBack={() => setSelectedClient(null)}
       />
     )
@@ -85,8 +132,8 @@ export function ComandaPageBarber({
         </div>
         
         <button 
-          className="bg-accent-main text-black text-[10px] font-medium tracking-[0.1em] p-[10px_18px] rounded-[8px] flex items-center gap-2 hover:brightness-110 transition-all uppercase shrink-0"
-          onClick={() => toast.info('Venda avulsa disponível em breve')}
+          className="bg-accent-main text-black text-[10px] font-medium tracking-[0.1em] p-[10px_18px] rounded-[8px] flex items-center gap-2 hover:brightness-110 transition-all uppercase shrink-0 cursor-pointer"
+          onClick={() => setIsClientModalOpen(true)}
         >
           <Plus className="w-3.5 h-3.5" />
           Venda Avulsa
@@ -154,13 +201,70 @@ export function ComandaPageBarber({
             <p className="text-[11px] text-[#222] uppercase tracking-widest">Seus clientes agendados aparecerão aqui para abertura de comanda.</p>
           </div>
           <button 
-            className="mt-2 px-[18px] py-[10px] bg-transparent border border-white/10 hover:bg-white/5 text-[#fff] text-[10px] font-medium uppercase tracking-[0.1em] rounded-[8px] transition-all"
-            onClick={() => toast.info('Agenda completa disponível em breve')}
+            className="mt-2 px-[18px] py-[10px] bg-transparent border border-white/10 hover:bg-white/5 text-[#fff] text-[10px] font-medium uppercase tracking-[0.1em] rounded-[8px] transition-all cursor-pointer"
+            onClick={() => router.push('/barber/appointments')}
           >
             Ver Agenda Completa
           </button>
         </div>
       )}
+
+      {/* Modal de Seleção de Cliente para Venda Avulsa */}
+      <Dialog open={isClientModalOpen} onOpenChange={setIsClientModalOpen}>
+        <DialogContent className="bg-bg-surface border-white/10 max-w-md p-6">
+          <DialogHeader>
+            <DialogTitle className="font-syne uppercase tracking-tight text-text-primary text-[18px]">
+              Selecionar Cliente
+            </DialogTitle>
+          </DialogHeader>
+          <div className="relative group bg-[#111] border border-white/5 rounded-[8px] flex items-center px-[14px] mt-4 mb-4">
+            <Search size={14} className="text-[#555] shrink-0" />
+            <input
+              type="text"
+              placeholder="BUSCAR CLIENTE PELO NOME..."
+              value={searchClientTerm}
+              onChange={(e) => setSearchClientTerm(e.target.value)}
+              className="bg-transparent border-none outline-none py-[10px] pl-[10px] text-[11px] text-text-secondary placeholder:text-[#444] w-full font-medium"
+            />
+          </div>
+          <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10">
+            {clients
+              .filter(client => 
+                client.full_name.toLowerCase().includes(searchClientTerm.toLowerCase())
+              )
+              .map(client => (
+                <div
+                  key={client.id}
+                  className="flex justify-between items-center p-3.5 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer group"
+                  onClick={() => {
+                    setIsClientModalOpen(false)
+                    setSearchClientTerm('')
+                    handleSelectClientOption(client)
+                  }}
+                >
+                  <div>
+                    <p className="font-bold text-text-primary uppercase text-[12px] tracking-wide">
+                      {client.full_name}
+                    </p>
+                    {client.phone && (
+                      <p className="text-[10px] text-muted-foreground">{client.phone}</p>
+                    )}
+                  </div>
+                  <span className="text-[9px] font-semibold text-accent-main uppercase tracking-wider group-hover:underline">
+                    Selecionar
+                  </span>
+                </div>
+              ))}
+            {clients.filter(client => 
+              client.full_name.toLowerCase().includes(searchClientTerm.toLowerCase())
+            ).length === 0 && (
+              <p className="text-center text-muted-foreground py-8 text-xs uppercase tracking-wider">
+                Nenhum cliente encontrado
+              </p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Syne, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ConfirmProvider } from "@/components/providers/confirm-provider";
 import { Toaster } from "sonner";
 
 const syne = Syne({
@@ -35,7 +36,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <ConfirmProvider>
+            {children}
+          </ConfirmProvider>
         </ThemeProvider>
         <Toaster position="top-right" richColors closeButton theme="dark" />
       </body>

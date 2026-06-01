@@ -13,6 +13,7 @@ import { AdminUser, AdminUsersFilter } from '../types'
 import { UserAvatar } from './user-avatar'
 import { cn } from '@/lib/utils/cn'
 import { toast } from 'sonner'
+import { useConfirm } from '@/components/providers/confirm-provider'
 import { toggleUserStatus, deleteUser } from '../actions'
 import { CreateUserModal } from './create-user-modal'
 import { EditUserModal } from './edit-user-modal'
@@ -22,6 +23,7 @@ interface UsersListProps {
 }
 
 export function UsersList({ initialUsers }: UsersListProps) {
+  const confirm = useConfirm()
   const [users, setUsers] = useState(initialUsers)
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<AdminUsersFilter['role']>('all')
@@ -51,8 +53,15 @@ export function UsersList({ initialUsers }: UsersListProps) {
     })
   }
 
-  const handleDelete = (id: string) => {
-    if (!confirm('Tem certeza que deseja remover este usuário?')) return
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({
+      title: 'Remover Usuário',
+      message: 'Tem certeza que deseja remover este usuário?',
+      variant: 'danger',
+      confirmText: 'Remover',
+      cancelText: 'Cancelar'
+    })
+    if (!ok) return
 
     startTransition(async () => {
       const result = await deleteUser(id)

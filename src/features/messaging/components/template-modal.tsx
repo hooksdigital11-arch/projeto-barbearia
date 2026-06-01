@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
-import { recordMessage, duplicateTemplate } from '../actions'
+import { sendMessageAction, duplicateTemplate } from '../actions'
 import type { ClientForMessage, MessageTemplate } from '../types'
 import { X, Plus, DotsThreeVertical, PencilSimple, Copy, Trash, Lock, PaperPlaneRight, MagnifyingGlass, CircleNotch } from '@phosphor-icons/react'
 import { 
@@ -21,29 +21,62 @@ interface TemplateModalProps {
   onClose: () => void
   clients: ClientForMessage[]
   templates: MessageTemplate[]
-  orgName: string
+  org: any
   onRefresh: () => void
 }
 
-function applyTemplateVars(content: string, client: ClientForMessage, orgName: string): string {
+function applyTemplateVars(content: string, client: ClientForMessage, org: any): string {
+  const orgName = org?.name || 'Barbearia'
+  const orgAddress = org?.address || 'Não configurado'
+  const orgPhone = org?.phone || 'Não configurado'
+
+  const lastVisit = client.last_visit_at
+    ? new Date(client.last_visit_at).toLocaleDateString('pt-BR')
+    : 'Sem visitas registradas'
+
+  // Detalhes do agendamento
+  let dateStr = 'A definir'
+  let timeStr = 'A definir'
+  let serviceStr = 'serviço'
+  let barberStr = 'seu barbeiro'
+  let priceStr = 'R$ 0,00'
+
+  const appt = client.next_appointment
+  if (appt) {
+    const apptDate = new Date(appt.start_time)
+    dateStr = apptDate.toLocaleDateString('pt-BR')
+    timeStr = apptDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    if (appt.service?.name) serviceStr = appt.service.name
+    if (appt.barber?.full_name) barberStr = appt.barber.full_name
+    if (appt.price_cents !== null && appt.price_cents !== undefined) {
+      priceStr = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(appt.price_cents / 100)
+    }
+  }
+
+  // Detalhes da fidelidade
+  const loyaltyBalance = client.loyalty_balance || 0
+  const loyaltyConfig = org?.loyalty_config as any
+  const goal = loyaltyConfig?.stamps_required || 10
+  const remaining = Math.max(0, goal - loyaltyBalance)
+
   return content
-    .replace(/\{nome\}/g, client.full_name)
-    .replace(/\{nome_barbearia\}/g, orgName)
-    .replace(/\{data\}/g, new Date().toLocaleDateString('pt-BR'))
-    .replace(/\{horario\}/g, new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
-    .replace(/\{servico\}/g, 'serviço')
-    .replace(/\{barbeiro\}/g, 'seu barbeiro')
-    .replace(/\{valor\}/g, 'R$ 0,00')
-    .replace(/\{link_agendamento\}/g, 'barbearia.com')
+    .replace(/\{nome\}/gi, client.full_name || 'Cliente')
+    .replace(/\{nome_barbearia\}/gi, orgName)
+    .replace(/\{data\}/gi, dateStr)
+    .replace(/\{horario\}/gi, timeStr)
+    .replace(/\{servico\}/gi, serviceStr)
+    .replace(/\{barbeiro\}/gi, barberStr)
+    .replace(/\{valor\}/gi, priceStr)
+    .replace(/\{link_agendamento\}/gi, 'barbearia.com')
+    .replace(/\{endereco_barbearia\}/gi, orgAddress)
+    .replace(/\{telefone_barbearia\}/gi, orgPhone)
+    .replace(/\{pontos_fidelidade\}/gi, String(loyaltyBalance))
+    .replace(/\{proximo_selo\}/gi, String(remaining))
+    .replace(/\{cupom_desconto\}/gi, 'VOLTE10')
+    .replace(/\{ultima_visita\}/gi, lastVisit)
 }
 
-function sendWhatsApp(phone: string, message: string) {
-  const clean = phone.replace(/\D/g, '')
-  const url = `https://wa.me/55${clean}?text=${encodeURIComponent(message)}`
-  window.open(url, '_blank')
-}
-
-export function TemplateModal({ isOpen, onClose, clients, templates, orgName, onRefresh }: TemplateModalProps) {
+export function TemplateModal({ isOpen, onClose, clients, templates, org, onRefresh }: TemplateModalProps) {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [selectedClientId, setSelectedClientId] = useState('')
   const [clientSearch, setClientSearch] = useState('')
@@ -67,13 +100,13 @@ export function TemplateModal({ isOpen, onClose, clients, templates, orgName, on
 
   const filteredClients = clientSearch.length >= 1
     ? clients.filter(c =>
-        c.full_name.toLowerCase().includes(clientSearch.toLowerCase()) ||
-        (c.phone || '').includes(clientSearch)
-      )
+      c.full_name.toLowerCase().includes(clientSearch.toLowerCase()) ||
+      (c.phone || '').includes(clientSearch)
+    )
     : []
 
   const preview = template && selectedClient
-    ? applyTemplateVars(template.content, selectedClient, orgName)
+    ? applyTemplateVars(template.content, selectedClient, org)
     : null
 
   const handleSend = () => {
@@ -87,17 +120,18 @@ export function TemplateModal({ isOpen, onClose, clients, templates, orgName, on
     }
 
     startTransition(async () => {
-      const content = applyTemplateVars(template.content, selectedClient, orgName)
-      sendWhatsApp(selectedClient.phone!, content)
+      const content = applyTemplateVars(template.content, selectedClient, org)
 
       const fd = new FormData()
       fd.append('client_id', selectedClient.id)
       fd.append('content', content)
       fd.append('template_used', template.id)
-      const res = await recordMessage(fd)
+      
+      const res = await sendMessageAction(fd)
       if (res.error) toast.error(res.error)
       else {
-        toast.success('TEMPLATE ENVIADO!')
+        toast.success('Template enviado com sucesso!')
+        onRefresh()
         onClose()
       }
     })

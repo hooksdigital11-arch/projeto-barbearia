@@ -1,27 +1,41 @@
 'use client'
 
-import { useState, useTransition, useRef } from 'react'
+import { useState, useTransition, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, PencilSimple, Trash, Play, Pause, X, CircleNotch } from '@phosphor-icons/react'
 import { deleteService, createService, updateService, toggleServiceStatus } from '../actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
+import { useConfirm } from '@/components/providers/confirm-provider'
 import type { Service } from '../types'
 
 export function ServicesSettings({ initialData }: { initialData: Service[] }) {
   const router = useRouter()
+  const confirm = useConfirm()
   const [services, setServices] = useState(initialData)
   const [isPending, startTransition] = useTransition()
   
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingService, setEditingService] = useState<Partial<Service> | null>(null)
+
+  // Sincroniza props quando o servidor envia novos dados via router.refresh()
+  useEffect(() => {
+    setServices(initialData)
+  }, [initialData])
   
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100)
   }
 
-  const handleDelete = (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este serviço? Esta ação não pode ser desfeita.')) return
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({
+      title: 'Excluir Serviço',
+      message: 'Tem certeza que deseja excluir este serviço? Esta ação não pode ser desfeita.',
+      variant: 'danger',
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar'
+    })
+    if (!ok) return
     
     startTransition(async () => {
       const result = await deleteService(id)

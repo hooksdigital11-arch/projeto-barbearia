@@ -1,5 +1,6 @@
 'use server'
 
+import { randomBytes } from 'crypto'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase/admin'
@@ -25,7 +26,7 @@ export async function createUser(input: CreateUserInput) {
     // 1. Criar no Auth via Admin API (ignora confirmação se autoConfirm for true)
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
-      password: password || require('crypto').randomBytes(12).toString('base64url'),
+      password: password || randomBytes(12).toString('base64url'),
       email_confirm: autoConfirm,
       user_metadata: { 
         full_name: fullName, 

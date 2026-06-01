@@ -1,80 +1,111 @@
 import { ReactNode } from 'react'
-import { AuthScene } from '@/features/auth/components/auth-scene'
+import Link from 'next/link'
+import { Scissors } from '@phosphor-icons/react/dist/ssr'
 
-/**
- * AuthLayout
- * Immersive full-screen centered layout with circuit-board background.
- * Features an interactive desk lamp (desktop) that toggles form visibility
- * and plays a barbershop monster video when lights are off.
- */
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen w-full bg-[#030303] overflow-hidden font-sans relative">
+    <div className="min-h-screen bg-[#0a0a0a] flex">
 
-      {/* === CIRCUIT BOARD BACKGROUND (static, always visible) === */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Subtle grid pattern */}
+      {/* ═══ LEFT PANEL ═══ */}
+      <div className="hidden lg:flex lg:w-[42%] xl:w-[40%] flex-col relative overflow-hidden">
+
+        {/* Atmospheric glow */}
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0"
           style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '60px 60px',
+            background:
+              'radial-gradient(ellipse 120% 55% at 50% -8%, rgba(0,212,170,0.09) 0%, transparent 58%),' +
+              'radial-gradient(ellipse 70% 60% at -5% 95%, rgba(0,212,170,0.04) 0%, transparent 55%),' +
+              '#0a0a0a',
           }}
         />
 
-        {/* Circuit lines - Top Left */}
-        <svg className="absolute top-0 left-0 w-[45%] h-[45%]" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 200 L80 200 L100 180 L170 180 L180 170 L250 170" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <path d="M200 0 L200 80 L180 100 L180 170" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <rect x="80" y="60" width="40" height="24" rx="4" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-          <circle cx="75" cy="72" r="3" fill="rgba(255,255,255,0.15)" />
-          <path d="M0 72 L72 72" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <path d="M120 72 L180 72 L180 100" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-        </svg>
+        {/* Grain */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            opacity: 0.033,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+            backgroundSize: '175px 175px',
+          }}
+        />
 
-        {/* Circuit lines - Top Right */}
-        <svg className="absolute top-0 right-0 w-[45%] h-[45%]" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M400 200 L320 200 L300 180 L230 180 L220 170 L150 170" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <path d="M200 0 L200 80 L220 100 L220 170" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <rect x="280" y="60" width="40" height="24" rx="4" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-          <circle cx="325" cy="72" r="3" fill="rgba(255,255,255,0.15)" />
-          <path d="M400 72 L328 72" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <path d="M280 72 L220 72 L220 100" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-        </svg>
+        {/* Right border */}
+        <div className="absolute right-0 inset-y-0 w-px bg-white/[0.05]" />
 
-        {/* Circuit lines - Bottom Left */}
-        <svg className="absolute bottom-0 left-0 w-[45%] h-[45%]" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 200 L80 200 L100 220 L170 220 L180 230 L250 230" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <path d="M200 400 L200 320 L180 300 L180 230" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <rect x="80" y="316" width="40" height="24" rx="4" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-          <circle cx="75" cy="328" r="3" fill="rgba(255,255,255,0.15)" />
-          <path d="M0 328 L72 328" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <path d="M120 328 L180 328 L180 300" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-        </svg>
+        {/* Content */}
+        <div className="relative flex flex-col h-full px-12 py-11">
 
-        {/* Circuit lines - Bottom Right */}
-        <svg className="absolute bottom-0 right-0 w-[45%] h-[45%]" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M400 200 L320 200 L300 220 L230 220 L220 230 L150 230" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <path d="M200 400 L200 320 L220 300 L220 230" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <rect x="280" y="316" width="40" height="24" rx="4" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-          <circle cx="325" cy="328" r="3" fill="rgba(255,255,255,0.15)" />
-          <path d="M400 328 L328 328" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <path d="M280 328 L220 328 L220 300" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-        </svg>
+          {/* Brand */}
+          <Link href="/" className="flex items-center gap-[7px] group w-fit">
+            <Scissors size={14} className="text-accent-main" weight="fill" />
+            <span className="font-syne text-[12px] font-semibold uppercase tracking-[0.22em] text-white group-hover:text-white/70 transition-colors duration-300">
+              BarberOS
+            </span>
+          </Link>
 
-        {/* Center ambient glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent-main/5 blur-[200px] rounded-full" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-accent-main/8 blur-[100px] rounded-full" />
+          {/* Headline */}
+          <div className="flex-1 flex items-center">
+            <div>
+              <p className="font-mono text-[9px] uppercase tracking-[0.42em] text-accent-main mb-6">
+                Acesso ao painel
+              </p>
+              <h1 className="font-syne uppercase select-none">
+                <span
+                  className="block font-medium leading-none"
+                  style={{
+                    fontSize: 'clamp(3rem, 5vw, 6rem)',
+                    color: 'rgba(255,255,255,0.09)',
+                    letterSpacing: '-0.04em',
+                    lineHeight: 1,
+                  }}
+                >
+                  Acesso.
+                </span>
+                <span
+                  className="block font-medium leading-none"
+                  style={{
+                    fontSize: 'clamp(3rem, 5vw, 6rem)',
+                    color: '#ffffff',
+                    letterSpacing: '-0.04em',
+                    lineHeight: 1,
+                    marginTop: '-0.09em',
+                  }}
+                >
+                  Seguro.
+                </span>
+              </h1>
+              <p className="mt-8 font-mono text-[10px] text-white/22 uppercase tracking-[0.26em] leading-[2.1] max-w-[220px]">
+                Gerencie sua barbearia com precisão e controle total.
+              </p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <p className="font-mono text-[9px] text-white/12 uppercase tracking-wider">
+            © {new Date().getFullYear()} BarberOS
+          </p>
+        </div>
       </div>
 
-      {/* === INTERACTIVE SCENE (Client Component) === */}
-      <AuthScene>
-        {children}
-      </AuthScene>
+      {/* ═══ RIGHT PANEL ═══ */}
+      <div className="flex-1 flex flex-col min-h-screen overflow-y-auto">
 
+        {/* Mobile brand */}
+        <div className="lg:hidden flex items-center gap-[7px] px-6 pt-8">
+          <Scissors size={14} className="text-accent-main" weight="fill" />
+          <Link href="/" className="font-syne text-[12px] font-semibold uppercase tracking-[0.22em] text-white">
+            BarberOS
+          </Link>
+        </div>
+
+        {/* Form area */}
+        <div className="flex-1 flex items-center justify-center px-6 py-12">
+          <div className="w-full max-w-[380px]">
+            {children}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

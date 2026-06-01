@@ -1,18 +1,24 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   Clock, 
   User, 
   ChartBar,
   Stop,
+  Play,
   BellRinging,
   List,
   CalendarSlash
 } from '@phosphor-icons/react'
 import { ServiceTimer } from './service-timer'
 import { cn } from '@/lib/utils/cn'
+import { toast } from 'sonner'
+import { notifyClient } from '@/features/waiting-list/actions'
+import { QuickStatusButton } from '@/features/appointment/components/appointment-status'
+import { toggleBarberShift } from '../actions'
+import { useConfirm } from '@/components/providers/confirm-provider'
 
 import { useDashboardRealtime } from '@/features/analytics/useDashboardRealtime'
 
@@ -20,6 +26,7 @@ interface AppointmentItem {
   id: string
   time: string
   client: string
+  client_id: string | null
   service: string
   duration: string
   status: string
@@ -41,6 +48,7 @@ interface CurrentClient {
 }
 
 interface BarberDashboardData {
+  status: string
   shift: string
   stats: {
     revenueDay: string | number
@@ -52,7 +60,9 @@ interface BarberDashboardData {
 
 export function BarberDashboard({ initialData, organizationId }: { initialData: BarberDashboardData, organizationId: string }) {
   const router = useRouter()
+  const confirm = useConfirm()
   const [data, setData] = useState(initialData)
+  const [isPending, startTransition] = useTransition()
 
   // Sincronização Realtime Global
   useDashboardRealtime(organizationId)
@@ -60,6 +70,43 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
   useEffect(() => {
     setData(initialData)
   }, [initialData])
+
+  const handleToggleShift = async () => {
+    const isShiftFinished = data.status === 'Fora de Serviço'
+    const newStatus = isShiftFinished ? 'active' : 'inactive'
+
+    if (!isShiftFinished) {
+      const confirmed = await confirm({
+        title: 'Finalizar Turno',
+        message: 'Deseja realmente finalizar seu turno e ficar fora de serviço?',
+        confirmText: 'Finalizar Turno',
+        cancelText: 'Voltar',
+        variant: 'danger',
+      })
+      if (!confirmed) return
+    }
+
+    startTransition(async () => {
+      const res = await toggleBarberShift(newStatus)
+      if (res.error) {
+        toast.error(res.error)
+      } else {
+        toast.success(newStatus === 'active' ? 'Turno iniciado!' : 'Turno finalizado!')
+        router.refresh()
+      }
+    })
+  }
+
+  const handleNotifyClient = (id: string) => {
+    startTransition(async () => {
+      const res = await notifyClient(id)
+      if (res.error) {
+        toast.error(res.error)
+      } else {
+        toast.success('Cliente notificado via WhatsApp!')
+      }
+    })
+  }
 
   return (
     <div className="space-y-10 animate-in fade-in duration-1000">
@@ -88,12 +135,20 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
         {/* Zona 1 — Status */}
         <div className="flex items-center gap-4 md:pr-10 md:border-r border-border-main">
           <div className="relative flex items-center justify-center">
-            <div className="w-[10px] h-[10px] rounded-full bg-accent-main relative z-10" />
-            <div className="absolute w-[10px] h-[10px] rounded-full bg-accent-main/15 animate-pulse-ring" />
+            <div className={cn(
+              "w-[10px] h-[10px] rounded-full relative z-10",
+              data.status === 'Em Atendimento' ? "bg-yellow-500" :
+              data.status === 'Fora de Serviço' ? "bg-red-500" : "bg-accent-main"
+            )} />
+            <div className={cn(
+              "absolute w-[10px] h-[10px] rounded-full animate-pulse-ring",
+              data.status === 'Em Atendimento' ? "bg-yellow-500/15" :
+              data.status === 'Fora de Serviço' ? "bg-red-500/15" : "bg-accent-main/15"
+            )} />
           </div>
           <div>
             <p className="text-[9px] text-text-muted uppercase tracking-wider mb-0.5">Status Operacional</p>
-            <p className="text-[14px] font-medium text-text-primary leading-tight">Disponível</p>
+            <p className="text-[14px] font-medium text-text-primary leading-tight">{data.status}</p>
           </div>
         </div>
 
@@ -117,9 +172,27 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
 
         {/* Zona 3 — Botão Finalizar Turno */}
         <div className="md:pl-10">
-          <button className="bg-accent-main text-black text-[11px] font-medium tracking-[0.06em] p-[10px_20px] rounded-[8px] flex items-center gap-2 hover:opacity-90 transition-all uppercase">
-            <Stop size={14} weight="fill" />
-            Finalizar Turno
+          <button
+            onClick={handleToggleShift}
+            disabled={isPending}
+            className={cn(
+              "text-black text-[11px] font-medium tracking-[0.06em] p-[10px_20px] rounded-[8px] flex items-center gap-2 hover:opacity-90 transition-all uppercase disabled:opacity-50",
+              data.status === 'Fora de Serviço'
+                ? "bg-accent-main"
+                : "bg-red-500 text-white hover:bg-red-600"
+            )}
+          >
+            {data.status === 'Fora de Serviço' ? (
+              <>
+                <Play size={14} weight="fill" />
+                Iniciar Turno
+              </>
+            ) : (
+              <>
+                <Stop size={14} weight="fill" />
+                Finalizar Turno
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -208,7 +281,7 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
                     key={apt.id}
                     className={cn(
                       "flex items-center justify-between p-3.5 rounded-[8px] border transition-all",
-                      apt.status === 'in_progress' ? "bg-bg-surface border-accent-main/15" : "bg-transparent border-border-main hover:border-border-main/80"
+                      apt.status === 'in_progress' ? "bg-[#0d2e29]/10 border-accent-main/15" : "bg-transparent border-border-main hover:border-border-main/80"
                     )}
                   >
                     <div className="flex items-center gap-5">
@@ -219,11 +292,22 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
                         <p className="text-[10px] text-text-muted uppercase tracking-wider mt-0.5">{apt.service} • {apt.duration}</p>
                       </div>
                     </div>
-                    {apt.status === 'in_progress' && (
-                      <div className="px-2 py-0.5 rounded bg-accent-main/5 border border-accent-main/15 text-accent-main text-[9px] font-medium uppercase tracking-wider">
-                        Ativo
-                      </div>
-                    )}
+                    <div>
+                      {apt.status === 'in_progress' ? (
+                        <div className="flex items-center gap-3">
+                          <span className="px-2 py-0.5 rounded bg-accent-main/5 border border-accent-main/15 text-accent-main text-[9px] font-medium uppercase tracking-wider">
+                            Ativo
+                          </span>
+                          <QuickStatusButton status="in_progress" appointmentId={apt.id} clientId={apt.client_id || undefined} role="barber" />
+                        </div>
+                      ) : apt.status === 'next' ? (
+                        <QuickStatusButton status="scheduled" appointmentId={apt.id} clientId={apt.client_id || undefined} role="barber" />
+                      ) : (
+                        <span className="text-[9px] text-[#444] uppercase tracking-wider font-semibold">
+                          {apt.status === 'scheduled' ? 'Agendado' : apt.status === 'completed' ? 'Concluído' : apt.status === 'cancelled' ? 'Cancelado' : apt.status}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : (
@@ -258,8 +342,12 @@ export function BarberDashboard({ initialData, organizationId }: { initialData: 
                       <p className="text-[12px] font-medium text-text-secondary tracking-tight">{client.name}</p>
                       <p className="text-[9px] text-text-muted uppercase tracking-wider">{client.waitingTime}</p>
                     </div>
-                    <button className="text-[10px] text-accent-main hover:underline uppercase tracking-wider font-medium">
-                      Chamar
+                    <button
+                      onClick={() => handleNotifyClient(client.id)}
+                      disabled={isPending}
+                      className="text-[10px] text-accent-main hover:underline uppercase tracking-wider font-medium disabled:opacity-50 cursor-pointer"
+                    >
+                      {isPending ? '...' : 'Chamar'}
                     </button>
                   </div>
                 ))

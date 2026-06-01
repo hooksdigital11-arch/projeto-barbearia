@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, PencilSimple, Trash, Copy, Play, Pause, X } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
 import { toast } from 'sonner'
+import { useConfirm } from '@/components/providers/confirm-provider'
 import { createService, updateService, deleteService, toggleServiceStatus, duplicateService } from '../actions'
 import { CATEGORY_CONFIG } from '../types'
 import type { Service, ServiceCategory } from '../types'
@@ -24,18 +25,31 @@ interface AdminServicesPageProps {
 
 export function AdminServicesPage({ services: initialServices, stats }: AdminServicesPageProps) {
   const router = useRouter()
+  const confirm = useConfirm()
   const [services, setServices] = useState(initialServices)
   const [isPending, startTransition] = useTransition()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingService, setEditingService] = useState<Partial<Service> | null>(null)
   const [categoryFilter, setCategoryFilter] = useState<string>('')
 
+  // Sincroniza props quando o servidor envia novos dados via router.refresh()
+  useEffect(() => {
+    setServices(initialServices)
+  }, [initialServices])
+
   const filtered = categoryFilter
     ? services.filter(s => s.category === categoryFilter)
     : services
 
-  const handleDelete = (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este serviço? Esta ação não pode ser desfeita.')) return
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({
+      title: 'Excluir Serviço',
+      message: 'Tem certeza que deseja excluir este serviço? Esta ação não pode ser desfeita.',
+      variant: 'danger',
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar'
+    })
+    if (!ok) return
 
     startTransition(async () => {
       const result = await deleteService(id)

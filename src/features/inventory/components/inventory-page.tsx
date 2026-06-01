@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useMemo, useTransition, useEffect } from 'react'
 import { Plus, ArrowCounterClockwise } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils/cn'
+import { useConfirm } from '@/components/providers/confirm-provider'
 import { InventoryStatsCards } from './inventory-stats'
 import { LowStockAlert } from './low-stock-alert'
 import { InventoryFilters } from './inventory-filters'
@@ -35,6 +36,7 @@ interface InventoryPageProps {
 
 export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: InventoryPageProps) {
   const router = useRouter()
+  const confirm = useConfirm()
   const [isPending, startTransition] = useTransition()
   const [activeTab, setActiveTab] = useState<'all' | 'revenda' | 'uso_interno' | 'inactive'>('all')
   const [search, setSearch] = useState('')
@@ -109,8 +111,16 @@ export function InventoryPage({ activeItems, inactiveItems, stats, userRole }: I
     })
   }, [sourceItems, activeTab, search, filters])
 
-  const handleDelete = (product: InventoryItem) => {
-    if (!confirm(`Deseja realmente EXCLUIR PERMANENTEMENTE o produto "${product.name}"?`)) return
+  const handleDelete = async (product: InventoryItem) => {
+    const ok = await confirm({
+      title: 'Excluir Produto',
+      message: `Deseja realmente EXCLUIR PERMANENTEMENTE o produto "${product.name}"?`,
+      variant: 'danger',
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar'
+    })
+    if (!ok) return
+
     startTransition(async () => {
       const result = await deleteProduct(product.id)
       if (result.success) toast.success('Produto excluído!')

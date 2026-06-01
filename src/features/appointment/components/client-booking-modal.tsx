@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { X, Scissors, User, Clock } from '@phosphor-icons/react'
@@ -22,6 +23,7 @@ export function ClientBookingModal({
   barbers,
   initialServiceId,
 }: ClientBookingModalProps) {
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [serviceId, setServiceId] = useState(initialServiceId || '')
   const [barberId, setBarberId] = useState('')
@@ -65,6 +67,7 @@ export function ClientBookingModal({
         toast.error(result.error)
       } else {
         toast.success('Agendamento realizado!')
+        router.refresh()
         onClose()
       }
     })
@@ -130,7 +133,9 @@ export function ClientBookingModal({
             >
               <option value="">Selecionar barbeiro...</option>
               {barbers.map(b => (
-                <option key={b.id} value={b.id}>{b.full_name}</option>
+                <option key={b.id} value={b.id} disabled={b.status === 'inactive'}>
+                  {b.full_name} {b.status === 'inactive' ? '— (Fora de Serviço)' : ''}
+                </option>
               ))}
             </select>
           </div>

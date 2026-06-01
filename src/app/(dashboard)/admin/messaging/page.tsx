@@ -27,7 +27,7 @@ export default async function AdminMessagingRoute() {
         stats={stats}
         clients={clients}
         templates={templates}
-        orgName={org?.name || 'Barbearia'}
+        org={org}
         isAdmin
       />
     )

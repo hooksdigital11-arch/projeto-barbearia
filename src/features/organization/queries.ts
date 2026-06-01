@@ -11,7 +11,7 @@ export const getOrganization = cache(async (organizationId: string) => {
 
   const { data, error } = await supabaseAdmin
     .from('organizations')
-    .select('id, name, logo_url')
+    .select('id, name, logo_url, phone, address, loyalty_config')
     .eq('id', organizationId)
     .single()
   

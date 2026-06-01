@@ -26,21 +26,52 @@ const days = [
   { id: 'sunday', label: 'Domingo' },
 ] as const
 
+function normalizeBusinessHours(data: any) {
+  const defaults = {
+    monday: { isOpen: true, open: '09:00', close: '18:00' },
+    tuesday: { isOpen: true, open: '09:00', close: '18:00' },
+    wednesday: { isOpen: true, open: '09:00', close: '18:00' },
+    thursday: { isOpen: true, open: '09:00', close: '18:00' },
+    friday: { isOpen: true, open: '09:00', close: '18:00' },
+    saturday: { isOpen: true, open: '09:00', close: '13:00' },
+    sunday: { isOpen: false, open: '09:00', close: '12:00' },
+  }
+
+  if (!data) return defaults
+
+  if (data.monday && typeof data.monday === 'object' && 'isOpen' in data.monday) {
+    return data
+  }
+
+  const mapKey = (oldKey: string, defaultsVal: { isOpen: boolean; open: string; close: string }) => {
+    const val = data[oldKey]
+    if (Array.isArray(val) && val.length === 2) {
+      const openHour = String(val[0]).padStart(2, '0') + ':00'
+      const closeHour = String(val[1]).padStart(2, '0') + ':00'
+      return { isOpen: true, open: openHour, close: closeHour }
+    }
+    return { isOpen: false, open: defaultsVal.open, close: defaultsVal.close }
+  }
+
+  return {
+    monday: mapKey('mon', defaults.monday),
+    tuesday: mapKey('tue', defaults.tuesday),
+    wednesday: mapKey('wed', defaults.wednesday),
+    thursday: mapKey('thu', defaults.thursday),
+    friday: mapKey('fri', defaults.friday),
+    saturday: mapKey('sat', defaults.saturday),
+    sunday: mapKey('sun', defaults.sunday),
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function BusinessHours({ initialData }: { initialData: any }) {
   const [isPending, startTransition] = useTransition()
+  const normalizedData = normalizeBusinessHours(initialData)
   
   const form = useForm<BusinessHoursInput>({
     resolver: zodResolver(businessHoursSchema),
-    defaultValues: initialData || {
-      monday: { isOpen: true, open: '09:00', close: '18:00' },
-      tuesday: { isOpen: true, open: '09:00', close: '18:00' },
-      wednesday: { isOpen: true, open: '09:00', close: '18:00' },
-      thursday: { isOpen: true, open: '09:00', close: '18:00' },
-      friday: { isOpen: true, open: '09:00', close: '18:00' },
-      saturday: { isOpen: true, open: '09:00', close: '13:00' },
-      sunday: { isOpen: false, open: '09:00', close: '12:00' },
-    },
+    defaultValues: normalizedData,
   })
 
   function onSubmit(data: BusinessHoursInput) {

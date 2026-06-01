@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import type { AppointmentWithRelations, ServiceOption, ClientOption } from '../types'
 import { AppointmentModal } from './appointment-modal'
-import { QuickStatusButton, CancelButton, StatusBadge } from './appointment-status'
+import { QuickStatusButton, CancelButton, StatusBadge, ConfirmationStageBadge } from './appointment-status'
 import { Plus, CalendarX } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -33,6 +33,13 @@ export function BarberAppointmentsPage({
   const nextAppointment = upcoming[0]
   const inProgress = appointments.find(a => a.status === 'in_progress')
 
+  const todayCount = appointments.filter(a => {
+    const d = new Date(a.start_time)
+    return d.getDate() === now.getDate() &&
+           d.getMonth() === now.getMonth() &&
+           d.getFullYear() === now.getFullYear()
+  }).length
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -43,7 +50,7 @@ export function BarberAppointmentsPage({
             Meus Agendamentos
           </h1>
           <p className="text-[11px] text-[#333] mt-1 font-medium uppercase tracking-wider">
-            {appointments.length} agendamento{appointments.length !== 1 ? 's' : ''} hoje
+            {todayCount} agendamento{todayCount !== 1 ? 's' : ''} hoje
           </p>
         </div>
         <button
@@ -62,12 +69,15 @@ export function BarberAppointmentsPage({
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest">EM ANDAMENTO AGORA</p>
-              <h2 className="text-xl font-bold text-text-primary font-syne">{inProgress.client.full_name}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-text-primary font-syne">{inProgress.client.full_name}</h2>
+                <ConfirmationStageBadge stage={inProgress.confirmacao_etapa} />
+              </div>
               <p className="text-sm text-muted-foreground">{inProgress.service.name} · {inProgress.duration_minutes}min</p>
             </div>
             <div className="flex flex-col gap-2 items-end shrink-0">
               <StatusBadge status={inProgress.status} appointmentId={inProgress.id} />
-              <QuickStatusButton status={inProgress.status} appointmentId={inProgress.id} />
+              <QuickStatusButton status={inProgress.status} appointmentId={inProgress.id} clientId={inProgress.client_id} role="barber" />
             </div>
           </div>
         </div>
@@ -80,7 +90,10 @@ export function BarberAppointmentsPage({
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-accent-cyan uppercase tracking-widest">PRÓXIMO CLIENTE</p>
-              <h2 className="text-xl font-bold text-text-primary font-syne">{nextAppointment.client.full_name}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-text-primary font-syne">{nextAppointment.client.full_name}</h2>
+                <ConfirmationStageBadge stage={nextAppointment.confirmacao_etapa} />
+              </div>
               <p className="text-sm text-muted-foreground">
                 {nextAppointment.service.name} · {new Date(nextAppointment.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
               </p>
@@ -90,7 +103,7 @@ export function BarberAppointmentsPage({
             </div>
             <div className="flex flex-col gap-2 items-end shrink-0">
               <StatusBadge status={nextAppointment.status} appointmentId={nextAppointment.id} />
-              <QuickStatusButton status={nextAppointment.status} appointmentId={nextAppointment.id} />
+              <QuickStatusButton status={nextAppointment.status} appointmentId={nextAppointment.id} clientId={nextAppointment.client_id} role="barber" />
             </div>
           </div>
         </div>
@@ -181,7 +194,12 @@ function AppointmentCard({
           <p className="text-sm font-bold text-text-primary">
             {startDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
           </p>
-          <p className="text-[10px] text-muted-foreground">{appt.duration_minutes}min</p>
+          {startDt.toDateString() !== new Date().toDateString() && (
+            <p className="text-[9px] text-accent-main font-semibold leading-none mt-[2px] uppercase">
+              {startDt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+            </p>
+          )}
+          <p className="text-[10px] text-muted-foreground mt-[2px]">{appt.duration_minutes}min</p>
         </div>
 
         {/* Divider */}
@@ -189,7 +207,10 @@ function AppointmentCard({
 
         {/* Content */}
         <div className="flex-1 min-w-0 space-y-1">
-          <p className="text-sm font-bold text-text-primary truncate">{appt.client.full_name}</p>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-sm font-bold text-text-primary truncate">{appt.client.full_name}</span>
+            <ConfirmationStageBadge stage={appt.confirmacao_etapa} />
+          </div>
           <div className="flex items-center gap-3">
             <p className="text-xs text-muted-foreground truncate">{appt.service.name}</p>
             <span className="text-xs font-bold text-text-primary/40">·</span>
@@ -212,7 +233,7 @@ function AppointmentCard({
 
         {/* Actions panel: visible by default on mobile, hover-only on sm and up */}
         <div className="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-          <QuickStatusButton status={appt.status} appointmentId={appt.id} />
+          <QuickStatusButton status={appt.status} appointmentId={appt.id} clientId={appt.client_id} role="barber" />
           {canEdit && (
             <>
               <button

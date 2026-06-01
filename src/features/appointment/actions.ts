@@ -12,6 +12,14 @@ import {
 import { checkTimeConflict } from './queries'
 import { enviarMensagem, isEvolutionConfigured } from '@/lib/evolution'
 
+function parseLocalTime(timeStr: string): Date {
+  if (!timeStr) return new Date()
+  if (timeStr.includes('Z') || /[-+]\d{2}:\d{2}$/.test(timeStr)) {
+    return new Date(timeStr)
+  }
+  return new Date(`${timeStr}-03:00`)
+}
+
 async function notificarAgendamento(
   clientId: string,
   barberId: string,
@@ -110,7 +118,7 @@ export async function createAppointment(formData: FormData) {
 
   if (!service) return { error: 'Serviço não encontrado' }
 
-  const startDt = new Date(start_time)
+  const startDt = parseLocalTime(start_time)
   const endDt = new Date(startDt.getTime() + service.duration_minutes * 60 * 1000)
 
   // Verificar conflito de horário
@@ -198,7 +206,7 @@ export async function updateAppointment(formData: FormData) {
         .single()
 
       if (svc) {
-        const startDt = new Date(start_time)
+        const startDt = parseLocalTime(start_time)
         const endDt = new Date(startDt.getTime() + svc.duration_minutes * 60 * 1000)
 
         if (targetBarberId) {
@@ -225,7 +233,7 @@ export async function updateAppointment(formData: FormData) {
     if (barber_id) updatePayload.barber_id = barber_id
     if (service_id) updatePayload.service_id = service_id
   } else if (start_time) {
-    updatePayload.start_time = start_time
+    updatePayload.start_time = parseLocalTime(start_time).toISOString()
   }
 
   const { error } = await (supabaseAdmin
@@ -375,14 +383,62 @@ export async function createClientAppointment(formData: FormData) {
     return { error: 'Dados inválidos', issues: parsed.error.flatten() }
   }
 
-  const { data: clientRow } = await supabaseAdmin
+  const { data: clientRows } = await supabaseAdmin
     .from('clients')
     .select('id')
     .eq('organization_id', user.organization_id)
     .eq('profile_id', user.id)
-    .single()
+    .limit(1)
 
-  if (!clientRow) return { error: 'Perfil de cliente não encontrado. Fale com a barbearia.' }
+  let clientRow = clientRows?.[0] || null
+
+  if (!clientRow) {
+    const phoneFilter = user.phone ? `phone.eq.${user.phone}` : ''
+    const emailFilter = user.email ? `email.eq.${user.email}` : ''
+    const orFilter = [phoneFilter, emailFilter].filter(Boolean).join(',')
+
+    if (orFilter) {
+      const { data: matchedClient } = await supabaseAdmin
+        .from('clients')
+        .select('id')
+        .eq('organization_id', user.organization_id)
+        .or(orFilter)
+        .is('profile_id', null)
+        .limit(1)
+        .maybeSingle()
+
+      if (matchedClient) {
+        await supabaseAdmin
+          .from('clients')
+          .update({ profile_id: user.id })
+          .eq('id', matchedClient.id)
+        clientRow = { id: matchedClient.id }
+      }
+    }
+
+    if (!clientRow) {
+      const { data: newClient } = await supabaseAdmin
+        .from('clients')
+        .insert({
+          organization_id: user.organization_id,
+          profile_id: user.id,
+          full_name: user.full_name || 'Cliente',
+          email: user.email || null,
+          phone: user.phone || null,
+          status: 'active',
+          total_visits: 0,
+          total_spent_cents: 0
+        })
+        .select('id')
+        .single()
+
+      if (newClient) {
+        clientRow = { id: newClient.id }
+      }
+    }
+  }
+
+  if (!clientRow) return { error: 'Perfil de cliente não pôde ser criado. Fale com a barbearia.' }
 
   const { service_id, barber_id, start_time, notes } = parsed.data
 
@@ -394,7 +450,7 @@ export async function createClientAppointment(formData: FormData) {
 
   if (!service) return { error: 'Serviço não encontrado' }
 
-  const startDt = new Date(start_time)
+  const startDt = parseLocalTime(start_time)
 
   if (startDt <= new Date()) {
     return { error: 'Não é possível agendar em data/hora passada' }

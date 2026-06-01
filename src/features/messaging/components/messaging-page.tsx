@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { ConversationPanel, ChatPanel } from './chat-interface'
 import { BroadcastModal } from './broadcast-modal'
 import { TemplateModal } from './template-modal'
+import { useRealtimeMessages } from '../hooks/use-realtime-messages'
+import { markMessagesAsReadAction } from '../actions'
 import { cn } from '@/lib/utils/cn'
 import type { Message, MessageConversation, MessagingStats, ClientForMessage, MessageTemplate } from '../types'
 import { 
@@ -23,7 +25,7 @@ interface MessagingPageProps {
   stats: MessagingStats
   clients: ClientForMessage[]
   templates: MessageTemplate[]
-  orgName: string
+  org: any
   isAdmin: boolean
   initialMessages?: Message[]
 }
@@ -33,7 +35,7 @@ export function MessagingPage({
   stats,
   clients,
   templates,
-  orgName,
+  org,
   isAdmin,
 }: MessagingPageProps) {
   const router = useRouter()
@@ -51,6 +53,9 @@ export function MessagingPage({
     setSelectedClientPhone(phone)
     setLoadingMessages(true)
 
+    // Marca as mensagens do cliente como lidas no banco
+    markMessagesAsReadAction(clientId)
+
     try {
       const res = await fetch(`/api/messaging/messages?clientId=${clientId}`)
       if (res.ok) {
@@ -63,6 +68,24 @@ export function MessagingPage({
       setLoadingMessages(false)
     }
   }
+
+  // ── Realtime: escuta novas mensagens do cliente selecionado ────────────────
+  useRealtimeMessages(
+    selectedClientId,
+    useCallback((newMsg) => {
+      setCurrentMessages(prev => {
+        // Evita duplicatas (mensagem enviada localmente já está na lista)
+        if (prev.some(m => m.id === newMsg.id)) return prev
+
+        // Se a mensagem foi recebida, marca como lida imediatamente
+        if (newMsg.direction === 'received' && selectedClientId) {
+          markMessagesAsReadAction(selectedClientId)
+        }
+
+        return [...prev, newMsg]
+      })
+    }, [selectedClientId])
+  )
 
   const handleRefresh = () => {
     router.refresh()
@@ -122,11 +145,11 @@ export function MessagingPage({
       </div>
 
       {/* Main Chat Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] overflow-hidden min-h-[320px] h-[calc(100vh-400px)]">
+      <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] bg-bg-sidebar border-[0.5px] border-border-main rounded-[10px] overflow-hidden min-h-[320px] h-[calc(100vh-400px)]">
         {/* Left Column: Conversations */}
         <div className={cn(
-          "border-r-[0.5px] border-border-main flex flex-col bg-bg-sidebar",
-          selectedClientId ? "hidden lg:flex" : "flex"
+          "border-r-[0.5px] border-border-main bg-bg-sidebar flex-col h-full min-h-0",
+          selectedClientId ? "hidden md:flex" : "flex"
         )}>
           <ConversationPanel
             conversations={conversations}
@@ -138,8 +161,8 @@ export function MessagingPage({
 
         {/* Right Column: Central de Atendimento */}
         <div className={cn(
-          "flex flex-col bg-bg-sidebar",
-          selectedClientId ? "flex" : "hidden lg:flex"
+          "bg-bg-sidebar flex-col h-full min-h-0",
+          selectedClientId ? "flex" : "hidden md:flex"
         )}>
           {selectedClientId ? (
             loadingMessages ? (
@@ -153,6 +176,7 @@ export function MessagingPage({
                 clientName={selectedClientName}
                 clientPhone={selectedClientPhone}
                 onBack={() => setSelectedClientId(null)}
+                onMessageSent={() => handleSelectClient(selectedClientId, selectedClientName, selectedClientPhone)}
               />
             )
           ) : (
@@ -175,7 +199,7 @@ export function MessagingPage({
       <BroadcastModal
         isOpen={isBroadcastOpen}
         onClose={() => setIsBroadcastOpen(false)}
-        orgName={orgName}
+        orgName={org?.name || 'Barbearia'}
         templates={templates}
       />
       <TemplateModal
@@ -183,7 +207,7 @@ export function MessagingPage({
         onClose={() => setIsTemplateOpen(false)}
         clients={clients}
         templates={templates}
-        orgName={orgName}
+        org={org}
         onRefresh={handleRefresh}
       />
     </div>
