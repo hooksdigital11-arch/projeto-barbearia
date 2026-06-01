@@ -1,14 +1,14 @@
 import 'server-only'
 import { cache } from 'react'
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireUser } from '@/lib/auth/require-auth'
+import { ComandaItem } from './types'
 
 // Buscar comanda ativa de um cliente (não paga)
 export const getActiveComanda = cache(async (clientId: string) => {
   const user = await requireUser()
-  const supabase = await createClient()
 
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from('comanda_items')
     .select(`
       *,
@@ -30,7 +30,6 @@ export const getComandasHistory = cache(async (filters?: {
   barberId?: string
 }) => {
   const user = await requireUser()
-  const supabase = await createClient()
 
   const now = new Date()
   let startDate: string
@@ -45,11 +44,11 @@ export const getComandasHistory = cache(async (filters?: {
     startDate = monthStart.toISOString()
   }
 
-  let query = supabase
+  let query = supabaseAdmin
     .from('comanda_items')
     .select(`
       *,
-      client:clients(id, full_name),
+      client:clients(id, full_name, phone),
       barber:profiles!comanda_items_barber_id_fkey(id, full_name)
     `)
     .eq('organization_id', user.organization_id)
@@ -69,11 +68,10 @@ export const getComandasHistory = cache(async (filters?: {
 // KPI stats de comandas (admin)
 export const getComandasStats = cache(async () => {
   const user = await requireUser()
-  const supabase = await createClient()
 
   const today = new Date().toISOString().split('T')[0]
 
-  const { data: todayItems } = await supabase
+  const { data: todayItems } = await supabaseAdmin
     .from('comanda_items')
     .select('total_cents,paid,client_id')
     .eq('organization_id', user.organization_id)

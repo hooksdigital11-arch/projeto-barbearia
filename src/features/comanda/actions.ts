@@ -1,7 +1,7 @@
 'use server'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireUser } from '@/lib/auth/require-auth'
 import { addItemSchema, closeComandaSchema } from './schemas'
 import { addStampAfterAppointment } from '@/features/loyalty/actions'
@@ -13,7 +13,6 @@ import { getActiveComanda } from './queries'
 export async function addComandaItem(formData: FormData) {
   const user = await requireUser()
   if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
-  const supabase = await createClient()
 
   const parsed = addItemSchema.safeParse({
     client_id: formData.get('client_id'),
@@ -45,9 +44,7 @@ export async function addComandaItem(formData: FormData) {
     paid: false,
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client: any = supabase
-  const { error } = await client.from('comanda_items').insert(insertData)
+  const { error } = await supabaseAdmin.from('comanda_items').insert(insertData)
 
   if (error) {
     console.error('Error adding comanda item:', error)
@@ -64,9 +61,8 @@ export async function removeComandaItem(itemId: string) {
   if (!z.string().uuid().safeParse(itemId).success) return { error: 'ID inválido' }
   const user = await requireUser()
   if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
-  const supabase = await createClient()
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('comanda_items')
     .delete()
     .eq('id', itemId)
@@ -83,7 +79,6 @@ export async function removeComandaItem(itemId: string) {
 export async function closeComanda(formData: FormData) {
   const user = await requireUser()
   if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
-  const supabase = await createClient()
 
   const parsed = closeComandaSchema.safeParse({
     client_id: formData.get('client_id'),
@@ -95,11 +90,9 @@ export async function closeComanda(formData: FormData) {
   if (!parsed.success) return { error: 'Dados inválidos' }
 
   const now = new Date().toISOString()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client: any = supabase
 
   // 1. Buscar todos os itens não pagos do cliente
-  const { data: items } = await client
+  const { data: items } = await supabaseAdmin
     .from('comanda_items')
     .select('*')
     .eq('organization_id', user.organization_id)
@@ -117,7 +110,7 @@ export async function closeComanda(formData: FormData) {
   }
 
   // 2. Marcar todos como pagos
-  const { error: payError } = await client
+  const { error: payError } = await supabaseAdmin
     .from('comanda_items')
     .update(updateData)
     .eq('organization_id', user.organization_id)
@@ -128,7 +121,7 @@ export async function closeComanda(formData: FormData) {
 
   // 3. Atualizar agendamento para completed — valida que pertence à org antes
   if (parsed.data.appointment_id) {
-    const { data: apptBefore } = await supabase
+    const { data: apptBefore } = await supabaseAdmin
       .from('appointments')
       .select('status, client_id')
       .eq('id', parsed.data.appointment_id)
@@ -141,7 +134,7 @@ export async function closeComanda(formData: FormData) {
     }
 
     if (apptBefore) {
-      await client
+      await supabaseAdmin
         .from('appointments')
         .update({ status: 'completed' })
         .eq('id', parsed.data.appointment_id)
@@ -154,7 +147,7 @@ export async function closeComanda(formData: FormData) {
           total_visits: number | null
           total_spent_cents: number | null
         }
-        const { data: clientObj } = await client
+        const { data: clientObj } = await supabaseAdmin
           .from('clients')
           .select('total_visits, total_spent_cents')
           .eq('id', parsed.data.client_id)
@@ -162,7 +155,7 @@ export async function closeComanda(formData: FormData) {
           .single() as { data: ClientStatsRow | null }
 
         if (clientObj) {
-          await client
+          await supabaseAdmin
             .from('clients')
             .update({
               total_visits: (clientObj.total_visits || 0) + 1,
