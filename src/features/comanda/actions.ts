@@ -106,6 +106,64 @@ export async function closeComanda(formData: FormData) {
     return { error: 'Nenhum item na comanda' }
   }
 
+  let appointmentId = parsed.data.appointment_id
+
+  // 1.5. Se não há agendamento pré-existente e há serviços na comanda, criamos um agendamento pontual
+  if (!appointmentId) {
+    const serviceItems = items.filter(i => i.item_type === 'service')
+    const firstServiceItem = serviceItems[0]
+    if (firstServiceItem) {
+      try {
+        // Encontrar o serviço pelo nome na organização
+        const { data: serviceObj } = await supabaseAdmin
+          .from('services')
+          .select('id, duration_minutes')
+          .eq('organization_id', user.organization_id)
+          .eq('name', firstServiceItem.name)
+          .limit(1)
+          .maybeSingle()
+
+        if (serviceObj) {
+          // Criar agendamento temporário como 'in_progress' para disparar trigger na conclusão
+          const totalCents = serviceItems.reduce((acc, i) => acc + i.total_cents, 0)
+          const { data: newAppt, error: apptError } = await supabaseAdmin
+            .from('appointments')
+            .insert({
+              organization_id: user.organization_id,
+              client_id: parsed.data.client_id,
+              barber_id: firstServiceItem.barber_id || user.id,
+              service_id: serviceObj.id,
+              start_time: now,
+              end_time: now,
+              duration_minutes: serviceObj.duration_minutes || 30,
+              price_cents: totalCents,
+              status: 'in_progress'
+            })
+            .select('id')
+            .single()
+
+          if (!apptError && newAppt) {
+            appointmentId = newAppt.id
+          } else {
+            console.error('[CLOSE_COMANDA] Failed to auto-create appointment:', apptError)
+          }
+        }
+      } catch (err) {
+        console.error('[CLOSE_COMANDA] Error resolving service for auto-appointment:', err)
+      }
+    }
+  }
+
+  // 1.8. Vincular todos os itens da comanda atual a este agendamento (garante baixa de estoque e auditoria completa)
+  if (appointmentId) {
+    await supabaseAdmin
+      .from('comanda_items')
+      .update({ appointment_id: appointmentId })
+      .eq('organization_id', user.organization_id)
+      .eq('client_id', parsed.data.client_id)
+      .eq('paid', false)
+  }
+
   const updateData = {
     paid: true,
     paid_at: now,
@@ -123,11 +181,11 @@ export async function closeComanda(formData: FormData) {
   if (payError) return { error: 'Erro ao processar pagamento' }
 
   // 3. Atualizar agendamento para completed — valida que pertence à org antes
-  if (parsed.data.appointment_id) {
+  if (appointmentId) {
     const { data: apptBefore } = await supabaseAdmin
       .from('appointments')
       .select('status, client_id')
-      .eq('id', parsed.data.appointment_id)
+      .eq('id', appointmentId)
       .eq('organization_id', user.organization_id)
       .single() as { data: { status: string; client_id: string } | null }
 
@@ -140,7 +198,7 @@ export async function closeComanda(formData: FormData) {
       await supabaseAdmin
         .from('appointments')
         .update({ status: 'completed' })
-        .eq('id', parsed.data.appointment_id)
+        .eq('id', appointmentId)
         .eq('organization_id', user.organization_id)
 
       if (apptBefore.status !== 'completed') {
@@ -173,7 +231,7 @@ export async function closeComanda(formData: FormData) {
           await addStampAfterAppointment(
             user.organization_id,
             parsed.data.client_id,
-            parsed.data.appointment_id,
+            appointmentId,
             totalCents
           )
         } catch (err) {
