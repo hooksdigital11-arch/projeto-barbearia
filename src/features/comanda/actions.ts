@@ -107,6 +107,27 @@ export async function closeComanda(formData: FormData) {
   }
 
   let appointmentId = parsed.data.appointment_id
+ 
+  // 1.3. Se não há agendamento explicitamente fornecido, buscar um agendamento existente (pendente ou em andamento) para este cliente
+  if (!appointmentId) {
+    try {
+      const { data: existingAppts } = await supabaseAdmin
+        .from('appointments')
+        .select('id, status')
+        .eq('organization_id', user.organization_id)
+        .eq('client_id', parsed.data.client_id)
+        .in('status', ['scheduled', 'in_progress'])
+        .order('start_time', { ascending: true })
+
+      if (existingAppts && existingAppts.length > 0) {
+        // Priorizar o que estiver 'in_progress', caso contrário o mais antigo 'scheduled'
+        const inProgress = existingAppts.find(a => a.status === 'in_progress')
+        appointmentId = inProgress ? inProgress.id : existingAppts[0]?.id
+      }
+    } catch (err) {
+      console.error('[CLOSE_COMANDA] Error looking up existing appointment:', err)
+    }
+  }
 
   // 1.5. Se não há agendamento pré-existente e há serviços na comanda, criamos um agendamento pontual
   if (!appointmentId) {
