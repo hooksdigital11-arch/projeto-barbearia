@@ -74,70 +74,17 @@ export function QuickStatusButton({
     startTransition(async () => {
       // Se for a ação de finalizar, redirecionamos para o checkout da comanda
       if (status === 'in_progress') {
-        let activeClientId = clientId
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
-
-        try {
-          if (!activeClientId) {
-            const { data } = await (supabase
-              .from('appointments')
-              .select('client_id')
-              .eq('id', appointmentId)
-              .single() as any)
-            if (data?.client_id) {
-              activeClientId = data.client_id
-            }
-          }
-
-          if (activeClientId) {
-            // Buscar detalhes do agendamento para obter serviço e preço
-            const { data: appt } = await (supabase
-              .from('appointments')
-              .select(`
-                id,
-                price_cents,
-                service:services(id, name, price_cents)
-              `)
-              .eq('id', appointmentId)
-              .single() as any)
-
-            if (appt && appt.service) {
-              const { getActiveComandaAction, addComandaItem } = await import('@/features/comanda/actions')
-              const comandaRes = await getActiveComandaAction(activeClientId)
-              
-              let hasService = false
-              if (comandaRes.success && comandaRes.data) {
-                hasService = (comandaRes.data as any[]).some(
-                  (item) => item.appointment_id === appt.id && item.item_type === 'service'
-                )
-              }
-
-              if (!hasService) {
-                const formData = new FormData()
-                formData.append('client_id', activeClientId)
-                formData.append('appointment_id', appt.id)
-                formData.append('item_type', 'service')
-                formData.append('name', appt.service.name || 'Serviço')
-                formData.append('quantity', '1')
-                formData.append('unit_price_cents', String(appt.price_cents || appt.service.price_cents || 0))
-                
-                const addRes = await addComandaItem(formData)
-                if (addRes.error) {
-                  console.error('[STATUS_BUTTON] Error adding comanda item:', addRes.error)
-                }
-              }
-            }
-          }
-        } catch (err) {
-          console.error('[STATUS_BUTTON] Failed to pre-add service to comanda:', err)
+        const { prepareComandaForAppointment } = await import('@/features/comanda/actions')
+        const res = await prepareComandaForAppointment(appointmentId)
+        if (res.error) {
+          toast.error(res.error)
+          return
         }
-
-        if (activeClientId) {
-          router.push(`/${role}/comanda?clientId=${activeClientId}&appointmentId=${appointmentId}`)
+        if (res.success && res.clientId) {
+          router.push(`/${role}/comanda?clientId=${res.clientId}&appointmentId=${appointmentId}`)
           return
         } else {
-          toast.error('Não foi possível carregar a comanda: Cliente inválido')
+          toast.error('Não foi possível carregar a comanda')
           return
         }
       }

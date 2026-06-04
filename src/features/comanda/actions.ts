@@ -336,3 +336,69 @@ export async function getClientNameAction(clientId: string) {
   }
 }
 
+export async function prepareComandaForAppointment(appointmentId: string) {
+  const user = await requireUser()
+  if (!['admin', 'barber'].includes(user.role)) return { error: 'Sem permissão' }
+
+  if (!z.string().uuid().safeParse(appointmentId).success) {
+    return { error: 'ID de agendamento inválido' }
+  }
+
+  try {
+    // 1. Buscar o agendamento de forma administrativa para garantir bypass de RLS
+    const { data: appt, error: apptError } = await supabaseAdmin
+      .from('appointments')
+      .select(`
+        id,
+        client_id,
+        price_cents,
+        service:services!appointments_service_id_fkey(id, name, price_cents)
+      `)
+      .eq('id', appointmentId)
+      .eq('organization_id', user.organization_id)
+      .single() as any
+
+    if (apptError || !appt) {
+      console.error('[PREPARE_COMANDA] Appointment not found:', apptError)
+      return { error: 'Agendamento não encontrado' }
+    }
+
+    if (!appt.service) {
+      return { error: 'Serviço do agendamento não encontrado' }
+    }
+
+    // 2. Buscar comanda ativa
+    const activeItemsRes = await getActiveComandaAction(appt.client_id)
+    if ('error' in activeItemsRes && activeItemsRes.error) {
+      return { error: activeItemsRes.error }
+    }
+    const activeItems = (activeItemsRes.data || []) as ComandaItem[]
+
+    // 3. Verificar se já tem o serviço associado a esse agendamento
+    const hasService = activeItems.some(
+      (item) => item.appointment_id === appt.id && item.item_type === 'service'
+    )
+
+    if (!hasService) {
+      const formData = new FormData()
+      formData.append('client_id', appt.client_id)
+      formData.append('appointment_id', appt.id)
+      formData.append('item_type', 'service')
+      formData.append('name', appt.service.name || 'Serviço')
+      formData.append('quantity', '1')
+      formData.append('unit_price_cents', String(appt.price_cents || appt.service.price_cents || 0))
+
+      const addRes = await addComandaItem(formData)
+      if (addRes.error) {
+        return { error: addRes.error }
+      }
+    }
+
+    return { success: true, clientId: appt.client_id }
+  } catch (err: any) {
+    console.error('[PREPARE_COMANDA] Error:', err)
+    return { error: err.message || 'Erro ao preparar comanda' }
+  }
+}
+
+
