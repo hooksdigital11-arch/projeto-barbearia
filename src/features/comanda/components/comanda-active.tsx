@@ -119,7 +119,7 @@ export function ComandaActive({
           <div className="space-y-3">
             {items.length > 0 ? (
               items.map((item, idx) => (
-                <ComandaItemRow key={item.id} item={item} index={idx} />
+                <ComandaItemRow key={item.id} item={item} index={idx} onRemoved={onRefresh} />
               ))
             ) : (
               <div className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-[10px] min-h-[220px] flex flex-col items-center justify-center p-8 gap-3">

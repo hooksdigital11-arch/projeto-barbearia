@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useTransition, useState } from 'react'
 import { toast } from 'sonner'
 import {
   Ticket,
@@ -15,7 +15,7 @@ import {
 import { PageTitle } from '@/components/shared/page-title'
 import { QueueTimer } from './queue-timer'
 import { WaitingListRealtime } from './waiting-list-realtime'
-import { confirmQueueSpot, leaveQueue, expireAndSkip } from '../actions'
+import { confirmQueueSpot, leaveQueue, expireAndSkip, joinQueue } from '../actions'
 import type { WaitingListEntry, ServiceOption, BarberOption } from '../types'
 
 interface WaitingListPageClientProps {
@@ -24,13 +24,47 @@ interface WaitingListPageClientProps {
   services: ServiceOption[]
   barbers: BarberOption[]
   organizationId: string
+  clientPhone: string
 }
 
 export function WaitingListPageClient({
   entry,
+  clientId,
+  services,
+  barbers,
   organizationId,
+  clientPhone,
 }: WaitingListPageClientProps) {
   const [isPending, startTransition] = useTransition()
+
+  const [selectedService, setSelectedService] = useState('')
+  const [selectedBarber, setSelectedBarber] = useState('')
+  const [clientPhoneState, setClientPhoneState] = useState(clientPhone || '')
+
+  function handleJoinQueue(e: React.FormEvent) {
+    e.preventDefault()
+    if (!clientId) {
+      toast.error('Erro: Cliente não identificado')
+      return
+    }
+
+    startTransition(async () => {
+      const formData = new FormData()
+      formData.append('client_id', clientId)
+      formData.append('service_id', selectedService)
+      if (selectedBarber) {
+        formData.append('barber_id', selectedBarber)
+      }
+      formData.append('phone', clientPhoneState)
+
+      const result = await joinQueue(formData)
+      if (result.error) {
+        toast.error(result.error)
+      } else {
+        toast.success(`Você entrou na fila! Posição #${result.position}`)
+      }
+    })
+  }
 
   function handleConfirm() {
     if (!entry) return
@@ -275,21 +309,101 @@ export function WaitingListPageClient({
 
       {/* CASO: Cliente NÃO está na fila */}
       {!entry && (
-        <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] p-12 text-center space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="inline-flex p-6 rounded-full bg-white/5">
-            <Queue size={48} weight="duotone" className="text-text-secondary" />
+        <div className="rounded-3xl border border-border-main bg-[#141414] p-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-md mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-2xl bg-accent-cyan/10">
+              <Queue size={32} weight="duotone" className="text-accent-cyan" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-text-primary font-syne">
+                📋 Sem horário hoje?
+              </h2>
+              <p className="text-sm text-text-secondary">
+                Entre na fila de espera e avisamos por WhatsApp
+              </p>
+            </div>
           </div>
-          <div className="space-y-2 max-w-sm mx-auto">
-            <h3 className="text-xl font-bold text-text-primary font-syne">
-              📋 Sem horário hoje?
-            </h3>
-            <p className="text-sm text-text-secondary">
-              Entre na fila de espera e avisamos quando abrir uma vaga!
-            </p>
-          </div>
-          <p className="text-xs text-text-secondary/60">
-            Peça ao barbeiro ou atendente para adicioná-lo à fila.
-          </p>
+
+          <form onSubmit={handleJoinQueue} className="space-y-6">
+            {/* Serviço */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-medium text-text-secondary uppercase tracking-[0.12em] block">
+                Serviço desejado <span className="text-accent-cyan">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  value={selectedService}
+                  onChange={(e) => setSelectedService(e.target.value)}
+                  required
+                  className="w-full appearance-none bg-white/5 border border-white/10 rounded-2xl px-[18px] pr-[40px] py-[14px] text-[13px] font-medium text-text-primary tracking-[0.03em] outline-none transition-all focus:border-accent-cyan/40 uppercase cursor-pointer"
+                >
+                  <option value="" className="bg-[#141414]">SELECIONAR SERVIÇO...</option>
+                  {services.map(s => (
+                    <option key={s.id} value={s.id} className="bg-[#141414]">
+                      {s.name.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-[16px] top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary">
+                  <Scissors size={16} className="opacity-50" />
+                </div>
+              </div>
+            </div>
+
+            {/* Barbeiro */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-medium text-text-secondary uppercase tracking-[0.12em] block">
+                Preferência de Barbeiro
+              </label>
+              <div className="relative">
+                <select
+                  value={selectedBarber}
+                  onChange={(e) => setSelectedBarber(e.target.value)}
+                  className="w-full appearance-none bg-white/5 border border-white/10 rounded-2xl px-[18px] pr-[40px] py-[14px] text-[13px] font-medium text-text-primary tracking-[0.03em] outline-none transition-all focus:border-accent-cyan/40 uppercase cursor-pointer"
+                >
+                  <option value="" className="bg-[#141414]">QUALQUER BARBEIRO</option>
+                  {barbers.map(b => (
+                    <option key={b.id} value={b.id} className="bg-[#141414]">
+                      {b.full_name.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-[16px] top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary">
+                  <User size={16} className="opacity-50" />
+                </div>
+              </div>
+            </div>
+
+            {/* WhatsApp */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-medium text-text-secondary uppercase tracking-[0.12em] block">
+                WhatsApp para Notificação <span className="text-accent-cyan">*</span>
+              </label>
+              <div className="relative flex items-center">
+                <div className="absolute left-[16px] pointer-events-none text-text-secondary">
+                  <WhatsappLogo size={18} className="text-emerald-400" />
+                </div>
+                <input
+                  type="tel"
+                  value={clientPhoneState}
+                  onChange={(e) => setClientPhoneState(e.target.value)}
+                  placeholder="(11) 98765-4321"
+                  required
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl pl-[46px] pr-[18px] py-[14px] text-[13px] font-medium text-text-primary outline-none transition-all focus:border-accent-cyan/40 placeholder:text-text-secondary/35"
+                />
+              </div>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isPending || !selectedService || !clientPhoneState}
+              className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-accent-cyan text-black font-bold text-base hover:bg-opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-accent-cyan/20 uppercase tracking-wider"
+            >
+              <Ticket size={20} weight="bold" />
+              {isPending ? 'ENTRANDO NA FILA...' : 'ENTRAR NA FILA DE ESPERA'}
+            </button>
+          </form>
         </div>
       )}
     </>

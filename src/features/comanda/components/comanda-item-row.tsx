@@ -11,9 +11,10 @@ import { removeComandaItem } from '../actions'
 interface ComandaItemRowProps {
   item: ComandaItem
   index?: number
+  onRemoved?: () => void
 }
 
-export function ComandaItemRow({ item, index = 0 }: ComandaItemRowProps) {
+export function ComandaItemRow({ item, index = 0, onRemoved }: ComandaItemRowProps) {
   const [isPending, startTransition] = useTransition()
 
   const handleRemove = () => {
@@ -23,6 +24,7 @@ export function ComandaItemRow({ item, index = 0 }: ComandaItemRowProps) {
         toast.error(result.error)
       } else {
         toast.success('Item removido')
+        onRemoved?.()
       }
     })
   }

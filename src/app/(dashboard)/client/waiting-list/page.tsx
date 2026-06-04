@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { requireClient } from '@/lib/auth/require-auth'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import {
   getClientQueuePosition,
   getClientIdForProfile,
@@ -29,6 +30,19 @@ async function Content() {
   // Buscar posição na fila (se tiver clientId)
   const entry = clientId ? await getClientQueuePosition(clientId) : null
 
+  // Obter o telefone padrão do cliente
+  let clientPhone = user.phone || ''
+  if (clientId) {
+    const { data: clientData } = await supabaseAdmin
+      .from('clients')
+      .select('phone')
+      .eq('id', clientId)
+      .maybeSingle()
+    if (clientData?.phone) {
+      clientPhone = clientData.phone
+    }
+  }
+
   return (
     <WaitingListPageClient
       entry={entry}
@@ -36,6 +50,7 @@ async function Content() {
       services={services}
       barbers={barbers}
       organizationId={user.organization_id}
+      clientPhone={clientPhone}
     />
   )
 }

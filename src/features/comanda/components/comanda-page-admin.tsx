@@ -50,6 +50,7 @@ interface ComandaPageAdminProps {
   initialPeriod?: Period
   appointments: AdminAppointment[]
   clients: ClientOption[]
+  urlAppointment?: AdminAppointment | null
 }
 
 const PERIODS: { id: Period; label: string }[] = [
@@ -64,6 +65,7 @@ export function ComandaPageAdmin({
   initialPeriod = 'today',
   appointments,
   clients,
+  urlAppointment,
 }: ComandaPageAdminProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -112,19 +114,45 @@ export function ComandaPageAdmin({
             }
           }
 
-          const appt = appointments.find(a => a.id === urlAppointmentId)
+          const appt = urlAppointment || appointments.find(a => a.id === urlAppointmentId)
 
           const result = await getActiveComandaAction(urlClientId)
           if ('error' in result && result.error) {
             toast.error(result.error)
             return
           }
-          const activeItems = result.data || []
-          setItems(activeItems as ComandaItem[])
+          let activeItems = (result.data || []) as ComandaItem[]
+
+          // Adicionar o serviço do agendamento automaticamente se não estiver na comanda
+          if (appt && appt.service) {
+            const hasService = activeItems.some(
+              (item) => item.appointment_id === appt.id && item.item_type === 'service'
+            )
+            if (!hasService) {
+              const { addComandaItem } = await import('../actions')
+              const formData = new FormData()
+              formData.append('client_id', urlClientId)
+              formData.append('appointment_id', appt.id)
+              formData.append('item_type', 'service')
+              formData.append('name', appt.service.name || 'Serviço')
+              formData.append('quantity', '1')
+              formData.append('unit_price_cents', String(appt.price_cents || appt.service.price_cents || 0))
+              
+              const addRes = await addComandaItem(formData)
+              if (addRes.success) {
+                const refetched = await getActiveComandaAction(urlClientId)
+                if ('data' in refetched && refetched.data) {
+                  activeItems = refetched.data as ComandaItem[]
+                }
+              }
+            }
+          }
+
+          setItems(activeItems)
           setSelectedClient({
             id: urlClientId,
             name: clientName,
-            appointment: appt || null
+            appointment: (appt as any) || null
           })
         } catch (err) {
           console.error(err)
@@ -136,7 +164,7 @@ export function ComandaPageAdmin({
       
       handleUrlClient()
     }
-  }, [urlClientId, urlAppointmentId, clients, appointments])
+  }, [urlClientId, urlAppointmentId, clients, appointments, urlAppointment])
 
   const clearUrlParams = () => {
     router.replace(pathname)
@@ -150,8 +178,34 @@ export function ComandaPageAdmin({
         toast.error(result.error)
         return
       }
-      const activeItems = result.data || []
-      setItems(activeItems as ComandaItem[])
+      let activeItems = (result.data || []) as ComandaItem[]
+
+      // Adicionar o serviço do agendamento automaticamente se não estiver na comanda
+      if (appt.service) {
+        const hasService = activeItems.some(
+          (item) => item.appointment_id === appt.id && item.item_type === 'service'
+        )
+        if (!hasService) {
+          const { addComandaItem } = await import('../actions')
+          const formData = new FormData()
+          formData.append('client_id', appt.client_id)
+          formData.append('appointment_id', appt.id)
+          formData.append('item_type', 'service')
+          formData.append('name', appt.service.name || 'Serviço')
+          formData.append('quantity', '1')
+          formData.append('unit_price_cents', String(appt.price_cents || appt.service.price_cents || 0))
+          
+          const addRes = await addComandaItem(formData)
+          if (addRes.success) {
+            const refetched = await getActiveComandaAction(appt.client_id)
+            if ('data' in refetched && refetched.data) {
+              activeItems = refetched.data as ComandaItem[]
+            }
+          }
+        }
+      }
+
+      setItems(activeItems)
       setSelectedClient({
         id: appt.client_id,
         name: appt.client?.full_name || 'Desconhecido',

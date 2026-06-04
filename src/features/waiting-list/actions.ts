@@ -226,7 +226,7 @@ export async function confirmQueueSpot(waitingListId: string) {
     return { error: 'Vaga expirada. O tempo para confirmação acabou.' }
   }
 
-  const { error } = await supabaseAdmin
+  const { error: updateError } = await supabaseAdmin
     .from('waiting_list')
     .update({
       status: 'confirmed',
@@ -234,9 +234,73 @@ export async function confirmQueueSpot(waitingListId: string) {
     })
     .eq('id', waitingListId)
 
-  if (error) {
-    console.error('[CONFIRM_SPOT]', error.message)
+  if (updateError) {
+    console.error('[CONFIRM_SPOT]', updateError.message)
     return { error: 'Erro ao confirmar vaga' }
+  }
+
+  // Criar agendamento correspondente no banco
+  try {
+    // 1. Buscar detalhes do serviço para duração e preço
+    const { data: service } = await supabaseAdmin
+      .from('services')
+      .select('duration_minutes, price_cents')
+      .eq('id', entry.service_id)
+      .single()
+
+    const duration = service?.duration_minutes || 30
+    const price = service?.price_cents || 0
+
+    const startTime = new Date()
+    const endTime = new Date(startTime.getTime() + duration * 60 * 1000)
+
+    // Definir barbeiro: preferência da entrada ou quem confirmou (se for barbeiro) ou primeiro barbeiro disponível
+    let finalBarberId = entry.barber_id
+    if (!finalBarberId && user.role === 'barber') {
+      finalBarberId = user.id
+    }
+    if (!finalBarberId) {
+      const { data: defaultBarber } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('organization_id', user.organization_id)
+        .eq('role', 'barber')
+        .limit(1)
+        .maybeSingle()
+      
+      if (defaultBarber) {
+        finalBarberId = defaultBarber.id
+      }
+    }
+
+    // 2. Criar agendamento
+    const { data: appointment, error: apptError } = await (supabaseAdmin
+      .from('appointments') as any)
+      .insert({
+        organization_id: user.organization_id,
+        client_id: entry.client_id,
+        service_id: entry.service_id,
+        barber_id: finalBarberId,
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        status: 'confirmed',
+        price_cents: price,
+        notes: 'Confirmado via fila de espera'
+      })
+      .select('id')
+      .single()
+
+    if (apptError || !appointment) {
+      console.error('[CONFIRM_SPOT] Erro ao criar agendamento:', apptError?.message)
+    } else {
+      // 3. Vincular o ID do agendamento à entrada da fila de espera
+      await supabaseAdmin
+        .from('waiting_list')
+        .update({ appointment_id: appointment.id })
+        .eq('id', waitingListId)
+    }
+  } catch (err) {
+    console.error('[CONFIRM_SPOT] Exceção ao criar agendamento:', err)
   }
 
   revalidateAll()

@@ -3,7 +3,7 @@ import { UserCircle } from '@phosphor-icons/react/dist/ssr'
 import { getLoyaltyConfig, getClientStamps } from '@/features/loyalty/queries'
 import { LoyaltyPageClient } from '@/features/loyalty/components/loyalty-page-client'
 import { requireClient } from '@/lib/auth/require-auth'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { getClientIdForProfile } from '@/features/waiting-list/queries'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default async function ClientLoyaltyPage() {
@@ -17,15 +17,10 @@ export default async function ClientLoyaltyPage() {
 async function LoyaltyContent() {
   const user = await requireClient()
 
-  // Buscar o client_id vinculado ao profile do usuário logado
-  const { data: client } = await supabaseAdmin
-    .from('clients')
-    .select('id')
-    .eq('organization_id', user.organization_id)
-    .eq('profile_id', user.id)
-    .single()
+  // Buscar o client_id vinculado ao profile de forma robusta (cria se necessário)
+  const clientId = await getClientIdForProfile()
 
-  if (!client) {
+  if (!clientId) {
     return (
       <div className="space-y-0 animate-in fade-in duration-700">
         <div className="mb-[20px]">
@@ -48,7 +43,7 @@ async function LoyaltyContent() {
 
   const [config, { balance, history }] = await Promise.all([
     getLoyaltyConfig(),
-    getClientStamps(client.id),
+    getClientStamps(clientId),
   ])
 
   return (
@@ -56,7 +51,7 @@ async function LoyaltyContent() {
       config={config}
       balance={balance}
       history={history}
-      clientId={client.id}
+      clientId={clientId}
     />
   )
 }

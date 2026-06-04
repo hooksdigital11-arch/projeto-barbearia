@@ -1,19 +1,20 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useTransition } from 'react'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Plus, Receipt, Clock, User, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { ComandaActive } from './comanda-active'
-import { getActiveComandaAction } from '../actions'
+import { getActiveComandaAction, getClientNameAction } from '../actions'
 import { ComandaItem } from '../types'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils/cn'
 
 interface BarberAppointment {
   id: string
   client_id: string
-  client: { full_name: string | null } | null
-  service: { name: string | null } | null
+  client: { id: string; full_name: string | null; phone: string | null } | null
+  service: { id: string; name: string | null; price_cents: number } | null
   start_time: string
   price_cents: number
 }
@@ -27,11 +28,17 @@ interface ClientOption {
 export function ComandaPageBarber({
   appointments,
   clients,
+  urlAppointment,
 }: {
   appointments: BarberAppointment[]
   clients: ClientOption[]
+  urlAppointment?: BarberAppointment | null
 }) {
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [isPending, startTransition] = useTransition()
+
   const [selectedClient, setSelectedClient] = useState<{
     id: string
     name: string
@@ -42,6 +49,82 @@ export function ComandaPageBarber({
   const [isClientModalOpen, setIsClientModalOpen] = useState(false)
   const [searchClientTerm, setSearchClientTerm] = useState('')
 
+  const urlClientId = searchParams.get('clientId')
+  const urlAppointmentId = searchParams.get('appointmentId')
+
+  // Handle URL Redirection Parameters (from Finalizar button click)
+  useEffect(() => {
+    if (urlClientId) {
+      const handleUrlClient = async () => {
+        setLoadingClientId(urlClientId)
+        try {
+          let clientName = 'Desconhecido'
+          const client = clients.find(c => c.id === urlClientId)
+          if (client) {
+            clientName = client.full_name
+          } else {
+            const res = await getClientNameAction(urlClientId)
+            if (res.success && res.name) {
+              clientName = res.name
+            }
+          }
+
+          const appt = urlAppointment || appointments.find(a => a.id === urlAppointmentId)
+
+          const result = await getActiveComandaAction(urlClientId)
+          if ('error' in result && result.error) {
+            toast.error(result.error)
+            return
+          }
+          let activeItems = (result.data || []) as ComandaItem[]
+
+          // Adicionar o serviço do agendamento automaticamente se não estiver na comanda
+          if (appt && appt.service) {
+            const hasService = activeItems.some(
+              (item) => item.appointment_id === appt.id && item.item_type === 'service'
+            )
+            if (!hasService) {
+              const { addComandaItem } = await import('../actions')
+              const formData = new FormData()
+              formData.append('client_id', urlClientId)
+              formData.append('appointment_id', appt.id)
+              formData.append('item_type', 'service')
+              formData.append('name', appt.service.name || 'Serviço')
+              formData.append('quantity', '1')
+              formData.append('unit_price_cents', String(appt.price_cents || appt.service.price_cents || 0))
+              
+              const addRes = await addComandaItem(formData)
+              if (addRes.success) {
+                const refetched = await getActiveComandaAction(urlClientId)
+                if ('data' in refetched && refetched.data) {
+                  activeItems = refetched.data as ComandaItem[]
+                }
+              }
+            }
+          }
+
+          setItems(activeItems)
+          setSelectedClient({
+            id: urlClientId,
+            name: clientName,
+            appointment: (appt as any) || null
+          })
+        } catch (err) {
+          console.error(err)
+          toast.error('Erro ao carregar comanda')
+        } finally {
+          setLoadingClientId(null)
+        }
+      }
+      
+      handleUrlClient()
+    }
+  }, [urlClientId, urlAppointmentId, clients, appointments, urlAppointment])
+
+  const clearUrlParams = () => {
+    router.replace(pathname)
+  }
+
   const handleSelectClient = async (appt: BarberAppointment) => {
     setLoadingClientId(appt.client_id)
     try {
@@ -50,8 +133,34 @@ export function ComandaPageBarber({
         toast.error(result.error)
         return
       }
-      const activeItems = result.data || []
-      setItems(activeItems as ComandaItem[])
+      let activeItems = (result.data || []) as ComandaItem[]
+
+      // Adicionar o serviço do agendamento automaticamente se não estiver na comanda
+      if (appt.service) {
+        const hasService = activeItems.some(
+          (item) => item.appointment_id === appt.id && item.item_type === 'service'
+        )
+        if (!hasService) {
+          const { addComandaItem } = await import('../actions')
+          const formData = new FormData()
+          formData.append('client_id', appt.client_id)
+          formData.append('appointment_id', appt.id)
+          formData.append('item_type', 'service')
+          formData.append('name', appt.service.name || 'Serviço')
+          formData.append('quantity', '1')
+          formData.append('unit_price_cents', String(appt.price_cents || appt.service.price_cents || 0))
+          
+          const addRes = await addComandaItem(formData)
+          if (addRes.success) {
+            const refetched = await getActiveComandaAction(appt.client_id)
+            if ('data' in refetched && refetched.data) {
+              activeItems = refetched.data as ComandaItem[]
+            }
+          }
+        }
+      }
+
+      setItems(activeItems)
       setSelectedClient({
         id: appt.client_id,
         name: appt.client?.full_name || 'Desconhecido',
@@ -112,7 +221,10 @@ export function ComandaPageBarber({
             name: selectedClient.appointment.service.name
           } : undefined
         } : null}
-        onBack={() => setSelectedClient(null)}
+        onBack={() => {
+          setSelectedClient(null)
+          clearUrlParams()
+        }}
       />
     )
   }

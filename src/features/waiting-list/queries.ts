@@ -137,13 +137,54 @@ export const getAvailableClients = cache(async (): Promise<ClientOption[]> => {
 export const getClientIdForProfile = cache(async (): Promise<string | null> => {
   const user = await requireUser()
 
-  const { data } = await supabaseAdmin
+  const { data: byProfile } = await supabaseAdmin
     .from('clients')
     .select('id')
     .eq('organization_id', user.organization_id)
-    .eq('email', user.email ?? '')
+    .eq('profile_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
-  return data?.id || null
+  if (byProfile?.id) return byProfile.id
+
+  const phoneFilter = user.phone ? `phone.eq.${user.phone}` : ''
+  const emailFilter = user.email ? `email.eq.${user.email}` : ''
+  const orFilter = [phoneFilter, emailFilter].filter(Boolean).join(',')
+
+  if (orFilter) {
+    const { data: matchedClient } = await supabaseAdmin
+      .from('clients')
+      .select('id')
+      .eq('organization_id', user.organization_id)
+      .or(orFilter)
+      .is('profile_id', null)
+      .limit(1)
+      .maybeSingle()
+
+    if (matchedClient) {
+      await supabaseAdmin
+        .from('clients')
+        .update({ profile_id: user.id })
+        .eq('id', matchedClient.id)
+      return matchedClient.id
+    }
+  }
+
+  // Se não achar nada, cria
+  const { data: newClient } = await supabaseAdmin
+    .from('clients')
+    .insert({
+      organization_id: user.organization_id,
+      profile_id: user.id,
+      full_name: user.full_name || 'Cliente',
+      email: user.email || null,
+      phone: user.phone || null,
+      status: 'active',
+      total_visits: 0,
+      total_spent_cents: 0
+    })
+    .select('id')
+    .maybeSingle()
+
+  return newClient?.id || null
 })
