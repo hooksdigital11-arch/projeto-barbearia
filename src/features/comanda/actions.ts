@@ -201,6 +201,48 @@ export async function closeComanda(formData: FormData) {
 
   if (payError) return { error: 'Erro ao processar pagamento' }
 
+  // 2.5. Dar baixa no estoque de produtos vendidos e registrar movimentações
+  try {
+    const productItems = items.filter(i => i.item_type === 'product' && i.inventory_id)
+    for (const item of productItems) {
+      if (item.inventory_id) {
+        // Buscar saldo atual do produto
+        const { data: prod } = await supabaseAdmin
+          .from('inventory')
+          .select('quantity')
+          .eq('id', item.inventory_id)
+          .eq('organization_id', user.organization_id)
+          .single()
+
+        if (prod) {
+          const newQty = Math.max(0, (prod.quantity || 0) - item.quantity)
+          
+          // Atualizar o estoque
+          await supabaseAdmin
+            .from('inventory')
+            .update({ quantity: newQty })
+            .eq('id', item.inventory_id)
+            .eq('organization_id', user.organization_id)
+
+          // Registrar a venda em inventory_movements para relatórios financeiros
+          const client: any = supabaseAdmin
+          await client
+            .from('inventory_movements')
+            .insert({
+              organization_id: user.organization_id,
+              inventory_id: item.inventory_id,
+              type: 'venda',
+              quantity: item.quantity,
+              unit_price_cents: item.unit_price_cents,
+              notes: `Venda automática via comanda do cliente`
+            })
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[CLOSE_COMANDA] Erro ao processar baixa de estoque:', err)
+  }
+
   // 3. Atualizar agendamento para completed — valida que pertence à org antes
   if (appointmentId) {
     const { data: apptBefore } = await supabaseAdmin
