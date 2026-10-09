@@ -1,37 +1,40 @@
-# Barbearia SaaS — Arquitetura & Stack 2026
+# Barbearia SaaS
 
-Bem-vindo ao projeto **Barbearia SaaS**. Este projeto foi inicializado seguindo as diretrizes mais rigorosas de arquitetura moderna (Next.js 15, React 19, Supabase).
+Aplicação web para gestão de barbearia, com áreas para administração, barbeiros e clientes. Inclui agenda, cadastro de clientes e serviços, fila de espera, comandas, estoque, fidelidade e relatórios.
 
-## 🚀 Tecnologias
+## Stack
 
-- **Framework**: Next.js 15 (App Router + Turbopack)
-- **UI**: Tailwind CSS 4 + Radix UI + Phosphor Icons
-- **Backend**: Supabase (Auth, DB, Realtime)
-- **Estilização**: Glassmorphism & Dark Mode Premium
-- **Tipagem**: TypeScript Strict
-- **Validação**: Zod + React Hook Form
+- Next.js 16 com App Router e React 19
+- TypeScript
+- Tailwind CSS 4 e componentes Radix UI
+- Supabase para autenticação e dados
+- Zod para validação
 
-## 📁 Estrutura de Pastas
+## Executar localmente
 
-- `src/app`: Rotas e layouts (App Router)
-- `src/features`: Lógica dividida por domínios (Agendamentos, Clientes, etc.)
-- `src/lib`: Infraestrutura e utilitários (Supabase, Auth, Utils)
-- `src/components`: Componentes compartilhados e UI
+Use Node.js 20.9 ou superior. Instale as dependências:
 
-## 🛠️ Padrões de Desenvolvimento
+```bash
+npm ci
+```
 
-1. **DAL (Data Access Layer)**: Todas as buscas de dados no servidor devem estar em `queries.ts` nas pastas de features, usando `cache()` e `server-only`.
-2. **Server Actions**: Todas as mutações devem usar Server Actions.
-3. **Zod**: Validação obrigatória para todos os dados de entrada.
-4. **Strict TS**: Proibido o uso de `any`.
+Crie um arquivo `.env.local` na raiz com as credenciais do seu ambiente Supabase e a URL local da aplicação. As variáveis necessárias estão declaradas em `src/env/server.ts`; mantenha `SUPABASE_SERVICE_ROLE_KEY` apenas no servidor e nunca envie credenciais para o Git.
 
-## 🎨 Design System
+Depois inicie o servidor:
 
-- **Fontes**: Syne (Headers) & DM Mono (Interface/Dados)
-- **Tema**: Focado em Dark Mode premium com acentos em Cyan e cores específicas para barbeiros.
-- **Efeitos**: Glassmorphism em containers principais.
+```bash
+npm run dev
+```
 
----
+Abra `http://localhost:3000`.
 
-*Inicializado por Antigravity (Google DeepMind)*
-# projeto-barbearia
+## Verificações
+
+```bash
+npm run test -- --run
+npm run type-check
+npm run lint
+npm run build
+```
+
+Os testes precisam das variáveis de ambiente do Supabase. Para executar a suíte sem uma conta real, use valores fictícios apenas no ambiente local de teste.
