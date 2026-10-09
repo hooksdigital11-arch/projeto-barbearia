@@ -12,7 +12,7 @@ Aplicação web para gestão de barbearia, com áreas para administração, barb
 
 ## Executar localmente
 
-Use Node.js 20.9 ou superior. Instale as dependências:
+Use Node.js 22.22.1 ou superior na linha 22, ou Node.js 24.x ou mais recente. A versão 24.14.1 foi usada nas verificações deste projeto. Instale as dependências:
 
 ```bash
 npm ci
